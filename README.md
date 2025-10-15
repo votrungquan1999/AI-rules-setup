@@ -208,28 +208,6 @@ Re-run the refinement process for better rule selection:
 ai-rules refine
 ```
 
-## Contributing
-
-We welcome contributions! See our [Contributing Guide](docs/contributing.md) for:
-
-- How to add new rule categories
-- Writing effective rule descriptions
-- Submitting pull requests
-- Community guidelines
-
-## Roadmap
-
-Check out our [detailed roadmap](docs/roadmap.md) to see what's coming:
-
-- **Iteration 1**: MVP with Cursor support
-- **Iteration 2**: Expanded rule library
-- **Iteration 3**: Enhanced commands
-- **Iteration 4**: Semantic search with vector DB
-- **Iteration 5**: Interactive rule refinement
-- **Iteration 6**: Web UI & community growth
-- **Iteration 7**: Multi-tool support
-- **Iteration 8**: Advanced features
-
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details.
