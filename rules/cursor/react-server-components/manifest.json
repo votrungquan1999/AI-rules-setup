@@ -1,0 +1,27 @@
+{
+  "id": "react-server-components",
+  "category": "react-server-components",
+  "tags": ["framework", "react", "server-components", "nextjs", "composition"],
+  "description": "React Server Components best practices, composition patterns, and client/server separation guidelines",
+  "version": "1.0.0",
+  "lastUpdated": "2025-01-17T00:00:00Z",
+  "files": [
+    {
+      "path": "server-components-rules.mdc",
+      "description": "Core Server Components rules and usage patterns",
+      "required": true
+    },
+    {
+      "path": "composition-patterns.mdc",
+      "description": "Component composition patterns and examples",
+      "required": true
+    },
+    {
+      "path": "client-server-separation.mdc",
+      "description": "Client/server component separation patterns and best practices",
+      "required": true
+    }
+  ],
+  "dependencies": ["typescript-conventions"],
+  "conflicts": ["react-class-components"]
+}

@@ -1,0 +1,25 @@
+---
+alwaysApply: true
+---
+
+# Context
+
+A command-line tool that helps developers pull curated AI agent rules from a centralized repository into their projects. No more hunting through scattered rule files - get the exact rules you need for your tech stack with a simple command.
+
+# Documents
+
+- the design documents are in the root/docs folder
+- the road map can also be found in the root/docs/roadmap.md file
+- When requested to do some tasks, first check the design documents and the road map to see if the task is already in the road map or if there is a design document for it.
+
+# Rules
+
+## General Rules
+
+- When changing content of the rule file for any AI agent, always update the corresponding rule file in the rules folder for other AI agents as well.
+
+- When changing content of the rule file for an AI agent, should update the manifest.json file for the corresponding AI agent as well.
+
+## Cursor Rules
+
+- for each cursor rule file, must strictly be less than 200 lines of code. Preferably around 150 lines of code.

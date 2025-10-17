@@ -1,0 +1,22 @@
+{
+  "id": "typescript-conventions",
+  "category": "typescript",
+  "tags": ["language", "typescript", "strict", "conventions"],
+  "description": "TypeScript strict conventions including hoisting, interfaces, JSDoc requirements, and import/export patterns",
+  "version": "1.0.0",
+  "lastUpdated": "2025-01-17T00:00:00Z",
+  "files": [
+    {
+      "path": "typescript-conventions.mdc",
+      "description": "Core TypeScript conventions for interfaces, JSDoc, and enums",
+      "required": true
+    },
+    {
+      "path": "typescript-imports-exports.mdc",
+      "description": "Import and export patterns and organization rules",
+      "required": true
+    }
+  ],
+  "dependencies": [],
+  "conflicts": []
+}

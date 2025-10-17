@@ -1,0 +1,22 @@
+{
+  "id": "react-hooks",
+  "category": "react-hooks",
+  "tags": ["react", "hooks", "context", "state-management", "performance"],
+  "description": "React hooks best practices, context patterns, and performance optimization guidelines",
+  "version": "1.0.0",
+  "lastUpdated": "2025-01-17T00:00:00Z",
+  "files": [
+    {
+      "path": "hooks-rules.mdc",
+      "description": "React hooks usage rules and performance guidelines",
+      "required": true
+    },
+    {
+      "path": "context-patterns.mdc",
+      "description": "Context patterns and state management best practices",
+      "required": true
+    }
+  ],
+  "dependencies": ["typescript-conventions"],
+  "conflicts": []
+}

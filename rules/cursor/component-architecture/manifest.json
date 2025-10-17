@@ -1,0 +1,22 @@
+{
+  "id": "component-architecture",
+  "category": "component-architecture",
+  "tags": ["architecture", "react", "file-structure", "state-management", "patterns"],
+  "description": "Component architecture patterns including file structure, state management, and organization guidelines",
+  "version": "1.0.0",
+  "lastUpdated": "2025-01-17T00:00:00Z",
+  "files": [
+    {
+      "path": "file-structure-patterns.mdc",
+      "description": "File structure patterns and directory organization",
+      "required": true
+    },
+    {
+      "path": "state-management-patterns.mdc",
+      "description": "State management patterns and context usage",
+      "required": true
+    }
+  ],
+  "dependencies": ["typescript-conventions", "react-server-components"],
+  "conflicts": []
+}

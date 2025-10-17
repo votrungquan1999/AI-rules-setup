@@ -1,0 +1,27 @@
+{
+  "id": "styling-tailwind",
+  "category": "styling",
+  "tags": ["styling", "css", "tailwind", "responsive", "components"],
+  "description": "Tailwind CSS best practices, component patterns, responsive design, and shadcn/ui usage guidelines",
+  "version": "1.0.0",
+  "lastUpdated": "2025-01-17T00:00:00Z",
+  "files": [
+    {
+      "path": "tailwind-basics.mdc",
+      "description": "Core Tailwind CSS usage patterns and utilities",
+      "required": true
+    },
+    {
+      "path": "layout-patterns.mdc",
+      "description": "Grid-based list views and responsive layout patterns",
+      "required": true
+    },
+    {
+      "path": "component-library.mdc",
+      "description": "shadcn/ui usage and component library best practices",
+      "required": true
+    }
+  ],
+  "dependencies": [],
+  "conflicts": ["styled-components", "emotion", "css-modules"]
+}
