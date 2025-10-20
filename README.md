@@ -4,18 +4,54 @@ A command-line tool that helps developers pull curated AI agent rules from a cen
 
 ## Quick Start
 
+### 1. Start the Database (Optional)
+
+For local development, you can use Docker to run MongoDB:
+
 ```bash
-# Install globally
-npm install -g ai-rules
+# Start MongoDB with Docker Compose
+docker-compose up -d mongodb
 
-# Initialize rules for your project
+# Or start with web UI
+docker-compose up -d
+```
+
+See [DOCKER_README.md](./DOCKER_README.md) for detailed setup instructions.
+
+### 2. Start the API Server
+
+```bash
+# Clone the repository
+git clone https://github.com/quanvo/AI-rules-repo.git
+cd AI-rules-repo
+
+# Install dependencies
+npm install
+
+# Start the Next.js API server (in one terminal)
+npm run dev:api
+```
+
+### 3. Use the CLI
+
+```bash
+# In another terminal, run the CLI
+npm run dev:cli init
+
+# Or build and install globally
+npm run build
+npm install -g .
 ai-rules init
+```
 
-# Add specific rule categories
-ai-rules add typescript react
+### 4. Development
 
-# Update to latest rules
-ai-rules update
+```bash
+# Run API server
+npm run dev:api
+
+# Run CLI in development mode
+npm run dev:cli init
 ```
 
 ## What is AI Rules CLI?
@@ -67,13 +103,31 @@ ai-rules remove old-framework
 ai-rules update
 ```
 
+## Architecture
+
+The system uses a two-tier architecture for optimal performance:
+
+### Next.js API Server (`src/app/`)
+
+- **Caches** GitHub repository content for 5 minutes
+- **Reduces** GitHub API rate limiting
+- **Provides** centralized rule management
+- **Runs** on `http://localhost:3000` by default
+
+### CLI Tool (`src/cli/`)
+
+- **Fetches** rules from the API server instead of local files
+- **Handles** user interaction and file operations
+- **Manages** project configuration and rule installation
+
 ## How It Works
 
-1. **Initialize** - Choose your AI agent and tech stack
-2. **Discover** - Search for relevant rules using natural language
-3. **Refine** - Answer questions to get personalized recommendations
-4. **Install** - Rules are automatically placed in the correct locations
-5. **Update** - Keep your rules current with the latest versions
+1. **Start API** - Next.js server fetches and caches rules from GitHub
+2. **Initialize** - Choose your AI agent and tech stack
+3. **Discover** - Search for relevant rules using natural language
+4. **Refine** - Answer questions to get personalized recommendations
+5. **Install** - Rules are automatically placed in the correct locations
+6. **Update** - Keep your rules current with the latest versions
 
 ## Project Structure
 
@@ -118,6 +172,20 @@ your-project/
 - **Jest** - Unit testing, mocking, test organization
 - **Playwright** - E2E testing, page object patterns
 - **Testing Library** - Component testing, accessibility
+
+## Testing
+
+The tests run against the real Next.js API server. Before running tests, start the API server:
+
+```bash
+# Terminal 1: Start the API server
+npm run dev:api
+
+# Terminal 2: Run tests
+npm test
+```
+
+The tests will automatically detect if the API server is running and test against real data from the GitHub repository.
 
 ## Configuration
 
