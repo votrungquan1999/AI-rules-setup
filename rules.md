@@ -130,6 +130,36 @@ export enum ContributionPeriod {
 type ContributionPeriod = 'weekly' | 'monthly' | 'quarterly' | 'semi-annually' | 'annually'
 ```
 
+- ALWAYS create separate types for different purposes, even if they appear identical.
+- NEVER reuse types across different contexts (client display vs API input vs database vs internal functions).
+- Each purpose should have its own dedicated type to prevent coupling and maintain clear boundaries.
+
+✅ Correct:
+
+```ts
+// Client display type
+export interface UserDisplay {
+  name: string
+  email: string
+}
+
+// API request type
+export interface CreateUserRequest {
+  name: string
+  email: string
+}
+```
+
+❌ Incorrect:
+
+```ts
+// DON'T reuse the same type for both client display and API input
+export interface User {
+  name: string
+  email: string
+}
+```
+
 ---
 
 ## 2. Styling
@@ -284,19 +314,24 @@ export function LoginForm() {
 
 ```javascript
 // DON'T DO THIS - use shadcn Button instead
-function CustomButton({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
+function CustomButton({ children, onClick }: { children: React.ReactNode, onClick: () => void }) {
   return (
-    <button
-      className='bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md'
-      onClick={onClick}
-    >
+    <button className='bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md' onClick={onClick}>
       {children}
     </button>
   )
 }
 
-// DON'T DO THIS - use shadcn Dialog instead  
-function CustomModal({ isOpen, onClose, children }: { isOpen: boolean; onClose: () => void; children: React.ReactNode }) {
+// DON'T DO THIS - use shadcn Dialog instead
+function CustomModal({
+  isOpen,
+  onClose,
+  children,
+}: {
+  isOpen: boolean,
+  onClose: () => void,
+  children: React.ReactNode,
+}) {
   return isOpen ? (
     <div className='fixed inset-0 bg-black/50 flex items-center justify-center'>
       <div className='bg-white p-6 rounded-lg'>{children}</div>
@@ -813,21 +848,21 @@ useEffect(() => {
 
 ```tsx
 // context.tsx
-const [ProviderBase, useState, useDispatch] = createReducerContext(reducer, initialState);
+const [ProviderBase, useState, useDispatch] = createReducerContext(reducer, initialState)
 
 export function MyProvider({ children, initialData }: { children: React.ReactNode; initialData?: MyData[] }) {
-  return <ProviderBase data={initialData}>{children}</ProviderBase>;
+  return <ProviderBase data={initialData}>{children}</ProviderBase>
 }
 
 // page.tsx (Server Component)
 export default function MyPage() {
-  const data = await getData();
-  
+  const data = await getData()
+
   return (
     <MyProvider initialData={data}>
       <MyContent />
     </MyProvider>
-  );
+  )
 }
 ```
 
@@ -835,20 +870,20 @@ export default function MyPage() {
 
 ```javascript
 // DON'T DO THIS - using initializer component
-<MyProvider>
+;<MyProvider>
   <MyInitializer data={data} />
   <MyContent />
 </MyProvider>
 
 // DON'T DO THIS - using useEffect in provider
-export function MyProvider({ children, data }: { children: React.ReactNode; data: MyData[] }) {
-  const [state, setState] = useState(initialState);
-  
+export function MyProvider({ children, data }: { children: React.ReactNode, data: MyData[] }) {
+  const [state, setState] = useState(initialState)
+
   useEffect(() => {
-    setState(prev => ({ ...prev, data }));
-  }, [data]);
-  
-  return <Context.Provider value={state}>{children}</Context.Provider>;
+    setState((prev) => ({ ...prev, data }))
+  }, [data])
+
+  return <Context.Provider value={state}>{children}</Context.Provider>
 }
 ```
 
@@ -864,28 +899,25 @@ const initialState: FormState = {
   fieldErrors: {},
   formRef: null,
   isConfirmDialogOpen: false,
-};
+}
 
-const [FormProviderBase, useFormState, useFormDispatch] = createReducerContext(
-  formReducer,
-  initialState,
-);
+const [FormProviderBase, useFormState, useFormDispatch] = createReducerContext(formReducer, initialState)
 
 // Enhanced provider that includes formRef in state
 export function FormProvider({
   formRef,
   children,
 }: {
-  formRef: React.RefObject<HTMLFormElement | null>;
-  children: React.ReactNode;
+  formRef: React.RefObject<HTMLFormElement | null>
+  children: React.ReactNode
 }) {
-  return <FormProviderBase formRef={formRef}>{children}</FormProviderBase>;
+  return <FormProviderBase formRef={formRef}>{children}</FormProviderBase>
 }
 
 // Hook to access formRef from state
 export function useFormRef() {
-  const state = useFormState();
-  return state.formRef;
+  const state = useFormState()
+  return state.formRef
 }
 ```
 
@@ -893,13 +925,19 @@ export function useFormRef() {
 
 ```tsx
 // DON'T DO THIS - separate contexts for related state
-const FormStateContext = createContext(/* form state */);
-const FormRefContext = createContext(/* form ref */);
-const FormActionContext = createContext(/* form action */);
+const FormStateContext = createContext(/* form state */)
+const FormRefContext = createContext(/* form ref */)
+const FormActionContext = createContext(/* form action */)
 
-export function FormProvider({ children }) { /* form state context */ }
-export function FormRefProvider({ children }) { /* form ref context */ }
-export function FormActionProvider({ children }) { /* form action context */ }
+export function FormProvider({ children }) {
+  /* form state context */
+}
+export function FormRefProvider({ children }) {
+  /* form ref context */
+}
+export function FormActionProvider({ children }) {
+  /* form action context */
+}
 ```
 
 - NEVER use the hooks from `createReducerContext` directly in components. ALWAYS transform them into more useful, domain-specific hooks.
@@ -939,11 +977,11 @@ export { Provider as ComponentProvider }
 export function MyComponent() {
   const state = useRawState() // ❌ Don't use raw state
   const dispatch = useRawDispatch() // ❌ Don't use raw dispatch
-  
+
   const handleClick = () => {
     dispatch({ type: 'OPEN_DIALOG', payload: 'some-id' }) // ❌ Raw dispatch
   }
-  
+
   return <div onClick={handleClick}>{state.isOpen ? 'Open' : 'Closed'}</div>
 }
 ```
@@ -955,11 +993,11 @@ export function MyComponent() {
 export function MyComponent() {
   const { isOpen, selectedId } = useComponentState()
   const { openDialog, closeDialog } = useComponentActions()
-  
+
   const handleClick = () => {
     openDialog('some-id') // ✅ Clean, semantic action
   }
-  
+
   return <div onClick={handleClick}>{isOpen ? 'Open' : 'Closed'}</div>
 }
 ```
@@ -1071,22 +1109,22 @@ export default function InvestmentPage() {
 ```ts
 // Database document type
 export interface ProductDocument {
-  _id?: unknown; // MongoDB ObjectId
-  id: string;
-  name: string;
+  _id?: unknown // MongoDB ObjectId
+  id: string
+  name: string
   // ... other database fields
 }
 
 // Client-facing interface
 export interface Product {
-  id: string;
-  name: string;
+  id: string
+  name: string
   // ... clean interface for components
 }
 
 // Database access with proper typing
-const db = await getDatabase();
-const products = await db.collection<ProductDocument>("products").find({}).toArray();
+const db = await getDatabase()
+const products = await db.collection<ProductDocument>('products').find({}).toArray()
 ```
 
 ❌ Incorrect:
@@ -1094,13 +1132,13 @@ const products = await db.collection<ProductDocument>("products").find({}).toArr
 ```ts
 // Missing Document suffix
 export interface Product {
-  _id?: any;
-  id: string;
-  name: string;
+  _id?: any
+  id: string
+  name: string
 }
 
 // Untyped database access
-const products = await db.collection("products").find({}).toArray();
+const products = await db.collection('products').find({}).toArray()
 ```
 
 - ALWAYS convert database documents to client interfaces when returning data.
@@ -1110,15 +1148,15 @@ const products = await db.collection("products").find({}).toArray();
 
 ```ts
 export async function getAllProducts(): Promise<Product[]> {
-  const db = await getDatabase();
-  const documents = await db.collection<ProductDocument>("products").find({}).toArray();
-  
+  const db = await getDatabase()
+  const documents = await db.collection<ProductDocument>('products').find({}).toArray()
+
   // Convert to client interface
   return documents.map((doc) => ({
     id: doc.id,
     name: doc.name,
     // ... map only needed fields
-  }));
+  }))
 }
 ```
 
@@ -1126,8 +1164,8 @@ export async function getAllProducts(): Promise<Product[]> {
 
 ```ts
 export async function getAllProducts(): Promise<ProductDocument[]> {
-  const db = await getDatabase();
-  return await db.collection<ProductDocument>("products").find({}).toArray();
+  const db = await getDatabase()
+  return await db.collection<ProductDocument>('products').find({}).toArray()
 }
 ```
 
@@ -1139,10 +1177,22 @@ export async function getAllProducts(): Promise<ProductDocument[]> {
 - MUST keep files under **300 lines** for AI context management.
 - NEVER require running/building the server to validate output.
 - NEVER run `npm run build` or `npm run dev` after completing tasks, the user will handle this.
+- ALWAYS use `npm install` to install packages. NEVER add packages directly to `package.json`.
 - AI MAY replace entire components or structures if it improves clarity/compliance.
 - For complex changes, AI MUST ask:
+
   - "Am I correct?"
   - "Which rules apply here?"
   - "Did I miss any relevant rules?"
+
+- NEVER implement unused/future features not explicitly requested by the user.
+- MUST ask 1-2 clarifying questions before implementing (or more if user explanation >100 characters).
+- Focus on what exists in the system currently, not what could be extended unless explicitly requested by the user.
+- When user provides long explanations (>100 characters), ask additional clarifying questions to verify scope and approach before proceeding.
+
+### 8.1 Error Handling
+
+- NEVER use try-catch blocks defensively around every operation.
+- ONLY place try-catch blocks at intentional error boundaries where you want to catch all errors from lower-level code.
 
 ---
