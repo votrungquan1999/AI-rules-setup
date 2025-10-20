@@ -1,0 +1,68 @@
+{
+  "name": "ai-rules-cli",
+  "version": "0.1.0",
+  "description": "A command-line tool that helps developers pull curated AI agent rules from a centralized repository into their projects",
+  "main": "dist/cli/index.js",
+  "bin": {
+    "ai-rules": "dist/cli/index.js"
+  },
+  "scripts": {
+    "------------ DEV COMMANDS ------------": "",
+    "dev": "tsx src/cli/index.ts",
+    "dev:api": "next dev",
+    "------------ BUILD COMMANDS ------------": "",
+    "build": "tsc",
+    "build:api": "next build",
+    "start:api": "next start",
+    "------------ TEST COMMANDS ------------": "",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "------------ LINT COMMANDS ------------": "",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "------------ PUBLISH COMMANDS ------------": "",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "ai",
+    "rules",
+    "cli",
+    "cursor",
+    "windsurf",
+    "aider",
+    "continue",
+    "cody"
+  ],
+  "author": "AI Rules CLI Team",
+  "license": "MIT",
+  "engines": {
+    "node": "> =18.0.0"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
+    "execa": "^8.0.1",
+    "inquirer": "^9.2.12",
+    "mongodb": "^6.20.0",
+    "nanoid": "^5.1.6",
+    "next": "^16.0.0-canary.10",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.6",
+    "@types/inquirer": "^9.0.7",
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "tsx": "^4.6.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ]
+}
