@@ -1,5 +1,5 @@
 import { getDatabase } from "../../src/server/database";
-import { findAllStoredRules, storeRulesData } from "../../src/server/rules-repository";
+import { storeRulesData } from "../../src/server/rules-repository";
 import type { RulesDataToStore } from "../../src/server/types";
 import { RULES_DATA_COLLECTION_NAME } from "../../src/server/types";
 
@@ -36,15 +36,6 @@ export async function seedDatabase(data: RulesDataToStore) {
 }
 
 /**
- * Verify that the database contains data for a specific agent and category
- */
-export async function verifyDatabaseHas(agent: string, category: string): Promise<boolean> {
-	const db = await getDatabase();
-	const doc = await db.collection(RULES_DATA_COLLECTION_NAME).findOne({ agent, category });
-	return doc !== null;
-}
-
-/**
  * Get the count of stored rules in the database
  */
 export async function getStoredRulesCount(): Promise<number> {
@@ -53,10 +44,12 @@ export async function getStoredRulesCount(): Promise<number> {
 }
 
 /**
- * Get all stored rules from the database
+ * Get all categories stored for a specific agent
  */
-export async function getAllStoredRules() {
-	return await findAllStoredRules();
+export async function getStoredCategoriesForAgent(agent: string): Promise<string[]> {
+	const db = await getDatabase();
+	const docs = await db.collection(RULES_DATA_COLLECTION_NAME).find({ agent }).toArray();
+	return docs.map((doc) => doc.category);
 }
 
 /**

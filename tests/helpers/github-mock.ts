@@ -4,10 +4,8 @@ import { join } from "node:path";
 /**
  * Test mode configuration
  */
-// @ts-ignore - process.env can be accessed in any environment
 export const USE_TEST_DATA = process.env.AI_RULES_USE_TEST_DATA === "true";
 export const TEST_DATA_PATH =
-	// @ts-ignore - process.env can be accessed in any environment
 	process.env.AI_RULES_TEST_DATA_PATH || join(process.cwd(), "tests", "fixtures", "github-responses.json");
 
 interface GitHubFixtures {

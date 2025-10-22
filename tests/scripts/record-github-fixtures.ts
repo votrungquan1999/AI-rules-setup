@@ -107,7 +107,7 @@ async function recordGitHubFixtures(): Promise<void> {
 		console.log("📁 Fetching agents...");
 		const allContents = await fetchDirectoryContents("rules");
 		const agents = allContents.filter((item) => item.type === "dir");
-		fixtures.directoryContents["rules"] = agents;
+		fixtures.directoryContents.rules = agents;
 		console.log(
 			`✅ Found ${agents.length} agents:`,
 			agents.map((a) => a.name),

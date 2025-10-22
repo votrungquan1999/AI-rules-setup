@@ -5,5 +5,11 @@ export default defineConfig({
 		globals: true,
 		environment: "node",
 		testTimeout: 60000, // 60 seconds for integration tests
+		pool: "forks",
+		poolOptions: {
+			forks: {
+				singleFork: true,
+			},
+		},
 	},
 });
