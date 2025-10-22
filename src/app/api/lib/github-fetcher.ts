@@ -146,16 +146,22 @@ async function fetchRuleFile(agent: string, category: string, filename: string):
  * @param agent - AI agent name
  * @param category - Category name
  * @param manifest - Manifest object containing file list
- * @returns Object mapping filenames to their content
+ * @returns Array of file objects with filename and content
  */
-async function fetchAllRuleFiles(agent: string, category: string, manifest: Manifest): Promise<Record<string, string>> {
-	const files: Record<string, string> = {};
+async function fetchAllRuleFiles(
+	agent: string,
+	category: string,
+	manifest: Manifest,
+): Promise<Array<{ filename: string; content: string }>> {
+	const files: Array<{ filename: string; content: string }> = [];
 
 	// Fetch all files in parallel
 	const filePromises = manifest.files.map(async (file) => {
 		const content = await fetchRuleFile(agent, category, file.path);
 		if (content) {
-			files[file.path] = content;
+			// Extract filename from the path (last segment)
+			const filename = file.path.split("/").pop() || file.path;
+			files.push({ filename, content });
 		}
 	});
 

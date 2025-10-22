@@ -1,4 +1,4 @@
-import type { Manifest } from "./types";
+import type { Manifest } from "../../server/types";
 
 // API configuration
 const API_BASE_URL = process.env.AI_RULES_API_URL || "http://localhost:3000";
@@ -10,9 +10,10 @@ interface RulesResponse {
 			categories: {
 				[categoryName: string]: {
 					manifest: Manifest;
-					files: {
-						[filename: string]: string;
-					};
+					files: Array<{
+						filename: string;
+						content: string;
+					}>;
 				};
 			};
 		};
@@ -111,7 +112,9 @@ export async function fetchRuleFile(agent: string, category: string, filename: s
 			return null;
 		}
 
-		return categoryData.files[filename] || null;
+		// Find the file in the array by filename
+		const file = categoryData.files.find((f) => f.filename === filename);
+		return file?.content || null;
 	} catch (error) {
 		console.error(`Error fetching rule file ${agent}/${category}/${filename}:`, error);
 		return null;

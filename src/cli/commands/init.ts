@@ -76,8 +76,11 @@ export async function initCommand(): Promise<void> {
 						continue;
 					}
 
+					// Extract filename from path (last segment)
+					const filename = file.path.split("/").pop() || file.path;
+
 					// Apply naming convention
-					const targetPath = applyNamingConvention(selectedAgent as AIAgent, manifest.category, file.path);
+					const targetPath = applyNamingConvention(selectedAgent as AIAgent, filename);
 
 					// Check for conflicts
 					const conflict = await detectConflict(join(process.cwd(), targetPath));

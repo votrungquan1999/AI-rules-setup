@@ -153,13 +153,7 @@
     "cursor/component-architecture": {
       "id": "component-architecture",
       "category": "component-architecture",
-      "tags": [
-        "architecture",
-        "react",
-        "file-structure",
-        "state-management",
-        "patterns"
-      ],
+      "tags": ["architecture", "react", "file-structure", "state-management", "patterns"],
       "description": "Component architecture patterns including file structure, state management, and organization guidelines",
       "version": "1.0.0",
       "lastUpdated": "2025-01-17T00:00:00Z",
@@ -175,22 +169,13 @@
           "required": true
         }
       ],
-      "dependencies": [
-        "typescript-conventions",
-        "react-server-components"
-      ],
+      "dependencies": ["typescript-conventions", "react-server-components"],
       "conflicts": []
     },
     "cursor/database": {
       "id": "database-patterns",
       "category": "database",
-      "tags": [
-        "database",
-        "mongodb",
-        "typescript",
-        "patterns",
-        "data-access"
-      ],
+      "tags": ["database", "mongodb", "typescript", "patterns", "data-access"],
       "description": "Database access patterns with typed collections and document conversion",
       "version": "1.0.0",
       "lastUpdated": "2025-01-17T00:00:00Z",
@@ -201,21 +186,13 @@
           "required": true
         }
       ],
-      "dependencies": [
-        "typescript-conventions"
-      ],
+      "dependencies": ["typescript-conventions"],
       "conflicts": []
     },
     "cursor/meta": {
       "id": "meta-rules",
       "category": "meta",
-      "tags": [
-        "meta",
-        "rules",
-        "guidelines",
-        "quality",
-        "documentation"
-      ],
+      "tags": ["meta", "rules", "guidelines", "quality", "documentation"],
       "description": "Meta rules for applying Cursor rules, file size limits, and change management guidelines",
       "version": "1.0.0",
       "lastUpdated": "2025-01-17T00:00:00Z",
@@ -232,13 +209,7 @@
     "cursor/react-hooks": {
       "id": "react-hooks",
       "category": "react-hooks",
-      "tags": [
-        "react",
-        "hooks",
-        "context",
-        "state-management",
-        "performance"
-      ],
+      "tags": ["react", "hooks", "context", "state-management", "performance"],
       "description": "React hooks best practices, context patterns, and performance optimization guidelines",
       "version": "1.0.0",
       "lastUpdated": "2025-01-17T00:00:00Z",
@@ -254,21 +225,13 @@
           "required": true
         }
       ],
-      "dependencies": [
-        "typescript-conventions"
-      ],
+      "dependencies": ["typescript-conventions"],
       "conflicts": []
     },
     "cursor/react-server-components": {
       "id": "react-server-components",
       "category": "react-server-components",
-      "tags": [
-        "framework",
-        "react",
-        "server-components",
-        "nextjs",
-        "composition"
-      ],
+      "tags": ["framework", "react", "server-components", "nextjs", "composition"],
       "description": "React Server Components best practices, composition patterns, and client/server separation guidelines",
       "version": "1.0.0",
       "lastUpdated": "2025-01-17T00:00:00Z",
@@ -289,23 +252,13 @@
           "required": true
         }
       ],
-      "dependencies": [
-        "typescript-conventions"
-      ],
-      "conflicts": [
-        "react-class-components"
-      ]
+      "dependencies": ["typescript-conventions"],
+      "conflicts": ["react-class-components"]
     },
     "cursor/styling": {
       "id": "styling-tailwind",
       "category": "styling",
-      "tags": [
-        "styling",
-        "css",
-        "tailwind",
-        "responsive",
-        "components"
-      ],
+      "tags": ["styling", "css", "tailwind", "responsive", "components"],
       "description": "Tailwind CSS best practices, component patterns, responsive design, and shadcn/ui usage guidelines",
       "version": "1.0.0",
       "lastUpdated": "2025-01-17T00:00:00Z",
@@ -327,21 +280,12 @@
         }
       ],
       "dependencies": [],
-      "conflicts": [
-        "styled-components",
-        "emotion",
-        "css-modules"
-      ]
+      "conflicts": ["styled-components", "emotion", "css-modules"]
     },
     "cursor/typescript": {
       "id": "typescript-conventions",
       "category": "typescript",
-      "tags": [
-        "language",
-        "typescript",
-        "strict",
-        "conventions"
-      ],
+      "tags": ["language", "typescript", "strict", "conventions"],
       "description": "TypeScript strict conventions including hoisting, interfaces, JSDoc requirements, and import/export patterns",
       "version": "1.0.0",
       "lastUpdated": "2025-01-17T00:00:00Z",
@@ -363,13 +307,7 @@
     "cursor/url-state": {
       "id": "url-state-management",
       "category": "url-state",
-      "tags": [
-        "url",
-        "state",
-        "routing",
-        "nextjs",
-        "search-params"
-      ],
+      "tags": ["url", "state", "routing", "nextjs", "search-params"],
       "description": "URL state management patterns for Next.js applications with server-side parameter handling",
       "version": "1.0.0",
       "lastUpdated": "2025-01-17T00:00:00Z",
@@ -380,10 +318,7 @@
           "required": true
         }
       ],
-      "dependencies": [
-        "typescript-conventions",
-        "react-server-components"
-      ],
+      "dependencies": ["typescript-conventions", "react-server-components"],
       "conflicts": []
     }
   },
