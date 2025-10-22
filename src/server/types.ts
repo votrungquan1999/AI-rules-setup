@@ -1,4 +1,12 @@
 /**
+ * File object interface for storing rule files
+ */
+export interface RuleFile {
+	filename: string;
+	content: string;
+}
+
+/**
  * Manifest interface (copied from CLI types to avoid circular dependency)
  */
 export interface Manifest {
@@ -25,7 +33,7 @@ export interface StoredRulesDocument {
 	agent: string;
 	category: string;
 	manifest: Manifest;
-	files: Record<string, string>;
+	files: RuleFile[];
 	githubCommitSha: string;
 	lastFetched: Date;
 	createdAt: Date;
@@ -40,7 +48,7 @@ export interface RulesDataToStore {
 	agent: string;
 	category: string;
 	manifest: Manifest;
-	files: Record<string, string>;
+	files: RuleFile[];
 	githubCommitSha: string;
 }
 
@@ -53,7 +61,7 @@ export interface RulesDataToStore {
  */
 export interface RuleCategory {
 	manifest: Manifest;
-	files: Record<string, string>;
+	files: RuleFile[];
 }
 
 /**

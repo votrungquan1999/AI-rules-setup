@@ -4,10 +4,8 @@ import { RULES_DATA_COLLECTION_NAME } from "./types";
 /**
  * MongoDB connection configuration
  */
-// @ts-ignore - can read env variables from process.env
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/ai-rules-cache";
 // Prefer test-friendly env var name to align with tests/helpers expectations
-// @ts-ignore - can read env variables from process.env
 const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || "ai-rules-cache";
 
 let client: MongoClient | null = null;

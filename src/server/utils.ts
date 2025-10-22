@@ -1,4 +1,4 @@
-import type { RulesData, RulesDataToStore, StoredRulesDocument } from "./types";
+import type { RuleAgent, RulesData, RulesDataToStore, StoredRulesDocument } from "./types";
 
 /**
  * Converts data to store into a database document
@@ -26,20 +26,26 @@ export function createStoredRulesDocument(dataToStore: RulesDataToStore): Stored
  * @returns Complete rules data structure
  */
 export function documentsToRulesData(documents: StoredRulesDocument[]): RulesData {
-	const result: RulesData = { agents: {} };
-
-	for (const doc of documents) {
-		if (!result.agents[doc.agent]) {
-			result.agents[doc.agent] = { categories: {} };
-		}
-
-		if (result.agents[doc.agent]) {
-			result.agents[doc.agent].categories[doc.category] = {
-				manifest: doc.manifest,
-				files: doc.files,
+	return documents.reduce<RulesData>(
+		(acc, doc) => {
+			const existingCategories = acc.agents[doc.agent]?.categories ?? {};
+			const nextAgent: RuleAgent = {
+				categories: {
+					...existingCategories,
+					[doc.category]: {
+						manifest: doc.manifest,
+						files: doc.files,
+					},
+				},
 			};
-		}
-	}
 
-	return result;
+			return {
+				agents: {
+					...acc.agents,
+					[doc.agent]: nextAgent,
+				},
+			};
+		},
+		{ agents: {} },
+	);
 }

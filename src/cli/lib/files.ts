@@ -38,29 +38,26 @@ export async function writeRuleFile(content: string, targetPath: string): Promis
 /**
  * Applies tool-specific naming conventions to convert source filename to target path
  * @param agent - AI agent type
- * @param category - Rule category name
- * @param filename - Source filename
+ * @param filename - Source filename (preserves original extension)
  * @returns Target file path following agent conventions
  */
-export function applyNamingConvention(agent: AIAgent, category: string, filename: string): string {
-	// Remove file extension and add appropriate extension
-	const baseName = filename.replace(/\.[^/.]+$/, "");
-
+export function applyNamingConvention(agent: AIAgent, filename: string): string {
 	switch (agent) {
 		case AIAgent.CURSOR:
-			return `.cursor/rules/${baseName}.md`;
+			return `.cursor/rules/${filename}`;
 
 		case AIAgent.WINDSURF:
-			return `.windsurf/rules/${category}.windsurfrules`;
+			// For Windsurf, use the filename as the category name but keep original extension
+			return `.windsurf/rules/${filename}`;
 
 		case AIAgent.AIDER:
-			return `.aider/rules/${baseName}.md`;
+			return `.aider/rules/${filename}`;
 
 		case AIAgent.CONTINUE:
-			return `.continue/rules/${baseName}.md`;
+			return `.continue/rules/${filename}`;
 
 		case AIAgent.CODY:
-			return `.cody/rules/${baseName}.md`;
+			return `.cody/rules/${filename}`;
 
 		default:
 			throw new Error(`Unsupported AI agent: ${agent}`);
