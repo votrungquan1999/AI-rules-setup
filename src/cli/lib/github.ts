@@ -44,7 +44,7 @@ async function fetchRulesData(): Promise<RulesResponse> {
 			throw new Error(`API request failed: ${response.status} ${response.statusText}`);
 		}
 
-		const data = await response.json();
+		const data = (await response.json()) as RulesResponse;
 
 		// Update cache
 		cachedRules = data;

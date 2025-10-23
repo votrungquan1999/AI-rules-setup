@@ -1,9 +1,3 @@
-import {
-	mockFetchDirectoryContents,
-	mockFetchFileContent,
-	mockFetchManifest,
-	USE_TEST_DATA,
-} from "../../../../tests/helpers/github-mock";
 import { findAllStoredRules, storeRulesData } from "../../../server/rules-repository";
 import type { GitHubError, GitHubFile, Manifest, RulesData, RulesDataToStore } from "../../../server/types";
 
@@ -16,17 +10,11 @@ const GITHUB_BASE_URL = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_R
 const GITHUB_RAW_URL = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main`;
 
 /**
- * Fetches directory contents from GitHub API or test data
+ * Fetches directory contents from GitHub API
  * @param path - Path to the directory (e.g., 'rules', 'rules/cursor')
  * @returns Array of file/directory entries
  */
 async function fetchDirectoryContents(path: string): Promise<GitHubFile[]> {
-	// Use test data if in test mode
-	if (USE_TEST_DATA) {
-		return mockFetchDirectoryContents(path) as Promise<GitHubFile[]>;
-	}
-
-	// Use real GitHub API
 	const url = `${GITHUB_BASE_URL}/contents/${path}`;
 	const response = await fetch(url, {
 		headers: {
@@ -47,17 +35,11 @@ async function fetchDirectoryContents(path: string): Promise<GitHubFile[]> {
 }
 
 /**
- * Fetches raw file content from GitHub or test data
+ * Fetches raw file content from GitHub
  * @param path - Path to the file (e.g., 'rules/cursor/typescript/manifest.json')
  * @returns File content as string
  */
 async function fetchFileContent(path: string): Promise<string> {
-	// Use test data if in test mode
-	if (USE_TEST_DATA) {
-		return mockFetchFileContent(path);
-	}
-
-	// Use real GitHub API
 	const url = `${GITHUB_RAW_URL}/${path}`;
 	const response = await fetch(url, {
 		headers: {
@@ -109,12 +91,6 @@ async function discoverCategories(agent: string): Promise<string[]> {
  * @returns Parsed manifest object or null if not found
  */
 async function fetchManifest(agent: string, category: string): Promise<Manifest | null> {
-	// Use test data if in test mode
-	if (USE_TEST_DATA) {
-		const manifest = await mockFetchManifest(agent, category);
-		return manifest as Manifest | null;
-	}
-
 	const manifestPath = `rules/${agent}/${category}/manifest.json`;
 	const content = await fetchFileContent(manifestPath);
 	const manifest = JSON.parse(content) as Manifest;
