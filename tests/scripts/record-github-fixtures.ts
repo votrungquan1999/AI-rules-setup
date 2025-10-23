@@ -41,7 +41,7 @@ async function fetchFromGitHub<T>(url: string): Promise<T> {
 	const response = await fetch(url, {
 		headers: {
 			Accept: "application/vnd.github.v3+json",
-			"User-Agent": "AI-rules-repo-test-recorder",
+			"User-Agent": "AI-rules-setup-test-recorder",
 		},
 	});
 

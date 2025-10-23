@@ -22,8 +22,8 @@ See [DOCKER_README.md](./DOCKER_README.md) for detailed setup instructions.
 
 ```bash
 # Clone the repository
-git clone https://github.com/quanvo/AI-rules-repo.git
-cd AI-rules-repo
+git clone https://github.com/votrungquan1999/AI-rules-setup.git
+cd AI-rules-setup
 
 # Install dependencies
 npm install
