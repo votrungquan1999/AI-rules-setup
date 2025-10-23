@@ -1,0 +1,46 @@
+{
+  "name": "@quanvo99/ai-rules",
+  "version": "0.1.0",
+  "description": "CLI tool for managing AI agent rules across projects",
+  "main": "dist/index.js",
+  "bin": {
+    "ai-rules": "bin/cli.js"
+  },
+  "preferGlobal": true,
+  "files": [
+    "dist/",
+    "bin/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "prepublishOnly": "cd .. && npm run build:cli"
+  },
+  "keywords": [
+    "ai",
+    "rules",
+    "cli",
+    "cursor",
+    "windsurf",
+    "aider"
+  ],
+  "author": "Vo Trung Quan",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/votrungquan1999/AI-rules-setup.git"
+  },
+  "homepage": "https://github.com/votrungquan1999/AI-rules-setup#readme",
+  "bugs": {
+    "url": "https://github.com/votrungquan1999/AI-rules-setup/issues"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
+    "execa": "^8.0.1",
+    "inquirer": "^9.2.12"
+  }
+}

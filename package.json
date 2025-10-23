@@ -1,11 +1,11 @@
 {
-  "name": "ai-rules-cli",
+  "name": "ai-rules-monorepo",
   "version": "0.1.0",
+  "private": true,
   "description": "A command-line tool that helps developers pull curated AI agent rules from a centralized repository into their projects",
-  "main": "dist/cli/index.js",
-  "bin": {
-    "ai-rules": "dist/cli/index.js"
-  },
+  "workspaces": [
+    "cli-package"
+  ],
   "scripts": {
     "------------ DEV COMMANDS ------------": "",
     "dev": "tsx src/cli/index.ts",
@@ -21,22 +21,19 @@
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "------------ PUBLISH COMMANDS ------------": "",
-    "prepublishOnly": "npm run build"
+    "build:cli": "tsc -p tsconfig.cli.json",
+    "publish:cli": "cd cli-package && npm publish --access public",
+    "prepublish:cli": "npm run build:cli"
   },
-  "keywords": [
-    "ai",
-    "rules",
-    "cli",
-    "cursor",
-    "windsurf",
-    "aider",
-    "continue",
-    "cody"
-  ],
-  "author": "AI Rules CLI Team",
+  "author": "Vo Trung Quan",
   "license": "MIT",
-  "engines": {
-    "node": "> =18.0.0"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/votrungquan1999/AI-rules-setup.git"
+  },
+  "homepage": "https://github.com/votrungquan1999/AI-rules-setup#readme",
+  "bugs": {
+    "url": "https://github.com/votrungquan1999/AI-rules-setup/issues"
   },
   "dependencies": {
     "chalk": "^5.3.0",
@@ -59,10 +56,5 @@
     "tsx": "^4.6.0",
     "typescript": "^5.3.0",
     "vitest": "^1.0.0"
-  },
-  "files": [
-    "dist/**/*",
-    "README.md",
-    "LICENSE"
-  ]
+  }
 }
