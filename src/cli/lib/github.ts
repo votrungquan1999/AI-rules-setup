@@ -1,7 +1,7 @@
 import type { Manifest } from "../../server/types";
 
 // API configuration
-const API_BASE_URL = process.env.AI_RULES_API_URL || "http://localhost:3000";
+const API_BASE_URL = process.env.AI_RULES_API_URL || "https://ai-rules-setup.vercel.app";
 
 // Types for API responses
 interface RulesResponse {

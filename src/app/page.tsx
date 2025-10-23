@@ -22,7 +22,7 @@ export default function HomePage() {
 			<h2>Configuration</h2>
 			<p>
 				Set the <code>AI_RULES_API_URL</code> environment variable to point to this server (default:
-				http://localhost:3000)
+				https://ai-rules-setup.vercel.app)
 			</p>
 		</div>
 	);

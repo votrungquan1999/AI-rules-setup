@@ -112,7 +112,7 @@ The system uses a two-tier architecture for optimal performance:
 - **Caches** GitHub repository content for 5 minutes
 - **Reduces** GitHub API rate limiting
 - **Provides** centralized rule management
-- **Runs** on `http://localhost:3000` by default
+- **Runs** on `https://ai-rules-setup.vercel.app` by default (or `http://localhost:3000` for local development)
 
 ### CLI Tool (`src/cli/`)
 
