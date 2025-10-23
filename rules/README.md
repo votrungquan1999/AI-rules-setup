@@ -412,6 +412,31 @@ Before submitting a rule category, ensure:
 - **Issue Triage**: Prioritize and categorize issues
 - **Documentation**: Keep documentation up-to-date
 
+## Tag System
+
+The AI Rules repository uses a comprehensive tagging system to help users find relevant rules based on their tech stack and specific needs.
+
+### Tag Categories
+
+- **Generic Tags**: Broad categorization (`patterns`, `best-practices`, `conventions`, `styling`, `architecture`, `database`, `state-management`)
+- **Technology Stack**: Specific technologies (`react`, `nextjs`, `typescript`, `tailwind`, `mongodb`, `shadcn`)
+- **Version Tags**: Version-specific features (`nextjs-13`, `nextjs-14`, `nextjs-15`, `react-18`, `react-19`)
+- **Feature-Specific**: Specific features or concepts (`server-components`, `app-router`, `search-params`, `document-typing`)
+- **Pattern-Specific**: Design patterns (`composition-pattern`, `hooks-pattern`, `context-pattern`, `file-structure`)
+- **Quality Tags**: Code quality and process (`type-safety`, `performance-optimization`, `code-quality`, `error-handling`)
+
+### Filtering Examples
+
+- **Next.js 15 + Server Components**: `nextjs-15` + `server-components`
+- **React Hooks + Performance**: `react` + `hooks-pattern` + `performance-optimization`
+- **TypeScript + Type Safety**: `typescript` + `type-safety` + `strict-mode`
+- **Database + MongoDB**: `database` + `mongodb` + `document-typing`
+- **Styling + Tailwind**: `styling` + `tailwind` + `shadcn`
+
+### Tag Guidelines
+
+For detailed information about tag naming conventions, selection criteria, and best practices, see [TAG_GUIDELINES.md](./TAG_GUIDELINES.md).
+
 ## Resources
 
 ### Documentation
@@ -420,6 +445,7 @@ Before submitting a rule category, ensure:
 - [Contributing Guide](../docs/contributing.md)
 - [System Design](../docs/system-design.md)
 - [Roadmap](../docs/roadmap.md)
+- [Tag Guidelines](./TAG_GUIDELINES.md)
 
 ### Tools
 
