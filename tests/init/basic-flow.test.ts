@@ -1,7 +1,8 @@
 import { setTimeout } from "node:timers/promises";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { CLIKey, sendKeys, spawnCLI } from "../helpers/cli-utils";
-import { cleanDatabase, connectToTestDB, disconnectTestDB } from "../helpers/database-utils";
+import { connectToTestDB, disconnectTestDB } from "../helpers/database-utils";
+import { seedTestDatabase } from "../helpers/seed-test-database";
 import {
 	cleanupTestProject,
 	createTestProject,
@@ -14,12 +15,11 @@ describe("Init Command - Basic Flow Tests", () => {
 	let testProjectDir: string | undefined;
 
 	beforeAll(async () => {
-		// Set environment variable to use test data
-		process.env.AI_RULES_USE_TEST_DATA = "true";
-		process.env.AI_RULES_TEST_DATA_PATH = "./tests/fixtures/github-responses.json";
-
 		// Connect to test database
 		await connectToTestDB();
+
+		// Seed database with test fixtures
+		await seedTestDatabase();
 
 		// Wait for API server to be ready
 		await waitForAPIReady();
@@ -31,9 +31,6 @@ describe("Init Command - Basic Flow Tests", () => {
 	});
 
 	beforeEach(async () => {
-		// Clean database before each basic test
-		await cleanDatabase();
-
 		// Clean up any existing test project
 		if (testProjectDir) {
 			await cleanupTestProject(testProjectDir);

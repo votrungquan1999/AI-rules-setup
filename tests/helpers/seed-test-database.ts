@@ -1,11 +1,33 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import type { Manifest } from "../../src/server/types";
 import { cleanDatabase, connectToTestDB, seedDatabase } from "../helpers/database-utils";
-import { loadFixtures } from "../helpers/github-mock";
+
+interface GitHubFixtures {
+	directoryContents: Record<string, unknown[]>;
+	manifests: Record<string, unknown>;
+	fileContents: Record<string, string>;
+}
+
+/**
+ * Load GitHub API fixtures from the recorded responses file
+ */
+async function loadFixtures(): Promise<GitHubFixtures> {
+	const testDataPath =
+		process.env.AI_RULES_TEST_DATA_PATH || join(process.cwd(), "tests", "fixtures", "github-responses.json");
+
+	try {
+		const content = await readFile(testDataPath, "utf-8");
+		return JSON.parse(content) as GitHubFixtures;
+	} catch (error) {
+		throw new Error(`Failed to load GitHub fixtures: ${error}`);
+	}
+}
 
 /**
  * Seed the test database with all data from GitHub fixtures
  */
-async function seedTestDatabase(): Promise<void> {
+export async function seedTestDatabase(): Promise<void> {
 	console.log("🌱 Seeding test database with GitHub fixtures...");
 	try {
 		// Connect to test database
@@ -83,13 +105,3 @@ async function seedTestDatabase(): Promise<void> {
 		process.exit(1);
 	}
 }
-
-// Run the seeding script
-if (require.main === module) {
-	seedTestDatabase().catch((error) => {
-		console.error("❌ Seeding script failed:", error);
-		process.exit(1);
-	});
-}
-
-export { seedTestDatabase };
