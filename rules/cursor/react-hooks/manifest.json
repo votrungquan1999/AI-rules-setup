@@ -1,7 +1,16 @@
 {
   "id": "react-hooks",
   "category": "react-hooks",
-  "tags": ["react", "hooks", "context", "state-management", "performance"],
+  "tags": [
+    "react",
+    "patterns",
+    "hooks-pattern",
+    "context-pattern",
+    "state-management",
+    "performance-optimization",
+    "use-reducer",
+    "use-effect"
+  ],
   "description": "React hooks best practices, context patterns, and performance optimization guidelines",
   "version": "1.0.0",
   "lastUpdated": "2025-01-17T00:00:00Z",

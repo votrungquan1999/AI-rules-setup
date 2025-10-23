@@ -1,7 +1,7 @@
 {
   "id": "styling-tailwind",
   "category": "styling",
-  "tags": ["styling", "css", "tailwind", "responsive", "components"],
+  "tags": ["styling", "tailwind", "css", "shadcn", "responsive-design", "grid-layout", "design-tokens"],
   "description": "Tailwind CSS best practices, component patterns, responsive design, and shadcn/ui usage guidelines",
   "version": "1.0.0",
   "lastUpdated": "2025-01-17T00:00:00Z",

@@ -1,7 +1,16 @@
 {
   "id": "typescript-conventions",
   "category": "typescript",
-  "tags": ["language", "typescript", "strict", "conventions"],
+  "tags": [
+    "typescript",
+    "conventions",
+    "best-practices",
+    "strict-mode",
+    "jsdoc",
+    "type-safety",
+    "imports-exports",
+    "enums"
+  ],
   "description": "TypeScript strict conventions including hoisting, interfaces, JSDoc requirements, and import/export patterns",
   "version": "1.0.0",
   "lastUpdated": "2025-01-17T00:00:00Z",

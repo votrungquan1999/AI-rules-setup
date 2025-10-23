@@ -1,7 +1,16 @@
 {
   "id": "database-patterns",
   "category": "database",
-  "tags": ["database", "mongodb", "typescript", "patterns", "data-access"],
+  "tags": [
+    "database",
+    "patterns",
+    "mongodb",
+    "typescript",
+    "document-typing",
+    "data-conversion",
+    "type-safety",
+    "data-access"
+  ],
   "description": "Database access patterns with typed collections and document conversion",
   "version": "1.0.0",
   "lastUpdated": "2025-01-17T00:00:00Z",

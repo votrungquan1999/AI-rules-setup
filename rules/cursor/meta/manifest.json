@@ -1,7 +1,16 @@
 {
   "id": "meta-rules",
   "category": "meta",
-  "tags": ["meta", "rules", "guidelines", "quality", "documentation"],
+  "tags": [
+    "meta",
+    "rules",
+    "guidelines",
+    "best-practices",
+    "code-quality",
+    "file-size-limits",
+    "error-handling",
+    "scope-management"
+  ],
   "description": "Meta rules for applying Cursor rules, file size limits, and change management guidelines",
   "version": "1.0.0",
   "lastUpdated": "2025-01-17T00:00:00Z",

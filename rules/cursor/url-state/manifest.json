@@ -1,7 +1,18 @@
 {
   "id": "url-state-management",
   "category": "url-state",
-  "tags": ["url", "state", "routing", "nextjs", "search-params"],
+  "tags": [
+    "state-management",
+    "patterns",
+    "nextjs",
+    "nextjs-13",
+    "nextjs-14",
+    "nextjs-15",
+    "url-state",
+    "search-params",
+    "server-side-rendering",
+    "app-router"
+  ],
   "description": "URL state management patterns for Next.js applications with server-side parameter handling",
   "version": "1.0.0",
   "lastUpdated": "2025-01-17T00:00:00Z",

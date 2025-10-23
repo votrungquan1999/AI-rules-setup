@@ -1,7 +1,18 @@
 {
   "id": "react-server-components",
   "category": "react-server-components",
-  "tags": ["framework", "react", "server-components", "nextjs", "composition"],
+  "tags": [
+    "react",
+    "patterns",
+    "server-components",
+    "nextjs",
+    "nextjs-13",
+    "nextjs-14",
+    "nextjs-15",
+    "app-router",
+    "composition-pattern",
+    "client-server-separation"
+  ],
   "description": "React Server Components best practices, composition patterns, and client/server separation guidelines",
   "version": "1.0.0",
   "lastUpdated": "2025-01-17T00:00:00Z",

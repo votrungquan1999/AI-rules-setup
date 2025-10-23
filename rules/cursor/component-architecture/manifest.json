@@ -1,7 +1,16 @@
 {
   "id": "component-architecture",
   "category": "component-architecture",
-  "tags": ["architecture", "react", "file-structure", "state-management", "patterns"],
+  "tags": [
+    "architecture",
+    "patterns",
+    "react",
+    "component-architecture",
+    "file-structure",
+    "state-management",
+    "server-client-separation",
+    "nextjs"
+  ],
   "description": "Component architecture patterns including file structure, state management, and organization guidelines",
   "version": "1.0.0",
   "lastUpdated": "2025-01-17T00:00:00Z",
