@@ -178,12 +178,25 @@ This roadmap outlines the iterative development strategy for the AI Rules CLI pr
 
 ---
 
-## Iteration 3: Enhanced Commands
+## Iteration 3: Web UI & Enhanced Commands
 
 **Duration**: 2-3 weeks  
-**Goal**: Improve developer experience
+**Goal**: Improve developer experience with web UI and enhanced CLI
 
 ### Features
+
+#### Web UI for Rule Selection (Priority)
+
+- [x] Non-interactive CLI with flags (`--agent`, `--categories`, `--overwrite-strategy`)
+- [x] Fuzzy search with relevancy scoring using Fuse.js
+- [x] Web UI at `/select-rules` with search and selection interface
+- [x] Command generation with copy-to-clipboard functionality
+- [x] Overwrite strategy selection in both UI and CLI
+- [x] Context-based component architecture for server/client composition
+- [x] Score-based CSS ordering for search results
+- [x] Tailwind CSS integration with shadcn/ui components
+
+**Benefits**: Users can now use a visual interface to search and select rules, then generate a non-interactive CLI command. This dramatically improves UX compared to the CLI-only approach.
 
 #### New Commands
 
@@ -193,7 +206,8 @@ This roadmap outlines the iterative development strategy for the AI Rules CLI pr
 
 #### Conflict file name handling
 
-- [ ] Pause the process and ask user if want to override or not
+- [x] Non-interactive conflict resolution with `--overwrite-strategy` flag
+- [ ] Pause the process and ask user if want to override or not (interactive mode)
 
 #### Validation and Safety
 
