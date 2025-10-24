@@ -2,7 +2,7 @@
 
 import { useRuleScore } from "src/lib/search.state";
 import { cn } from "src/lib/utils";
-import { useRuleCardId } from "./rule-card.context";
+import { useRuleCardId } from "./rule-card-wrapper";
 
 /**
  * Score badge component that displays relevancy score with semantic color tokens

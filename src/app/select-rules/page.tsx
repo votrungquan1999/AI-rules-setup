@@ -1,10 +1,11 @@
 import { AgentSelector } from "src/components/agent-selector";
 import { CommandDisplay } from "src/components/command-display";
-import { RuleCardWrapper } from "src/components/rule-card-wrapper";
+import { RuleCardProvider, RuleCardLabel, RuleCardCheckbox } from "src/components/rule-card-wrapper";
 import { ScoreBadge } from "src/components/score-badge";
 import { SearchInput } from "src/components/search-input";
 import { SelectedRulesSidebar } from "src/components/selected-rules-sidebar";
 import { StrategySelector } from "src/components/strategy-selector";
+import { TruncatedDescription } from "src/components/truncated-description";
 import { SearchProvider } from "src/lib/search.state";
 import { SelectionProvider } from "src/lib/selection.state";
 import { findAllStoredRules } from "src/server/rules-repository";
@@ -67,30 +68,39 @@ export default async function SelectRulesPage() {
 								{/* Rules list */}
 								<div className="flex flex-col gap-3">
 									{manifests.map((manifest) => (
-										<RuleCardWrapper key={manifest.id} ruleId={manifest.id}>
-											{/* Server-rendered content */}
-											<div className="space-y-2">
-												<div className="flex items-center gap-2">
-													<h3 className="font-semibold text-foreground">{manifest.id}</h3>
-													<ScoreBadge />
-												</div>
-												<p className="text-sm text-muted-foreground">{manifest.description}</p>
-												{manifest.tags.length > 0 && (
-													<div className="flex flex-wrap gap-1">
-														{manifest.tags.slice(0, 5).map((tag) => (
-															<span key={tag} className="px-2 py-0.5 text-xs rounded bg-muted text-muted-foreground">
-																{tag}
-															</span>
-														))}
-														{manifest.tags.length > 5 && (
-															<span className="px-2 py-0.5 text-xs rounded bg-muted text-muted-foreground">
-																+{manifest.tags.length - 5}
-															</span>
+										<RuleCardProvider key={manifest.id} ruleId={manifest.id}>
+											<RuleCardLabel>
+												<div className="flex items-start gap-3">
+													{/* Checkbox */}
+													<div className="mt-1">
+														<RuleCardCheckbox />
+													</div>
+
+													{/* Server-rendered content */}
+													<div className="flex-1 min-w-0 space-y-2">
+														<div className="flex items-center gap-2">
+															<h3 className="font-semibold text-foreground">{manifest.id}</h3>
+															<ScoreBadge />
+														</div>
+														<TruncatedDescription text={manifest.description} />
+														{manifest.tags.length > 0 && (
+															<div className="flex flex-wrap gap-1">
+																{manifest.tags.slice(0, 5).map((tag) => (
+																	<span key={tag} className="px-2 py-0.5 text-xs rounded bg-muted text-muted-foreground">
+																		{tag}
+																	</span>
+																))}
+																{manifest.tags.length > 5 && (
+																	<span className="px-2 py-0.5 text-xs rounded bg-muted text-muted-foreground">
+																		+{manifest.tags.length - 5}
+																	</span>
+																)}
+															</div>
 														)}
 													</div>
-												)}
-											</div>
-										</RuleCardWrapper>
+												</div>
+											</RuleCardLabel>
+										</RuleCardProvider>
 									))}
 								</div>
 							</div>

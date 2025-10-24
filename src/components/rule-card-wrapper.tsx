@@ -1,55 +1,96 @@
 "use client";
 
+import { createContext, useContext, useId, type ReactNode } from "react";
 import { useRuleScore } from "src/lib/search.state";
 import { useIsRuleSelected, useToggleSelection } from "src/lib/selection.state";
-import { RuleCardProvider } from "./rule-card.context";
 import { Checkbox } from "./ui/checkbox";
-import { useId } from "react";
 
-interface RuleCardWrapperProps {
+interface RuleCardContextValue {
+	/** Rule ID for this card */
+	ruleId: string;
+	/** Unique checkbox ID for label association */
+	checkboxId: string;
+}
+
+const RuleCardContext = createContext<RuleCardContextValue | null>(null);
+
+interface RuleCardProviderProps {
 	/** Rule ID for tracking selection and score */
 	ruleId: string;
-	/** Server-rendered content (name, description, tags, ScoreBadge, etc.) */
-	children: React.ReactNode;
+	/** Child components */
+	children: ReactNode;
 }
 
 /**
- * Client wrapper for rule cards that handles:
- * - Context provider for child components
- * - Checkbox for selection using shadcn/ui
- * - CSS ordering based on relevancy score
- * - Clickable card via semantic label/checkbox association
+ * Context provider for rule card components
+ * Provides ruleId and checkboxId to child components
  */
-export function RuleCardWrapper({ ruleId, children }: RuleCardWrapperProps) {
-	const score = useRuleScore(ruleId);
-	const isSelected = useIsRuleSelected(ruleId);
-	const toggleSelection = useToggleSelection();
+export function RuleCardProvider({ ruleId, children }: RuleCardProviderProps) {
 	const checkboxId = useId();
 
-	return (
-		<RuleCardProvider ruleId={ruleId}>
-			<label
-				htmlFor={checkboxId}
-				className={`
-					block w-full text-left p-4 rounded-lg border transition-colors cursor-pointer
-					${isSelected ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/50"}
-				`}
-				style={{ order: -score }} // CSS ordering: higher scores appear first
-			>
-				<div className="flex items-start gap-3">
-					{/* Shadcn Checkbox */}
-					<div className="mt-1">
-						<Checkbox
-							id={checkboxId}
-							checked={isSelected}
-							onCheckedChange={() => toggleSelection(ruleId)}
-						/>
-					</div>
+	return <RuleCardContext.Provider value={{ ruleId, checkboxId }}>{children}</RuleCardContext.Provider>;
+}
 
-					{/* Content area - server-rendered children can use useRuleCardId() */}
-					<div className="flex-1 min-w-0">{children}</div>
-				</div>
-			</label>
-		</RuleCardProvider>
+/**
+ * Hook to get current rule ID from card context
+ */
+export function useRuleCardId(): string {
+	const context = useContext(RuleCardContext);
+	if (!context) {
+		throw new Error("useRuleCardId must be used within RuleCardProvider");
+	}
+	return context.ruleId;
+}
+
+/**
+ * Hook to get checkbox ID from card context
+ */
+export function useRuleCardCheckboxId(): string {
+	const context = useContext(RuleCardContext);
+	if (!context) {
+		throw new Error("useRuleCardCheckboxId must be used within RuleCardProvider");
+	}
+	return context.checkboxId;
+}
+
+interface RuleCardLabelProps {
+	/** Label content (card children) */
+	children: ReactNode;
+}
+
+/**
+ * Clickable label wrapper for rule card
+ * Handles styling, hover states, and CSS ordering based on relevancy score
+ */
+export function RuleCardLabel({ children }: RuleCardLabelProps) {
+	const ruleId = useRuleCardId();
+	const checkboxId = useRuleCardCheckboxId();
+	const score = useRuleScore(ruleId);
+	const isSelected = useIsRuleSelected(ruleId);
+
+	return (
+		<label
+			htmlFor={checkboxId}
+			className={`
+				block w-full text-left p-4 rounded-lg border transition-colors cursor-pointer
+				${isSelected ? "border-primary bg-primary/10" : "border-border bg-card hover:border-primary/50"}
+			`}
+			style={{ order: -score }} // CSS ordering: higher scores appear first
+		>
+			{children}
+		</label>
 	);
+}
+
+/**
+ * Checkbox component for rule selection
+ * Uses context to get ruleId and handles selection state
+ */
+export function RuleCardCheckbox() {
+	const ruleId = useRuleCardId();
+	const checkboxId = useRuleCardCheckboxId();
+	const isSelected = useIsRuleSelected(ruleId);
+	const toggleSelection = useToggleSelection();
+
+	return <Checkbox id={checkboxId} checked={isSelected} onCheckedChange={() => toggleSelection(ruleId)} />;
 }
