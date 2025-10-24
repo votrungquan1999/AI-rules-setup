@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { createReducerContext } from "src/app/hooks/createReducerContext";
 import type { Manifest } from "src/server/types";
 import { type SearchResult, searchRules } from "./search";
@@ -82,18 +83,19 @@ export function useSetSearchQuery(): (query: string) => void {
 /**
  * Hook to get search results
  * Performs fuzzy search when query changes
+ * Results are memoized to prevent unnecessary recalculations
  */
 export function useSearchResults(): SearchResult[] {
 	const state = useSearchState();
-	return searchRules(state.query, state.manifests);
+	return useMemo(() => searchRules(state.query, state.manifests), [state.query, state.manifests]);
 }
 
 /**
  * Hook to get score for a specific rule ID
+ * Uses memoized search results for performance
  */
 export function useRuleScore(ruleId: string): number {
-	const state = useSearchState();
-	const results = searchRules(state.query, state.manifests);
+	const results = useSearchResults();
 	const result = results.find((r) => r.manifest.id === ruleId);
 	return result?.score ?? 0;
 }
