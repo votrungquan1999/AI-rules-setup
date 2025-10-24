@@ -27,8 +27,8 @@ export function generateCliCommand(agent: string, categories: string[], overwrit
 	const sanitizedCategories = categories.map((cat) => sanitizeCliInput(cat)).join(",");
 	const sanitizedStrategy = overwriteStrategy; // Already validated above
 
-	// Build command
-	const command = `ai-rules init --agent ${sanitizedAgent} --categories ${sanitizedCategories} --overwrite-strategy ${sanitizedStrategy}`;
+	// Build command with npx prefix and @latest suffix
+	const command = `npx @quanvo99/ai-rules@latest init --agent ${sanitizedAgent} --categories ${sanitizedCategories} --overwrite-strategy ${sanitizedStrategy}`;
 
 	return command;
 }
