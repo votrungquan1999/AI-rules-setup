@@ -27,6 +27,11 @@
       "suspicious": {
         "noExplicitAny": "warn",
         "noTsIgnore": "off"
+      },
+      "css": {
+        "unknownAtRules": {
+          "ignore": ["custom-variant", "theme", "plugin"]
+        }
       }
     }
   },
