@@ -16,9 +16,35 @@ program
 program
 	.command("init")
 	.description("Initialize AI rules for the current project")
-	.action(async () => {
+	.option("--agent <name>", "Specify the AI agent (cursor, windsurf, etc.)")
+	.option("--categories <list>", "Comma-separated list of category IDs to install")
+	.option(
+		"--overwrite-strategy <strategy>",
+		"Conflict resolution strategy: prompt (ask), force (overwrite), or skip (keep existing)",
+		"prompt",
+	)
+	.action(async (options) => {
 		try {
-			await initCommand();
+			// Parse categories from comma-separated string
+			const parsedOptions = {
+				agent: options.agent,
+				categories: options.categories ? options.categories.split(",").map((c: string) => c.trim()) : undefined,
+				overwriteStrategy: options.overwriteStrategy,
+			};
+			
+			// Validate overwrite strategy
+			if (
+				parsedOptions.overwriteStrategy &&
+				!["prompt", "force", "skip"].includes(parsedOptions.overwriteStrategy)
+			) {
+				console.error(
+					chalk.red(`❌ Invalid overwrite strategy: ${parsedOptions.overwriteStrategy}`),
+				);
+				console.log(chalk.yellow("Valid options: prompt, force, skip"));
+				process.exit(1);
+			}
+			
+			await initCommand(parsedOptions);
 		} catch (error) {
 			console.error(chalk.red(`❌ Error: ${error}`));
 			process.exit(1);

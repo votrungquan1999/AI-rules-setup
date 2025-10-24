@@ -86,6 +86,11 @@ export interface ConflictResult {
 }
 
 /**
+ * Overwrite strategy for handling file conflicts
+ */
+export type OverwriteStrategy = "prompt" | "force" | "skip";
+
+/**
  * CLI command options
  */
 export interface InitOptions {
@@ -99,4 +104,6 @@ export interface InitOptions {
 	agent?: string;
 	/** Specific categories to install */
 	categories?: string[];
+	/** Overwrite strategy for file conflicts (prompt, force, skip) */
+	overwriteStrategy?: OverwriteStrategy;
 }
