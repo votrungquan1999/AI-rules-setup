@@ -16,8 +16,21 @@ For each task, Cursor MUST double-check:
 - MUST keep files under **300 lines** for AI context management.
 - NEVER require running/building the server to validate output.
 - NEVER run `npm run build` or `npm run dev` after completing tasks, the user will handle this.
+- ALWAYS use `npm install` to install packages. NEVER add packages directly to `package.json`.
 - AI MAY replace entire components or structures if it improves clarity/compliance.
 - For complex changes, AI MUST ask:
   - "Am I correct?"
   - "Which rules apply here?"
   - "Did I miss any relevant rules?"
+
+## Scope Management
+
+- NEVER implement unused/future features not explicitly requested by the user.
+- MUST ask 1-2 clarifying questions before implementing (or more if user explanation >100 characters).
+- Focus on what exists in the system currently, not what could be extended unless explicitly requested by the user.
+- When user provides long explanations (>100 characters), ask additional clarifying questions to verify scope and approach before proceeding.
+
+## Error Handling
+
+- NEVER use try-catch blocks defensively around every operation.
+- ONLY place try-catch blocks at intentional error boundaries where you want to catch all errors from lower-level code.

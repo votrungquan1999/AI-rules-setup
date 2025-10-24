@@ -93,3 +93,35 @@ export enum ContributionPeriod {
 ```ts
 type ContributionPeriod = 'weekly' | 'monthly' | 'quarterly' | 'semi-annually' | 'annually'
 ```
+
+## 5. Type Separation for Different Purposes
+
+- ALWAYS create separate types for different purposes, even if they appear identical.
+- NEVER reuse types across different contexts (client display vs API input vs database vs internal functions).
+- Each purpose should have its own dedicated type to prevent coupling and maintain clear boundaries.
+
+✅ Correct:
+
+```ts
+// Client display type
+export interface UserDisplay {
+  name: string
+  email: string
+}
+
+// API request type
+export interface CreateUserRequest {
+  name: string
+  email: string
+}
+```
+
+❌ Incorrect:
+
+```ts
+// DON'T reuse the same type for both client display and API input
+export interface User {
+  name: string
+  email: string
+}
+```
