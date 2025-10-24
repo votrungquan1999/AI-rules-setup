@@ -1,9 +1,9 @@
 "use client";
 
-import { Copy } from "lucide-react";
+import { Check, Copy } from "lucide-react";
 import { Button } from "src/components/ui/button";
 import { useGeneratedCommand } from "src/lib/selection.state";
-import { CopyButton } from "./copy-button";
+import { CopyButton, CopiedContent, DefaultContent } from "./copy-button";
 
 /**
  * Command display with copy-to-clipboard functionality using shadcn Button
@@ -36,7 +36,12 @@ export function CommandDisplay() {
 						className="absolute top-2 right-2"
 						aria-label="Copy command"
 					>
-						<Copy className="size-4" />
+						<CopiedContent>
+							<Check className="size-4 text-green-600" />
+						</CopiedContent>
+						<DefaultContent>
+							<Copy className="size-4" />
+						</DefaultContent>
 					</Button>
 				</CopyButton>
 			</div>
