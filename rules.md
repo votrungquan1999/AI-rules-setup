@@ -782,7 +782,7 @@ src/components/user-profile/
 ```tsx
 'use client'
 
-import { createReducerContext } from '@/lib/context'
+import { createReducerContext } from '...'
 import type { UserProfileState, UserProfileAction } from './user-profile.type'
 
 const initialState: UserProfileState = {
