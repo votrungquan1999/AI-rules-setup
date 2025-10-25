@@ -19,7 +19,7 @@ This roadmap outlines the iterative development strategy for the AI Rules CLI pr
 | 1         | MVP with Cursor support        | Completed |
 | 2         | Expand Cursor rule library     | Completed |
 | 3         | Web UI for Rule Selection      | Completed |
-| 4         | Cache Revalidation             | Planned   |
+| 4         | Cache Revalidation             | Completed |
 | 5         | Enhanced Commands              | Planned   |
 | 6         | Semantic search with vector DB | Planned   |
 | 7         | Interactive rule refinement    | Planned   |
@@ -72,19 +72,19 @@ This roadmap outlines the iterative development strategy for the AI Rules CLI pr
 
 ### Features
 
-- [ ] Implement mechanism to revalidate cache when rules folder changes
-- [ ] Suggested implementation: prepush hook
+- [x] Implement mechanism to revalidate cache when rules folder changes
+- [x] Implementation: GitHub Actions workflow
 
 **Purpose**: Quick implementation to ensure the web UI reflects rule changes immediately without manual intervention.
 
 ### Success Criteria
 
-- [ ] Rule changes trigger cache revalidation automatically
+- [x] Rule changes trigger cache revalidation automatically
 
 ### Deliverables
 
-- Cache revalidation mechanism
-- Basic documentation
+- Cache revalidation mechanism (GitHub Actions + TypeScript script)
+- Basic documentation (inline workflow comments)
 
 ---
 

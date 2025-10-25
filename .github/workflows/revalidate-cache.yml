@@ -1,0 +1,51 @@
+name: Revalidate Rules Cache
+
+# Trigger this workflow when changes are pushed to the rules folder on main branch
+# or when manually triggered from the GitHub Actions UI
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "rules/**"
+  workflow_dispatch:
+
+jobs:
+  clear-cache:
+    name: Clear MongoDB Cache
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Clear MongoDB cache
+        env:
+          # MongoDB connection string from GitHub Secrets
+          # This should point to the same production MongoDB used by Vercel
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          MONGODB_DB_NAME: ${{ secrets.MONGODB_DB_NAME }}
+        run: npx tsx .github/scripts/clear-cache.ts
+
+      - name: Pre-warm cache (optional)
+        # This step calls the public API to trigger immediate re-caching
+        # Remove or comment out this step if you prefer lazy cache warming
+        run: |
+          echo "Pre-warming cache by calling /api/rules endpoint..."
+          curl -f https://ai-rules-setup.vercel.app/api/rules || echo "Cache pre-warming failed, will warm on first user request"
+        continue-on-error: true
+
+      - name: Cache clearing summary
+        if: success()
+        run: |
+          echo "✓ Cache successfully cleared"
+          echo "Next request to /api/rules will fetch fresh data from GitHub"
