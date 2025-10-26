@@ -3,7 +3,7 @@
 import { Check, Copy } from "lucide-react";
 import { Button } from "src/components/ui/button";
 import { useGeneratedCommand } from "src/lib/selection.state";
-import { CopyButton, CopiedContent, DefaultContent } from "./copy-button";
+import { CopiedContent, CopyButton, DefaultContent } from "./copy-button";
 
 /**
  * Command display with copy-to-clipboard functionality using shadcn Button

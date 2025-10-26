@@ -1,6 +1,6 @@
 import Fuse from "fuse.js";
-import { removeStopwords, eng } from "stopword";
 import type { Manifest } from "src/server/types";
+import { eng, removeStopwords } from "stopword";
 
 /**
  * Search result with relevancy score and matched fields

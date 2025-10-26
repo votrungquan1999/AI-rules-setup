@@ -92,7 +92,7 @@ interface ConditionalContentProps {
  */
 export function CopiedContent({ children }: ConditionalContentProps) {
 	const { isCopied } = useCopyButtonContext();
-	return isCopied ? <>{children}</> : null;
+	return isCopied ? children : null;
 }
 
 /**
@@ -100,7 +100,7 @@ export function CopiedContent({ children }: ConditionalContentProps) {
  */
 export function DefaultContent({ children }: ConditionalContentProps) {
 	const { isCopied } = useCopyButtonContext();
-	return isCopied ? null : <>{children}</>;
+	return isCopied ? null : children;
 }
 
 /**

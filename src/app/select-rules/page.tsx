@@ -1,6 +1,6 @@
 import { AgentSelector } from "src/components/agent-selector";
 import { CommandDisplay } from "src/components/command-display";
-import { RuleCardProvider, RuleCardLabel, RuleCardCheckbox } from "src/components/rule-card-wrapper";
+import { RuleCardCheckbox, RuleCardLabel, RuleCardProvider } from "src/components/rule-card-wrapper";
 import { ScoreBadge } from "src/components/score-badge";
 import { SearchInput } from "src/components/search-input";
 import { SelectedRulesSidebar } from "src/components/selected-rules-sidebar";
@@ -86,7 +86,10 @@ export default async function SelectRulesPage() {
 														{manifest.tags.length > 0 && (
 															<div className="flex flex-wrap gap-1">
 																{manifest.tags.slice(0, 5).map((tag) => (
-																	<span key={tag} className="px-2 py-0.5 text-xs rounded bg-muted text-muted-foreground">
+																	<span
+																		key={tag}
+																		className="px-2 py-0.5 text-xs rounded bg-muted text-muted-foreground"
+																	>
 																		{tag}
 																	</span>
 																))}

@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { createReducerContext } from "src/app/hooks/createReducerContext";
 import type { Manifest } from "src/server/types";
 import { type SearchResult, searchRules } from "./search";
+
 // import { type SearchResult, searchRules } from "./search-minisearch";
 
 /**

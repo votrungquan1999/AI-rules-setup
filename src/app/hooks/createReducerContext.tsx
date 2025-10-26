@@ -9,10 +9,7 @@ import {
 	useReducer,
 } from "react";
 
-export function createReducerContext<Action, State>(
-	reducer: Reducer<State, Action>,
-	initialState: State,
-) {
+export function createReducerContext<Action, State>(reducer: Reducer<State, Action>, initialState: State) {
 	const stateCtx = createContext<State>(initialState);
 	const dispatchCtx = createContext<Dispatch<Action>>(() => {});
 
@@ -21,10 +18,7 @@ export function createReducerContext<Action, State>(
 		middleware,
 		...values
 	}: PropsWithChildren<Partial<State>> & {
-		middleware?: (
-			dispatch: Dispatch<Action>,
-			getNextState: (action: Action) => State,
-		) => Dispatch<Action>;
+		middleware?: (dispatch: Dispatch<Action>, getNextState: (action: Action) => State) => Dispatch<Action>;
 	}) {
 		const [state, dispatch] = useReducer(reducer, initialState, (defaultState) => ({
 			...defaultState,

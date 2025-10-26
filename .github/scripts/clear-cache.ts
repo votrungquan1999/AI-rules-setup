@@ -1,4 +1,4 @@
-import { getDatabase, closeDatabase } from "../../src/server/database";
+import { closeDatabase, getDatabase } from "../../src/server/database";
 import { RULES_DATA_COLLECTION_NAME } from "../../src/server/types";
 
 /**
@@ -50,5 +50,3 @@ clearCache()
 		console.error("Cache clearing failed:", error);
 		process.exit(1);
 	});
-
-

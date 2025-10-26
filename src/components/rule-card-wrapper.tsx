@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useId, type ReactNode } from "react";
+import { createContext, type ReactNode, useContext, useId } from "react";
 import { useRuleScore } from "src/lib/search.state";
 import { useIsRuleSelected, useToggleSelection } from "src/lib/selection.state";
 import { Checkbox } from "./ui/checkbox";

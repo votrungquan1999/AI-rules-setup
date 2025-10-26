@@ -31,19 +31,14 @@ program
 				categories: options.categories ? options.categories.split(",").map((c: string) => c.trim()) : undefined,
 				overwriteStrategy: options.overwriteStrategy,
 			};
-			
+
 			// Validate overwrite strategy
-			if (
-				parsedOptions.overwriteStrategy &&
-				!["prompt", "force", "skip"].includes(parsedOptions.overwriteStrategy)
-			) {
-				console.error(
-					chalk.red(`❌ Invalid overwrite strategy: ${parsedOptions.overwriteStrategy}`),
-				);
+			if (parsedOptions.overwriteStrategy && !["prompt", "force", "skip"].includes(parsedOptions.overwriteStrategy)) {
+				console.error(chalk.red(`❌ Invalid overwrite strategy: ${parsedOptions.overwriteStrategy}`));
 				console.log(chalk.yellow("Valid options: prompt, force, skip"));
 				process.exit(1);
 			}
-			
+
 			await initCommand(parsedOptions);
 		} catch (error) {
 			console.error(chalk.red(`❌ Error: ${error}`));

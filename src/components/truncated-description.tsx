@@ -37,17 +37,13 @@ export function TruncatedDescription({ text }: TruncatedDescriptionProps) {
 		return () => {
 			window.removeEventListener("resize", checkTruncation);
 		};
-	}, [text]);
+	}, []);
 
 	if (isExpanded) {
 		return (
 			<div className="space-y-1">
 				<p className="text-sm text-muted-foreground">{text}</p>
-				<button
-					type="button"
-					onClick={() => setIsExpanded(false)}
-					className="text-xs text-primary hover:underline"
-				>
+				<button type="button" onClick={() => setIsExpanded(false)} className="text-xs text-primary hover:underline">
 					Show less
 				</button>
 			</div>
@@ -71,4 +67,3 @@ export function TruncatedDescription({ text }: TruncatedDescriptionProps) {
 		</div>
 	);
 }
-
