@@ -10,10 +10,20 @@ on:
       - "rules/**"
   workflow_dispatch:
 
+# Security: Use minimal required permissions
+permissions:
+  contents: read
+
+# Prevent multiple cache clearing operations from running simultaneously
+concurrency:
+  group: cache-revalidation
+  cancel-in-progress: true
+
 jobs:
   clear-cache:
     name: Clear MongoDB Cache
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment: production
 
     steps:
@@ -45,8 +55,14 @@ jobs:
           curl -f https://ai-rules-setup.vercel.app/api/rules || echo "Cache pre-warming failed, will warm on first user request"
         continue-on-error: true
 
-      - name: Cache clearing summary
+      - name: Generate job summary
         if: success()
         run: |
-          echo "✓ Cache successfully cleared"
-          echo "Next request to /api/rules will fetch fresh data from GitHub"
+          echo "## ✅ Cache Revalidation Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Workflow:** ${{ github.workflow }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Triggered by:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "MongoDB cache has been cleared. Next request to \`/api/rules\` will fetch fresh data from GitHub." >> $GITHUB_STEP_SUMMARY
