@@ -14,6 +14,7 @@ jobs:
   clear-cache:
     name: Clear MongoDB Cache
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
       - name: Checkout repository
