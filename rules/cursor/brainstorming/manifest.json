@@ -1,0 +1,28 @@
+{
+  "id": "brainstorming-patterns",
+  "category": "brainstorming",
+  "tags": [
+    "brainstorming",
+    "problem-solving",
+    "structured-thinking",
+    "layered-approach",
+    "zoom-out-first",
+    "design-thinking",
+    "iterative-thinking",
+    "documentation",
+    "clarification",
+    "best-practices"
+  ],
+  "description": "AI agent brainstorming patterns including problem definition, clarification questions, zoom-out first approach, iterative solution thinking, and documentation requirements for structured problem-solving",
+  "version": "1.0.0",
+  "lastUpdated": "2025-01-27T00:00:00Z",
+  "files": [
+    {
+      "path": "brainstorming-patterns.mdc",
+      "description": "Core brainstorming patterns and structured thinking approach",
+      "required": true
+    }
+  ],
+  "dependencies": [],
+  "conflicts": []
+}
