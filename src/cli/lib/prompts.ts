@@ -72,17 +72,27 @@ export async function promptCategorySelection(manifests: Manifest[]): Promise<st
 		return [];
 	}
 
-	// Format choices with enhanced visual hierarchy
-	const choices = manifests.map((manifest) => {
-		const tagLine = chalk.gray(`[${manifest.tags.slice(0, 3).join(", ")}]`);
-		const descLine = manifest.description.length > 60 ? `${manifest.description.slice(0, 60)}…` : manifest.description;
+	const ALL_OPTION = "__ALL__";
 
-		return {
-			name: `${chalk.cyan.bold(manifest.id)} ${tagLine}\n  ${chalk.dim(descLine)}`,
-			value: manifest.id,
-			short: manifest.id,
-		};
-	});
+	// Format choices with enhanced visual hierarchy
+	const choices = [
+		{
+			name: chalk.bold.green("📦 Select All"),
+			value: ALL_OPTION,
+			short: "All",
+		},
+		...manifests.map((manifest) => {
+			const tagLine = chalk.gray(`[${manifest.tags.slice(0, 3).join(", ")}]`);
+			const descLine =
+				manifest.description.length > 60 ? `${manifest.description.slice(0, 60)}…` : manifest.description;
+
+			return {
+				name: `${chalk.cyan.bold(manifest.id)} ${tagLine}\n  ${chalk.dim(descLine)}`,
+				value: manifest.id,
+				short: manifest.id,
+			};
+		}),
+	];
 
 	const { categories } = await inquirer.prompt([
 		{
@@ -100,7 +110,12 @@ export async function promptCategorySelection(manifests: Manifest[]): Promise<st
 		},
 	]);
 
-	return categories;
+	// Handle "Select All" option
+	if (categories.includes(ALL_OPTION)) {
+		return manifests.map((m) => m.id);
+	}
+
+	return categories.filter((cat: string) => cat !== ALL_OPTION);
 }
 
 /**

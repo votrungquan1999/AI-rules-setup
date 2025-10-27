@@ -47,16 +47,22 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
 		// Category selection: use provided options or prompt
 		let selectedCategories: string[];
 		if (options.categories && options.categories.length > 0) {
-			// Validate provided categories
-			const validCategories = manifests.map((m) => m.id);
-			const invalidCategories = options.categories.filter((cat) => !validCategories.includes(cat));
-			if (invalidCategories.length > 0) {
-				console.log(chalk.red(`❌ Invalid categories: ${invalidCategories.join(", ")}`));
-				console.log(chalk.yellow(`Available categories: ${validCategories.join(", ")}`));
-				process.exit(1);
+			// Check if "all" is specified
+			if (options.categories.includes("all")) {
+				selectedCategories = manifests.map((m) => m.id);
+				console.log(chalk.green(`✓ Selected all categories: ${selectedCategories.join(", ")}\n`));
+			} else {
+				// Validate provided categories
+				const validCategories = manifests.map((m) => m.id);
+				const invalidCategories = options.categories.filter((cat) => !validCategories.includes(cat));
+				if (invalidCategories.length > 0) {
+					console.log(chalk.red(`❌ Invalid categories: ${invalidCategories.join(", ")}`));
+					console.log(chalk.yellow(`Available categories: ${validCategories.join(", ")}`));
+					process.exit(1);
+				}
+				selectedCategories = options.categories;
+				console.log(chalk.green(`✓ Selected categories: ${selectedCategories.join(", ")}\n`));
 			}
-			selectedCategories = options.categories;
-			console.log(chalk.green(`✓ Selected categories: ${selectedCategories.join(", ")}\n`));
 		} else {
 			selectedCategories = await promptCategorySelection(manifests);
 			if (selectedCategories.length === 0) {
