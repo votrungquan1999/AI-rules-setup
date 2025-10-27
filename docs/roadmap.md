@@ -88,6 +88,52 @@ This roadmap outlines the iterative development strategy for the AI Rules CLI pr
 
 ---
 
+## Current Development Challenge: Techstack Identification
+
+**Status**: Blocking progress on Iterations 5-7
+
+### The Problem
+
+The tool is currently useful enough for manual rule selection through the web UI or CLI prompts, but scaling to provide automatic, intelligent rule recommendations requires solving a critical challenge: **automated techstack identification**.
+
+### Key Issue
+
+To provide value beyond manual category selection, the tool needs a programmatic way to:
+
+- Generate context-appropriate questions about a developer's techstack
+- Identify relevant rules based on detected technology choices
+- Scale question generation without manual curation
+
+**Current Limitation**: While the web UI and CLI can show all available rules, there's no intelligent way to automatically determine which rules are relevant to a specific developer's project without manually crafting question sets for each techstack combination.
+
+### Impact
+
+This challenge stalls progress on:
+
+- **Iteration 5** (Enhanced Commands): Cannot intelligently suggest categories
+- **Iteration 6** (Semantic Search): Search alone doesn't solve the discovery problem
+- **Iteration 7** (Interactive Rule Refinement): Question generation is the core feature
+
+### Why Manual Question Curation Doesn't Scale
+
+- Technology combinations grow combinatorially (React + TypeScript + Next.js + Tailwind + ...)
+- New frameworks emerge constantly
+- Different projects within the same stack have different needs
+- Maintaining question trees manually becomes unmanageable at scale
+
+### The Solution Space
+
+We need to find an approach that can:
+
+1. **Programmatically generate questions** based on available rules
+2. **Detect or infer techstack** from project files (package.json, requirements.txt, etc.)
+3. **Combine detection with targeted questions** for edge cases
+4. **Scale automatically** as the rule library grows
+
+See [Techstack Identification Brainstorming](./brainstorming/techstack-identification.md) for detailed exploration of potential solutions.
+
+---
+
 ## Iteration 5: Enhanced Commands
 
 **Goal**: Improve CLI usability and safety
