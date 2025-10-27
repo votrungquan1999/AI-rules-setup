@@ -9,6 +9,7 @@
     "react-server-components",
     "styling-tailwind",
     "typescript-conventions",
-    "url-state-management"
+    "url-state-management",
+    "brainstorming-patterns"
   ]
 }
