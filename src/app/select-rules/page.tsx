@@ -117,7 +117,7 @@ export default async function SelectRulesPage() {
 								</div>
 
 								<div className="p-6">
-									<CommandDisplay />
+									<CommandDisplay manifests={manifests} />
 								</div>
 							</div>
 						</div>

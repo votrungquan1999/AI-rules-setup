@@ -23,7 +23,8 @@ type SelectionAction =
 	| { type: "SET_AGENT"; payload: string }
 	| { type: "TOGGLE_SELECTION"; payload: string }
 	| { type: "CLEAR_SELECTIONS" }
-	| { type: "SET_STRATEGY"; payload: OverwriteStrategy };
+	| { type: "SET_STRATEGY"; payload: OverwriteStrategy }
+	| { type: "SELECT_ALL"; payload: string[] };
 
 /**
  * Initial selection state
@@ -60,6 +61,9 @@ function selectionReducer(state: SelectionState, action: SelectionAction): Selec
 
 		case "SET_STRATEGY":
 			return { ...state, overwriteStrategy: action.payload };
+
+		case "SELECT_ALL":
+			return { ...state, selectedIds: new Set(action.payload) };
 
 		default:
 			return state;
@@ -152,10 +156,18 @@ export function useSetOverwriteStrategy(): (strategy: OverwriteStrategy) => void
 }
 
 /**
+ * Hook to select all available categories
+ */
+export function useSelectAll(): (allIds: string[]) => void {
+	const dispatch = useSelectionDispatch();
+	return (allIds: string[]) => dispatch({ type: "SELECT_ALL", payload: allIds });
+}
+
+/**
  * Hook to get generated CLI command
  * Computes command from current state
  */
-export function useGeneratedCommand(): string {
+export function useGeneratedCommand(allIds: string[]): string {
 	const state = useSelectionState();
 
 	if (state.selectedIds.size === 0) {
@@ -163,8 +175,14 @@ export function useGeneratedCommand(): string {
 	}
 
 	try {
+		// Check if all categories are selected
 		const categories = Array.from(state.selectedIds);
-		return generateCliCommand(state.agent, categories, state.overwriteStrategy);
+		const isAllSelected = categories.length === allIds.length && categories.every((id) => allIds.includes(id));
+
+		// If all are selected, use "all" as the category value
+		const categoryValue = isAllSelected ? ["all"] : categories;
+
+		return generateCliCommand(state.agent, categoryValue, state.overwriteStrategy);
 	} catch (error) {
 		console.error("Error generating command:", error);
 		return "";

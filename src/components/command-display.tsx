@@ -3,14 +3,21 @@
 import { Check, Copy } from "lucide-react";
 import { Button } from "src/components/ui/button";
 import { useGeneratedCommand } from "src/lib/selection.state";
+import type { Manifest } from "src/server/types";
 import { CopiedContent, CopyButton, DefaultContent } from "./copy-button";
+
+interface CommandDisplayProps {
+	/** All available manifests */
+	manifests: Manifest[];
+}
 
 /**
  * Command display with copy-to-clipboard functionality using shadcn Button
  * Uses selection context to get generated command
  */
-export function CommandDisplay() {
-	const command = useGeneratedCommand();
+export function CommandDisplay({ manifests }: CommandDisplayProps) {
+	const allIds = manifests.map((m) => m.id);
+	const command = useGeneratedCommand(allIds);
 
 	if (!command) {
 		return (
