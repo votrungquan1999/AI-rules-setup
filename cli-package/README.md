@@ -5,72 +5,78 @@ A command-line tool that helps developers pull curated AI agent rules from a cen
 ## Quick Start
 
 ```bash
-# Initialize rules for your project (no installation needed!)
+# Interactive mode - walk through prompts
 npx @quanvo99/ai-rules init
 
-# Add specific rule categories
-npx @quanvo99/ai-rules add typescript react
+# Non-interactive mode - specify options directly
+npx @quanvo99/ai-rules init --agent cursor --categories typescript,react-hooks --overwrite-strategy force
+```
 
-# Update to latest rules
-npx @quanvo99/ai-rules update
+## 🌐 Interactive Rule Selection
+
+**Prefer a visual interface?** Use our web UI to browse, search, and select rules interactively:
+
+👉 **[Open Rule Selector at https://ai-rules-setup.vercel.app/](https://ai-rules-setup.vercel.app/)**
+
+The web interface allows you to:
+
+- Browse all available rules with descriptions and tags
+- Search rules using keywords
+- Select multiple rules interactively
+- Generate a non-interactive CLI command with your selections
+- Copy and paste the command to install rules instantly
+
+Example generated command:
+
+```bash
+npx @quanvo99/ai-rules init --agent cursor --categories typescript-conventions,react-hooks --overwrite-strategy force
 ```
 
 ## What is AI Rules CLI?
 
 AI Rules CLI solves the problem of scattered, hard-to-find AI agent rule files across different projects. Instead of manually copying rules from various sources, you can:
 
-- **Discover** rules by tech stack using natural language search
+- **Discover** rules by browsing categories and tags
 - **Install** only the rules you need for your specific project
-- **Update** to the latest rule versions with a single command
-- **Refine** your selection through intelligent questioning
+- **Choose** between interactive CLI prompts or web-based selection
 
 ## Supported AI Agents
 
 - **Cursor** - `.cursor/rules/` directory with `.cursorrules` files
-- **Windsurf** - `.windsurf/rules/` directory with `.windsurfrules` files
-- **More coming soon** - Aider, Continue, Cody, and others
+- **More coming soon** - Windsurf, Aider, Continue, Cody, and others
 
 ## Key Features
 
-### 🎯 Smart Rule Discovery
+### 🎯 Interactive or Command-Line Driven
 
-Use natural language to find relevant rules:
+Choose your preferred workflow:
 
-```bash
-npx @quanvo99/ai-rules search "nextjs 15 server components tailwind"
-```
+- **Interactive CLI** - Guided prompts for agent and category selection
+- **Non-Interactive CLI** - Direct command with all options specified
+- **Web UI** - Visual interface at https://ai-rules-setup.vercel.app/
 
-### 🔍 Interactive Refinement
+### 📦 Multiple AI Agent Support
 
-Get personalized recommendations through guided questions:
+Works with:
 
-- "Are you using App Router or Pages Router?"
-- "What's your primary data fetching strategy?"
-- "Do you prefer Tailwind or styled-components?"
+- **Cursor** - `.cursor/rules/` directory
+- More agents coming soon
 
-### 📦 Easy Management
+### ⚙️ Flexible Conflict Resolution
 
-```bash
-# See what's installed
-npx @quanvo99/ai-rules status
+Handle existing files your way:
 
-# Add more rules
-npx @quanvo99/ai-rules add nextjs database
-
-# Remove unused rules
-npx @quanvo99/ai-rules remove old-framework
-
-# Update everything
-npx @quanvo99/ai-rules update
-```
+- `prompt` - Ask for each conflict (default)
+- `force` - Overwrite all existing files
+- `skip` - Keep existing files, skip new ones
 
 ## How It Works
 
-1. **Initialize** - Choose your AI agent and tech stack
-2. **Discover** - Search for relevant rules using natural language
-3. **Refine** - Answer questions to get personalized recommendations
-4. **Install** - Rules are automatically placed in the correct locations
-5. **Update** - Keep your rules current with the latest versions
+1. **Choose Your Interface** - Use the CLI in interactive mode or the web UI at https://ai-rules-setup.vercel.app/
+2. **Select Agent** - Choose your AI agent (Cursor, Windsurf, etc.)
+3. **Pick Categories** - Select rule categories that match your tech stack
+4. **Handle Conflicts** - Decide how to handle existing files (prompt, force, or skip)
+5. **Install** - Rules are automatically placed in the correct locations
 
 ## Project Structure
 
@@ -85,7 +91,7 @@ your-project/
 └── package.json
 ```
 
-## Available Rule Categories
+## Example Rule Categories
 
 ### Languages
 
@@ -122,19 +128,9 @@ The CLI creates a `.ai-rules.json` file in your project root:
 
 ```json
 {
+  "version": "1.0.0",
   "agent": "cursor",
-  "rules": [
-    {
-      "id": "typescript-strict",
-      "category": "typescript",
-      "installedAt": "2024-01-15T10:30:00Z",
-      "source": "github.com/votrungquan1999/AI-rules-setup"
-    }
-  ],
-  "preferences": {
-    "autoUpdate": false,
-    "conflictResolution": "prompt"
-  }
+  "categories": ["typescript-conventions", "react-hooks", "meta-rules"]
 }
 ```
 
@@ -142,77 +138,43 @@ The CLI creates a `.ai-rules.json` file in your project root:
 
 ### `npx @quanvo99/ai-rules init`
 
-Interactive setup wizard that guides you through:
+Initialize AI rules for your project. Can be used in interactive or non-interactive mode.
 
-- AI agent selection
-- Tech stack identification
-- Rule discovery and selection
-- Installation configuration
-
-### `npx @quanvo99/ai-rules add <categories...>`
-
-Add specific rule categories to your project:
+**Interactive Mode:**
 
 ```bash
-npx @quanvo99/ai-rules add typescript react nextjs
-```
-
-### `npx @quanvo99/ai-rules remove <categories...>`
-
-Remove rule categories from your project:
-
-```bash
-npx @quanvo99/ai-rules remove old-framework
-```
-
-### `npx @quanvo99/ai-rules update`
-
-Update all installed rules to their latest versions:
-
-```bash
-npx @quanvo99/ai-rules update
-```
-
-### `npx @quanvo99/ai-rules list [--filter <tag>]`
-
-List available rule categories with optional filtering:
-
-```bash
-npx @quanvo99/ai-rules list --filter frontend
-```
-
-### `npx @quanvo99/ai-rules status`
-
-Show currently installed rules and their status:
-
-```bash
-npx @quanvo99/ai-rules status
-```
-
-### `npx @quanvo99/ai-rules search "<query>"`
-
-Search for rules using natural language:
-
-```bash
-npx @quanvo99/ai-rules search "nextjs 15 server components with tailwind"
-```
-
-### `npx @quanvo99/ai-rules refine`
-
-Re-run the refinement process for better rule selection:
-
-```bash
-npx @quanvo99/ai-rules refine
-```
-
-## Environment Variables
-
-You can configure the API endpoint if needed:
-
-```bash
-# Set custom API URL (optional)
-export AI_RULES_API_URL=https://your-api-domain.com
 npx @quanvo99/ai-rules init
+```
+
+Walks you through:
+
+- AI agent selection (cursor, windsurf, etc.)
+- Category selection with descriptions and tags
+- File conflict resolution
+
+**Non-Interactive Mode:**
+
+```bash
+npx @quanvo99/ai-rules init [options]
+```
+
+**Options:**
+
+- `--agent <name>` - Specify the AI agent (cursor, windsurf, etc.)
+- `--categories <list>` - Comma-separated category IDs (use "all" for all categories)
+- `--overwrite-strategy <strategy>` - Conflict resolution: `prompt` (default), `force`, or `skip`
+
+**Examples:**
+
+```bash
+# Install specific categories for Cursor
+npx @quanvo99/ai-rules init --agent cursor --categories typescript-conventions,react-hooks
+
+# Install all categories with force overwrite
+npx @quanvo99/ai-rules init --agent cursor --categories all --overwrite-strategy force
+
+# Skip existing files
+npx @quanvo99/ai-rules init --agent cursor --categories meta-rules --overwrite-strategy skip
 ```
 
 ## License

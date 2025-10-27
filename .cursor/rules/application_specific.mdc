@@ -11,6 +11,7 @@ A command-line tool that helps developers pull curated AI agent rules from a cen
 - the design documents are in the root/docs folder
 - the road map can also be found in the root/docs/roadmap.md file
 - When requested to do some tasks, first check the design documents and the road map to see if the task is already in the road map or if there is a design document for it.
+- When there are updates related to the CLI, should update the readme.md file in the cli-package folder if there are interface changes.
 
 # Rules
 

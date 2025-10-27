@@ -54,19 +54,6 @@ export default function HomePage() {
 							</div>
 						</div>
 					</section>
-
-					<section>
-						<h2 className="text-2xl font-semibold text-foreground mb-3">Configuration</h2>
-						<div className="bg-card border border-border rounded-lg p-4">
-							<p className="text-sm text-muted-foreground mb-2">
-								Set the <code className="bg-muted px-1 py-0.5 rounded">AI_RULES_API_URL</code> environment variable to
-								point to this server:
-							</p>
-							<code className="text-sm font-mono bg-muted px-2 py-1 rounded block">
-								AI_RULES_API_URL=https://ai-rules-setup.vercel.app
-							</code>
-						</div>
-					</section>
 				</div>
 			</div>
 		</div>
