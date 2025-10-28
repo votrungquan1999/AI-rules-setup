@@ -1,0 +1,73 @@
+{
+  "questions": [
+    {
+      "id": "uses-typescript",
+      "text": "Are you using TypeScript in your project?",
+      "tags": [
+        "typescript",
+        "language",
+        "type-system"
+      ],
+      "type": "yes-no",
+      "keywords": [
+        "typescript",
+        "ts"
+      ]
+    },
+    {
+      "id": "needs-type-hoisting-help",
+      "text": "Do you need help with hoisting `type` aliases and `interface` definitions to the top of TypeScript files?",
+      "tags": [
+        "typescript",
+        "hoisting",
+        "conventions"
+      ],
+      "type": "yes-no",
+      "keywords": [
+        "type-aliases",
+        "interfaces"
+      ]
+    },
+    {
+      "id": "needs-jsdoc-documentation-help",
+      "text": "Do you need assistance with adding JSDoc blocks to your functions for better documentation?",
+      "tags": [
+        "typescript",
+        "jsdoc",
+        "documentation"
+      ],
+      "type": "yes-no",
+      "keywords": [
+        "jsdoc",
+        "function-documentation"
+      ]
+    },
+    {
+      "id": "needs-import-export-organization-help",
+      "text": "Do you need guidance on organizing and structuring your TypeScript import and export statements?",
+      "tags": [
+        "typescript",
+        "imports",
+        "exports"
+      ],
+      "type": "yes-no",
+      "keywords": [
+        "import-statements",
+        "export-patterns"
+      ]
+    },
+    {
+      "id": "needs-enum-vs-type-discussion",
+      "text": "Are you looking for advice on when to use `enum` instead of string literal union types in TypeScript?",
+      "tags": [
+        "typescript",
+        "enums",
+        "types"
+      ],
+      "type": "yes-no",
+      "keywords": [
+        "enums-over-string-union"
+      ]
+    }
+  ]
+}
