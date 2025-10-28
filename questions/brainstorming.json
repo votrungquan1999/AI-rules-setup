@@ -1,0 +1,75 @@
+{
+  "questions": [
+    {
+      "id": "wants-brainstorming-patterns",
+      "text": "Do you want rules to help with brainstorming and documenting ideas methodically?",
+      "tags": [
+        "brainstorming",
+        "problem-solving",
+        "structured-thinking",
+        "documentation"
+      ],
+      "type": "yes-no",
+      "keywords": [
+        "brainstorming",
+        "structured-thinking",
+        "documentation",
+        "problem-definition"
+      ]
+    },
+    {
+      "id": "uses-markdown-for-documentation",
+      "text": "Are you using markdown files for your project documentation?",
+      "tags": [
+        "markdown",
+        "documention"
+      ],
+      "type": "yes-no",
+      "keywords": [
+        "markdown",
+        "documentation"
+      ]
+    },
+    {
+      "id": "needs-clarification-in-brainstorming",
+      "text": "Do you need help with generating clarifying questions for your brainstorming sessions?",
+      "tags": [
+        "brainstorming",
+        "questions"
+      ],
+      "type": "yes-no",
+      "keywords": [
+        "clarity",
+        "clarify",
+        "questions"
+      ]
+    },
+    {
+      "id": "uses-layered-approach-for-problem-solving",
+      "text": "Are you using a layered or zoom-out approach when solving problems?",
+      "tags": [
+        "problem-solving",
+        "layered-approach"
+      ],
+      "type": "yes-no",
+      "keywords": [
+        "zoom-out-first",
+        "layers"
+      ]
+    },
+    {
+      "id": "needs-documentation-for-solutions",
+      "text": "Do you need help with documenting your brainstorming and problem-solving processes?",
+      "tags": [
+        "documentation",
+        "problem-solving"
+      ],
+      "type": "yes-no",
+      "keywords": [
+        "document",
+        "record",
+        "keep-notes"
+      ]
+    }
+  ]
+}
