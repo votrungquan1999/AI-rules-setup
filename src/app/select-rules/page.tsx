@@ -1,5 +1,6 @@
 import { AgentSelector } from "src/components/agent-selector";
 import { CommandDisplay } from "src/components/command-display";
+// import { QuestionsDialog } from "src/components/questions-dialog";
 import { RuleCardCheckbox, RuleCardLabel, RuleCardProvider } from "src/components/rule-card-wrapper";
 import { ScoreBadge } from "src/components/score-badge";
 import { SearchInput } from "src/components/search-input";
@@ -8,6 +9,7 @@ import { StrategySelector } from "src/components/strategy-selector";
 import { TruncatedDescription } from "src/components/truncated-description";
 import { SearchProvider } from "src/lib/search.state";
 import { SelectionProvider } from "src/lib/selection.state";
+import { findAllStoredQuestions } from "src/server/questions-repository";
 import { findAllStoredRules } from "src/server/rules-repository";
 
 /**
@@ -18,6 +20,7 @@ export default async function SelectRulesPage() {
 	"use cache";
 
 	const rulesData = await findAllStoredRules();
+	const questionsData = await findAllStoredQuestions();
 
 	if (!rulesData || !rulesData.agents) {
 		return (
@@ -44,7 +47,7 @@ export default async function SelectRulesPage() {
 	const manifests = Object.values(firstAgentCategories).map((cat) => cat.manifest);
 
 	return (
-		<SearchProvider manifests={manifests}>
+		<SearchProvider manifests={manifests} questions={questionsData}>
 			<SelectionProvider defaultAgent={defaultAgent}>
 				<div className="min-h-screen bg-background">
 					<div className="max-w-7xl mx-auto p-8">
@@ -55,6 +58,9 @@ export default async function SelectRulesPage() {
 								Search for rules and generate a CLI command to install them
 							</p>
 						</div>
+
+						{/* Temporarily disabled questions dialog since the questions generation is not very good yet */}
+						{/* <QuestionsDialog /> */}
 
 						<div className="grid grid-cols-[1fr_400px] gap-6">
 							{/* Main content */}

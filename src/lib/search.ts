@@ -1,4 +1,5 @@
 import Fuse from "fuse.js";
+import type { Question } from "src/lib/question-types";
 import type { Manifest } from "src/server/types";
 import { eng, removeStopwords } from "stopword";
 
@@ -142,4 +143,35 @@ export function searchRules(query: string, manifests: Manifest[]): SearchResult[
 
 	// Sort by score (highest first)
 	return results.sort((a, b) => b.score - a.score);
+}
+
+/**
+ * Searches questions using context tokens and their tags
+ * @param contextTokens - tokens built from description and answers
+ * @param questions - list of questions
+ * @returns questions sorted by match score
+ */
+export function searchQuestions(contextTokens: string[], questions: Question[]): Question[] {
+	if (contextTokens.length === 0) return questions;
+
+	const fuse = new Fuse(questions, {
+		keys: [{ name: "tags", weight: 1 }],
+		threshold: 0.4,
+		includeScore: true,
+		ignoreLocation: true,
+		isCaseSensitive: false,
+	});
+
+	const scores = new Map<string, number>();
+
+	for (const token of contextTokens) {
+		const res = fuse.search(token);
+		for (const r of res) {
+			const prev = scores.get(r.item.id) ?? 0;
+			const tokenScore = Math.round((1 - (r.score ?? 1)) * 100);
+			scores.set(r.item.id, prev + tokenScore);
+		}
+	}
+
+	return [...questions].sort((a, b) => (scores.get(b.id) ?? 0) - (scores.get(a.id) ?? 0));
 }
