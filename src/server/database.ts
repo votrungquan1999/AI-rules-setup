@@ -1,5 +1,4 @@
 import { type Db, MongoClient } from "mongodb";
-import { RULES_DATA_COLLECTION_NAME } from "./types";
 
 /**
  * MongoDB connection configuration
@@ -48,24 +47,7 @@ export async function getDatabase(): Promise<Db> {
 	const mongoClient = await getClient();
 	database = mongoClient.db(MONGODB_DB_NAME);
 
-	// Create indexes for optimal performance
-	await createIndexes(database);
-
 	return database;
-}
-
-/**
- * Creates necessary indexes for the rules_cache collection
- * @param db - MongoDB database instance
- */
-async function createIndexes(db: Db): Promise<void> {
-	const collection = db.collection(RULES_DATA_COLLECTION_NAME);
-
-	// Compound unique index on agent and category
-	await collection.createIndex({ agent: 1, category: 1 }, { unique: true, name: "agent_category_unique" });
-
-	// Index on lastFetched for future cleanup jobs
-	await collection.createIndex({ lastFetched: 1 }, { name: "lastFetched_index" });
 }
 
 /**
