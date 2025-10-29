@@ -157,10 +157,6 @@ Before exploring solutions, we need to clarify several aspects:
    - [x] Good UX for the web UI - **ANSWERED: UX first**
    - [x] Scalability to large rule sets - **ANSWERED: Second priority**
 
-7. **Are there specific technologies/frameworks that are the highest priority to support?**
-
-   **ANSWERED: Next.js ecosystem - Next.js, Tailwind, shadcn/ui, and adjacent technologies**
-
 ---
 
 **Continue reading:** [Core Concept Exploration →](./question-based-filtering.md)
