@@ -99,3 +99,43 @@ export interface GitHubError {
 }
 
 export const RULES_DATA_COLLECTION_NAME = "rules_data";
+
+/**
+ * Question document type for individual MongoDB documents
+ * Each question is stored as a separate document
+ */
+export interface QuestionDocument {
+	/** Unique identifier in kebab-case */
+	id: string;
+	/** The question text */
+	text: string;
+	/** Question type */
+	type: "yes-no" | "choice" | "open-ended";
+	/** Array of tags for fuzzy search matching */
+	tags: string[];
+	/** Keywords for yes-no questions (optional) */
+	keywords?: string[];
+	/** Options for choice questions (optional) */
+	options?: Array<{
+		text: string;
+		keywords: string[];
+	}>;
+	/** Source file where question was originally defined */
+	sourceFile: string;
+	/** When this question was cached from GitHub */
+	lastFetched: Date;
+	/** When this document was created */
+	createdAt: Date;
+	/** When this document was last updated */
+	updatedAt: Date;
+}
+
+/**
+ * Questions response type for server component data
+ * Contains all questions fetched from database
+ */
+export interface QuestionsResponse {
+	questions: QuestionDocument[];
+}
+
+export const QUESTIONS_COLLECTION_NAME = "questions";
