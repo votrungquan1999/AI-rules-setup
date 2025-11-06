@@ -22,6 +22,7 @@ For each task, Cursor MUST double-check:
   - "Am I correct?"
   - "Which rules apply here?"
   - "Did I miss any relevant rules?"
+- Apply the multi-shot method of prompt engineering: After editing around 5 files, should ask the user to review if the current direction is correct, then continue with the next 5 files. This iterative feedback approach helps ensure the AI stays aligned with user expectations and corrects course early if needed.
 
 ## Scope Management
 

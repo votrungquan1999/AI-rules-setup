@@ -1185,6 +1185,8 @@ export async function getAllProducts(): Promise<ProductDocument[]> {
   - "Which rules apply here?"
   - "Did I miss any relevant rules?"
 
+- Apply the multi-shot method of prompt engineering: After editing around 5 files, should ask the user to review if the current direction is correct, then continue with the next 5 files. This iterative feedback approach helps ensure the AI stays aligned with user expectations and corrects course early if needed.
+
 - NEVER implement unused/future features not explicitly requested by the user.
 - MUST ask 1-2 clarifying questions before implementing (or more if user explanation >100 characters).
 - Focus on what exists in the system currently, not what could be extended unless explicitly requested by the user.

@@ -25,7 +25,6 @@ A command-line tool that helps developers pull curated AI agent rules from a cen
 
 - for each cursor rule file, must strictly be less than 200 lines of code. Preferably around 150 lines of code.
 - should use the root/rules.md as master rule file and should follow it in all user requests.
-- After editing around 5 files, should ask the user to review if the current direction is correct, then continue with the next 5 files.
 
 ## Testing Rules
 
