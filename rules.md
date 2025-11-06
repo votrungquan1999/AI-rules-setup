@@ -1173,6 +1173,7 @@ export async function getAllProducts(): Promise<ProductDocument[]> {
 
 ## 8. Meta Rules
 
+- ALWAYS check all applicable rules before making any changes.
 - ALWAYS explain which rules were applied in the output.
 - MUST keep files under **300 lines** for AI context management.
 - NEVER require running/building the server to validate output.
@@ -1196,5 +1197,10 @@ export async function getAllProducts(): Promise<ProductDocument[]> {
 
 - NEVER use try-catch blocks defensively around every operation.
 - ONLY place try-catch blocks at intentional error boundaries where you want to catch all errors from lower-level code.
+
+### 8.2 Planning Mode
+
+- When in planning mode and a `plan.md` file has already been generated, ALWAYS create a new file for any plan changes requested by the user.
+- NEVER modify the existing `plan.md` file when the user requests changes to the plan.
 
 ---

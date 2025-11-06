@@ -19,9 +19,12 @@
     "validation",
     "conventions",
     "standards",
-    "rule-application"
+    "rule-application",
+    "planning-mode",
+    "planning",
+    "plan.md"
   ],
-  "description": "Meta rules for applying AI agent rules covering file size limits and line count restrictions, scope management and complexity control, error handling patterns, rule application guidelines, code quality standards, validation requirements, and change management strategies for maintainable codebases",
+  "description": "Meta rules for applying AI agent rules covering file size limits and line count restrictions, scope management and complexity control, error handling patterns, rule application guidelines, code quality standards, validation requirements, change management strategies for maintainable codebases, and planning mode behavior for plan file generation",
   "version": "1.0.0",
   "lastUpdated": "2025-01-17T00:00:00Z",
   "files": [
