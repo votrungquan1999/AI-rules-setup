@@ -54,7 +54,7 @@
     "lucide-react": "^0.546.0",
     "mongodb": "^6.20.0",
     "nanoid": "^5.1.6",
-    "next": "^16.0.0-canary.10",
+    "next": "16.1.0-canary.19",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "stopword": "^3.1.5",
