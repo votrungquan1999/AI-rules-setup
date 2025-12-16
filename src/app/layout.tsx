@@ -1,14 +1,27 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { StructuredData } from "src/components/structured-data";
+import { siteMetadata } from "src/lib/metadata";
 import "./globals.css";
 
-export const metadata: Metadata = {
-	title: "AI Rules API",
-	description: "API server for fetching and caching AI agent rules from GitHub",
+export const metadata: Metadata = siteMetadata;
+
+export const viewport: Viewport = {
+	width: "device-width",
+	initialScale: 1,
+	maximumScale: 5,
+	themeColor: [
+		{ media: "(prefers-color-scheme: light)", color: "#ffffff" },
+		{ media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+	],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<html lang="en">
+			<head>
+				<link rel="canonical" href={siteMetadata.alternates?.canonical as string} />
+				<StructuredData />
+			</head>
 			<body>{children}</body>
 		</html>
 	);
