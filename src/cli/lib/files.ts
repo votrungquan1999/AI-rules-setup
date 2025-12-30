@@ -59,7 +59,28 @@ export function applyNamingConvention(agent: AIAgent, filename: string): string 
 		case AIAgent.CODY:
 			return `.cody/rules/${filename}`;
 
+		case AIAgent.CLAUDE_CODE:
+			return `.claude/rules/${filename}`;
+
 		default:
 			throw new Error(`Unsupported AI agent: ${agent}`);
+	}
+}
+
+/**
+ * Applies skill-specific naming conventions for skill files
+ * Converts flat file structure (skill-name.md) to directory structure (skill-name/SKILL.md)
+ * @param agent - AI agent type
+ * @param skillName - Name of the skill (without .md extension)
+ * @returns Target file path for the skill
+ */
+export function applySkillNamingConvention(agent: AIAgent, skillName: string): string {
+	switch (agent) {
+		case AIAgent.CLAUDE_CODE:
+			// Convert skill-name to skill-name/SKILL.md
+			return `.claude/skills/${skillName}/SKILL.md`;
+
+		default:
+			throw new Error(`Skills are not supported for agent: ${agent}`);
 	}
 }

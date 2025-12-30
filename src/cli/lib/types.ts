@@ -59,6 +59,7 @@ export enum AIAgent {
 	AIDER = "aider",
 	CONTINUE = "continue",
 	CODY = "cody",
+	CLAUDE_CODE = "claude-code",
 }
 
 /**

@@ -1,5 +1,5 @@
 import { findAllStoredRules, storeRulesData } from "../../../server/rules-repository";
-import type { GitHubError, GitHubFile, Manifest, RulesData, RulesDataToStore } from "../../../server/types";
+import type { GitHubError, GitHubFile, Manifest, RuleAgent, RulesData, RulesDataToStore } from "../../../server/types";
 
 /**
  * GitHub API configuration
@@ -118,6 +118,37 @@ async function fetchRuleFile(agent: string, category: string, filename: string):
 }
 
 /**
+ * Discovers all available skills for Claude Code from skills/claude-code/
+ * @returns Array of skill objects with name and content
+ */
+async function discoverSkills(): Promise<Array<{ name: string; content: string }>> {
+	const entries = await fetchDirectoryContents("skills/claude-code");
+
+	// Filter for .md files only (exclude README.md)
+	const skillFiles = entries.filter(
+		(entry) => entry.type === "file" && entry.name.endsWith(".md") && entry.name !== "README.md",
+	);
+
+	const skills: Array<{ name: string; content: string }> = [];
+
+	for (const file of skillFiles) {
+		try {
+			const content = await fetchFileContent(`skills/claude-code/${file.name}`);
+			// Extract skill name from filename (remove .md extension)
+			const skillName = file.name.replace(/\.md$/, "");
+			skills.push({
+				name: skillName,
+				content,
+			});
+		} catch (error) {
+			console.warn(`Failed to fetch skill file ${file.name}:`, error);
+		}
+	}
+
+	return skills;
+}
+
+/**
  * Fetches all rule files for a specific agent and category
  * @param agent - AI agent name
  * @param category - Category name
@@ -177,28 +208,29 @@ async function fetchFromGitHubAndCache(): Promise<RulesData> {
 	// Discover all agents
 	const agents = await discoverAgents();
 
-	for (const agent of agents) {
-		result.agents[agent] = { categories: {} };
+	for (const agentName of agents) {
+		result.agents[agentName] = { categories: {} };
+		const agent: RuleAgent = { categories: {} };
 
 		// Discover categories for this agent
-		const categories = await discoverCategories(agent);
+		const categories = await discoverCategories(agentName);
 
 		for (const category of categories) {
 			// Fetch manifest for this category
-			const manifest = await fetchManifest(agent, category);
+			const manifest = await fetchManifest(agentName, category);
 
 			if (manifest) {
 				// Fetch all rule files for this category
-				const files = await fetchAllRuleFiles(agent, category, manifest);
+				const files = await fetchAllRuleFiles(agentName, category, manifest);
 
-				result.agents[agent].categories[category] = {
+				agent.categories[category] = {
 					manifest,
 					files,
 				};
 
 				// Store in MongoDB for future requests
 				const dataToStore: RulesDataToStore = {
-					agent,
+					agent: agentName,
 					category,
 					manifest,
 					files,
@@ -206,6 +238,16 @@ async function fetchFromGitHubAndCache(): Promise<RulesData> {
 				};
 				await storeRulesData(dataToStore);
 			}
+		}
+
+		result.agents[agentName] = agent;
+
+		// For Claude Code, also fetch skills
+		if (agentName === "claude-code") {
+			console.log("Fetching skills for Claude Code...");
+			const skills = await discoverSkills();
+			result.agents[agentName].skills = skills;
+			console.log(`Fetched ${skills.length} skills for Claude Code`);
 		}
 	}
 

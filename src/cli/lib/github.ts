@@ -16,6 +16,11 @@ interface RulesResponse {
 					}>;
 				};
 			};
+			/** Optional skills (currently only for Claude Code) */
+			skills?: Array<{
+				name: string;
+				content: string;
+			}>;
 		};
 	};
 }
@@ -118,5 +123,26 @@ export async function fetchRuleFile(agent: string, category: string, filename: s
 	} catch (error) {
 		console.error(`Error fetching rule file ${agent}/${category}/${filename}:`, error);
 		return null;
+	}
+}
+
+/**
+ * Fetches all skills for a specific agent from the API
+ * @param agent - AI agent name (e.g., 'claude-code')
+ * @returns Array of skill objects with name and content, or empty array if no skills
+ */
+export async function fetchSkills(agent: string): Promise<Array<{ name: string; content: string }>> {
+	try {
+		const data = await fetchRulesData();
+		const agentData = data.agents[agent];
+
+		if (!agentData || !agentData.skills) {
+			return [];
+		}
+
+		return agentData.skills;
+	} catch (error) {
+		console.error(`Error fetching skills for agent ${agent}:`, error);
+		return [];
 	}
 }

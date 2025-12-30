@@ -1,8 +1,8 @@
 import { join } from "node:path";
 import chalk from "chalk";
 import { addCategory, loadConfig, saveConfig } from "../lib/config";
-import { applyNamingConvention, detectConflict, writeRuleFile } from "../lib/files";
-import { fetchAvailableAgents, fetchManifests, fetchRuleFile } from "../lib/github";
+import { applyNamingConvention, applySkillNamingConvention, detectConflict, writeRuleFile } from "../lib/files";
+import { fetchAvailableAgents, fetchManifests, fetchRuleFile, fetchSkills } from "../lib/github";
 import { promptAgentSelection, promptCategorySelection, promptConflictResolution } from "../lib/prompts";
 import type { AIAgent, Config, InitOptions } from "../lib/types";
 
@@ -151,6 +151,55 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
 			Object.assign(config, updatedConfig);
 
 			installedRules.push(manifest.id);
+		}
+
+		// For Claude Code, also install skills
+		if (selectedAgent === "claude-code") {
+			console.log(chalk.blue("\n🎯 Installing Claude Code skills..."));
+			const skills = await fetchSkills(selectedAgent);
+
+			if (skills.length > 0) {
+				let installedSkillsCount = 0;
+
+				for (const skill of skills) {
+					try {
+						// Apply skill naming convention
+						const targetPath = applySkillNamingConvention(selectedAgent as AIAgent, skill.name);
+
+						// Check for conflicts
+						const conflict = await detectConflict(join(process.cwd(), targetPath));
+						if (conflict.hasConflict) {
+							// Handle conflict based on strategy
+							if (overwriteStrategy === "skip") {
+								console.log(chalk.yellow(`⏭️  Skipped (file exists): ${targetPath}`));
+								continue;
+							}
+
+							if (overwriteStrategy === "force") {
+								console.log(chalk.yellow(`⚠️  Overwriting: ${targetPath}`));
+							} else {
+								// prompt strategy
+								const shouldOverwrite = await promptConflictResolution(targetPath);
+								if (!shouldOverwrite) {
+									console.log(chalk.yellow(`⏭️  Skipped: ${targetPath}`));
+									continue;
+								}
+							}
+						}
+
+						// Write skill file
+						await writeRuleFile(skill.content, join(process.cwd(), targetPath));
+						console.log(chalk.green(`✓ Installed skill: ${skill.name}`));
+						installedSkillsCount++;
+					} catch (error) {
+						console.log(chalk.red(`❌ Error installing skill ${skill.name}: ${error}`));
+					}
+				}
+
+				console.log(chalk.green(`\n🎉 Successfully installed ${installedSkillsCount} skills`));
+			} else {
+				console.log(chalk.yellow("No skills found for Claude Code"));
+			}
 		}
 
 		// Save updated config

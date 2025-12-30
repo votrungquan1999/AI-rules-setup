@@ -65,12 +65,22 @@ export interface RuleCategory {
 }
 
 /**
- * Represents an agent with all its categories
+ * Represents a single skill file
+ */
+export interface SkillFile {
+	name: string;
+	content: string;
+}
+
+/**
+ * Represents an agent with all its categories and optional skills
  */
 export interface RuleAgent {
 	categories: {
 		[categoryName: string]: RuleCategory;
 	};
+	/** Optional skills (currently only for Claude Code) */
+	skills?: SkillFile[];
 }
 
 /**
