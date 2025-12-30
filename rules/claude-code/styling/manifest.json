@@ -1,0 +1,60 @@
+{
+  "id": "styling-tailwind",
+  "category": "styling",
+  "tags": [
+    "styling",
+    "css",
+    "design",
+    "ui",
+    "frontend",
+    "tailwind",
+    "tailwindcss",
+    "tw",
+    "utility-first",
+    "utility-classes",
+    "shadcn",
+    "shadcn-ui",
+    "component-library",
+    "radix",
+    "radix-ui",
+    "responsive",
+    "responsive-design",
+    "mobile-first",
+    "breakpoints",
+    "grid",
+    "grid-layout",
+    "flexbox",
+    "layout",
+    "design-tokens",
+    "tokens",
+    "theme",
+    "theming",
+    "dark-mode",
+    "patterns",
+    "best-practices",
+    "conventions",
+    "claude-code"
+  ],
+  "description": "Tailwind CSS best practices for Claude Code covering utility-first styling, size utilities, grid-based layouts, responsive design patterns with mobile-first approach, tokenized color system, shadcn/ui component library integration with Radix UI primitives, theming and dark mode support, breakpoint management, and design system conventions for modern frontend development",
+  "version": "1.0.0",
+  "lastUpdated": "2025-12-24T00:00:00Z",
+  "files": [
+    {
+      "path": "tailwind-basics.md",
+      "description": "Core Tailwind CSS usage patterns and utilities",
+      "required": true
+    },
+    {
+      "path": "layout-patterns.md",
+      "description": "Grid-based list views and responsive layout patterns",
+      "required": true
+    },
+    {
+      "path": "component-library.md",
+      "description": "shadcn/ui usage and component library best practices",
+      "required": true
+    }
+  ],
+  "dependencies": [],
+  "conflicts": ["styled-components", "emotion", "css-modules"]
+}

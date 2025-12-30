@@ -1,0 +1,41 @@
+{
+  "id": "testing-pillars",
+  "category": "testing",
+  "tags": [
+    "testing",
+    "test",
+    "unit-testing",
+    "integration-testing",
+    "e2e-testing",
+    "test-quality",
+    "reliability",
+    "validity",
+    "sensitivity",
+    "resilience",
+    "flaky-tests",
+    "test-assertions",
+    "test-patterns",
+    "vitest",
+    "jest",
+    "pytest",
+    "testing-library",
+    "react-testing",
+    "test-best-practices",
+    "test-driven-development",
+    "tdd",
+    "claude-code",
+    "multi-language"
+  ],
+  "description": "Comprehensive testing guidelines for Claude Code based on the 4 Pillars of Good Tests: Reliability (consistency), Validity (accuracy), Sensitivity (responsiveness), and Resilience (robustness). Ensures tests are deterministic, actually verify behavior, detect bugs, and survive refactoring. Applies to all languages including TypeScript, Python, Go, and more",
+  "version": "1.0.0",
+  "lastUpdated": "2025-12-24T00:00:00Z",
+  "files": [
+    {
+      "path": "testing-pillars.md",
+      "description": "The 4 Pillars of Good Tests framework with examples",
+      "required": true
+    }
+  ],
+  "dependencies": [],
+  "conflicts": []
+}

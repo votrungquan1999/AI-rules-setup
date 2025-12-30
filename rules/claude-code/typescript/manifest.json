@@ -1,0 +1,49 @@
+{
+  "id": "typescript-conventions",
+  "category": "typescript",
+  "tags": [
+    "typescript",
+    "ts",
+    "language",
+    "type-system",
+    "types",
+    "typing",
+    "conventions",
+    "best-practices",
+    "strict-mode",
+    "strict",
+    "interfaces",
+    "interface",
+    "type-aliases",
+    "jsdoc",
+    "documentation",
+    "comments",
+    "type-safety",
+    "safety",
+    "imports",
+    "exports",
+    "imports-exports",
+    "enums",
+    "enum",
+    "hoisting",
+    "organization",
+    "claude-code"
+  ],
+  "description": "TypeScript strict conventions for Claude Code covering type and interface hoisting, interface vs type usage patterns, JSDoc documentation requirements for functions, enum usage over union types, import and export organization patterns, type separation for different purposes, inline import restrictions, and type safety best practices for strongly-typed codebases",
+  "version": "1.0.0",
+  "lastUpdated": "2025-12-24T00:00:00Z",
+  "files": [
+    {
+      "path": "typescript-conventions.md",
+      "description": "Core TypeScript conventions for interfaces, JSDoc, and enums",
+      "required": true
+    },
+    {
+      "path": "typescript-imports-exports.md",
+      "description": "Import and export patterns and organization rules",
+      "required": true
+    }
+  ],
+  "dependencies": [],
+  "conflicts": []
+}

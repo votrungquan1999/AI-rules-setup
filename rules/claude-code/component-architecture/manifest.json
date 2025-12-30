@@ -1,0 +1,43 @@
+{
+  "id": "component-architecture",
+  "category": "component-architecture",
+  "tags": [
+    "component-architecture",
+    "components",
+    "architecture",
+    "file-structure",
+    "patterns",
+    "react",
+    "nextjs",
+    "organization",
+    "state-management",
+    "state",
+    "provider-patterns",
+    "context",
+    "hooks",
+    "best-practices",
+    "conventions",
+    "naming",
+    "directories",
+    "server-components",
+    "client-components",
+    "claude-code"
+  ],
+  "description": "Component architecture patterns for Claude Code covering file structure organization with server/client separation, state management patterns with context and hooks, provider patterns for data flow, hook transformation strategies, directory organization conventions, and naming patterns for maintainable React component architectures",
+  "version": "1.0.0",
+  "lastUpdated": "2025-12-24T00:00:00Z",
+  "files": [
+    {
+      "path": "file-structure-patterns.md",
+      "description": "File structure patterns and directory organization",
+      "required": true
+    },
+    {
+      "path": "state-management-patterns.md",
+      "description": "State management patterns and context usage",
+      "required": true
+    }
+  ],
+  "dependencies": [],
+  "conflicts": []
+}

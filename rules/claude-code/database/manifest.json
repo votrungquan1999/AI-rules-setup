@@ -1,0 +1,48 @@
+{
+  "id": "database-patterns",
+  "category": "database",
+  "tags": [
+    "database",
+    "db",
+    "patterns",
+    "mongodb",
+    "mongo",
+    "nosql",
+    "sql",
+    "postgresql",
+    "mysql",
+    "document-db",
+    "relational-db",
+    "collections",
+    "typescript",
+    "python",
+    "go",
+    "document-typing",
+    "typing",
+    "type-safety",
+    "data-conversion",
+    "data-mapping",
+    "data-access",
+    "odm",
+    "orm",
+    "schemas",
+    "document-suffix",
+    "client-interfaces",
+    "best-practices",
+    "conventions",
+    "claude-code",
+    "multi-language"
+  ],
+  "description": "Database access patterns for Claude Code covering typed collections, document typing conventions with Document suffix pattern, type conversion between database documents and client interfaces, data mapping strategies, collection typing, schema organization, and type-safe database operations for NoSQL and SQL databases across multiple languages",
+  "version": "1.0.0",
+  "lastUpdated": "2025-12-24T00:00:00Z",
+  "files": [
+    {
+      "path": "database-patterns.md",
+      "description": "Database access patterns with typed collections and data conversion",
+      "required": true
+    }
+  ],
+  "dependencies": [],
+  "conflicts": []
+}

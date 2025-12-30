@@ -1,0 +1,44 @@
+{
+  "id": "url-state-management",
+  "category": "url-state",
+  "tags": [
+    "state-management",
+    "state",
+    "url",
+    "url-state",
+    "patterns",
+    "nextjs",
+    "next",
+    "nextjs-13",
+    "nextjs-14",
+    "nextjs-15",
+    "search-params",
+    "query-params",
+    "query-string",
+    "params",
+    "router",
+    "use-router",
+    "use-search-params",
+    "server-side",
+    "server-side-rendering",
+    "ssr",
+    "app-router",
+    "url-parameters",
+    "synchronization",
+    "best-practices",
+    "conventions",
+    "claude-code"
+  ],
+  "description": "URL state management patterns for Claude Code in Next.js applications covering server-side search parameter handling, URL parameter conversion and validation, query string synchronization with client state, router patterns with useRouter and useSearchParams, initial state from URLs, parameter naming conventions, and state persistence strategies for App Router",
+  "version": "1.0.0",
+  "lastUpdated": "2025-12-24T00:00:00Z",
+  "files": [
+    {
+      "path": "url-state-management.md",
+      "description": "URL state management patterns and server-side parameter handling",
+      "required": true
+    }
+  ],
+  "dependencies": [],
+  "conflicts": []
+}

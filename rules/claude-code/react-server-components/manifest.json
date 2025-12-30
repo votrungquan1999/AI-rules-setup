@@ -1,0 +1,57 @@
+{
+  "id": "react-server-components",
+  "category": "react-server-components",
+  "tags": [
+    "react",
+    "react-18",
+    "react-19",
+    "patterns",
+    "server-components",
+    "rsc",
+    "server-side",
+    "ssr",
+    "client-components",
+    "use-client",
+    "client-server-separation",
+    "server-client",
+    "nextjs",
+    "next",
+    "nextjs-13",
+    "nextjs-14",
+    "nextjs-15",
+    "app-router",
+    "composition",
+    "composition-pattern",
+    "data-fetching",
+    "async",
+    "async-components",
+    "streaming",
+    "suspense",
+    "performance",
+    "best-practices",
+    "conventions",
+    "claude-code"
+  ],
+  "description": "React Server Components best practices for Claude Code in Next.js App Router covering server vs client component usage patterns, composition strategies, data fetching in server components, async component patterns, streaming and suspense, client-server boundary separation, performance optimization, component architecture for Next.js 13+ with TypeScript support",
+  "version": "1.0.0",
+  "lastUpdated": "2025-12-24T00:00:00Z",
+  "files": [
+    {
+      "path": "server-components-rules.md",
+      "description": "Core Server Components rules and usage patterns",
+      "required": true
+    },
+    {
+      "path": "composition-patterns.md",
+      "description": "Component composition patterns and examples",
+      "required": true
+    },
+    {
+      "path": "client-server-separation.md",
+      "description": "Client/server component separation patterns and best practices",
+      "required": true
+    }
+  ],
+  "dependencies": [],
+  "conflicts": ["react-class-components"]
+}
