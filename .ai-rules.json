@@ -10,6 +10,7 @@
     "styling-tailwind",
     "typescript-conventions",
     "url-state-management",
-    "brainstorming-patterns"
+    "brainstorming-patterns",
+    "testing-pillars"
   ]
 }
