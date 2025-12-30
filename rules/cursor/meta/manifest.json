@@ -22,15 +22,28 @@
     "rule-application",
     "planning-mode",
     "planning",
-    "plan.md"
+    "plan.md",
+    "feature-development",
+    "workflow",
+    "implementation",
+    "incremental",
+    "test-driven",
+    "tdd",
+    "progress-tracking",
+    "acceptance-criteria"
   ],
-  "description": "Meta rules for applying AI agent rules covering file size limits and line count restrictions, scope management and complexity control, error handling patterns, rule application guidelines, code quality standards, validation requirements, change management strategies for maintainable codebases, and planning mode behavior for plan file generation",
+  "description": "Meta rules for applying AI agent rules covering file size limits and line count restrictions, scope management and complexity control, error handling patterns, rule application guidelines, code quality standards, validation requirements, change management strategies for maintainable codebases, planning mode behavior for plan file generation, and feature development workflow with incremental implementation and progress tracking",
   "version": "1.0.0",
-  "lastUpdated": "2025-01-17T00:00:00Z",
+  "lastUpdated": "2025-12-24T00:00:00Z",
   "files": [
     {
       "path": "meta-rules.mdc",
       "description": "Meta rules for rule application and code quality",
+      "required": true
+    },
+    {
+      "path": "feature-development-guide.mdc",
+      "description": "Step-by-step feature development workflow with planning, incremental implementation, test-driven approach, and progress tracking",
       "required": true
     }
   ],
