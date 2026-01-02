@@ -143,7 +143,7 @@ export async function callOllama(
 	}
 
 	try {
-		const data: OllamaResponse = await response.json();
+		const data = (await response.json()) as OllamaResponse;
 		return data.response;
 	} catch (error) {
 		throw new OllamaError(`Failed to parse JSON response: ${error instanceof Error ? error.message : "Unknown error"}`);
