@@ -1,12 +1,10 @@
 name: Publish CLI to npm
 
-# Trigger only when cli-package/package.json version changes on main branch
+# Trigger on every push to main branch
 on:
   push:
     branches:
       - main
-    paths:
-      - "cli-package/package.json"
   workflow_dispatch: # Allow manual trigger
 
 # Required permissions
@@ -48,12 +46,24 @@ jobs:
           PUBLISHED_VERSION=$(npm view @quanvo99/ai-rules version 2>/dev/null || echo "0.0.0")
           echo "Published version: $PUBLISHED_VERSION"
 
-          # Compare versions
-          if [ "$PACKAGE_VERSION" != "$PUBLISHED_VERSION" ]; then
-            echo "✅ Version differs from published - will publish"
+          # Compare versions using semver (node -p returns 1 if greater, 0 if equal, -1 if less)
+          COMPARISON=$(node -p "
+            const semver = (v) => v.split('.').map(Number);
+            const [a1, a2, a3] = semver('$PACKAGE_VERSION');
+            const [b1, b2, b3] = semver('$PUBLISHED_VERSION');
+            if (a1 > b1) process.exit(1);
+            if (a1 < b1) process.exit(0);
+            if (a2 > b2) process.exit(1);
+            if (a2 < b2) process.exit(0);
+            if (a3 > b3) process.exit(1);
+            process.exit(0);
+          " && echo "equal_or_less" || echo "greater")
+
+          if [ "$COMPARISON" = "greater" ]; then
+            echo "✅ Package version is greater than published - will publish"
             echo "should_publish=true" >> $GITHUB_OUTPUT
           else
-            echo "⏭️  Version matches published - skipping publish"
+            echo "⏭️  Package version is not greater than published - skipping publish"
             echo "should_publish=false" >> $GITHUB_OUTPUT
           fi
 
