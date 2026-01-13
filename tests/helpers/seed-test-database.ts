@@ -1,107 +1,153 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { Manifest } from "../../src/server/types";
-import { cleanDatabase, connectToTestDB, seedDatabase } from "../helpers/database-utils";
+import { type Db, MongoClient } from "mongodb";
+import type {
+	Manifest,
+	RulesDataToStore,
+	SkillFile,
+	StoredRulesDocument,
+	StoredSkillsDocument,
+} from "../../src/server/types";
+import { RULES_DATA_COLLECTION_NAME, SKILLS_COLLECTION_NAME } from "../../src/server/types";
+import { createStoredRulesDocument } from "../../src/server/utils";
 
-interface GitHubFixtures {
-	directoryContents: Record<string, unknown[]>;
-	manifests: Record<string, unknown>;
-	fileContents: Record<string, string>;
+/**
+ * Simple test fixture structure
+ */
+interface TestFixtureCategory {
+	name: string;
+	manifest: Manifest;
+	files: Array<{ filename: string; content: string }>;
+}
+
+interface TestFixtureAgent {
+	name: string;
+	categories: TestFixtureCategory[];
+	skills?: Array<{ name: string; content: string }>;
+}
+
+interface TestFixtures {
+	agents: TestFixtureAgent[];
 }
 
 /**
- * Load GitHub API fixtures from the recorded responses file
+ * Load test fixtures from the simple test data file
  */
-async function loadFixtures(): Promise<GitHubFixtures> {
+async function loadFixtures(): Promise<TestFixtures> {
 	const testDataPath =
-		process.env.AI_RULES_TEST_DATA_PATH || join(process.cwd(), "tests", "fixtures", "github-responses.json");
+		process.env.AI_RULES_TEST_DATA_PATH || join(process.cwd(), "tests", "fixtures", "test-data.json");
 
 	try {
 		const content = await readFile(testDataPath, "utf-8");
-		return JSON.parse(content) as GitHubFixtures;
+		return JSON.parse(content) as TestFixtures;
 	} catch (error) {
-		throw new Error(`Failed to load GitHub fixtures: ${error}`);
+		throw new Error(`Failed to load test fixtures: ${error}`);
 	}
 }
 
 /**
- * Seed the test database with all data from GitHub fixtures
+ * Connect directly to the test database using the database name from environment
+ * Does not use the production getDatabase() function
  */
-export async function seedTestDatabase(): Promise<void> {
-	console.log("🌱 Seeding test database with GitHub fixtures...");
-	try {
-		// Connect to test database
-		await connectToTestDB();
-		// Clean existing data
-		await cleanDatabase();
-		console.log("✅ Cleaned existing data");
-		// Load fixtures
-		const fixtures = await loadFixtures();
-		console.log("✅ Loaded fixtures");
-		// Get agents from fixtures
-		const agents = (fixtures.directoryContents.rules || []) as Array<{ name: string; type: string }>;
-		console.log(
-			`📁 Found ${agents.length} agents:`,
-			agents.map((a) => a.name),
-		);
+async function getTestDatabase(): Promise<Db> {
+	const dbName = process.env.MONGODB_DB_NAME || "ai-rules-cache-test";
+	const mongoUri = process.env.MONGODB_URI || "mongodb://localhost:27017/ai-rules-cache";
 
-		let totalSeeded = 0;
+	const client = new MongoClient(mongoUri, {
+		maxPoolSize: 10,
+		serverSelectionTimeoutMS: 5000,
+		socketTimeoutMS: 45000,
+	});
 
-		// Process each agent
-		for (const agent of agents) {
-			if (agent.type !== "dir") continue;
+	await client.connect();
+	return client.db(dbName);
+}
 
-			const agentName = agent.name;
-			const categories = (fixtures.directoryContents[`rules/${agentName}`] || []) as Array<{
-				name: string;
-				type: string;
-			}>;
-			console.log(`📁 Processing agent ${agentName} with ${categories.length} categories`);
+/**
+ * Clean the test database by dropping collections
+ */
+async function cleanTestDatabase(db: Db): Promise<void> {
+	const collections = [RULES_DATA_COLLECTION_NAME, SKILLS_COLLECTION_NAME];
 
-			// Process each category
-			for (const category of categories) {
-				if (category.type !== "dir") continue;
-
-				const categoryName = category.name;
-				const manifestKey = `${agentName}/${categoryName}`;
-				const manifest = fixtures.manifests[manifestKey] as Manifest | undefined;
-
-				if (!manifest) {
-					console.log(`⚠️  No manifest found for ${manifestKey}`);
-					continue;
-				}
-
-				// Collect files for this category
-				const files: Array<{ filename: string; content: string }> = [];
-				if (manifest.files && Array.isArray(manifest.files)) {
-					for (const file of manifest.files) {
-						const filePath = `rules/${agentName}/${categoryName}/${file.path}`;
-						const content = fixtures.fileContents[filePath];
-						if (content) {
-							// Extract filename from path (last segment)
-							const filename = file.path.split("/").pop() || file.path;
-							files.push({ filename, content });
-						}
-					}
-				}
-
-				// Seed this category
-				await seedDatabase({
-					agent: agentName,
-					category: categoryName,
-					manifest: manifest,
-					files: files,
-					githubCommitSha: "test-sha",
-				});
-
-				totalSeeded++;
-				console.log(`✅ Seeded ${manifestKey} (${files.length} files)`);
+	for (const collectionName of collections) {
+		try {
+			await db.collection(collectionName).drop();
+		} catch (error) {
+			// Collection might not exist, which is fine for cleaning
+			if (error instanceof Error && !error.message.includes("ns not found")) {
+				throw error;
 			}
 		}
+	}
+}
 
-		console.log(`🎉 Successfully seeded ${totalSeeded} categories`);
+/**
+ * Store rules data directly in the test database
+ */
+async function storeRulesInTestDatabase(db: Db, dataToStore: RulesDataToStore): Promise<void> {
+	const collection = db.collection<StoredRulesDocument>(RULES_DATA_COLLECTION_NAME);
+	const document = createStoredRulesDocument(dataToStore);
+
+	await collection.replaceOne({ agent: dataToStore.agent, category: dataToStore.category }, document, {
+		upsert: true,
+	});
+}
+
+/**
+ * Store skills data directly in the test database
+ */
+async function storeSkillsInTestDatabase(db: Db, agent: string, skills: SkillFile[]): Promise<void> {
+	const collection = db.collection<StoredSkillsDocument>(SKILLS_COLLECTION_NAME);
+	const now = new Date();
+	const document: StoredSkillsDocument = {
+		agent,
+		skills,
+		githubCommitSha: "test-sha",
+		lastFetched: now,
+		createdAt: now,
+		updatedAt: now,
+	};
+
+	await collection.replaceOne({ agent }, document, { upsert: true });
+}
+
+/**
+ * Seed the test database with all data from test fixtures
+ * Connects directly to the test database using the database name from environment
+ */
+export async function seedTestDatabase(): Promise<void> {
+	const db = await getTestDatabase();
+
+	try {
+		// Clean existing data
+		await cleanTestDatabase(db);
+
+		// Load fixtures
+		const fixtures = await loadFixtures();
+
+		// Process each agent
+		for (const agent of fixtures.agents) {
+			const agentName = agent.name;
+
+			// Process each category
+			for (const category of agent.categories) {
+				// Seed this category directly in the test database
+				await storeRulesInTestDatabase(db, {
+					agent: agentName,
+					category: category.name,
+					manifest: category.manifest,
+					files: category.files,
+					githubCommitSha: "test-sha",
+				});
+			}
+
+			// Process skills if they exist
+			if (agent.skills && agent.skills.length > 0) {
+				await storeSkillsInTestDatabase(db, agentName, agent.skills);
+			}
+		}
 	} catch (error) {
 		console.error("❌ Failed to seed database:", error);
-		process.exit(1);
+		throw error;
 	}
 }
