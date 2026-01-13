@@ -14,6 +14,8 @@ export interface Manifest {
 	category: string;
 	tags: string[];
 	description: string;
+	/** When to use this rule category - guidance for ChatGPT prompt generation */
+	whenToUse: string;
 	version?: string;
 	lastUpdated?: string;
 	files: Array<{
@@ -111,6 +113,19 @@ export interface GitHubError {
 export const RULES_DATA_COLLECTION_NAME = "rules_data";
 
 /**
+ * Database document type for stored skills
+ * Follows the database patterns with Document suffix
+ */
+export interface StoredSkillsDocument {
+	agent: string;
+	skills: SkillFile[];
+	githubCommitSha: string;
+	lastFetched: Date;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+/**
  * Question document type for individual MongoDB documents
  * Each question is stored as a separate document
  */
@@ -149,3 +164,4 @@ export interface QuestionsResponse {
 }
 
 export const QUESTIONS_COLLECTION_NAME = "questions";
+export const SKILLS_COLLECTION_NAME = "skills_data";
