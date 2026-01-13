@@ -2,18 +2,16 @@
 
 import { useId } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "src/components/ui/select";
+import { useAgents } from "src/lib/manifests.state";
 import { useClearSelections, useSelectedAgent, useSetAgent } from "src/lib/selection.state";
-
-interface AgentSelectorProps {
-	/** Available agent names */
-	agents: string[];
-}
 
 /**
  * Agent selection dropdown component using shadcn Select
  * Clears selections when agent changes
+ * Gets agents from ManifestsProvider context
  */
-export function AgentSelector({ agents }: AgentSelectorProps) {
+export function AgentSelector() {
+	const agents = useAgents();
 	const selectId = useId();
 	const selectedAgent = useSelectedAgent();
 	const setAgent = useSetAgent();
