@@ -5,16 +5,22 @@ import type { OverwriteStrategy } from "src/cli/lib/types";
  * @param agent - Selected AI agent (cursor, windsurf, etc.)
  * @param categories - Array of category IDs to install
  * @param overwriteStrategy - Conflict resolution strategy (prompt, force, skip)
+ * @param skills - Array of skill names to install (optional, currently only for Claude Code)
  * @returns Complete CLI command string ready to copy and run
  */
-export function generateCliCommand(agent: string, categories: string[], overwriteStrategy: OverwriteStrategy): string {
+export function generateCliCommand(
+	agent: string,
+	categories: string[],
+	overwriteStrategy: OverwriteStrategy,
+	skills: string[] = [],
+): string {
 	// Validate inputs
 	if (!agent || !agent.trim()) {
 		throw new Error("Agent is required");
 	}
 
-	if (!categories || categories.length === 0) {
-		throw new Error("At least one category must be selected");
+	if (categories.length === 0 && skills.length === 0) {
+		throw new Error("At least one category or skill must be selected");
 	}
 
 	const validStrategies: OverwriteStrategy[] = ["prompt", "force", "skip"];
@@ -24,11 +30,22 @@ export function generateCliCommand(agent: string, categories: string[], overwrit
 
 	// Sanitize inputs
 	const sanitizedAgent = sanitizeCliInput(agent);
-	const sanitizedCategories = categories.map((cat) => sanitizeCliInput(cat)).join(",");
+	const sanitizedCategories = categories.length > 0 ? categories.map((cat) => sanitizeCliInput(cat)).join(",") : "";
+	const sanitizedSkills = skills.length > 0 ? skills.map((skill) => sanitizeCliInput(skill)).join(",") : "";
 	const sanitizedStrategy = overwriteStrategy; // Already validated above
 
 	// Build command with npx prefix and @latest suffix
-	const command = `npx @quanvo99/ai-rules@latest init --agent ${sanitizedAgent} --categories ${sanitizedCategories} --overwrite-strategy ${sanitizedStrategy}`;
+	let command = `npx @quanvo99/ai-rules@latest init --agent ${sanitizedAgent}`;
+
+	if (sanitizedCategories) {
+		command += ` --categories ${sanitizedCategories}`;
+	}
+
+	if (sanitizedSkills) {
+		command += ` --skills ${sanitizedSkills}`;
+	}
+
+	command += ` --overwrite-strategy ${sanitizedStrategy}`;
 
 	return command;
 }
