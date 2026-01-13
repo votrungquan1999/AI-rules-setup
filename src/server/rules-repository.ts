@@ -1,5 +1,13 @@
 import { getDatabase } from "./database";
-import { RULES_DATA_COLLECTION_NAME, type RulesData, type RulesDataToStore, type StoredRulesDocument } from "./types";
+import {
+	RULES_DATA_COLLECTION_NAME,
+	type RulesData,
+	type RulesDataToStore,
+	SKILLS_COLLECTION_NAME,
+	type SkillFile,
+	type StoredRulesDocument,
+	type StoredSkillsDocument,
+} from "./types";
 import { createStoredRulesDocument, documentsToRulesData } from "./utils";
 
 /**
@@ -16,7 +24,20 @@ export async function findAllStoredRules(): Promise<RulesData | null> {
 		return null;
 	}
 
-	return documentsToRulesData(documents);
+	const rulesData = documentsToRulesData(documents);
+
+	// Also fetch skills for each agent that has skills stored
+	const skillsCollection = db.collection<StoredSkillsDocument>(SKILLS_COLLECTION_NAME);
+	const skillsDocuments = await skillsCollection.find({}).toArray();
+
+	for (const skillsDoc of skillsDocuments) {
+		const agent = rulesData.agents[skillsDoc.agent];
+		if (agent) {
+			agent.skills = skillsDoc.skills;
+		}
+	}
+
+	return rulesData;
 }
 
 /**
@@ -33,5 +54,36 @@ export async function storeRulesData(dataToStore: RulesDataToStore): Promise<boo
 	await collection.replaceOne({ agent: dataToStore.agent, category: dataToStore.category }, document, { upsert: true });
 
 	console.log(`Successfully stored rules for ${dataToStore.agent}/${dataToStore.category}`);
+	return true;
+}
+
+/**
+ * Stores skills data for a specific agent
+ * @param agent - Agent name (e.g., 'claude-code')
+ * @param skills - Array of skill files to store
+ * @param githubCommitSha - GitHub commit SHA (optional)
+ * @returns True if successful, false otherwise
+ */
+export async function storeSkillsData(
+	agent: string,
+	skills: SkillFile[],
+	githubCommitSha = "unknown",
+): Promise<boolean> {
+	const db = await getDatabase();
+	const collection = db.collection<StoredSkillsDocument>(SKILLS_COLLECTION_NAME);
+
+	const now = new Date();
+	const document: StoredSkillsDocument = {
+		agent,
+		skills,
+		githubCommitSha,
+		lastFetched: now,
+		createdAt: now,
+		updatedAt: now,
+	};
+
+	await collection.replaceOne({ agent }, document, { upsert: true });
+
+	console.log(`Successfully stored ${skills.length} skills for ${agent}`);
 	return true;
 }
