@@ -12,7 +12,7 @@ Each rule category in the AI Rules repository must include a `manifest.json` fil
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": ["id", "category", "tags", "description", "files"],
+  "required": ["id", "category", "tags", "description", "whenToUse", "files"],
   "properties": {
     "id": {
       "type": "string",
@@ -36,6 +36,12 @@ Each rule category in the AI Rules repository must include a `manifest.json` fil
     "description": {
       "type": "string",
       "description": "Human-readable description of the rules",
+      "minLength": 10,
+      "maxLength": 500
+    },
+    "whenToUse": {
+      "type": "string",
+      "description": "Guidance for when to use this rule category - used for ChatGPT prompt generation to help AI understand project context and select appropriate rules",
       "minLength": 10,
       "maxLength": 500
     },
@@ -179,6 +185,7 @@ Each rule category in the AI Rules repository must include a `manifest.json` fil
   "category": "typescript",
   "tags": ["language", "typed", "strict"],
   "description": "TypeScript strict mode rules with comprehensive type checking and best practices",
+  "whenToUse": "Use this when your project uses TypeScript and you want strict type checking, comprehensive type safety, and best practices for TypeScript development",
   "version": "1.2.0",
   "lastUpdated": "2024-01-15T10:30:00Z",
   "files": [
@@ -222,6 +229,7 @@ Each rule category in the AI Rules repository must include a `manifest.json` fil
   "category": "react",
   "tags": ["framework", "react", "server-components", "nextjs"],
   "description": "React Server Components best practices and patterns for Next.js App Router",
+  "whenToUse": "Use this when building React applications with Next.js App Router, using Server Components for data fetching, or when you need to separate server and client component concerns",
   "version": "2.1.0",
   "lastUpdated": "2024-01-20T14:15:00Z",
   "files": [
@@ -274,6 +282,7 @@ Each rule category in the AI Rules repository must include a `manifest.json` fil
   "category": "tailwind",
   "tags": ["styling", "css", "utility-first", "responsive"],
   "description": "Tailwind CSS best practices, component patterns, and responsive design guidelines",
+  "whenToUse": "Use this when your project uses Tailwind CSS for styling, follows utility-first CSS approach, or needs responsive design patterns and component styling guidelines",
   "version": "1.5.0",
   "lastUpdated": "2024-01-18T09:45:00Z",
   "files": [
@@ -345,6 +354,13 @@ Each rule category in the AI Rules repository must include a `manifest.json` fil
 - **Length**: 10-500 characters
 - **Description**: Human-readable description of the rules
 - **Example**: `"TypeScript strict mode rules with comprehensive type checking"`
+
+#### `whenToUse`
+
+- **Type**: String
+- **Length**: 10-500 characters
+- **Description**: Guidance for when to use this rule category - used for ChatGPT prompt generation to help AI understand project context and select appropriate rules
+- **Example**: `"Use this when your project uses TypeScript and you want strict type checking"`
 
 #### `files`
 
