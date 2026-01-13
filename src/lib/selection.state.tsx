@@ -12,6 +12,8 @@ interface SelectionState {
 	agent: string;
 	/** Set of selected rule IDs */
 	selectedIds: Set<string>;
+	/** Set of selected skill names */
+	selectedSkillNames: Set<string>;
 	/** Overwrite strategy for conflicts */
 	overwriteStrategy: OverwriteStrategy;
 }
@@ -22,6 +24,7 @@ interface SelectionState {
 type SelectionAction =
 	| { type: "SET_AGENT"; payload: string }
 	| { type: "TOGGLE_SELECTION"; payload: string }
+	| { type: "TOGGLE_SKILL_SELECTION"; payload: string }
 	| { type: "CLEAR_SELECTIONS" }
 	| { type: "SET_STRATEGY"; payload: OverwriteStrategy }
 	| { type: "SELECT_ALL"; payload: string[] };
@@ -32,6 +35,7 @@ type SelectionAction =
 const initialState: SelectionState = {
 	agent: "cursor",
 	selectedIds: new Set<string>(),
+	selectedSkillNames: new Set<string>(),
 	overwriteStrategy: "prompt",
 };
 
@@ -44,7 +48,12 @@ const initialState: SelectionState = {
 function selectionReducer(state: SelectionState, action: SelectionAction): SelectionState {
 	switch (action.type) {
 		case "SET_AGENT":
-			return { ...state, agent: action.payload };
+			return {
+				...state,
+				agent: action.payload,
+				selectedIds: new Set<string>(),
+				selectedSkillNames: new Set<string>(),
+			};
 
 		case "TOGGLE_SELECTION": {
 			const newSet = new Set(state.selectedIds);
@@ -56,8 +65,22 @@ function selectionReducer(state: SelectionState, action: SelectionAction): Selec
 			return { ...state, selectedIds: newSet };
 		}
 
+		case "TOGGLE_SKILL_SELECTION": {
+			const newSet = new Set(state.selectedSkillNames);
+			if (newSet.has(action.payload)) {
+				newSet.delete(action.payload);
+			} else {
+				newSet.add(action.payload);
+			}
+			return { ...state, selectedSkillNames: newSet };
+		}
+
 		case "CLEAR_SELECTIONS":
-			return { ...state, selectedIds: new Set<string>() };
+			return {
+				...state,
+				selectedIds: new Set<string>(),
+				selectedSkillNames: new Set<string>(),
+			};
 
 		case "SET_STRATEGY":
 			return { ...state, overwriteStrategy: action.payload };
@@ -164,13 +187,30 @@ export function useSelectAll(): (allIds: string[]) => void {
 }
 
 /**
+ * Hook to get all selected skill names
+ */
+export function useSelectedSkillNames(): Set<string> {
+	const state = useSelectionState();
+	return state.selectedSkillNames;
+}
+
+/**
+ * Hook to toggle skill selection
+ */
+export function useToggleSkillSelection(): (skillName: string) => void {
+	const dispatch = useSelectionDispatch();
+	return (skillName: string) => dispatch({ type: "TOGGLE_SKILL_SELECTION", payload: skillName });
+}
+
+/**
  * Hook to get generated CLI command
  * Computes command from current state
  */
 export function useGeneratedCommand(allIds: string[]): string {
 	const state = useSelectionState();
 
-	if (state.selectedIds.size === 0) {
+	// Generate command if rules or skills are selected
+	if (state.selectedIds.size === 0 && state.selectedSkillNames.size === 0) {
 		return "";
 	}
 
@@ -182,7 +222,9 @@ export function useGeneratedCommand(allIds: string[]): string {
 		// If all are selected, use "all" as the category value
 		const categoryValue = isAllSelected ? ["all"] : categories;
 
-		return generateCliCommand(state.agent, categoryValue, state.overwriteStrategy);
+		const selectedSkills = Array.from(state.selectedSkillNames);
+
+		return generateCliCommand(state.agent, categoryValue, state.overwriteStrategy, selectedSkills);
 	} catch (error) {
 		console.error("Error generating command:", error);
 		return "";
