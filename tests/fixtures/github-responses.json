@@ -16,6 +16,22 @@
           "git": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/git/trees/424e08d827c670f17ee43be208046f8a9f84f4c0",
           "html": "https://github.com/votrungquan1999/AI-rules-setup/tree/main/rules/cursor"
         }
+      },
+      {
+        "name": "claude-code",
+        "path": "rules/claude-code",
+        "sha": "claude-code-sha-placeholder",
+        "size": 0,
+        "url": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/contents/rules/claude-code?ref=main",
+        "html_url": "https://github.com/votrungquan1999/AI-rules-setup/tree/main/rules/claude-code",
+        "git_url": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/git/trees/claude-code-sha-placeholder",
+        "download_url": null,
+        "type": "dir",
+        "_links": {
+          "self": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/contents/rules/claude-code?ref=main",
+          "git": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/git/trees/claude-code-sha-placeholder",
+          "html": "https://github.com/votrungquan1999/AI-rules-setup/tree/main/rules/claude-code"
+        }
       }
     ],
     "rules/cursor": [
@@ -147,13 +163,181 @@
           "html": "https://github.com/votrungquan1999/AI-rules-setup/tree/main/rules/cursor/url-state"
         }
       }
+    ],
+    "rules/claude-code": [
+      {
+        "name": "brainstorming",
+        "path": "rules/claude-code/brainstorming",
+        "sha": "brainstorming-sha-placeholder",
+        "size": 0,
+        "url": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/contents/rules/claude-code/brainstorming?ref=main",
+        "html_url": "https://github.com/votrungquan1999/AI-rules-setup/tree/main/rules/claude-code/brainstorming",
+        "git_url": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/git/trees/brainstorming-sha-placeholder",
+        "download_url": null,
+        "type": "dir",
+        "_links": {
+          "self": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/contents/rules/claude-code/brainstorming?ref=main",
+          "git": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/git/trees/brainstorming-sha-placeholder",
+          "html": "https://github.com/votrungquan1999/AI-rules-setup/tree/main/rules/claude-code/brainstorming"
+        }
+      },
+      {
+        "name": "component-architecture",
+        "path": "rules/claude-code/component-architecture",
+        "sha": "component-architecture-sha-placeholder",
+        "size": 0,
+        "url": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/contents/rules/claude-code/component-architecture?ref=main",
+        "html_url": "https://github.com/votrungquan1999/AI-rules-setup/tree/main/rules/claude-code/component-architecture",
+        "git_url": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/git/trees/component-architecture-sha-placeholder",
+        "download_url": null,
+        "type": "dir",
+        "_links": {
+          "self": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/contents/rules/claude-code/component-architecture?ref=main",
+          "git": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/git/trees/component-architecture-sha-placeholder",
+          "html": "https://github.com/votrungquan1999/AI-rules-setup/tree/main/rules/claude-code/component-architecture"
+        }
+      },
+      {
+        "name": "database",
+        "path": "rules/claude-code/database",
+        "sha": "database-sha-placeholder",
+        "size": 0,
+        "url": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/contents/rules/claude-code/database?ref=main",
+        "html_url": "https://github.com/votrungquan1999/AI-rules-setup/tree/main/rules/claude-code/database",
+        "git_url": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/git/trees/database-sha-placeholder",
+        "download_url": null,
+        "type": "dir",
+        "_links": {
+          "self": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/contents/rules/claude-code/database?ref=main",
+          "git": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/git/trees/database-sha-placeholder",
+          "html": "https://github.com/votrungquan1999/AI-rules-setup/tree/main/rules/claude-code/database"
+        }
+      },
+      {
+        "name": "meta",
+        "path": "rules/claude-code/meta",
+        "sha": "meta-sha-placeholder",
+        "size": 0,
+        "url": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/contents/rules/claude-code/meta?ref=main",
+        "html_url": "https://github.com/votrungquan1999/AI-rules-setup/tree/main/rules/claude-code/meta",
+        "git_url": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/git/trees/meta-sha-placeholder",
+        "download_url": null,
+        "type": "dir",
+        "_links": {
+          "self": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/contents/rules/claude-code/meta?ref=main",
+          "git": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/git/trees/meta-sha-placeholder",
+          "html": "https://github.com/votrungquan1999/AI-rules-setup/tree/main/rules/claude-code/meta"
+        }
+      },
+      {
+        "name": "react-hooks",
+        "path": "rules/claude-code/react-hooks",
+        "sha": "react-hooks-sha-placeholder",
+        "size": 0,
+        "url": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/contents/rules/claude-code/react-hooks?ref=main",
+        "html_url": "https://github.com/votrungquan1999/AI-rules-setup/tree/main/rules/claude-code/react-hooks",
+        "git_url": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/git/trees/react-hooks-sha-placeholder",
+        "download_url": null,
+        "type": "dir",
+        "_links": {
+          "self": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/contents/rules/claude-code/react-hooks?ref=main",
+          "git": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/git/trees/react-hooks-sha-placeholder",
+          "html": "https://github.com/votrungquan1999/AI-rules-setup/tree/main/rules/claude-code/react-hooks"
+        }
+      },
+      {
+        "name": "react-server-components",
+        "path": "rules/claude-code/react-server-components",
+        "sha": "react-server-components-sha-placeholder",
+        "size": 0,
+        "url": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/contents/rules/claude-code/react-server-components?ref=main",
+        "html_url": "https://github.com/votrungquan1999/AI-rules-setup/tree/main/rules/claude-code/react-server-components",
+        "git_url": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/git/trees/react-server-components-sha-placeholder",
+        "download_url": null,
+        "type": "dir",
+        "_links": {
+          "self": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/contents/rules/claude-code/react-server-components?ref=main",
+          "git": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/git/trees/react-server-components-sha-placeholder",
+          "html": "https://github.com/votrungquan1999/AI-rules-setup/tree/main/rules/claude-code/react-server-components"
+        }
+      },
+      {
+        "name": "styling",
+        "path": "rules/claude-code/styling",
+        "sha": "styling-sha-placeholder",
+        "size": 0,
+        "url": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/contents/rules/claude-code/styling?ref=main",
+        "html_url": "https://github.com/votrungquan1999/AI-rules-setup/tree/main/rules/claude-code/styling",
+        "git_url": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/git/trees/styling-sha-placeholder",
+        "download_url": null,
+        "type": "dir",
+        "_links": {
+          "self": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/contents/rules/claude-code/styling?ref=main",
+          "git": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/git/trees/styling-sha-placeholder",
+          "html": "https://github.com/votrungquan1999/AI-rules-setup/tree/main/rules/claude-code/styling"
+        }
+      },
+      {
+        "name": "testing",
+        "path": "rules/claude-code/testing",
+        "sha": "testing-sha-placeholder",
+        "size": 0,
+        "url": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/contents/rules/claude-code/testing?ref=main",
+        "html_url": "https://github.com/votrungquan1999/AI-rules-setup/tree/main/rules/claude-code/testing",
+        "git_url": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/git/trees/testing-sha-placeholder",
+        "download_url": null,
+        "type": "dir",
+        "_links": {
+          "self": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/contents/rules/claude-code/testing?ref=main",
+          "git": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/git/trees/testing-sha-placeholder",
+          "html": "https://github.com/votrungquan1999/AI-rules-setup/tree/main/rules/claude-code/testing"
+        }
+      },
+      {
+        "name": "typescript",
+        "path": "rules/claude-code/typescript",
+        "sha": "typescript-sha-placeholder",
+        "size": 0,
+        "url": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/contents/rules/claude-code/typescript?ref=main",
+        "html_url": "https://github.com/votrungquan1999/AI-rules-setup/tree/main/rules/claude-code/typescript",
+        "git_url": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/git/trees/typescript-sha-placeholder",
+        "download_url": null,
+        "type": "dir",
+        "_links": {
+          "self": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/contents/rules/claude-code/typescript?ref=main",
+          "git": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/git/trees/typescript-sha-placeholder",
+          "html": "https://github.com/votrungquan1999/AI-rules-setup/tree/main/rules/claude-code/typescript"
+        }
+      },
+      {
+        "name": "url-state",
+        "path": "rules/claude-code/url-state",
+        "sha": "url-state-sha-placeholder",
+        "size": 0,
+        "url": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/contents/rules/claude-code/url-state?ref=main",
+        "html_url": "https://github.com/votrungquan1999/AI-rules-setup/tree/main/rules/claude-code/url-state",
+        "git_url": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/git/trees/url-state-sha-placeholder",
+        "download_url": null,
+        "type": "dir",
+        "_links": {
+          "self": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/contents/rules/claude-code/url-state?ref=main",
+          "git": "https://api.github.com/repos/votrungquan1999/AI-rules-setup/git/trees/url-state-sha-placeholder",
+          "html": "https://github.com/votrungquan1999/AI-rules-setup/tree/main/rules/claude-code/url-state"
+        }
+      }
     ]
   },
   "manifests": {
     "cursor/component-architecture": {
       "id": "component-architecture",
       "category": "component-architecture",
-      "tags": ["architecture", "react", "file-structure", "state-management", "patterns"],
+      "tags": [
+        "architecture",
+        "react",
+        "file-structure",
+        "state-management",
+        "patterns"
+      ],
       "description": "Component architecture patterns including file structure, state management, and organization guidelines",
       "version": "1.0.0",
       "lastUpdated": "2025-01-17T00:00:00Z",
@@ -169,13 +353,22 @@
           "required": true
         }
       ],
-      "dependencies": ["typescript-conventions", "react-server-components"],
+      "dependencies": [
+        "typescript-conventions",
+        "react-server-components"
+      ],
       "conflicts": []
     },
     "cursor/database": {
       "id": "database-patterns",
       "category": "database",
-      "tags": ["database", "mongodb", "typescript", "patterns", "data-access"],
+      "tags": [
+        "database",
+        "mongodb",
+        "typescript",
+        "patterns",
+        "data-access"
+      ],
       "description": "Database access patterns with typed collections and document conversion",
       "version": "1.0.0",
       "lastUpdated": "2025-01-17T00:00:00Z",
@@ -186,13 +379,21 @@
           "required": true
         }
       ],
-      "dependencies": ["typescript-conventions"],
+      "dependencies": [
+        "typescript-conventions"
+      ],
       "conflicts": []
     },
     "cursor/meta": {
       "id": "meta-rules",
       "category": "meta",
-      "tags": ["meta", "rules", "guidelines", "quality", "documentation"],
+      "tags": [
+        "meta",
+        "rules",
+        "guidelines",
+        "quality",
+        "documentation"
+      ],
       "description": "Meta rules for applying Cursor rules, file size limits, and change management guidelines",
       "version": "1.0.0",
       "lastUpdated": "2025-01-17T00:00:00Z",
@@ -209,7 +410,13 @@
     "cursor/react-hooks": {
       "id": "react-hooks",
       "category": "react-hooks",
-      "tags": ["react", "hooks", "context", "state-management", "performance"],
+      "tags": [
+        "react",
+        "hooks",
+        "context",
+        "state-management",
+        "performance"
+      ],
       "description": "React hooks best practices, context patterns, and performance optimization guidelines",
       "version": "1.0.0",
       "lastUpdated": "2025-01-17T00:00:00Z",
@@ -225,13 +432,21 @@
           "required": true
         }
       ],
-      "dependencies": ["typescript-conventions"],
+      "dependencies": [
+        "typescript-conventions"
+      ],
       "conflicts": []
     },
     "cursor/react-server-components": {
       "id": "react-server-components",
       "category": "react-server-components",
-      "tags": ["framework", "react", "server-components", "nextjs", "composition"],
+      "tags": [
+        "framework",
+        "react",
+        "server-components",
+        "nextjs",
+        "composition"
+      ],
       "description": "React Server Components best practices, composition patterns, and client/server separation guidelines",
       "version": "1.0.0",
       "lastUpdated": "2025-01-17T00:00:00Z",
@@ -252,13 +467,23 @@
           "required": true
         }
       ],
-      "dependencies": ["typescript-conventions"],
-      "conflicts": ["react-class-components"]
+      "dependencies": [
+        "typescript-conventions"
+      ],
+      "conflicts": [
+        "react-class-components"
+      ]
     },
     "cursor/styling": {
       "id": "styling-tailwind",
       "category": "styling",
-      "tags": ["styling", "css", "tailwind", "responsive", "components"],
+      "tags": [
+        "styling",
+        "css",
+        "tailwind",
+        "responsive",
+        "components"
+      ],
       "description": "Tailwind CSS best practices, component patterns, responsive design, and shadcn/ui usage guidelines",
       "version": "1.0.0",
       "lastUpdated": "2025-01-17T00:00:00Z",
@@ -280,12 +505,21 @@
         }
       ],
       "dependencies": [],
-      "conflicts": ["styled-components", "emotion", "css-modules"]
+      "conflicts": [
+        "styled-components",
+        "emotion",
+        "css-modules"
+      ]
     },
     "cursor/typescript": {
       "id": "typescript-conventions",
       "category": "typescript",
-      "tags": ["language", "typescript", "strict", "conventions"],
+      "tags": [
+        "language",
+        "typescript",
+        "strict",
+        "conventions"
+      ],
       "description": "TypeScript strict conventions including hoisting, interfaces, JSDoc requirements, and import/export patterns",
       "version": "1.0.0",
       "lastUpdated": "2025-01-17T00:00:00Z",
@@ -307,7 +541,13 @@
     "cursor/url-state": {
       "id": "url-state-management",
       "category": "url-state",
-      "tags": ["url", "state", "routing", "nextjs", "search-params"],
+      "tags": [
+        "url",
+        "state",
+        "routing",
+        "nextjs",
+        "search-params"
+      ],
       "description": "URL state management patterns for Next.js applications with server-side parameter handling",
       "version": "1.0.0",
       "lastUpdated": "2025-01-17T00:00:00Z",
@@ -318,7 +558,488 @@
           "required": true
         }
       ],
-      "dependencies": ["typescript-conventions", "react-server-components"],
+      "dependencies": [
+        "typescript-conventions",
+        "react-server-components"
+      ],
+      "conflicts": []
+    },
+    "claude-code/brainstorming": {
+      "id": "brainstorming-patterns",
+      "category": "brainstorming",
+      "tags": [
+        "brainstorming",
+        "problem-solving",
+        "structured-thinking",
+        "layered-approach",
+        "zoom-out-first",
+        "design-thinking",
+        "iterative-thinking",
+        "documentation",
+        "clarification",
+        "best-practices",
+        "claude-code"
+      ],
+      "description": "AI agent brainstorming patterns for Claude Code including problem definition, clarification questions, zoom-out first approach, iterative solution thinking, and documentation requirements for structured problem-solving",
+      "version": "1.0.0",
+      "lastUpdated": "2025-12-24T00:00:00Z",
+      "files": [
+        {
+          "path": "brainstorming-patterns.md",
+          "description": "Core brainstorming patterns and structured thinking approach",
+          "required": true
+        }
+      ],
+      "dependencies": [],
+      "conflicts": []
+    },
+    "claude-code/component-architecture": {
+      "id": "component-architecture",
+      "category": "component-architecture",
+      "tags": [
+        "component-architecture",
+        "components",
+        "architecture",
+        "file-structure",
+        "patterns",
+        "react",
+        "nextjs",
+        "organization",
+        "state-management",
+        "state",
+        "provider-patterns",
+        "context",
+        "hooks",
+        "best-practices",
+        "conventions",
+        "naming",
+        "directories",
+        "server-components",
+        "client-components",
+        "claude-code"
+      ],
+      "description": "Component architecture patterns for Claude Code covering file structure organization with server/client separation, state management patterns with context and hooks, provider patterns for data flow, hook transformation strategies, directory organization conventions, and naming patterns for maintainable React component architectures",
+      "version": "1.0.0",
+      "lastUpdated": "2025-12-24T00:00:00Z",
+      "files": [
+        {
+          "path": "file-structure-patterns.md",
+          "description": "File structure patterns and directory organization",
+          "required": true
+        },
+        {
+          "path": "state-management-patterns.md",
+          "description": "State management patterns and context usage",
+          "required": true
+        }
+      ],
+      "dependencies": [],
+      "conflicts": []
+    },
+    "claude-code/database": {
+      "id": "database-patterns",
+      "category": "database",
+      "tags": [
+        "database",
+        "db",
+        "patterns",
+        "mongodb",
+        "mongo",
+        "nosql",
+        "sql",
+        "postgresql",
+        "mysql",
+        "document-db",
+        "relational-db",
+        "collections",
+        "typescript",
+        "python",
+        "go",
+        "document-typing",
+        "typing",
+        "type-safety",
+        "data-conversion",
+        "data-mapping",
+        "data-access",
+        "odm",
+        "orm",
+        "schemas",
+        "document-suffix",
+        "client-interfaces",
+        "best-practices",
+        "conventions",
+        "claude-code",
+        "multi-language"
+      ],
+      "description": "Database access patterns for Claude Code covering typed collections, document typing conventions with Document suffix pattern, type conversion between database documents and client interfaces, data mapping strategies, collection typing, schema organization, and type-safe database operations for NoSQL and SQL databases across multiple languages",
+      "version": "1.0.0",
+      "lastUpdated": "2025-12-24T00:00:00Z",
+      "files": [
+        {
+          "path": "database-patterns.md",
+          "description": "Database access patterns with typed collections and data conversion",
+          "required": true
+        }
+      ],
+      "dependencies": [],
+      "conflicts": []
+    },
+    "claude-code/meta": {
+      "id": "meta-rules",
+      "category": "meta",
+      "tags": [
+        "meta",
+        "meta-rules",
+        "rules",
+        "guidelines",
+        "best-practices",
+        "code-quality",
+        "quality",
+        "file-size-limits",
+        "file-limits",
+        "line-limits",
+        "error-handling",
+        "scope-management",
+        "scope",
+        "complexity",
+        "validation",
+        "conventions",
+        "standards",
+        "rule-application",
+        "planning-mode",
+        "planning",
+        "plan.md",
+        "feature-development",
+        "workflow",
+        "implementation",
+        "incremental",
+        "test-driven",
+        "tdd",
+        "progress-tracking",
+        "acceptance-criteria",
+        "claude-code"
+      ],
+      "description": "Meta rules for applying Claude Code rules covering file size limits and line count restrictions, scope management and complexity control, error handling patterns, rule application guidelines, code quality standards, validation requirements, change management strategies for maintainable codebases, planning mode behavior for plan file generation, and feature development workflow with incremental implementation and progress tracking",
+      "version": "1.0.0",
+      "lastUpdated": "2025-12-24T00:00:00Z",
+      "files": [
+        {
+          "path": "meta-rules.md",
+          "description": "Meta rules for rule application and code quality",
+          "required": true
+        },
+        {
+          "path": "feature-development-guide.md",
+          "description": "Step-by-step feature development workflow with planning, incremental implementation, test-driven approach, and progress tracking",
+          "required": true
+        }
+      ],
+      "dependencies": [],
+      "conflicts": []
+    },
+    "claude-code/react-hooks": {
+      "id": "react-hooks",
+      "category": "react-hooks",
+      "tags": [
+        "react",
+        "hooks",
+        "react-hooks",
+        "patterns",
+        "hooks-pattern",
+        "use-state",
+        "use-effect",
+        "use-reducer",
+        "use-context",
+        "use-memo",
+        "use-callback",
+        "custom-hooks",
+        "context",
+        "context-pattern",
+        "provider",
+        "state-management",
+        "state",
+        "performance",
+        "performance-optimization",
+        "optimization",
+        "memoization",
+        "create-reducer-context",
+        "best-practices",
+        "conventions",
+        "claude-code"
+      ],
+      "description": "React hooks best practices for Claude Code covering useState, useEffect, useReducer, useContext, useMemo, useCallback usage patterns, custom hooks creation, context patterns with providers, performance optimization through memoization, hook dependencies management, reducer context patterns, and state management strategies for functional React components",
+      "version": "1.0.0",
+      "lastUpdated": "2025-12-24T00:00:00Z",
+      "files": [
+        {
+          "path": "hooks-rules.md",
+          "description": "React hooks usage rules and performance guidelines",
+          "required": true
+        },
+        {
+          "path": "context-patterns.md",
+          "description": "Context patterns and state management best practices",
+          "required": true
+        }
+      ],
+      "dependencies": [],
+      "conflicts": []
+    },
+    "claude-code/react-server-components": {
+      "id": "react-server-components",
+      "category": "react-server-components",
+      "tags": [
+        "react",
+        "react-18",
+        "react-19",
+        "patterns",
+        "server-components",
+        "rsc",
+        "server-side",
+        "ssr",
+        "client-components",
+        "use-client",
+        "client-server-separation",
+        "server-client",
+        "nextjs",
+        "next",
+        "nextjs-13",
+        "nextjs-14",
+        "nextjs-15",
+        "app-router",
+        "composition",
+        "composition-pattern",
+        "data-fetching",
+        "async",
+        "async-components",
+        "streaming",
+        "suspense",
+        "performance",
+        "best-practices",
+        "conventions",
+        "claude-code"
+      ],
+      "description": "React Server Components best practices for Claude Code in Next.js App Router covering server vs client component usage patterns, composition strategies, data fetching in server components, async component patterns, streaming and suspense, client-server boundary separation, performance optimization, component architecture for Next.js 13+ with TypeScript support",
+      "version": "1.0.0",
+      "lastUpdated": "2025-12-24T00:00:00Z",
+      "files": [
+        {
+          "path": "server-components-rules.md",
+          "description": "Core Server Components rules and usage patterns",
+          "required": true
+        },
+        {
+          "path": "composition-patterns.md",
+          "description": "Component composition patterns and examples",
+          "required": true
+        },
+        {
+          "path": "client-server-separation.md",
+          "description": "Client/server component separation patterns and best practices",
+          "required": true
+        }
+      ],
+      "dependencies": [],
+      "conflicts": [
+        "react-class-components"
+      ]
+    },
+    "claude-code/styling": {
+      "id": "styling-tailwind",
+      "category": "styling",
+      "tags": [
+        "styling",
+        "css",
+        "design",
+        "ui",
+        "frontend",
+        "tailwind",
+        "tailwindcss",
+        "tw",
+        "utility-first",
+        "utility-classes",
+        "shadcn",
+        "shadcn-ui",
+        "component-library",
+        "radix",
+        "radix-ui",
+        "responsive",
+        "responsive-design",
+        "mobile-first",
+        "breakpoints",
+        "grid",
+        "grid-layout",
+        "flexbox",
+        "layout",
+        "design-tokens",
+        "tokens",
+        "theme",
+        "theming",
+        "dark-mode",
+        "patterns",
+        "best-practices",
+        "conventions",
+        "claude-code"
+      ],
+      "description": "Tailwind CSS best practices for Claude Code covering utility-first styling, size utilities, grid-based layouts, responsive design patterns with mobile-first approach, tokenized color system, shadcn/ui component library integration with Radix UI primitives, theming and dark mode support, breakpoint management, and design system conventions for modern frontend development",
+      "version": "1.0.0",
+      "lastUpdated": "2025-12-24T00:00:00Z",
+      "files": [
+        {
+          "path": "tailwind-basics.md",
+          "description": "Core Tailwind CSS usage patterns and utilities",
+          "required": true
+        },
+        {
+          "path": "layout-patterns.md",
+          "description": "Grid-based list views and responsive layout patterns",
+          "required": true
+        },
+        {
+          "path": "component-library.md",
+          "description": "shadcn/ui usage and component library best practices",
+          "required": true
+        }
+      ],
+      "dependencies": [],
+      "conflicts": [
+        "styled-components",
+        "emotion",
+        "css-modules"
+      ]
+    },
+    "claude-code/testing": {
+      "id": "testing-pillars",
+      "category": "testing",
+      "tags": [
+        "testing",
+        "test",
+        "unit-testing",
+        "integration-testing",
+        "e2e-testing",
+        "test-quality",
+        "reliability",
+        "validity",
+        "sensitivity",
+        "resilience",
+        "flaky-tests",
+        "test-assertions",
+        "test-patterns",
+        "vitest",
+        "jest",
+        "pytest",
+        "testing-library",
+        "react-testing",
+        "test-best-practices",
+        "test-driven-development",
+        "tdd",
+        "claude-code",
+        "multi-language"
+      ],
+      "description": "Comprehensive testing guidelines for Claude Code based on the 4 Pillars of Good Tests: Reliability (consistency), Validity (accuracy), Sensitivity (responsiveness), and Resilience (robustness). Ensures tests are deterministic, actually verify behavior, detect bugs, and survive refactoring. Applies to all languages including TypeScript, Python, Go, and more",
+      "version": "1.0.0",
+      "lastUpdated": "2025-12-24T00:00:00Z",
+      "files": [
+        {
+          "path": "testing-pillars.md",
+          "description": "The 4 Pillars of Good Tests framework with examples",
+          "required": true
+        }
+      ],
+      "dependencies": [],
+      "conflicts": []
+    },
+    "claude-code/typescript": {
+      "id": "typescript-conventions",
+      "category": "typescript",
+      "tags": [
+        "typescript",
+        "ts",
+        "language",
+        "type-system",
+        "types",
+        "typing",
+        "conventions",
+        "best-practices",
+        "strict-mode",
+        "strict",
+        "interfaces",
+        "interface",
+        "type-aliases",
+        "jsdoc",
+        "documentation",
+        "comments",
+        "type-safety",
+        "safety",
+        "imports",
+        "exports",
+        "imports-exports",
+        "enums",
+        "enum",
+        "hoisting",
+        "organization",
+        "claude-code"
+      ],
+      "description": "TypeScript strict conventions for Claude Code covering type and interface hoisting, interface vs type usage patterns, JSDoc documentation requirements for functions, enum usage over union types, import and export organization patterns, type separation for different purposes, inline import restrictions, and type safety best practices for strongly-typed codebases",
+      "version": "1.0.0",
+      "lastUpdated": "2025-12-24T00:00:00Z",
+      "files": [
+        {
+          "path": "typescript-conventions.md",
+          "description": "Core TypeScript conventions for interfaces, JSDoc, and enums",
+          "required": true
+        },
+        {
+          "path": "typescript-imports-exports.md",
+          "description": "Import and export patterns and organization rules",
+          "required": true
+        }
+      ],
+      "dependencies": [],
+      "conflicts": []
+    },
+    "claude-code/url-state": {
+      "id": "url-state-management",
+      "category": "url-state",
+      "tags": [
+        "state-management",
+        "state",
+        "url",
+        "url-state",
+        "patterns",
+        "nextjs",
+        "next",
+        "nextjs-13",
+        "nextjs-14",
+        "nextjs-15",
+        "search-params",
+        "query-params",
+        "query-string",
+        "params",
+        "router",
+        "use-router",
+        "use-search-params",
+        "server-side",
+        "server-side-rendering",
+        "ssr",
+        "app-router",
+        "url-parameters",
+        "synchronization",
+        "best-practices",
+        "conventions",
+        "claude-code"
+      ],
+      "description": "URL state management patterns for Claude Code in Next.js applications covering server-side search parameter handling, URL parameter conversion and validation, query string synchronization with client state, router patterns with useRouter and useSearchParams, initial state from URLs, parameter naming conventions, and state persistence strategies for App Router",
+      "version": "1.0.0",
+      "lastUpdated": "2025-12-24T00:00:00Z",
+      "files": [
+        {
+          "path": "url-state-management.md",
+          "description": "URL state management patterns and server-side parameter handling",
+          "required": true
+        }
+      ],
+      "dependencies": [],
       "conflicts": []
     }
   },
@@ -337,6 +1058,24 @@
     "rules/cursor/styling/component-library.mdc": "---\nalwaysApply: true\ndescription: shadcn/ui usage and component library best practices\n---\n\n# Component Library\n\n## 1. shadcn/ui Usage\n\n- ALWAYS use shadcn/ui components unless explicitly told otherwise.\n- NEVER create custom UI components when shadcn equivalents exist.\n- ALWAYS install shadcn components using the CLI: `npx shadcn@latest add [component-name]`\n- ALWAYS import shadcn components from `src/components/ui/`.\n- If a component doesn't exist in shadcn, check the registry first before creating custom components.\n\n✅ Correct:\n\n```tsx\nimport { Button } from 'src/components/ui/button'\nimport { Input } from 'src/components/ui/input'\nimport { Dialog, DialogContent, DialogHeader, DialogTitle } from 'src/components/ui/dialog'\n\nexport function LoginForm() {\n  return (\n    <Dialog>\n      <DialogContent>\n        <DialogHeader>\n          <DialogTitle>Login</DialogTitle>\n        </DialogHeader>\n        <form className='space-y-4'>\n          <Input placeholder='Email' />\n          <Input type='password' placeholder='Password' />\n          <Button type='submit'>Login</Button>\n        </form>\n      </DialogContent>\n    </Dialog>\n  )\n}\n```\n\n❌ Incorrect (creating custom components when shadcn exists):\n\n```javascript\n// DON'T DO THIS - use shadcn Button instead\nfunction CustomButton({ children, onClick }: { children: React.ReactNode, onClick: () => void }) {\n  return (\n    <button className='bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md' onClick={onClick}>\n      {children}\n    </button>\n  )\n}\n\n// DON'T DO THIS - use shadcn Dialog instead\nfunction CustomModal({\n  isOpen,\n  onClose,\n  children,\n}: {\n  isOpen: boolean,\n  onClose: () => void,\n  children: React.ReactNode,\n}) {\n  return isOpen ? (\n    <div className='fixed inset-0 bg-black/50 flex items-center justify-center'>\n      <div className='bg-white p-6 rounded-lg'>{children}</div>\n    </div>\n  ) : null\n}\n```\n",
     "rules/cursor/typescript/typescript-conventions.mdc": "---\nalwaysApply: true\ndescription: Core TypeScript conventions for interfaces, JSDoc, and enums\n---\n\n# TypeScript Conventions\n\n## 1. Type and Interface Hoisting\n\n- ALWAYS hoist `type` aliases and `interface` definitions to the top of the file.\n- ALWAYS use `interface` instead of `type`, EXCEPT when:\n\n  - You need a union type (`type A = B | C`).\n  - You need mapped/conditional types.\n\n## 2. JSDoc Requirements\n\n- EVERY function MUST have a JSDoc block describing its purpose.\n- WHENEVER function logic changes, JSDoc and inline comments MUST be updated accordingly.\n\n✅ Example:\n\n```ts\n/**\n * Returns a user by ID from the database.\n * @param id - The unique identifier of the user\n * @returns Promise that resolves to the user object or null if not found\n */\nasync function getUserById(id: string): Promise<User | null> {\n  return db.user.findUnique({ where: { id } })\n}\n```\n\n❌ Incorrect (missing JSDoc or incomplete documentation):\n\n```ts\n// Missing JSDoc\nfunction getUserById(id: string): Promise<User> {\n  return db.user.findUnique({ where: { id } })\n}\n\n// Incomplete JSDoc\n/**\n * Gets user\n */\nfunction getUserById(id: string): Promise<User> {\n  return db.user.findUnique({ where: { id } })\n}\n```\n\n## 3. Import Statements\n\n- NEVER use inline imports like `import(\"path/to/module\").TypeName`. ALWAYS use proper import statements.\n\n✅ Correct:\n\n```ts\nimport type { UserData } from 'src/lib/user-types'\n\ninterface ApiResponse {\n  data: UserData\n  status: string\n}\n```\n\n❌ Incorrect:\n\n```ts\ninterface ApiResponse {\n  data: import('src/lib/user-types').UserData\n  status: string\n}\n```\n\n## 4. Enum Usage\n\n- ALWAYS use `enum` instead of string literal union types for fixed sets of values.\n\n✅ Correct:\n\n```ts\nexport enum ContributionPeriod {\n  Weekly = 'weekly',\n  Monthly = 'monthly',\n  Quarterly = 'quarterly',\n  SemiAnnually = 'semi-annually',\n  Annually = 'annually',\n}\n```\n\n❌ Incorrect:\n\n```ts\ntype ContributionPeriod = 'weekly' | 'monthly' | 'quarterly' | 'semi-annually' | 'annually'\n```\n",
     "rules/cursor/typescript/typescript-imports-exports.mdc": "---\nalwaysApply: true\ndescription: Import and export patterns and organization rules\n---\n\n# TypeScript Imports and Exports\n\n## 1. Export Statements\n\n- NEVER use multi-export statements like `export { A, B, C }` or `export type { X, Y, Z }`. ALWAYS use individual export statements for better traceability.\n- NEVER re-export types from shared locations. Each file should only export its own specific types and import shared types directly.\n- ALWAYS keep types with their related functionality. For example, S3UploadResult should be in the S3 file, not in product types.\n\n✅ Correct:\n\n```ts\nexport interface User {\n  id: string\n  name: string\n}\n\nexport interface Product {\n  id: string\n  title: string\n}\n\nexport const UserRole = UserRole\nexport const ProductStatus = ProductStatus\n```\n\n❌ Incorrect:\n\n```ts\ninterface User {\n  id: string\n  name: string\n}\n\ninterface Product {\n  id: string\n  title: string\n}\n\nexport type { User, Product }\nexport { UserRole, ProductStatus }\n```\n",
-    "rules/cursor/url-state/url-state-management.mdc": "---\nalwaysApply: true\ndescription: 'URL state management patterns and server-side parameter handling'\n---\n\n# URL State Management Patterns\n\n## 1. Server-Side URL Parameter Handling\n\nFor pages that need URL state management, ALWAYS handle URL parameters on the server side and pass them as initial state to client components.\n\n✅ Correct:\n\n```tsx\n// page.tsx (Server Component)\ninterface InvestmentPageProps {\n  searchParams: Promise<{ [key: string]: string | string[] | undefined }>\n}\n\nfunction convertSearchParamsToFormState(urlSearchParams: URLSearchParams): FormState {\n  // Implementation here\n}\n\nexport default async function InvestmentPage({ searchParams }: InvestmentPageProps) {\n  const params = await searchParams\n  const urlSearchParams = new URLSearchParams(params as Record<string, string>)\n  const initialFormState = convertSearchParamsToFormState(urlSearchParams)\n\n  return (\n    <CalculatorSuspenseWrapper>\n      <InvestmentCalculator initialFormState={initialFormState} />\n    </CalculatorSuspenseWrapper>\n  )\n}\n```\n\n❌ Incorrect (handling URL state on client):\n\n```tsx\n// page.tsx - DON'T DO THIS\n'use client'\n\nexport default function InvestmentPage() {\n  const searchParams = useSearchParams()\n\n  // ... URL state handling using useSearchParams must not be used unless absolutely necessary\n}\n```\n\n## 2. URL Parameter Conversion\n\n- Convert URL parameters to typed form state on the server\n- Handle type conversion and validation\n- Provide sensible defaults for missing parameters\n\n✅ Correct:\n\n```tsx\nfunction convertSearchParamsToFormState(urlSearchParams: URLSearchParams): FormState {\n  return {\n    initialAmount: urlSearchParams.get('amount') ? Number(urlSearchParams.get('amount')) : undefined,\n    period: (urlSearchParams.get('period') as ContributionPeriod) || ContributionPeriod.Monthly,\n    rate: urlSearchParams.get('rate') ? Number(urlSearchParams.get('rate')) : undefined,\n  }\n}\n```\n\n## 3. URL State Synchronization\n\n- Use server-side URL handling for initial state\n- Use client-side state management for form interactions\n- Sync state back to URL when necessary using `router.push` or `router.replace`\n\n✅ Correct:\n\n```tsx\n// client component\n'use client'\n\nexport function InvestmentCalculator({ initialFormState }: { initialFormState: FormState }) {\n  const router = useRouter()\n  const [formState, setFormState] = useState(initialFormState)\n\n  const updateURL = useCallback((newState: FormState) => {\n    const params = new URLSearchParams()\n    if (newState.initialAmount) params.set('amount', newState.initialAmount.toString())\n    if (newState.period) params.set('period', newState.period)\n    if (newState.rate) params.set('rate', newState.rate.toString())\n\n    router.replace(`?${params.toString()}`, { scroll: false })\n  }, [router])\n\n  // Update URL when form state changes\n  useEffect(() => {\n    updateURL(formState)\n  }, [formState, updateURL])\n\n  return (\n    // Form JSX\n  )\n}\n```\n\n## 4. URL State Best Practices\n\n- Keep URL state minimal - only include essential parameters\n- Use meaningful parameter names\n- Handle edge cases (invalid values, missing parameters)\n- Consider URL length limits\n- Use `router.replace` for internal state updates, `router.push` for navigation\n\n✅ Correct:\n\n```tsx\n// Good URL state management\nconst updateFilters = (filters: FilterState) => {\n  const params = new URLSearchParams()\n\n  // Only add non-default values to URL\n  if (filters.category !== 'all') params.set('category', filters.category)\n  if (filters.priceRange.min > 0) params.set('minPrice', filters.priceRange.min.toString())\n  if (filters.priceRange.max < 1000) params.set('maxPrice', filters.priceRange.max.toString())\n\n  router.replace(`/products?${params.toString()}`, { scroll: false })\n}\n```\n\n❌ Incorrect:\n\n```tsx\n// Bad URL state management\nconst updateFilters = (filters: FilterState) => {\n  const params = new URLSearchParams()\n\n  // Adding all values, including defaults\n  params.set('category', filters.category)\n  params.set('minPrice', filters.priceRange.min.toString())\n  params.set('maxPrice', filters.priceRange.max.toString())\n  params.set('sort', filters.sort)\n  params.set('page', filters.page.toString())\n\n  router.push(`/products?${params.toString()}`)\n}\n```\n"
+    "rules/cursor/url-state/url-state-management.mdc": "---\nalwaysApply: true\ndescription: 'URL state management patterns and server-side parameter handling'\n---\n\n# URL State Management Patterns\n\n## 1. Server-Side URL Parameter Handling\n\nFor pages that need URL state management, ALWAYS handle URL parameters on the server side and pass them as initial state to client components.\n\n✅ Correct:\n\n```tsx\n// page.tsx (Server Component)\ninterface InvestmentPageProps {\n  searchParams: Promise<{ [key: string]: string | string[] | undefined }>\n}\n\nfunction convertSearchParamsToFormState(urlSearchParams: URLSearchParams): FormState {\n  // Implementation here\n}\n\nexport default async function InvestmentPage({ searchParams }: InvestmentPageProps) {\n  const params = await searchParams\n  const urlSearchParams = new URLSearchParams(params as Record<string, string>)\n  const initialFormState = convertSearchParamsToFormState(urlSearchParams)\n\n  return (\n    <CalculatorSuspenseWrapper>\n      <InvestmentCalculator initialFormState={initialFormState} />\n    </CalculatorSuspenseWrapper>\n  )\n}\n```\n\n❌ Incorrect (handling URL state on client):\n\n```tsx\n// page.tsx - DON'T DO THIS\n'use client'\n\nexport default function InvestmentPage() {\n  const searchParams = useSearchParams()\n\n  // ... URL state handling using useSearchParams must not be used unless absolutely necessary\n}\n```\n\n## 2. URL Parameter Conversion\n\n- Convert URL parameters to typed form state on the server\n- Handle type conversion and validation\n- Provide sensible defaults for missing parameters\n\n✅ Correct:\n\n```tsx\nfunction convertSearchParamsToFormState(urlSearchParams: URLSearchParams): FormState {\n  return {\n    initialAmount: urlSearchParams.get('amount') ? Number(urlSearchParams.get('amount')) : undefined,\n    period: (urlSearchParams.get('period') as ContributionPeriod) || ContributionPeriod.Monthly,\n    rate: urlSearchParams.get('rate') ? Number(urlSearchParams.get('rate')) : undefined,\n  }\n}\n```\n\n## 3. URL State Synchronization\n\n- Use server-side URL handling for initial state\n- Use client-side state management for form interactions\n- Sync state back to URL when necessary using `router.push` or `router.replace`\n\n✅ Correct:\n\n```tsx\n// client component\n'use client'\n\nexport function InvestmentCalculator({ initialFormState }: { initialFormState: FormState }) {\n  const router = useRouter()\n  const [formState, setFormState] = useState(initialFormState)\n\n  const updateURL = useCallback((newState: FormState) => {\n    const params = new URLSearchParams()\n    if (newState.initialAmount) params.set('amount', newState.initialAmount.toString())\n    if (newState.period) params.set('period', newState.period)\n    if (newState.rate) params.set('rate', newState.rate.toString())\n\n    router.replace(`?${params.toString()}`, { scroll: false })\n  }, [router])\n\n  // Update URL when form state changes\n  useEffect(() => {\n    updateURL(formState)\n  }, [formState, updateURL])\n\n  return (\n    // Form JSX\n  )\n}\n```\n\n## 4. URL State Best Practices\n\n- Keep URL state minimal - only include essential parameters\n- Use meaningful parameter names\n- Handle edge cases (invalid values, missing parameters)\n- Consider URL length limits\n- Use `router.replace` for internal state updates, `router.push` for navigation\n\n✅ Correct:\n\n```tsx\n// Good URL state management\nconst updateFilters = (filters: FilterState) => {\n  const params = new URLSearchParams()\n\n  // Only add non-default values to URL\n  if (filters.category !== 'all') params.set('category', filters.category)\n  if (filters.priceRange.min > 0) params.set('minPrice', filters.priceRange.min.toString())\n  if (filters.priceRange.max < 1000) params.set('maxPrice', filters.priceRange.max.toString())\n\n  router.replace(`/products?${params.toString()}`, { scroll: false })\n}\n```\n\n❌ Incorrect:\n\n```tsx\n// Bad URL state management\nconst updateFilters = (filters: FilterState) => {\n  const params = new URLSearchParams()\n\n  // Adding all values, including defaults\n  params.set('category', filters.category)\n  params.set('minPrice', filters.priceRange.min.toString())\n  params.set('maxPrice', filters.priceRange.max.toString())\n  params.set('sort', filters.sort)\n  params.set('page', filters.page.toString())\n\n  router.push(`/products?${params.toString()}`)\n}\n```\n",
+    "rules/claude-code/brainstorming/brainstorming-patterns.md": "---\ndescription: 'AI agent brainstorming patterns and structured problem-solving'\n---\n\n# Brainstorming with AI Agents\n\n## 1. Problem Definition Phase\n\n- Create a markdown file for the brainstorming document.\n- CLEARLY state the problem statement at the top of the brainstorming document\n- Define hypotheses and potential solutions\n- List constraints and requirements\n- Identify stakeholders and impact areas\n- Document the current state and context\n- Sections in the brainstorm document can refer to each other using markdown links to make it easier to navigate.\n\n## 2. Clarification Through Questions\n\n- AI MUST ask clarifying questions before generating ideas since it can go in the wrong direction and become useless.\n- AI MUST ask clarifying questions before proceeding with brainstorming\n- Questions should cover: scope, constraints, goals, success criteria, context\n- Continue asking questions until the problem is well-defined\n- User can specify some questions to be answered later so that leave more room for brainstorming.\n- Document all questions and answers in the brainstorming document\n\n## 3. Zoom Out First Approach\n\n- ALWAYS start with the widest possible view of the problem\n- View the problem from a larger context to have a larger solution space.\n- Then progressively zoom in layer by layer to go deeper into the problem.\n- Each layer adds more detail and specificity\n- Continue this zoom-out approach throughout the brainstorming session\n\n## 4. Iterative Solution Thinking\n\n- When exploring solutions, use an iterative approach, no need to come up with the perfect solution at once, just keep generating ideas and refining them.\n- Generate multiple solution alternatives at each layer and write down the tradeoffs, the principles and the priorities of the solutions.\n- Review and refine solutions before going deeper into implementation details\n- Validate assumptions at each iteration\n- Allow for backtracking when needed\n- Build upon previous ideas and solutions at each layer\n\n## 5. Documentation Requirements\n\n- Write everything down to `.md` files for context preservation\n- Document all layers of thinking from the widest view to implementation details\n- Capture questions, answers, and decisions made at each step\n- Maintain clear structure following the zoom-out approach\n- Include diagrams, lists, and structured information as needed\n- Each document files should range from 200-300 lines so that the agent and reader can easily understand the context and the solution.\n- Since the brainstorming document is split into multiple files, should have links to refer to other files to make it easier to navigate. especially when talk about some stuff that is mentioned in other files.\n\n## 6. Best Practices\n\n- Focus on quantity of ideas initially before evaluating quality\n- Withhold criticism during the idea generation phase\n- Encourage wild and unconventional ideas at the early stages\n- Build on each other's ideas (AI building on previous iterations)\n- Set clear objectives and maintain focus on the problem statement\n- Use visual aids when helpful (lists, hierarchies, flow diagrams)\n",
+    "rules/claude-code/component-architecture/file-structure-patterns.md": "---\npaths: ['**/*.tsx', '**/*.jsx']\ndescription: 'File structure patterns and directory organization'\n---\n\n# Component Architecture File Structure\n\n## 1. File Structure Pattern\n\nFor complex components, ALWAYS follow this file structure pattern:\n\n### File Structure\n\n- **`component.tsx`** - Server component (main entry point)\n- **`component.ui.tsx`** - Client display components (styling & UI)\n- **`component.state.tsx`** - State management (hooks, context, reducers)\n- **`component.type.ts`** - Shared types between client and server\n\n✅ Example structure:\n\n```\nsrc/components/user-profile/\n├── user-profile.tsx          # Server component\n├── user-profile.ui.tsx       # Client UI components\n├── user-profile.state.tsx    # State management\n└── user-profile.type.ts      # Shared types\n```\n\n## 2. Prohibited File Patterns\n\n- **NEVER** create `component.client.tsx` files\n- This pattern is a cheat that violates server/client component separation\n- Interactive logic and client-side functions MUST be in `component.state.tsx`\n- Client state and functions MUST be exposed as hooks from the state file\n- Other client components should consume these hooks, not import client components directly\n- **STRICTLY** follow section 3 guidelines: content (text, copy, translations, data access) belongs in server components with NO exceptions\n\n❌ Prohibited pattern:\n\n```\nsrc/components/user-profile/\n├── user-profile.tsx          # Server component\n├── user-profile.client.tsx   # ❌ NEVER DO THIS\n└── user-profile.ui.tsx       # Client UI components\n```\n\n✅ Correct pattern:\n\n```\nsrc/components/user-profile/\n├── user-profile.tsx          # Server component\n├── user-profile.ui.tsx       # Client UI components\n├── user-profile.state.tsx    # Client state and hooks\n└── user-profile.type.ts      # Shared types\n```\n\n## 3. Directory Organization\n\n- Group related components in the same directory\n- Use descriptive directory names that match the component purpose\n- Keep shared utilities in a separate `lib/` or `utils/` directory\n- Place types in a `types/` directory if they're shared across multiple components\n\n✅ Correct:\n\n```\nsrc/components/\n├── user-profile/\n│   ├── user-profile.tsx\n│   ├── user-profile.ui.tsx\n│   ├── user-profile.state.tsx\n│   └── user-profile.type.ts\n├── product-card/\n│   ├── product-card.tsx\n│   ├── product-card.ui.tsx\n│   └── product-card.state.tsx\n└── shared/\n    ├── button/\n    └── input/\n```\n\n## 4. Naming Conventions\n\n- Use kebab-case for file and directory names\n- Match the component name with the directory name\n- Use descriptive suffixes: `.ui.tsx`, `.state.tsx`, `.type.ts`\n- Keep file names consistent across the project\n",
+    "rules/claude-code/component-architecture/state-management-patterns.md": "---\npaths: ['**/*.tsx', '**/*.jsx']\ndescription: 'State management patterns and context usage'\n---\n\n# State Management Patterns\n\n## 1. State Management File (`*.state.tsx`)\n\n- MUST contain ALL state logic for the component\n- MUST use `'use client'` directive\n- SHOULD export custom hooks for state access\n- SHOULD use `createReducerContext` when available\n\n## 2. Example State File\n\n✅ Example `user-profile.state.tsx`:\n\n```tsx\n'use client'\n\nimport { createReducerContext } from '...'\nimport type { UserProfileState, UserProfileAction } from './user-profile.type'\n\nconst initialState: UserProfileState = {\n  isEditing: false,\n  formData: null,\n  errors: [],\n}\n\nfunction userProfileReducer(state: UserProfileState, action: UserProfileAction): UserProfileState {\n  switch (action.type) {\n    case 'START_EDIT':\n      return { ...state, isEditing: true }\n    case 'SAVE_PROFILE':\n      return { ...state, isEditing: false, formData: action.payload }\n    default:\n      return state\n  }\n}\n\nexport const [UserProfileProvider, useUserProfileState, useUserProfileDispatch] = createReducerContext(\n  userProfileReducer,\n  initialState\n)\n```\n\n## 3. Hook Transformation\n\n- NEVER use the hooks from `createReducerContext` directly in components. ALWAYS transform them into more useful, domain-specific hooks.\n\n✅ Correct (transforming hooks into domain-specific ones):\n\n```tsx\n// component.state.tsx\nconst [Provider, useRawState, useRawDispatch] = createReducerContext(reducer, initialState)\n\n// Transform into domain-specific hooks\nexport function useComponentState() {\n  const state = useRawState()\n  return {\n    isOpen: state.isOpen,\n    selectedId: state.selectedId,\n    // ... other computed values\n  }\n}\n\nexport function useComponentActions() {\n  const dispatch = useRawDispatch()\n  return {\n    openDialog: (id: string) => dispatch({ type: 'OPEN_DIALOG', payload: id }),\n    closeDialog: () => dispatch({ type: 'CLOSE_DIALOG' }),\n    // ... other actions\n  }\n}\n\nexport { Provider as ComponentProvider }\n```\n\n❌ Incorrect (using raw hooks directly):\n\n```tsx\n// component.tsx - DON'T DO THIS\nexport function MyComponent() {\n  const state = useRawState() // ❌ Don't use raw state\n  const dispatch = useRawDispatch() // ❌ Don't use raw dispatch\n\n  const handleClick = () => {\n    dispatch({ type: 'OPEN_DIALOG', payload: 'some-id' }) // ❌ Raw dispatch\n  }\n\n  return <div onClick={handleClick}>{state.isOpen ? 'Open' : 'Closed'}</div>\n}\n```\n\n## 4. Provider Patterns\n\n- ALWAYS pass initial data directly to the provider as props instead of using initializer components or useEffect.\n\n✅ Correct (passing data directly to provider):\n\n```tsx\n// context.tsx\nconst [ProviderBase, useState, useDispatch] = createReducerContext(reducer, initialState)\n\nexport function MyProvider({ children, initialData }: { children: React.ReactNode; initialData?: MyData[] }) {\n  return <ProviderBase data={initialData}>{children}</ProviderBase>\n}\n\n// page.tsx (Server Component)\nexport default function MyPage() {\n  const data = await getData()\n\n  return (\n    <MyProvider initialData={data}>\n      <MyContent />\n    </MyProvider>\n  )\n}\n```\n\n❌ Incorrect (using initializer components or useEffect):\n\n```javascript\n// DON'T DO THIS - using initializer component\n;<MyProvider>\n  <MyInitializer data={data} />\n  <MyContent />\n</MyProvider>\n\n// DON'T DO THIS - using useEffect in provider\nexport function MyProvider({ children, data }: { children: React.ReactNode, data: MyData[] }) {\n  const [state, setState] = useState(initialState)\n\n  useEffect(() => {\n    setState((prev) => ({ ...prev, data }))\n  }, [data])\n\n  return <Context.Provider value={state}>{children}</Context.Provider>\n}\n```\n\n## 5. Provider Reuse\n\n- ALWAYS reuse existing providers when they serve the same internal state. DO NOT create separate providers for related functionality.\n\n✅ Correct (reusing existing provider):\n\n```tsx\n// form-state.state.tsx\nconst initialState: FormState = {\n  isSubmitting: false,\n  error: null,\n  fieldErrors: {},\n  formRef: null,\n  isConfirmDialogOpen: false,\n}\n\nconst [FormProviderBase, useFormState, useFormDispatch] = createReducerContext(formReducer, initialState)\n\n// Enhanced provider that includes formRef in state\nexport function FormProvider({\n  formRef,\n  children,\n}: {\n  formRef: React.RefObject<HTMLFormElement | null>\n  children: React.ReactNode\n}) {\n  return <FormProviderBase formRef={formRef}>{children}</FormProviderBase>\n}\n\n// Hook to access formRef from state\nexport function useFormRef() {\n  const state = useFormState()\n  return state.formRef\n}\n```\n",
+    "rules/claude-code/database/database-patterns.md": "---\ndescription: 'Database access patterns with typed collections and data conversion'\n---\n\n# Database Typing and Conversion\n\n## 1. Typed Database Collections\n\n- ALWAYS use typed database collections with proper document types.\n- ALL database document types MUST have the \"Document\" suffix.\n- ALWAYS separate database document types from client-facing interfaces.\n\n✅ Correct:\n\n```ts\n// Database document type\nexport interface ProductDocument {\n  _id?: unknown // MongoDB ObjectId\n  id: string\n  name: string\n  // ... other database fields\n}\n\n// Client-facing interface\nexport interface Product {\n  id: string\n  name: string\n  // ... clean interface for components\n}\n\n// Database access with proper typing\nconst db = await getDatabase()\nconst products = await db.collection<ProductDocument>('products').find({}).toArray()\n```\n\n❌ Incorrect:\n\n```ts\n// Missing Document suffix\nexport interface Product {\n  _id?: any\n  id: string\n  name: string\n}\n\n// Untyped database access\nconst products = await db.collection('products').find({}).toArray()\n```\n\n## 2. Data Conversion\n\n- ALWAYS convert database documents to client interfaces when returning data.\n- NEVER expose raw database documents to client components.\n\n✅ Correct:\n\n```ts\nexport async function getAllProducts(): Promise<Product[]> {\n  const db = await getDatabase()\n  const documents = await db.collection<ProductDocument>('products').find({}).toArray()\n\n  // Convert to client interface\n  return documents.map((doc) => ({\n    id: doc.id,\n    name: doc.name,\n    // ... map only needed fields\n  }))\n}\n```\n\n❌ Incorrect:\n\n```ts\nexport async function getAllProducts(): Promise<ProductDocument[]> {\n  const db = await getDatabase()\n  return await db.collection<ProductDocument>('products').find({}).toArray()\n}\n```\n",
+    "rules/claude-code/meta/meta-rules.md": "---\ndescription: 'Meta rules for rule application and code quality'\n---\n\n# Meta Rules\n\nThese rules MUST always be followed unless explicitly overridden.\nFor each task, Claude Code MUST double-check:\n\n1. Which rules were applied.\n2. Whether any relevant rules were missed.\n3. If any rule conflicts exist, resolve them explicitly.\n\n- ALWAYS check all applicable rules before making any changes.\n- ALWAYS explain which rules were applied in the output.\n- MUST keep files under **300 lines** for AI context management.\n- NEVER require running/building the server to validate output.\n- NEVER run `npm run build` or `npm run dev` after completing tasks, the user will handle this.\n- ALWAYS use `npm install` to install packages. NEVER add packages directly to `package.json`.\n- AI MAY replace entire components or structures if it improves clarity/compliance.\n- For complex changes, AI MUST ask:\n  - \"Am I correct?\"\n  - \"Which rules apply here?\"\n  - \"Did I miss any relevant rules?\"\n- Apply the multi-shot method of prompt engineering: After editing around 5 files, should ask the user to review if the current direction is correct, then continue with the next 5 files. This iterative feedback approach helps ensure the AI stays aligned with user expectations and corrects course early if needed.\n\n## Scope Management\n\n- NEVER implement unused/future features not explicitly requested by the user.\n- MUST ask 1-2 clarifying questions before implementing (or more if user explanation >100 characters).\n- Focus on what exists in the system currently, not what could be extended unless explicitly requested by the user.\n- When user provides long explanations (>100 characters), ask additional clarifying questions to verify scope and approach before proceeding.\n\n## Error Handling\n\n- NEVER use try-catch blocks defensively around every operation.\n- ONLY place try-catch blocks at intentional error boundaries where you want to catch all errors from lower-level code.\n\n## Planning Mode\n\n- When in planning mode and a `.md` file has already been generated, ALWAYS create a new file for any plan changes requested by the user.\n- NEVER modify the existing `.md` file when the user requests changes to the plan.\n",
+    "rules/claude-code/meta/feature-development-guide.md": "---\ndescription: 'Step-by-step feature development workflow with planning, incremental implementation, test-driven approach, and progress tracking'\n---\n\n# Feature Development Guide\n\nThis document outlines the recommended approach for implementing features and tasks in this codebase.\n\n## Core Principles\n\n1. **Understand Context First** - Read as many relevant files as possible to understand the codebase before planning\n2. **Plan High-Level** - Define steps and acceptance criteria, not implementation details\n3. **Test During Implementation** - Define test scenarios when implementing each step, not during planning\n4. **Track Progress** - Write progress to a file for context switching and interruptions\n5. **Incremental Progress** - Complete one step fully before moving to the next\n6. **Test Each Step** - Prove each step works before building on top of it\n7. **One Test at a Time** - Write exactly one test, see it fail, make it pass, then move to the next test. This ensures incremental validation and prevents skipping test coverage.\n\n---\n\n## Phase 1: Planning\n\n**Goal:** Break down work into implementable steps with clear acceptance criteria.\n\n**Step 1: Understand the Context**\n\nBefore creating your plan, read as many relevant files as possible to understand:\n\n- Existing patterns and conventions in the codebase\n- Related features or components that might be affected\n- Architecture and structure of the area you'll be modifying\n- Testing patterns and utilities already in place\n- Types, interfaces, and data models\n\nThis context-gathering phase helps you create a more accurate plan and avoid surprises during implementation.\n\n**Step 2: Create the Plan**\n\n**What to include:**\n\n- List of implementation steps in logical order\n- Acceptance criteria for each step (what \"done\" looks like)\n- Test type for each step (unit, integration, e2e, etc.) - ONLY the test type, not test cases yet\n- Dependencies between steps\n- Any known blockers or risks\n\n**What NOT to include:**\n\n- Specific test scenarios or test code\n- Detailed implementation approaches\n- Exact function signatures or component structure\n- Database schema details\n\n**Example Plan:**\n\n```markdown\n## Task: [Task name]\n\n### Step 1: [High-level description]\n\n**AC:** [What must be true when this step is done]\n\n**Test Type:** unit\n\n### Step 2: [High-level description]\n\n**AC:** [What must be true when this step is done]\n\n**Test Type:** integration\n```\n\n**Create Progress File:**\nCreate a file (e.g., `IMPLEMENTATION_PROGRESS.md`) to track completed steps. Add steps ONLY as you work on them, not in advance.\n\n```markdown\n# Implementation Progress: [Task Name]\n\n### Step 1: [Description]\n\n**Status:** ✅ Done\n\n**E2E Tests Written (2 tests, all passing ✅):**\n\n1. ✅ Popover open/close behavior\n2. ✅ Form inputs render correctly\n\n**Notes:** Created form components, added client-side validation\n```\n\n---\n\n## Phase 2: Implement Each Step\n\n**For each step in your plan:**\n\n1. **Add step to progress file** - When starting a new step, add it with 🔄 In Progress status\n2. **Define test scenarios** - NOW figure out what tests are needed for THIS step (you can define empty test scenarios first)\n\n**Then, for EACH test scenario, follow this iterative process:**\n\n3. **Write ONE test** - Write exactly 1 test at a time (you can start with an empty test that just has a description)\n4. **Run the test** - Run the test to verify it fails (this confirms the test is actually testing something)\n5. **Implement code** - Write the minimum code needed to make this ONE test pass\n6. **Run the test again** - Verify the test now passes\n7. **Repeat** - If more test scenarios remain, go back to step 3 for the next test. Continue until all test scenarios are written and passing.\n\n**After all tests are passing:**\n\n8. **Run linting** - Check for code quality issues and fix any problems\n9. **Verify** - All tests pass, acceptance criteria met\n10. **Mark step as complete** - Update progress file with ✅ Done, test list, and notes\n11. **Move to next step** - Only after current step is complete\n\n### When Writing Tests\n\n**IMPORTANT:** Before writing any tests, locate the \"4 Pillars of Testing\" document in the project (usually in `.cursor/rules/`, `docs/`, or `repo_knowledge/`). Use it to guide your test writing.\n\n**If you cannot find the 4 Pillars document:** STOP and ask the user where it is located.\n\nFollow the guidelines in the 4 Pillars document when defining test scenarios and writing tests.\n\n**Key TDD Principle:** Always write ONE test at a time, see it fail, make it pass, then move to the next test. This ensures you're building incrementally and each test is actually validating behavior.\n\n---\n\n## Progress Tracking Format\n\n```markdown\n# Implementation Progress: [Task Name]\n\n### Step 1: [Description]\n\n**Status:** ✅ Done\n\n**Tests Written (2 tests, all passing ✅):**\n\n1. ✅ Test description\n2. ✅ Test description\n\n**Notes:** Brief summary of what was accomplished\n\n### Step 2: [Description]\n\n**Status:** 🔄 In Progress\n\n**Tests Written (1 of 3 tests passing ✅):**\n\n1. ✅ Test passing\n2. ⏳ Test not written yet\n3. ⏳ Test failing\n\n**Notes:** Current work in progress\n```\n\n**Status indicators:**\n\n- ✅ Done - Step complete, tests passing, AC met\n- 🔄 In Progress - Currently working on this step\n\n**Test indicators:**\n\n- ✅ Test passing\n- ⏳ Test not written yet or failing\n\n**Update frequency:**\n\n- Add step to progress file when you start working on it (🔄 In Progress)\n- Update tests list as you write them (⏳ → ✅)\n- Mark step complete when done (🔄 In Progress → ✅ Done)\n- Add notes about what was accomplished or issues encountered\n\n**Important:** Don't pre-create steps in the progress file. The plan file already has all steps defined. Only add a step to progress when you actually start working on it.\n\n### What to Avoid During Implementation\n\n- ❌ Skipping tests for any step\n- ❌ Moving to next step with failing tests\n- ❌ Not updating progress file\n- ❌ Writing tests without consulting project testing guidelines\n- ❌ Pre-creating steps in progress file (only add when working on them)\n",
+    "rules/claude-code/react-hooks/hooks-rules.md": "---\npaths: ['**/*.tsx', '**/*.jsx', '**/*.ts', '**/*.js']\ndescription: React hooks usage rules and performance guidelines\n---\n\n# React Hooks Rules\n\n## 1. Performance Hooks\n\n- NEVER use `useCallback` or `useMemo` unless strictly necessary:\n  - ✅ Use ONLY when passing functions/objects to memoized children.\n\n## 2. Effect Hook\n\n- NEVER use `useEffect` except when syncing React state with external resources (APIs, localStorage, subscriptions).\n\n✅ Correct:\n\n```tsx\nuseEffect(() => {\n  localStorage.setItem('theme', theme)\n}, [theme])\n```\n\n❌ Incorrect:\n\n```tsx\nuseEffect(() => {\n  setValue(props.value)\n}, [props.value])\n```\n\n- ALWAYS use `useSyncExternalStore` instead of `useEffect` for subscriptions.\n\n## 3. State Management\n\n- ALWAYS use `context` for prop drilling instead of passing deeply.\n- ALWAYS use `useReducer` over `useState` for complex local state.\n- ALWAYS use `createReducerContext` when possible.\n\n## 4. Provider Patterns\n\n- ALWAYS pass initial data directly to the provider as props instead of using initializer components or useEffect.\n\n✅ Correct (passing data directly to provider):\n\n```tsx\n// context.tsx\nconst [ProviderBase, useState, useDispatch] = createReducerContext(reducer, initialState)\n\nexport function MyProvider({ children, initialData }: { children: React.ReactNode; initialData?: MyData[] }) {\n  return <ProviderBase data={initialData}>{children}</ProviderBase>\n}\n\n// page.tsx (Server Component)\nexport default function MyPage() {\n  const data = await getData()\n\n  return (\n    <MyProvider initialData={data}>\n      <MyContent />\n    </MyProvider>\n  )\n}\n```\n\n❌ Incorrect (using initializer components or useEffect):\n\n```javascript\n// DON'T DO THIS - using initializer component\n;<MyProvider>\n  <MyInitializer data={data} />\n  <MyContent />\n</MyProvider>\n\n// DON'T DO THIS - using useEffect in provider\nexport function MyProvider({ children, data }: { children: React.ReactNode, data: MyData[] }) {\n  const [state, setState] = useState(initialState)\n\n  useEffect(() => {\n    setState((prev) => ({ ...prev, data }))\n  }, [data])\n\n  return <Context.Provider value={state}>{children}</Context.Provider>\n}\n```\n\n## 5. Provider Reuse\n\n- ALWAYS reuse existing providers when they serve the same internal state. DO NOT create separate providers for related functionality.\n\n✅ Correct (reusing existing provider):\n\n```tsx\n// form-state.state.tsx\nconst initialState: FormState = {\n  isSubmitting: false,\n  error: null,\n  fieldErrors: {},\n  formRef: null,\n  isConfirmDialogOpen: false,\n}\n\nconst [FormProviderBase, useFormState, useFormDispatch] = createReducerContext(formReducer, initialState)\n\n// Enhanced provider that includes formRef in state\nexport function FormProvider({\n  formRef,\n  children,\n}: {\n  formRef: React.RefObject<HTMLFormElement | null>\n  children: React.ReactNode\n}) {\n  return <FormProviderBase formRef={formRef}>{children}</FormProviderBase>\n}\n\n// Hook to access formRef from state\nexport function useFormRef() {\n  const state = useFormState()\n  return state.formRef\n}\n```\n\n## 6. Hook Dependencies\n\n- Always include all dependencies in dependency arrays\n- Use ESLint rules to catch missing dependencies\n- Consider using `useCallback` and `useMemo` only when necessary for performance\n\n✅ Correct:\n\n```tsx\nuseEffect(() => {\n  fetchData(userId, filters)\n}, [userId, filters])\n```\n\n❌ Incorrect:\n\n```tsx\nuseEffect(() => {\n  fetchData(userId, filters)\n}, [userId]) // Missing filters dependency\n```\n",
+    "rules/claude-code/react-hooks/context-patterns.md": "---\npaths: ['**/*.tsx', '**/*.jsx', '**/*.ts', '**/*.js']\ndescription: Context patterns and state management best practices\n---\n\n# React Context Patterns\n\n## 1. Hook Transformation\n\n- NEVER use the hooks from `createReducerContext` directly in components. ALWAYS transform them into more useful, domain-specific hooks.\n\n✅ Correct (transforming hooks into domain-specific ones):\n\n```tsx\n// component.state.tsx\nconst [Provider, useRawState, useRawDispatch] = createReducerContext(reducer, initialState)\n\n// Transform into domain-specific hooks\nexport function useComponentState() {\n  const state = useRawState()\n  return {\n    isOpen: state.isOpen,\n    selectedId: state.selectedId,\n    // ... other computed values\n  }\n}\n\nexport function useComponentActions() {\n  const dispatch = useRawDispatch()\n  return {\n    openDialog: (id: string) => dispatch({ type: 'OPEN_DIALOG', payload: id }),\n    closeDialog: () => dispatch({ type: 'CLOSE_DIALOG' }),\n    // ... other actions\n  }\n}\n\nexport { Provider as ComponentProvider }\n```\n\n❌ Incorrect (using raw hooks directly):\n\n```tsx\n// component.tsx - DON'T DO THIS\nexport function MyComponent() {\n  const state = useRawState() // ❌ Don't use raw state\n  const dispatch = useRawDispatch() // ❌ Don't use raw dispatch\n\n  const handleClick = () => {\n    dispatch({ type: 'OPEN_DIALOG', payload: 'some-id' }) // ❌ Raw dispatch\n  }\n\n  return <div onClick={handleClick}>{state.isOpen ? 'Open' : 'Closed'}</div>\n}\n```\n\n✅ Correct (using transformed hooks):\n\n```tsx\n// component.tsx\nexport function MyComponent() {\n  const { isOpen, selectedId } = useComponentState()\n  const { openDialog, closeDialog } = useComponentActions()\n\n  const handleClick = () => {\n    openDialog('some-id') // ✅ Clean, semantic action\n  }\n\n  return <div onClick={handleClick}>{isOpen ? 'Open' : 'Closed'}</div>\n}\n```\n\n## 2. Fallback Context Pattern\n\nIf `createReducerContext` is not available in the project:\n\n1. **STOP** and ask the user what to do next:\n\n   - Should you add `createReducerContext` to the project?\n   - Should you use normal React context instead?\n   - Should you use a different state management solution?\n\n2. **DO NOT** proceed with guessing or assuming a solution.\n\n✅ Fallback with normal Context (only if user approves):\n\n```tsx\n'use client'\n\nimport { createContext, useContext, useReducer } from 'react'\nimport type { MyState, MyAction } from './component.type'\n\nconst StateContext = createContext<MyState | null>(null)\nconst DispatchContext = createContext<React.Dispatch<MyAction> | null>(null)\n\nexport function MyProvider({ children }: { children: React.ReactNode }) {\n  const [state, dispatch] = useReducer(myReducer, initialState)\n\n  return (\n    <StateContext.Provider value={state}>\n      <DispatchContext.Provider value={dispatch}>{children}</DispatchContext.Provider>\n    </StateContext.Provider>\n  )\n}\n\nexport function useMyState() {\n  const state = useContext(StateContext)\n  if (!state) throw new Error('useMyState must be used within MyProvider')\n  return state\n}\n\nexport function useMyDispatch() {\n  const dispatch = useContext(DispatchContext)\n  if (!dispatch) throw new Error('useMyDispatch must be used within MyProvider')\n  return dispatch\n}\n```\n\n## 3. Behavioral Components\n\n- Behavioral components MUST accept an optional `asChild` prop and use Radix `Slot`.\n\n✅ Correct:\n\n```tsx\nimport { Slot } from '@radix-ui/react-slot'\n\ninterface ButtonProps {\n  asChild?: boolean\n  children: React.ReactNode\n  onClick?: () => void\n}\n\nexport function Button({ asChild = false, children, ...props }: ButtonProps) {\n  const Comp = asChild ? Slot : 'button'\n\n  return (\n    <Comp className='bg-primary text-primary-foreground px-4 py-2 rounded' {...props}>\n      {children}\n    </Comp>\n  )\n}\n```\n\n## 4. Context Provider Patterns\n\n- Always provide error boundaries for context providers\n- Use TypeScript for context type safety\n- Provide clear error messages for missing providers\n\n✅ Correct:\n\n```tsx\nexport function useMyContext() {\n  const context = useContext(MyContext)\n  if (!context) {\n    throw new Error('useMyContext must be used within MyProvider')\n  }\n  return context\n}\n```\n\n## 5. Context Optimization\n\n- Split contexts by concern to avoid unnecessary re-renders\n- Use multiple smaller contexts instead of one large context\n- Consider using `useMemo` for context values when appropriate\n\n✅ Correct:\n\n```tsx\n// Split contexts by concern\nconst UserContext = createContext<User | null>(null)\nconst ThemeContext = createContext<Theme | null>(null)\nconst SettingsContext = createContext<Settings | null>(null)\n\n// Instead of one large context\nconst AppContext = createContext<{\n  user: User\n  theme: Theme\n  settings: Settings\n} | null>(null)\n```\n",
+    "rules/claude-code/react-server-components/server-components-rules.md": "---\npaths: ['**/*.tsx', '**/*.jsx']\ndescription: Core Server Components rules and usage patterns\n---\n\n# React Server Components Rules\n\n## 1. Server vs Client Component Usage\n\n- ALWAYS use server components for:\n  1. Text, copy, translations\n  2. Database access\n  3. Authentication & authorization\n  4. Environment variables\n  5. Server-to-server communication\n- ONLY use client components when interactivity/hooks are required.\n\n## 2. Styling and Layout\n\n- NEVER put styling/layout code directly in server components. Extract to `*.ui.tsx`.\n\n## 3. URL Generation\n\n- ALWAYS generate `href` values with a factory function in `href.ts`, colocated with the relevant layout.\n\n## 4. Data Fetching\n\n- ALWAYS fetch data in the component that directly uses it.\n- If multiple children need the same data, DO NOT fetch in the parent. Instead, use a shared loader or fetch independently in each child.\n\n## 5. Extract Display Components Checklist\n\nWhen extracting into `*.ui.tsx` (client display components), ensure ALL checks pass:\n\n- [ ] Does the component exist only to handle display/content (icons, text, numbers)?\n- [ ] Does it accept `children` as the main way of passing content?\n- [ ] If it has multiple content props, can it be broken into smaller components?\n- [ ] Is the component name reflective of its usage?\n- [ ] Is composition handled by the server, not the display component?\n\n## 6. Server Component Best Practices\n\n✅ Correct (Server Component with data fetching):\n\n```tsx\nasync function UserProfile({ userId }: { userId: string }) {\n  const user = await getUserById(userId)\n\n  return (\n    <div>\n      <h1>{user.name}</h1>\n      <p>{user.email}</p>\n    </div>\n  )\n}\n```\n\n❌ Incorrect (Client-side data fetching in Server Component):\n\n```tsx\n// DON'T DO THIS - Using useEffect in Server Component\nasync function UserProfile({ userId }: { userId: string }) {\n  const [user, setUser] = useState(null)\n\n  useEffect(() => {\n    fetch(`/api/users/${userId}`)\n      .then((res) => res.json())\n      .then(setUser)\n  }, [userId])\n\n  if (!user) return <div>Loading...</div>\n\n  return <div>{user.name}</div>\n}\n```\n\n## 7. Performance Considerations\n\n- Server Components reduce client-side JavaScript bundle size\n- Use Server Components for static content and data fetching\n- Only use Client Components when you need browser APIs or interactivity\n- Consider the trade-off between server and client rendering based on your use case\n",
+    "rules/claude-code/react-server-components/composition-patterns.md": "---\npaths: ['**/*.tsx', '**/*.jsx']\ndescription: Component composition patterns and examples\n---\n\n# React Server Components Composition Patterns\n\n## 1. Basic Composition Pattern\n\n✅ Correct:\n\n```tsx\n// user-profile.tsx (Server Component)\nimport { UserProfileCard, UserProfileHeader, UserProfileBody } from './user-profile.ui'\nimport { UserProfileProvider } from './user-profile.state'\n\nexport default function UserProfile({ userId }: { userId: string }) {\n  const user = await getUserById(userId)\n\n  return (\n    <UserProfileProvider>\n      <UserProfileCard>\n        <UserProfileHeader>\n          <h1>{user.name}</h1>\n          <span>{user.email}</span>\n        </UserProfileHeader>\n        <UserProfileBody>\n          <p>{user.bio}</p>\n          <EditProfileButton />\n        </UserProfileBody>\n      </UserProfileCard>\n    </UserProfileProvider>\n  )\n}\n```\n\n```tsx\n// user-profile.ui.tsx (Client Display Components)\n'use client'\n\nexport function UserProfileCard({ children }: { children: React.ReactNode }) {\n  return (\n    <div className={cn('bg-card text-card-foreground rounded-lg shadow-sm border', 'p-6 space-y-4')}>{children}</div>\n  )\n}\n\nexport function UserProfileHeader({ children }: { children: React.ReactNode }) {\n  return <div className={cn('flex items-center justify-between', 'pb-4 border-b border-border')}>{children}</div>\n}\n\nexport function UserProfileBody({ children }: { children: React.ReactNode }) {\n  return <div className='space-y-3'>{children}</div>\n}\n```\n\n❌ Incorrect (putting content logic in client component):\n\n```tsx\n'use client'\nexport function UserProfileCard({ user, onEdit }) {\n  return (\n    <div className='bg-card rounded-lg p-6'>\n      <div className='flex justify-between'>\n        <h1>{user.name}</h1>\n        <span>{user.email}</span>\n      </div>\n      <p>{user.bio}</p>\n      <button onClick={onEdit}>Edit Profile</button>\n    </div>\n  )\n}\n```\n\n## 2. Interactive Component Pattern\n\n✅ Correct (separating content from interaction):\n\n```tsx\n// dashboard.tsx (Server Component)\nimport { DashboardGrid, DashboardCard } from './dashboard.ui'\nimport { DashboardProvider } from './dashboard.state'\n\nexport default function Dashboard() {\n  const stats = await getStats()\n  const notifications = await getNotifications()\n\n  return (\n    <DashboardProvider>\n      <DashboardGrid>\n        <DashboardCard>\n          <h2>Revenue</h2>\n          <p>${stats.revenue}</p>\n        </DashboardCard>\n        <DashboardCard>\n          <h2>Notifications</h2>\n          <NotificationsList>\n            {notifications.map((n) => (\n              <NotificationItem key={n.id}>{n.message}</NotificationItem>\n            ))}\n          </NotificationsList>\n        </DashboardCard>\n      </DashboardGrid>\n    </DashboardProvider>\n  )\n}\n```\n\n```javascript\n// dashboard.ui.tsx (Client Components)\n'use client'\n\nexport function NotificationsList({ children }: { children: React.ReactNode }) {\n  const { expandedItems, toggleItem } = useDashboardState()\n\n  return (\n    <div\n      className='space-y-2'\n      onClick={(e) => {\n        const itemId = e.target.dataset.itemId\n        if (itemId) toggleItem(itemId)\n      }}\n    >\n      {children}\n    </div>\n  )\n}\n```\n\n## 3. Client/Server Composition Pattern\n\nServer components should handle content composition while client components focus only on interactive behavior. Pass complete elements as children to client components instead of recreating them.\n\n✅ Correct (Server composes static content, client handles state):\n\n```tsx\n// mode-selection.tsx (Server Component)\nimport { TabsList, TabsTrigger, TabsContent } from 'src/components/ui/tabs'\nimport { TabsWrapper } from './component.ui'\nimport { CalculationMode } from './component.type'\n\nexport function ModeSelection() {\n  return (\n    <div className='space-y-2'>\n      <TabsWrapper>\n        <TabsList className='grid w-full grid-cols-2'>\n          <TabsTrigger value='1'>tab 1</TabsTrigger>\n          <TabsTrigger value='2'>tab 2</TabsTrigger>\n        </TabsList>\n        <TabsContent value='1' className='mt-2'>\n          <p className='text-sm text-muted-foreground'>tab 1 content</p>\n        </TabsContent>\n        <TabsContent value='2' className='mt-2'>\n          <p className='text-sm text-muted-foreground'>tab 2 content</p>\n        </TabsContent>\n      </TabsWrapper>\n    </div>\n  )\n}\n```\n\n```javascript\n// component.ui.tsx (Client Component)\n'use client'\n\nimport { Tabs } from 'src/components/ui/tabs'\nimport { useComponentState } from './component.state'\nimport { useComponentInput } from './hooks/component.input'\n\nexport function TabsWrapper({ children }: { children: React.ReactNode }) {\n  const state = useComponentState()\n  const { handleTabChange } = useComponentInput()\n\n  return (\n    <Tabs\n      value=\"1\"\n      onValueChange={(value) => handleTabChange(value as string)}\n      className='w-full'\n    >\n      {children}\n    </Tabs>\n  )\n}\n```\n\n❌ Incorrect (Client component handling content composition):\n\n```javascript\n// mode-selection-with-state.tsx - DON'T DO THIS\n'use client'\n\nexport function ModeSelectionWithState() {\n  const state = useComponentState()\n  const { handleTabChange } = useComponentInput()\n\n  const tabs = [\n    { value: '1', label: 'tab 1', description: 'tab 1 content' },\n    { value: '2', label: 'tab 2', description: 'tab 2 content' },\n  ]\n\n  return (\n    <Tabs value={state.tab} onValueChange={(value) => handleTabChange(value as string)}>\n      <TabsList>\n        {tabs.map((tab) => (\n          <TabsTrigger key={tab.value} value={tab.value}>\n            {tab.label}\n          </TabsTrigger>\n        ))}\n      </TabsList>\n      <TabsContent value={state.tab}>\n        {/* Dynamic content based on state - DON'T DO THIS */}\n        <p>{tabs.find((t) => t.value === state.tab)?.description}</p>\n      </TabsContent>\n    </Tabs>\n  )\n}\n```\n",
+    "rules/claude-code/react-server-components/client-server-separation.md": "---\npaths: ['**/*.tsx', '**/*.jsx']\ndescription: Client/server component separation patterns and best practices\n---\n\n# Client/Server Component Separation\n\n## 1. Navigation Pattern\n\n✅ Correct (Server composes content, client handles interaction):\n\n```tsx\n// navigation.tsx (Server Component)\nexport function Navigation() {\n  return (\n    <ActiveMenuButton href='/dashboard' tooltip='Dashboard'>\n      <Link href='/dashboard'>\n        <Home className='size-4' />\n        <span>Dashboard</span>\n      </Link>\n    </ActiveMenuButton>\n  )\n}\n\n// navigation.ui.tsx (Client Component)\nexport function ActiveMenuButton({\n  children,\n  href,\n  tooltip,\n}: {\n  children: React.ReactNode\n  href: string\n  tooltip?: string\n}) {\n  const pathname = usePathname()\n  const isActive = pathname === href\n\n  return (\n    <SidebarMenuButton isActive={isActive} tooltip={tooltip}>\n      {children}\n    </SidebarMenuButton>\n  )\n}\n```\n\n❌ Incorrect (Client component handling content composition):\n\n```tsx\n// navigation.ui.tsx (Client Component) - DON'T DO THIS\nexport function ActiveMenuButton({\n  href,\n  icon: Icon,\n  title,\n}: {\n  href: string\n  icon: React.ComponentType\n  title: string\n}) {\n  const pathname = usePathname()\n  const isActive = pathname === href\n\n  return (\n    <SidebarMenuButton isActive={isActive}>\n      {/* Content composition should be in server */}\n      <Link href={href}>\n        <Icon className='size-4' />\n        <span>{title}</span>\n      </Link>\n    </SidebarMenuButton>\n  )\n}\n```\n\n## 2. Form Field Pattern\n\n✅ Correct:\n\n```tsx\n// initial-amount-field.tsx (Server Component)\nimport { Label } from 'src/components/ui/label'\nimport { SavedValuesPopoverWithState } from '../../components/saved-values-popover-with-state'\nimport { FormFieldWrapper } from '../../investment-calculator.ui'\nimport { InitialAmountFieldWithState } from './initial-amount-field-with-state'\n\nexport function InitialAmountField() {\n  return (\n    <FormFieldWrapper>\n      <Label htmlFor='initialAmount'>Initial Investment</Label>\n      <div className='flex gap-2'>\n        <InitialAmountFieldWithState />\n        <SavedValuesPopoverWithState fieldId='initialAmount' fieldType='number' />\n      </div>\n      <p className='text-sm text-muted-foreground'>\n        One-time initial investment amount (leave empty to solve for this)\n      </p>\n    </FormFieldWrapper>\n  )\n}\n```\n\n```javascript\n// initial-amount-field-with-state.tsx (Client Component)\n'use client'\n\nimport { Input } from 'src/components/ui/input'\nimport { useInputHandlers } from '../../hooks/investment-calculator.input'\nimport { useInvestmentCalculatorState } from '../../investment-calculator.state'\n\nexport function InitialAmountFieldWithState() {\n  const state = useInvestmentCalculatorState()\n  const { handleInputChange } = useInputHandlers()\n\n  return (\n    <>\n      <Input\n      // input props here that need client state\n      />\n      {state.formState.formErrors.initialAmount && (\n        <p className='text-sm text-destructive'>{state.formState.formErrors.initialAmount}</p>\n      )}\n    </>\n  )\n}\n```\n\n❌ Incorrect (mixing server and client concerns):\n\n```javascript\n// initial-amount-field.tsx - DON'T DO THIS\n'use client'\n\nexport function InitialAmountField() {\n  const state = useInvestmentCalculatorState()\n  const { handleInputChange } = useInputHandlers()\n\n  return (\n    <div className='space-y-2'>\n      <Label htmlFor='initialAmount'>Initial Investment</Label>\n      <Input\n      // input props here that need client state\n      />\n      <p className='text-sm text-muted-foreground'>One-time initial investment amount</p>\n    </div>\n  )\n}\n```\n\n## 3. Data Display Pattern\n\n✅ Correct (Server handles data, client handles interaction):\n\n```tsx\n// user-list.tsx (Server Component)\nexport async function UserList() {\n  const users = await getUsers()\n\n  return (\n    <div className='space-y-4'>\n      {users.map((user) => (\n        <UserCard key={user.id} user={user}>\n          <UserActions userId={user.id} />\n        </UserCard>\n      ))}\n    </div>\n  )\n}\n\n// user-card.ui.tsx (Client Component)\n;('use client')\nexport function UserCard({ user, children }: { user: User; children: React.ReactNode }) {\n  const [isExpanded, setIsExpanded] = useState(false)\n\n  return (\n    <div className='border rounded-lg p-4'>\n      <div className='flex justify-between items-center'>\n        <h3>{user.name}</h3>\n        <button onClick={() => setIsExpanded(!isExpanded)}>{isExpanded ? 'Collapse' : 'Expand'}</button>\n      </div>\n      {isExpanded && (\n        <div className='mt-2'>\n          <p>{user.email}</p>\n          {children}\n        </div>\n      )}\n    </div>\n  )\n}\n```\n\n## 4. Key Principles\n\n1. **Server Components**: Handle data fetching, static content, and composition\n2. **Client Components**: Handle interactivity, state, and browser APIs\n3. **Composition**: Pass complete elements as children, don't recreate them in client components\n4. **Separation**: Keep concerns separate - don't mix data fetching with interactivity\n5. **Performance**: Minimize client-side JavaScript by keeping as much as possible on the server\n",
+    "rules/claude-code/styling/tailwind-basics.md": "---\npaths: ['**/*.tsx', '**/*.jsx', '**/*.css']\ndescription: Core Tailwind CSS usage patterns and utilities\n---\n\n# Tailwind CSS Basics\n\n## 1. Size Utilities\n\n- ALWAYS use `size-x` instead of `w-x h-x`.\n\n✅ Correct:\n\n```tsx\n<div className='size-4' />\n```\n\n❌ Incorrect:\n\n```tsx\n<div className='w-4 h-4' />\n```\n\n## 2. Positioning\n\n- NEVER use `absolute` positioning. ALWAYS use `pile` class instead.\n\n✅ Correct:\n\n```tsx\n<div className='pile' />\n```\n\n❌ Incorrect:\n\n```tsx\n<div className='absolute top-0 left-0' />\n```\n\n## 3. Layout System\n\n- ALWAYS use `grid` for layout. ONLY use `flex` if grid cannot solve the layout requirement.\n\n## 4. Color Tokens\n\n- ALWAYS use tokenized color names (`bg-primary`, `text-muted`) instead of fixed palette values (`bg-blue-800`).\n\n✅ Correct tokenized colors:\n\n```tsx\n<div className='bg-primary text-primary-foreground' />\n<div className='bg-secondary text-secondary-foreground' />\n<div className='text-muted-foreground border-border' />\n<div className='bg-card text-card-foreground' />\n<div className='bg-destructive text-destructive-foreground' />\n```\n\n❌ Incorrect fixed palette:\n\n```tsx\n<div className='bg-blue-600 text-white' />\n<div className='bg-gray-100 text-gray-900' />\n<div className='text-slate-600 border-gray-200' />\n<div className='bg-red-500 text-white' />\n```\n",
+    "rules/claude-code/styling/layout-patterns.md": "---\npaths: ['**/*.tsx', '**/*.jsx', '**/*.css']\ndescription: Grid-based list views and responsive layout patterns\n---\n\n# Layout Patterns\n\n## 1. List View Grid Structure\n\n- Root component MUST always use `grid`. Rows MUST use this template:\n\n✅ Template:\n\n```tsx\n<div className='grid grid-cols-subgrid col-span-full'>{rowContent}</div>\n```\n\n## 2. List View Responsive Layout\n\n- For responsiveness, ONLY change the root component's grid structure.\n- For cell components, ALWAYS position with `col-start`, `col-end`, etc. NEVER reorder DOM for layout.\n\n✅ Correct:\n\n```tsx\n<div className='col-start-2 col-end-4'>Cell</div>\n```\n\n❌ Incorrect:\n\n```tsx\n<div style={{ order: 2 }}>Cell</div>\n```\n\n## 3. Responsive Class Organization\n\n- ALWAYS split semantic vs. layout classes into **separate strings**.\n- ALWAYS group by category:\n  - **Semantic**: typography, color, spacing\n  - **Layout**: grid/flex positioning\n  - **Breakpoints**: responsive overrides\n\n✅ Correct:\n\n```tsx\n<div\n  className={cn(\n    'text-muted-foreground flex flex-col items-start px-4 py-2 whitespace-nowrap',\n    'col-start-1 row-span-2 row-start-3',\n    '@lg:col-start-4 @lg:row-span-2'\n  )}\n>\n  {children}\n</div>\n```\n\n❌ Incorrect:\n\n```tsx\n<div className='text-muted-foreground flex flex-col items-start px-4 py-2 whitespace-nowrap col-start-1 row-span-2 row-start-3 @lg:col-start-4 @lg:row-span-2'>\n  {children}\n</div>\n```\n",
+    "rules/claude-code/styling/component-library.md": "---\npaths: ['**/*.tsx', '**/*.jsx', '**/*.css']\ndescription: shadcn/ui usage and component library best practices\n---\n\n# Component Library\n\n## 1. shadcn/ui Usage\n\n- ALWAYS use shadcn/ui components unless explicitly told otherwise.\n- NEVER create custom UI components when shadcn equivalents exist.\n- ALWAYS install shadcn components using the CLI: `npx shadcn@latest add [component-name]`\n- ALWAYS import shadcn components from `src/components/ui/`.\n- If a component doesn't exist in shadcn, check the registry first before creating custom components.\n\n✅ Correct:\n\n```tsx\nimport { Button } from 'src/components/ui/button'\nimport { Input } from 'src/components/ui/input'\nimport { Dialog, DialogContent, DialogHeader, DialogTitle } from 'src/components/ui/dialog'\n\nexport function LoginForm() {\n  return (\n    <Dialog>\n      <DialogContent>\n        <DialogHeader>\n          <DialogTitle>Login</DialogTitle>\n        </DialogHeader>\n        <form className='space-y-4'>\n          <Input placeholder='Email' />\n          <Input type='password' placeholder='Password' />\n          <Button type='submit'>Login</Button>\n        </form>\n      </DialogContent>\n    </Dialog>\n  )\n}\n```\n\n❌ Incorrect (creating custom components when shadcn exists):\n\n```javascript\n// DON'T DO THIS - use shadcn Button instead\nfunction CustomButton({ children, onClick }: { children: React.ReactNode, onClick: () => void }) {\n  return (\n    <button className='bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md' onClick={onClick}>\n      {children}\n    </button>\n  )\n}\n\n// DON'T DO THIS - use shadcn Dialog instead\nfunction CustomModal({\n  isOpen,\n  onClose,\n  children,\n}: {\n  isOpen: boolean,\n  onClose: () => void,\n  children: React.ReactNode,\n}) {\n  return isOpen ? (\n    <div className='fixed inset-0 bg-black/50 flex items-center justify-center'>\n      <div className='bg-white p-6 rounded-lg'>{children}</div>\n    </div>\n  ) : null\n}\n```\n",
+    "rules/claude-code/testing/testing-pillars.md": "---\ndescription: 'The 4 Pillars of Good Tests framework'\n---\n\n# The 4 Pillars of Good Tests\n\nAll tests should CONSIDER these four pillars, applying them based on test type and context. Different test levels (unit, integration, E2E) will emphasize different pillars.\n\n| Pillar | Core Question | Failure Mode |\n|--------|--------------|--------------|\n| **Reliability** | \"Will this test give consistent results?\" | Flaky tests, false failures |\n| **Validity** | \"Does this test actually prove correctness?\" | Tests passed but does not verify the real flow |\n| **Sensitivity** | \"Will this test fail if there are bugs?\" | Tests that pass despite defects |\n| **Resilience** | \"Will this test survive legitimate refactoring?\" | Brittle tests that break on every change |\n\n**Trade-offs**: Unit tests may need to test implementation details (lower resilience), while E2E tests should focus on user behavior (high resilience). Balance these pillars based on your testing goals.\n\n## 1. Reliability (Consistency)\n\n**Priority**: Critical for ALL test types\n\nTests should produce identical, reproducible results under the same conditions.\n\n**Common Causes of Unreliable Tests:**\n- Race conditions and async timing issues\n- Shared mutable state between tests\n- Dependencies on external systems\n- Hardcoded timeouts instead of condition-based waits\n- Tests that depend on execution order\n\n**Examples:**\n```typescript\n// ❌ Bad - hardcoded sleep\nawait new Promise((resolve) => setTimeout(resolve, 2000));\n\n// ✅ Good - wait for specific condition\nawait waitFor(() => expect(element).toBeVisible());\n\n// ❌ Bad - tests share state\nlet sharedCounter = 0;\nit(\"test 1\", () => { sharedCounter++; });\nit(\"test 2\", () => { expect(sharedCounter).toBe(0); }); // Fails!\n\n// ✅ Good - each test sets up its own state\nit(\"test 1\", () => { const counter = 0; /* ... */ });\nit(\"test 2\", () => { const counter = 0; /* ... */ });\n```\n\n## 2. Validity (Accuracy)\n\n**Priority**: Critical for ALL test types\n\nTests should actually verify what they claim to verify. Assertions must always run and accurately reflect intended behavior.\n\n**Key Practices:**\n- Avoid conditional assertions that may be silently skipped\n- Use specific assertions, not generic \"truthy\" checks\n- Every expected behavior should be asserted\n- A passing test must definitively fail when code is incorrect\n\n**Examples:**\n```typescript\n// ❌ Bad - conditional assertions can be silently skipped\nif (\"error\" in result) {\n  expect(result.error.message).toBe(\"Failed\");\n}\n\n// ✅ Good - all assertions will run\nexpect(result).toEqual(\n  expect.objectContaining({\n    error: expect.objectContaining({ message: \"Failed\" }),\n  })\n);\n\n// ❌ Bad - assertion may never run if array is empty\nresults.forEach((result) => {\n  expect(result.status).toBe(\"success\");\n});\n\n// ✅ Good - explicitly verify array has items\nexpect(results).toHaveLength(3);\nresults.forEach((result) => {\n  expect(result.status).toBe(\"success\");\n});\n```\n\n## 3. Sensitivity (Responsiveness)\n\n**Priority**: High for unit tests, moderate for integration/E2E\n\nTests should detect actual defects when they exist. Balance with resilience based on test type.\n\n**Key Practices:**\n- Use static, literal values in assertions rather than implementation constants\n- Write specific assertions rather than overly permissive ones\n- Verify complete behavior including edge cases and error conditions\n- Avoid over-mocking that bypasses the code you're testing\n\n**Examples:**\n```typescript\n// ❌ Bad - won't catch if constant value changes incorrectly\nexpect(result.message).toBe(ERROR_MESSAGES.INVALID);\n\n// ✅ Good - catches any deviation from expected value\nexpect(result.message).toBe(\"Invalid input provided\");\n\n// ❌ Bad - overly loose assertion\nexpect(result).toBeTruthy();\n\n// ✅ Good - specific assertion\nexpect(result).toEqual({ status: \"success\", count: 5 });\n\n// ❌ Bad - not testing the right thing\nexpect(apiCall).toHaveBeenCalled();\n\n// ✅ Good - verify the actual behavior\nexpect(apiCall).toHaveBeenCalledWith({ userId: \"123\", action: \"delete\" });\n```\n\n## 4. Resilience (Robustness)\n\n**Priority**: High for integration/E2E tests, moderate for unit tests\n\nTests should remain valid when code undergoes legitimate changes that don't alter external behavior.\n\n**Note**: Unit tests MAY need to test implementation details to ensure internal correctness. This is acceptable and sometimes necessary. Resilience is more critical for integration and E2E tests.\n\n**Key Practices:**\n- **E2E/Integration**: Test through public interfaces, use semantic selectors, focus on user behavior\n- **Unit**: Balance testing implementation logic with avoiding over-coupling to internal structure\n- Assert on meaningful parts of output, not exact strings that may change cosmetically\n\n**Examples:**\n```typescript\n// ❌ Bad for E2E - testing implementation details\nexpect(component.state.isLoading).toBe(false);\n\n// ✅ Good for E2E - testing user-visible behavior\nexpect(screen.getByRole(\"button\")).not.toBeDisabled();\n\n// ✅ Acceptable for unit tests - testing internal logic\nexpect(internalHelper).toHaveBeenCalled(); // OK if testing unit behavior\n\n// ❌ Bad - brittle selector tied to CSS classes\nconst button = container.querySelector(\"div.css-1abc123 > button\");\n\n// ✅ Good - semantic selector\nconst button = screen.getByRole(\"button\", { name: \"Submit\" });\n\n// ❌ Bad - testing exact error message that may change\nexpect(error.message).toBe(\"Error: Database connection failed at line 123\");\n\n// ✅ Good - testing the meaningful part\nexpect(error.message).toContain(\"Database connection failed\");\n```\n\n## Guidelines by Test Type\n\n**Unit Tests:**\n- **Reliability**: Critical - must be deterministic\n- **Validity**: Critical - must verify correct behavior\n- **Sensitivity**: High - should catch implementation bugs\n- **Resilience**: Moderate - may test some implementation details\n\n**Integration Tests:**\n- **Reliability**: Critical - must be deterministic\n- **Validity**: Critical - must verify correct integration\n- **Sensitivity**: High - should catch integration bugs\n- **Resilience**: High - focus on interface contracts, not internals\n\n**E2E Tests:**\n- **Reliability**: Critical - must be deterministic\n- **Validity**: Critical - must verify real user flows\n- **Sensitivity**: Moderate - catch major user-facing bugs\n- **Resilience**: Critical - test user behavior, never implementation\n\n## Summary\n\nWhen writing or reviewing tests, ask yourself:\n\n1. **Reliability**: Will this give the same result every time?\n2. **Validity**: Does this actually test what I think it tests?\n3. **Sensitivity**: Would this fail if I introduced a bug?\n4. **Resilience**: Will this break when I refactor? (Is that acceptable for this test type?)\n\nBalance these pillars based on your test type and goals. Not all pillars apply equally to all tests.\n",
+    "rules/claude-code/typescript/typescript-conventions.md": "---\npaths: ['**/*.ts', '**/*.tsx']\ndescription: Core TypeScript conventions for interfaces, JSDoc, and enums\n---\n\n# TypeScript Conventions\n\n## 1. Type and Interface Hoisting\n\n- ALWAYS hoist `type` aliases and `interface` definitions to the top of the file.\n- ALWAYS use `interface` instead of `type`, EXCEPT when:\n\n  - You need a union type (`type A = B | C`).\n  - You need mapped/conditional types.\n\n## 2. JSDoc Requirements\n\n- EVERY function MUST have a JSDoc block describing its purpose.\n- WHENEVER function logic changes, JSDoc and inline comments MUST be updated accordingly.\n\n✅ Example:\n\n```ts\n/**\n * Returns a user by ID from the database.\n * @param id - The unique identifier of the user\n * @returns Promise that resolves to the user object or null if not found\n */\nasync function getUserById(id: string): Promise<User | null> {\n  return db.user.findUnique({ where: { id } })\n}\n```\n\n❌ Incorrect (missing JSDoc or incomplete documentation):\n\n```ts\n// Missing JSDoc\nfunction getUserById(id: string): Promise<User> {\n  return db.user.findUnique({ where: { id } })\n}\n\n// Incomplete JSDoc\n/**\n * Gets user\n */\nfunction getUserById(id: string): Promise<User> {\n  return db.user.findUnique({ where: { id } })\n}\n```\n\n## 3. Import Statements\n\n- NEVER use inline imports like `import(\"path/to/module\").TypeName`. ALWAYS use proper import statements.\n\n✅ Correct:\n\n```ts\nimport type { UserData } from 'src/lib/user-types'\n\ninterface ApiResponse {\n  data: UserData\n  status: string\n}\n```\n\n❌ Incorrect:\n\n```ts\ninterface ApiResponse {\n  data: import('src/lib/user-types').UserData\n  status: string\n}\n```\n\n## 4. Enum Usage\n\n- ALWAYS use `enum` instead of string literal union types for fixed sets of values.\n\n✅ Correct:\n\n```ts\nexport enum ContributionPeriod {\n  Weekly = 'weekly',\n  Monthly = 'monthly',\n  Quarterly = 'quarterly',\n  SemiAnnually = 'semi-annually',\n  Annually = 'annually',\n}\n```\n\n❌ Incorrect:\n\n```ts\ntype ContributionPeriod = 'weekly' | 'monthly' | 'quarterly' | 'semi-annually' | 'annually'\n```\n\n## 5. Type Separation for Different Purposes\n\n- ALWAYS create separate types for different purposes, even if they appear identical.\n- NEVER reuse types across different contexts (client display vs API input vs database vs internal functions).\n- Each purpose should have its own dedicated type to prevent coupling and maintain clear boundaries.\n\n✅ Correct:\n\n```ts\n// Client display type\nexport interface UserDisplay {\n  name: string\n  email: string\n}\n\n// API request type\nexport interface CreateUserRequest {\n  name: string\n  email: string\n}\n```\n\n❌ Incorrect:\n\n```ts\n// DON'T reuse the same type for both client display and API input\nexport interface User {\n  name: string\n  email: string\n}\n```\n",
+    "rules/claude-code/typescript/typescript-imports-exports.md": "---\npaths: ['**/*.ts', '**/*.tsx']\ndescription: Import and export patterns and organization rules\n---\n\n# TypeScript Imports and Exports\n\n## 1. Export Statements\n\n- NEVER use multi-export statements like `export { A, B, C }` or `export type { X, Y, Z }`. ALWAYS use individual export statements for better traceability.\n- NEVER re-export types from shared locations. Each file should only export its own specific types and import shared types directly.\n- ALWAYS keep types with their related functionality. For example, S3UploadResult should be in the S3 file, not in product types.\n\n✅ Correct:\n\n```ts\nexport interface User {\n  id: string\n  name: string\n}\n\nexport interface Product {\n  id: string\n  title: string\n}\n\nexport const UserRole = UserRole\nexport const ProductStatus = ProductStatus\n```\n\n❌ Incorrect:\n\n```ts\ninterface User {\n  id: string\n  name: string\n}\n\ninterface Product {\n  id: string\n  title: string\n}\n\nexport type { User, Product }\nexport { UserRole, ProductStatus }\n```\n",
+    "rules/claude-code/url-state/url-state-management.md": "---\npaths: ['**/app/**/*']\ndescription: 'URL state management patterns and server-side parameter handling'\n---\n\n# URL State Management Patterns\n\n## 1. Server-Side URL Parameter Handling\n\nFor pages that need URL state management, ALWAYS handle URL parameters on the server side and pass them as initial state to client components.\n\n✅ Correct:\n\n```tsx\n// page.tsx (Server Component)\ninterface InvestmentPageProps {\n  searchParams: Promise<{ [key: string]: string | string[] | undefined }>\n}\n\nfunction convertSearchParamsToFormState(urlSearchParams: URLSearchParams): FormState {\n  // Implementation here\n}\n\nexport default async function InvestmentPage({ searchParams }: InvestmentPageProps) {\n  const params = await searchParams\n  const urlSearchParams = new URLSearchParams(params as Record<string, string>)\n  const initialFormState = convertSearchParamsToFormState(urlSearchParams)\n\n  return (\n    <CalculatorSuspenseWrapper>\n      <InvestmentCalculator initialFormState={initialFormState} />\n    </CalculatorSuspenseWrapper>\n  )\n}\n```\n\n❌ Incorrect (handling URL state on client):\n\n```tsx\n// page.tsx - DON'T DO THIS\n'use client'\n\nexport default function InvestmentPage() {\n  const searchParams = useSearchParams()\n\n  // ... URL state handling using useSearchParams must not be used unless absolutely necessary\n}\n```\n\n## 2. URL Parameter Conversion\n\n- Convert URL parameters to typed form state on the server\n- Handle type conversion and validation\n- Provide sensible defaults for missing parameters\n\n✅ Correct:\n\n```tsx\nfunction convertSearchParamsToFormState(urlSearchParams: URLSearchParams): FormState {\n  return {\n    initialAmount: urlSearchParams.get('amount') ? Number(urlSearchParams.get('amount')) : undefined,\n    period: (urlSearchParams.get('period') as ContributionPeriod) || ContributionPeriod.Monthly,\n    rate: urlSearchParams.get('rate') ? Number(urlSearchParams.get('rate')) : undefined,\n  }\n}\n```\n\n## 3. URL State Synchronization\n\n- Use server-side URL handling for initial state\n- Use client-side state management for form interactions\n- Sync state back to URL when necessary using `router.push` or `router.replace`\n\n✅ Correct:\n\n```tsx\n// client component\n'use client'\n\nexport function InvestmentCalculator({ initialFormState }: { initialFormState: FormState }) {\n  const router = useRouter()\n  const [formState, setFormState] = useState(initialFormState)\n\n  const updateURL = useCallback((newState: FormState) => {\n    const params = new URLSearchParams()\n    if (newState.initialAmount) params.set('amount', newState.initialAmount.toString())\n    if (newState.period) params.set('period', newState.period)\n    if (newState.rate) params.set('rate', newState.rate.toString())\n\n    router.replace(`?${params.toString()}`, { scroll: false })\n  }, [router])\n\n  // Update URL when form state changes\n  useEffect(() => {\n    updateURL(formState)\n  }, [formState, updateURL])\n\n  return (\n    // Form JSX\n  )\n}\n```\n\n## 4. URL State Best Practices\n\n- Keep URL state minimal - only include essential parameters\n- Use meaningful parameter names\n- Handle edge cases (invalid values, missing parameters)\n- Consider URL length limits\n- Use `router.replace` for internal state updates, `router.push` for navigation\n\n✅ Correct:\n\n```tsx\n// Good URL state management\nconst updateFilters = (filters: FilterState) => {\n  const params = new URLSearchParams()\n\n  // Only add non-default values to URL\n  if (filters.category !== 'all') params.set('category', filters.category)\n  if (filters.priceRange.min > 0) params.set('minPrice', filters.priceRange.min.toString())\n  if (filters.priceRange.max < 1000) params.set('maxPrice', filters.priceRange.max.toString())\n\n  router.replace(`/products?${params.toString()}`, { scroll: false })\n}\n```\n\n❌ Incorrect:\n\n```tsx\n// Bad URL state management\nconst updateFilters = (filters: FilterState) => {\n  const params = new URLSearchParams()\n\n  // Adding all values, including defaults\n  params.set('category', filters.category)\n  params.set('minPrice', filters.priceRange.min.toString())\n  params.set('maxPrice', filters.priceRange.max.toString())\n  params.set('sort', filters.sort)\n  params.set('page', filters.page.toString())\n\n  router.push(`/products?${params.toString()}`)\n}\n```\n"
   }
 }
