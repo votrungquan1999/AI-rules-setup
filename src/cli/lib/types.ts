@@ -10,6 +10,8 @@ export interface Manifest {
 	tags: string[];
 	/** Human-readable description of the rules */
 	description: string;
+	/** When to use this rule category - guidance for ChatGPT prompt generation */
+	whenToUse: string;
 	/** List of rule files in this category */
 	files: ManifestFile[];
 	/** Optional dependencies on other rule categories */

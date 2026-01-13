@@ -15,8 +15,9 @@ import {
 import { Input } from "src/components/ui/input";
 import { Label } from "src/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "src/components/ui/radio-group";
+import { useQuestions } from "src/lib/manifests.state";
 import type { ChoiceQuestion, OpenEndedQuestion, YesNoQuestion } from "src/lib/question-types";
-import { useAnsweredCount, useClearAnswers, useQuestionAnswer, useQuestions, useSetAnswer } from "src/lib/search.state";
+import { useAnsweredCount, useClearAnswers, useQuestionAnswer, useSetAnswer } from "src/lib/search.state";
 
 /**
  * Yes/No question input component

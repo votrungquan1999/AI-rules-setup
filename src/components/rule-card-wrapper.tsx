@@ -71,6 +71,7 @@ export function RuleCardLabel({ children }: RuleCardLabelProps) {
 	return (
 		<label
 			htmlFor={checkboxId}
+			data-testid={`rule-card-${ruleId}`}
 			className={`
 				block w-full text-left p-4 rounded-lg border transition-colors cursor-pointer
 				${isSelected ? "border-primary bg-primary/10" : "border-border bg-card hover:border-primary/50"}
