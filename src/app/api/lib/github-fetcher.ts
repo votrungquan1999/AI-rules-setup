@@ -1,4 +1,4 @@
-import { findAllStoredRules, storeRulesData } from "../../../server/rules-repository";
+import { findAllStoredRules, storeRulesData, storeSkillsData } from "../../../server/rules-repository";
 import type { GitHubError, GitHubFile, Manifest, RuleAgent, RulesData, RulesDataToStore } from "../../../server/types";
 
 /**
@@ -248,6 +248,11 @@ async function fetchFromGitHubAndCache(): Promise<RulesData> {
 			const skills = await discoverSkills();
 			result.agents[agentName].skills = skills;
 			console.log(`Fetched ${skills.length} skills for Claude Code`);
+
+			// Store skills in MongoDB
+			if (skills.length > 0) {
+				await storeSkillsData(agentName, skills, "unknown");
+			}
 		}
 	}
 
