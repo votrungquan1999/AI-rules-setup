@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { type NextRequest, NextResponse } from "next/server";
 import { fetchAllRulesData } from "../lib/github-fetcher";
 
@@ -13,6 +14,8 @@ export async function GET(_request: NextRequest) {
 	try {
 		console.log("Fetching rules data from MongoDB with GitHub fallback");
 		const rulesData = await fetchAllRulesData();
+
+		revalidatePath("/select-rules");
 
 		return NextResponse.json(rulesData, {
 			status: 200,
