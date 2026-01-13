@@ -1,6 +1,6 @@
 ---
-alwaysApply: true
-description: 'File structure patterns and directory organization'
+globs: ['**/*.tsx', '**/*.jsx']
+description: 'Cursor component architecture: file structure patterns and directory organization for React components'
 ---
 
 # Component Architecture File Structure

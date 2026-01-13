@@ -1,5 +1,5 @@
 ---
-description: 'AI agent brainstorming patterns and structured problem-solving'
+description: 'Claude Code brainstorming: AI agent patterns and structured problem-solving approach'
 ---
 
 # Brainstorming with AI Agents

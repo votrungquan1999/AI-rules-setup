@@ -1,6 +1,6 @@
 ---
 alwaysApply: true
-description: 'Meta rules for rule application and code quality'
+description: 'Meta rules for Cursor: rule application and code quality guidelines'
 ---
 
 # Meta Rules

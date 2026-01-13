@@ -1,6 +1,6 @@
 ---
-alwaysApply: true
-description: 'URL state management patterns and server-side parameter handling'
+globs: ['**/page.tsx', '**/page.ts', '**/route.ts']
+description: 'Cursor URL state management: server-side parameter handling and state synchronization'
 ---
 
 # URL State Management Patterns

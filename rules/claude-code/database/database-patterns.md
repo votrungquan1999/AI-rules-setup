@@ -1,5 +1,6 @@
 ---
-description: 'Database access patterns with typed collections and data conversion'
+paths: ['**/*.ts', '**/database/**/*.ts', '**/server/**/*.ts']
+description: 'Claude Code database patterns: typed collections, data conversion, and document types'
 ---
 
 # Database Typing and Conversion

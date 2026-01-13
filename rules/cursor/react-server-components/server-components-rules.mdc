@@ -1,6 +1,6 @@
 ---
-alwaysApply: true
-description: Core Server Components rules and usage patterns
+globs: ['**/*.tsx', '**/*.jsx']
+description: 'Cursor React Server Components: core rules and usage patterns'
 ---
 
 # React Server Components Rules

@@ -1,6 +1,6 @@
 ---
-alwaysApply: true
-description: Client/server component separation patterns and best practices
+globs: ['**/*.tsx', '**/*.jsx']
+description: 'Cursor client/server separation: component separation patterns and best practices'
 ---
 
 # Client/Server Component Separation

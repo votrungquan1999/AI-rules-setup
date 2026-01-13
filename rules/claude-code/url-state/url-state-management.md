@@ -1,6 +1,6 @@
 ---
-paths: ['**/app/**/*']
-description: 'URL state management patterns and server-side parameter handling'
+paths: ['**/app/**/*', '**/page.tsx', '**/page.ts', '**/route.ts']
+description: 'Claude Code URL state management: server-side parameter handling and state synchronization'
 ---
 
 # URL State Management Patterns

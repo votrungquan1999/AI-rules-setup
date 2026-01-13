@@ -1,6 +1,6 @@
 ---
-alwaysApply: true
-description: React hooks usage rules and performance guidelines
+globs: ['**/*.tsx', '**/*.jsx']
+description: 'Cursor React hooks: usage rules and performance guidelines'
 ---
 
 # React Hooks Rules

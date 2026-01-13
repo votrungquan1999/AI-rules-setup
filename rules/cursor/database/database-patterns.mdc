@@ -1,6 +1,6 @@
 ---
-alwaysApply: true
-description: 'Database access patterns with typed collections and data conversion'
+globs: ['**/*.ts', '**/database/**/*.ts', '**/server/**/*.ts']
+description: 'Cursor database patterns: typed collections, data conversion, and document types'
 ---
 
 # Database Typing and Conversion

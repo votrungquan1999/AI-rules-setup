@@ -1,6 +1,6 @@
 ---
-alwaysApply: false
-description: 'The 4 Pillars of Good Tests framework'
+globs: ['**/*.test.ts', '**/*.test.tsx', '**/*.spec.ts', '**/*.spec.tsx']
+description: 'Cursor testing: The 4 Pillars of Good Tests framework (Reliability, Validity, Sensitivity, Resilience)'
 ---
 
 # The 4 Pillars of Good Tests

@@ -1,6 +1,6 @@
 ---
-alwaysApply: true
-description: Grid-based list views and responsive layout patterns
+globs: ['**/*.tsx', '**/*.jsx']
+description: 'Cursor layout patterns: grid-based list views and responsive layout patterns'
 ---
 
 # Layout Patterns

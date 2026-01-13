@@ -1,6 +1,6 @@
 ---
 paths: ['**/*.tsx', '**/*.jsx']
-description: Client/server component separation patterns and best practices
+description: 'Claude Code client/server separation: component separation patterns and best practices'
 ---
 
 # Client/Server Component Separation

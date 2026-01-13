@@ -1,6 +1,6 @@
 ---
 paths: ['**/*.tsx', '**/*.jsx']
-description: 'File structure patterns and directory organization'
+description: 'Claude Code component architecture: file structure patterns and directory organization for React components'
 ---
 
 # Component Architecture File Structure

@@ -1,6 +1,6 @@
 ---
-alwaysApply: true
-description: Core TypeScript conventions for interfaces, JSDoc, and enums
+globs: ['**/*.ts', '**/*.tsx']
+description: 'Cursor TypeScript conventions: interfaces, JSDoc, enums, and type patterns'
 ---
 
 # TypeScript Conventions

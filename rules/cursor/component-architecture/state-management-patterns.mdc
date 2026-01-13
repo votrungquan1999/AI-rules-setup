@@ -1,6 +1,6 @@
 ---
-alwaysApply: true
-description: 'State management patterns and context usage'
+globs: ['**/*.tsx', '**/*.jsx', '**/*.state.tsx']
+description: 'Cursor state management: patterns for context usage and state files'
 ---
 
 # State Management Patterns

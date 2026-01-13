@@ -1,5 +1,5 @@
 ---
-description: 'Step-by-step feature development workflow with planning, incremental implementation, test-driven approach, and progress tracking'
+description: 'Claude Code feature development workflow: step-by-step guide with planning, incremental implementation, test-driven approach, and progress tracking'
 ---
 
 # Feature Development Guide
@@ -14,6 +14,7 @@ This document outlines the recommended approach for implementing features and ta
 4. **Track Progress** - Write progress to a file for context switching and interruptions
 5. **Incremental Progress** - Complete one step fully before moving to the next
 6. **Test Each Step** - Prove each step works before building on top of it
+7. **One Test at a Time** - Write exactly one test, see it fail, make it pass, then move to the next test. This ensures incremental validation and prevents skipping test coverage.
 
 ---
 
@@ -33,12 +34,15 @@ Before creating your plan, read as many relevant files as possible to understand
 
 This context-gathering phase helps you create a more accurate plan and avoid surprises during implementation.
 
+**Important:** If anything is unclear or ambiguous, ask the user clarifying questions. Do not assume implementation details, architectural decisions, or requirements. It's better to ask questions upfront than to make incorrect assumptions that lead to rework later.
+
 **Step 2: Create the Plan**
 
 **What to include:**
 
 - List of implementation steps in logical order
 - Acceptance criteria for each step (what "done" looks like)
+- Test type for each step (unit, integration, e2e, etc.) - ONLY the test type, not test cases yet
 - Dependencies between steps
 - Any known blockers or risks
 
@@ -58,13 +62,13 @@ This context-gathering phase helps you create a more accurate plan and avoid sur
 
 **AC:** [What must be true when this step is done]
 
+**Test Type:** unit
+
 ### Step 2: [High-level description]
 
 **AC:** [What must be true when this step is done]
 
-### Step 3: [High-level description]
-
-**AC:** [What must be true when this step is done]
+**Test Type:** integration
 ```
 
 **Create Progress File:**
@@ -77,15 +81,10 @@ Create a file (e.g., `IMPLEMENTATION_PROGRESS.md`) to track completed steps. Add
 
 **Status:** ✅ Done
 
-**E2E Tests Written (7 tests, all passing ✅):**
+**E2E Tests Written (2 tests, all passing ✅):**
 
 1. ✅ Popover open/close behavior
 2. ✅ Form inputs render correctly
-3. ✅ Decimal auto-jump: "10.50"
-4. ✅ Decimal separator only: "10."
-5. ✅ Comma as separator: "10,75"
-6. ✅ Validation: zero amount
-7. ✅ Validation: empty email
 
 **Notes:** Created form components, added client-side validation
 ```
@@ -97,21 +96,32 @@ Create a file (e.g., `IMPLEMENTATION_PROGRESS.md`) to track completed steps. Add
 **For each step in your plan:**
 
 1. **Add step to progress file** - When starting a new step, add it with 🔄 In Progress status
-2. **Define test scenarios** - NOW figure out what tests are needed for THIS step
-3. **Write tests** - Create tests following project testing guidelines
-4. **Implement** - Write code to make tests pass
-5. **Run linting** - Check for code quality issues and fix any problems
-6. **Verify** - All tests pass, acceptance criteria met
-7. **Mark step as complete** - Update progress file with ✅ Done, test list, and notes
-8. **Move to next step** - Only after current step is complete
+2. **Define test scenarios** - NOW figure out what tests are needed for THIS step (you can define empty test scenarios first)
+
+**Then, for EACH test scenario, follow this iterative process:**
+
+3. **Write ONE test** - Write exactly 1 test at a time (you can start with an empty test that just has a description)
+4. **Run the test** - Run the test to verify it fails (this confirms the test is actually testing something)
+5. **Implement code** - Write the minimum code needed to make this ONE test pass
+6. **Run the test again** - Verify the test now passes
+7. **Repeat** - If more test scenarios remain, go back to step 3 for the next test. Continue until all test scenarios are written and passing.
+
+**After all tests are passing:**
+
+8. **Run linting** - Check for code quality issues and fix any problems
+9. **Verify** - All tests pass, acceptance criteria met
+10. **Mark step as complete** - Update progress file with ✅ Done, test list, and notes
+11. **Move to next step** - Only after current step is complete
 
 ### When Writing Tests
 
-**IMPORTANT:** Before writing any tests, locate the "4 Pillars of Testing" document in the project (usually in `.cursor/rules/`, `.claude/rules/`, `docs/`, or `repo_knowledge/`). Use it to guide your test writing.
+**IMPORTANT:** Before writing any tests, locate the "4 Pillars of Testing" document in the project (usually in `.cursor/rules/`, `docs/`, or `repo_knowledge/`). Use it to guide your test writing.
 
 **If you cannot find the 4 Pillars document:** STOP and ask the user where it is located.
 
 Follow the guidelines in the 4 Pillars document when defining test scenarios and writing tests.
+
+**Key TDD Principle:** Always write ONE test at a time, see it fail, make it pass, then move to the next test. This ensures you're building incrementally and each test is actually validating behavior.
 
 ---
 
@@ -124,11 +134,10 @@ Follow the guidelines in the 4 Pillars document when defining test scenarios and
 
 **Status:** ✅ Done
 
-**Tests Written (7 tests, all passing ✅):**
+**Tests Written (2 tests, all passing ✅):**
 
 1. ✅ Test description
 2. ✅ Test description
-3. ✅ Test description
 
 **Notes:** Brief summary of what was accomplished
 
@@ -136,12 +145,11 @@ Follow the guidelines in the 4 Pillars document when defining test scenarios and
 
 **Status:** 🔄 In Progress
 
-**Tests Written (2 of 4 tests passing ✅):**
+**Tests Written (1 of 3 tests passing ✅):**
 
 1. ✅ Test passing
-2. ✅ Test passing
-3. ⏳ Test not written yet
-4. ⏳ Test failing
+2. ⏳ Test not written yet
+3. ⏳ Test failing
 
 **Notes:** Current work in progress
 ```
@@ -172,4 +180,3 @@ Follow the guidelines in the 4 Pillars document when defining test scenarios and
 - ❌ Not updating progress file
 - ❌ Writing tests without consulting project testing guidelines
 - ❌ Pre-creating steps in progress file (only add when working on them)
-

@@ -1,6 +1,6 @@
 ---
 paths: ['**/*.tsx', '**/*.jsx']
-description: Core Server Components rules and usage patterns
+description: 'Claude Code React Server Components: core rules and usage patterns'
 ---
 
 # React Server Components Rules

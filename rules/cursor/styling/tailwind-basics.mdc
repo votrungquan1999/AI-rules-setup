@@ -1,6 +1,6 @@
 ---
-alwaysApply: true
-description: Core Tailwind CSS usage patterns and utilities
+globs: ['**/*.tsx', '**/*.jsx', '**/*.css']
+description: 'Cursor Tailwind CSS: core usage patterns, size utilities, positioning, and color tokens'
 ---
 
 # Tailwind CSS Basics

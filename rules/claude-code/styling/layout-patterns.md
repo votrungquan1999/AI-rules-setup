@@ -1,6 +1,6 @@
 ---
 paths: ['**/*.tsx', '**/*.jsx', '**/*.css']
-description: Grid-based list views and responsive layout patterns
+description: 'Claude Code layout patterns: grid-based list views and responsive layout patterns'
 ---
 
 # Layout Patterns

@@ -1,6 +1,6 @@
 ---
-alwaysApply: true
-description: Context patterns and state management best practices
+globs: ['**/*.tsx', '**/*.jsx', '**/*.state.tsx']
+description: 'Cursor React context: patterns and state management best practices'
 ---
 
 # React Context Patterns

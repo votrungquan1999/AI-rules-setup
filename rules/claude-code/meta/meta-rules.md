@@ -1,5 +1,5 @@
 ---
-description: 'Meta rules for rule application and code quality'
+description: 'Meta rules for Claude Code: rule application and code quality guidelines'
 ---
 
 # Meta Rules

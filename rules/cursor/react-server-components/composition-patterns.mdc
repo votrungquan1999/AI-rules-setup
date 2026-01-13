@@ -1,6 +1,6 @@
 ---
-alwaysApply: true
-description: Component composition patterns and examples
+globs: ['**/*.tsx', '**/*.jsx']
+description: 'Cursor React composition: server component composition patterns and examples'
 ---
 
 # React Server Components Composition Patterns
