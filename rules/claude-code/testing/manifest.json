@@ -1,5 +1,5 @@
 {
-  "id": "testing-pillars",
+  "id": "testing-guidelines",
   "category": "testing",
   "tags": [
     "testing",
@@ -23,16 +23,23 @@
     "test-best-practices",
     "test-driven-development",
     "tdd",
+    "red-green-refactor",
+    "test-first",
     "claude-code",
     "multi-language"
   ],
-  "description": "Comprehensive testing guidelines for Claude Code based on the 4 Pillars of Good Tests: Reliability (consistency), Validity (accuracy), Sensitivity (responsiveness), and Resilience (robustness). Ensures tests are deterministic, actually verify behavior, detect bugs, and survive refactoring. Applies to all languages including TypeScript, Python, Go, and more",
+  "description": "Comprehensive testing guidelines for Claude Code including the 4 Pillars of Good Tests framework and TDD workflow. Covers test quality principles (Reliability, Validity, Sensitivity, Resilience) and test-driven development practices with red-green-refactor cycle, test-first approach, and quality assurance",
   "version": "1.0.0",
   "lastUpdated": "2025-12-24T00:00:00Z",
   "files": [
     {
       "path": "testing-pillars.md",
       "description": "The 4 Pillars of Good Tests framework with examples",
+      "required": true
+    },
+    {
+      "path": "tdd-guidelines.md",
+      "description": "Test-Driven Development guidelines with red-green-refactor cycle, test-first approach, and quality assurance practices",
       "required": true
     }
   ],
