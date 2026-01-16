@@ -38,6 +38,8 @@ This context-gathering phase helps you create a more accurate plan and avoid sur
 
 **Step 2: Create the Plan**
 
+Create plan based on the gathered information. MUST pause for user review and wait for user to say "implement it" before starting implementation phase.
+
 **What to include:**
 
 - List of implementation steps in logical order
