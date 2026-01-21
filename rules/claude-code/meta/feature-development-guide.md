@@ -34,7 +34,9 @@ Before creating your plan, read as many relevant files as possible to understand
 
 This context-gathering phase helps you create a more accurate plan and avoid surprises during implementation.
 
-**Important:** If anything is unclear or ambiguous, ask the user clarifying questions. Do not assume implementation details, architectural decisions, or requirements. It's better to ask questions upfront than to make incorrect assumptions that lead to rework later.
+**Critical: Requirement Clarification First.** If anything is unclear or ambiguous, ask the user clarifying questions. Do not assume implementation details, architectural decisions, or requirements. You must proactively ask requirement-focused questions instead of assuming details.
+
+**Mandatory Checkpoint Before Step 2:** Report how many files you read and ask the user whether to read more files, ask more questions, or continue. Do not create a plan until the user explicitly says "continue"; otherwise, follow their instructions and ask again.
 
 **Step 2: Create the Plan**
 
