@@ -1,0 +1,53 @@
+{
+  "id": "react-hooks",
+  "category": "react-hooks",
+  "agent": "antigravity",
+  "tags": [
+    "react",
+    "hooks",
+    "react-hooks",
+    "patterns",
+    "hooks-pattern",
+    "use-state",
+    "use-effect",
+    "use-reducer",
+    "use-context",
+    "use-memo",
+    "use-callback",
+    "custom-hooks",
+    "context",
+    "context-pattern",
+    "provider",
+    "state-management",
+    "state",
+    "performance",
+    "performance-optimization",
+    "optimization",
+    "memoization",
+    "create-reducer-context",
+    "best-practices",
+    "conventions"
+  ],
+  "description": "React hooks best practices covering useState, useEffect, useReducer, useContext, useMemo, useCallback usage patterns, custom hooks creation, context patterns with providers, performance optimization through memoization, hook dependencies management, reducer context patterns, and state management strategies for functional React components",
+  "version": "1.0.0",
+  "lastUpdated": "2026-02-05T00:00:00Z",
+  "activation": {
+    "mode": "model-decision"
+  },
+  "files": [
+    {
+      "path": "hooks-rules.md",
+      "description": "React hooks usage rules and performance guidelines",
+      "targetPath": "hooks-rules.md",
+      "required": true
+    },
+    {
+      "path": "context-patterns.md",
+      "description": "Context patterns and state management best practices",
+      "targetPath": "context-patterns.md",
+      "required": true
+    }
+  ],
+  "dependencies": ["typescript-conventions"],
+  "conflicts": []
+}

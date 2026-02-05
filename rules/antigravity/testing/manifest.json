@@ -1,0 +1,51 @@
+{
+  "id": "testing-guidelines",
+  "category": "testing",
+  "agent": "antigravity",
+  "tags": [
+    "testing",
+    "test",
+    "unit-testing",
+    "integration-testing",
+    "e2e-testing",
+    "test-quality",
+    "reliability",
+    "validity",
+    "sensitivity",
+    "resilience",
+    "flaky-tests",
+    "test-assertions",
+    "test-patterns",
+    "vitest",
+    "jest",
+    "testing-library",
+    "react-testing",
+    "test-best-practices",
+    "test-driven-development",
+    "tdd",
+    "red-green-refactor",
+    "test-first"
+  ],
+  "description": "Comprehensive testing guidelines for Claude Code including the 4 Pillars of Good Tests framework and TDD workflow. Covers test quality principles (Reliability, Validity, Sensitivity, Resilience) and test-driven development practices with red-green-refactor cycle, test-first approach, and quality assurance",
+  "version": "1.0.0",
+  "lastUpdated": "2026-02-05T00:00:00Z",
+  "activation": {
+    "mode": "model-decision"
+  },
+  "files": [
+    {
+      "path": "testing-pillars.md",
+      "description": "The 4 Pillars of Good Tests framework with examples",
+      "targetPath": "testing-pillars.md",
+      "required": true
+    },
+    {
+      "path": "tdd-guidelines.md",
+      "description": "Test-Driven Development guidelines with red-green-refactor cycle, test-first approach, and quality assurance practices",
+      "targetPath": "tdd-guidelines.md",
+      "required": true
+    }
+  ],
+  "dependencies": [],
+  "conflicts": []
+}

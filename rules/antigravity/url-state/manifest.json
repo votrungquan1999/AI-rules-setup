@@ -1,0 +1,48 @@
+{
+  "id": "url-state-management",
+  "category": "url-state",
+  "agent": "antigravity",
+  "tags": [
+    "state-management",
+    "state",
+    "url",
+    "url-state",
+    "patterns",
+    "nextjs",
+    "next",
+    "nextjs-13",
+    "nextjs-14",
+    "nextjs-15",
+    "search-params",
+    "query-params",
+    "query-string",
+    "params",
+    "router",
+    "use-router",
+    "use-search-params",
+    "server-side",
+    "server-side-rendering",
+    "ssr",
+    "app-router",
+    "url-parameters",
+    "synchronization",
+    "best-practices",
+    "conventions"
+  ],
+  "description": "URL state management patterns for Next.js applications covering server-side search parameter handling, URL parameter conversion and validation, query string synchronization with client state, router patterns with useRouter and useSearchParams, initial state from URLs, parameter naming conventions, and state persistence strategies for App Router",
+  "version": "1.0.0",
+  "lastUpdated": "2026-02-05T00:00:00Z",
+  "activation": {
+    "mode": "model-decision"
+  },
+  "files": [
+    {
+      "path": "url-state-management.md",
+      "description": "URL state management patterns and server-side parameter handling",
+      "targetPath": "url-state-management.md",
+      "required": true
+    }
+  ],
+  "dependencies": ["typescript-conventions", "react-server-components"],
+  "conflicts": []
+}

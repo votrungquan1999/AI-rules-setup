@@ -1,0 +1,43 @@
+{
+  "id": "meta-rules",
+  "category": "meta",
+  "agent": "antigravity",
+  "tags": [
+    "meta",
+    "meta-rules",
+    "rules",
+    "guidelines",
+    "best-practices",
+    "code-quality",
+    "quality",
+    "file-size-limits",
+    "file-limits",
+    "line-limits",
+    "error-handling",
+    "scope-management",
+    "scope",
+    "complexity",
+    "validation",
+    "conventions",
+    "standards",
+    "rule-application",
+    "planning-mode",
+    "planning"
+  ],
+  "description": "Meta rules for applying Antigravity agent rules covering file size limits and line count restrictions, scope management and complexity control, error handling patterns, rule application guidelines, code quality standards, validation requirements, and change management strategies for maintainable codebases",
+  "version": "1.0.0",
+  "lastUpdated": "2026-02-05T00:00:00Z",
+  "activation": {
+    "mode": "always"
+  },
+  "files": [
+    {
+      "path": "meta-rules.md",
+      "description": "Meta rules for rule application and code quality",
+      "targetPath": "meta-rules.md",
+      "required": true
+    }
+  ],
+  "dependencies": [],
+  "conflicts": []
+}

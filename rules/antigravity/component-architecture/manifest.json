@@ -1,0 +1,55 @@
+{
+  "id": "component-architecture",
+  "category": "component-architecture",
+  "agent": "antigravity",
+  "tags": [
+    "architecture",
+    "patterns",
+    "react",
+    "component-architecture",
+    "component-structure",
+    "components",
+    "file-structure",
+    "file-organization",
+    "directory-structure",
+    "organization",
+    "state-management",
+    "hooks",
+    "context",
+    "provider",
+    "reducers",
+    "use-reducer",
+    "create-reducer-context",
+    "server-client-separation",
+    "client-components",
+    "ui-components",
+    "nextjs",
+    "tsx",
+    "modular",
+    "separation-of-concerns",
+    "best-practices",
+    "conventions"
+  ],
+  "description": "Component architecture patterns for React and Next.js applications covering file structure organization with component, UI, state, and type files, state management with hooks and context providers, reducer patterns, component separation strategies, directory organization, and modular architecture best practices for scalable frontend development",
+  "version": "1.0.0",
+  "lastUpdated": "2026-02-05T00:00:00Z",
+  "activation": {
+    "mode": "model-decision"
+  },
+  "files": [
+    {
+      "path": "file-structure-patterns.md",
+      "description": "File structure patterns and directory organization",
+      "targetPath": "file-structure-patterns.md",
+      "required": true
+    },
+    {
+      "path": "state-management-patterns.md",
+      "description": "State management patterns and context usage",
+      "targetPath": "state-management-patterns.md",
+      "required": true
+    }
+  ],
+  "dependencies": ["typescript-conventions", "react-server-components"],
+  "conflicts": []
+}
