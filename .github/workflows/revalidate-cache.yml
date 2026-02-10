@@ -1,6 +1,6 @@
 name: Revalidate Rules Cache
 
-# Trigger this workflow when changes are pushed to the rules folder on main branch
+# Trigger this workflow when changes are pushed to rules/skills/workflows on main branch
 # or when manually triggered from the GitHub Actions UI
 on:
   push:
@@ -8,6 +8,8 @@ on:
       - main
     paths:
       - "rules/**"
+      - "skills/**"
+      - "workflows/**"
   workflow_dispatch:
 
 # Security: Use minimal required permissions
@@ -20,8 +22,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  clear-cache:
-    name: Clear MongoDB Cache
+  prime-cache:
+    name: Prime MongoDB Cache
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment: production
@@ -39,30 +41,24 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Clear MongoDB cache
+      - name: Prime MongoDB cache from local filesystem
         env:
           # MongoDB connection string from GitHub Secrets
-          # This should point to the same production MongoDB used by Vercel
+          # This should point to the same production MongoDB used by Vercel/Edge
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
           MONGODB_DB_NAME: ${{ secrets.MONGODB_DB_NAME }}
-        run: npx tsx .github/scripts/clear-cache.ts
-
-      - name: Pre-warm cache (optional)
-        # This step calls the public API to trigger immediate re-caching
-        # Remove or comment out this step if you prefer lazy cache warming
-        run: |
-          echo "Pre-warming cache by calling /api/rules endpoint..."
-          curl -f https://ai-rules-setup.vercel.app/api/rules || echo "Cache pre-warming failed, will warm on first user request"
-        continue-on-error: true
+        run: npx tsx .github/scripts/prime-cache.ts
 
       - name: Generate job summary
         if: success()
         run: |
-          echo "## ✅ Cache Revalidation Complete" >> $GITHUB_STEP_SUMMARY
+          echo "## ✅ Cache Priming Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Workflow:** ${{ github.workflow }}" >> $GITHUB_STEP_SUMMARY
           echo "**Triggered by:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
           echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "MongoDB cache has been cleared. Next request to \`/api/rules\` will fetch fresh data from GitHub." >> $GITHUB_STEP_SUMMARY
+          echo "MongoDB cache has been populated with latest rules, skills, and workflows from local filesystem." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The serverless/edge API will now serve from this primed cache." >> $GITHUB_STEP_SUMMARY
