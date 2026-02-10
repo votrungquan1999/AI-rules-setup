@@ -18,6 +18,6 @@ export default defineConfig({
 			},
 		},
 		setupFiles: ["./tests/setup.ts"],
-		exclude: ["**/node_modules/**", "**/dist/**", "**/tests/e2e/**"],
+		exclude: ["**/node_modules/**", "**/dist/**", "**/.history/**", "**/.next/**", "**/tests/e2e/**"],
 	},
 });
