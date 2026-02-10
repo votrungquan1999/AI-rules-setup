@@ -1,0 +1,14 @@
+{
+  "id": "test-category",
+  "category": "test-category",
+  "tags": ["test"],
+  "description": "Test category for unit tests",
+  "whenToUse": "When testing",
+  "files": [
+    {
+      "path": "rule.md",
+      "description": "Test rule file",
+      "required": true
+    }
+  ]
+}
