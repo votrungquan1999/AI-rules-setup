@@ -1,18 +1,18 @@
 import { revalidatePath } from "next/cache";
 import { type NextRequest, NextResponse } from "next/server";
-import { fetchAllRulesData } from "../lib/github-fetcher";
+import { fetchAllRulesData } from "../lib/rules-data-fetcher";
 
 /**
  * GET /api/rules
  *
- * Fetches all available rules from MongoDB cache with GitHub fallback.
- * First attempts to serve from MongoDB, falls back to GitHub if data is missing.
+ * Fetches all available rules from MongoDB cache with local filesystem auto-priming.
+ * First attempts to serve from MongoDB cache, automatically primes from local filesystem if cache is empty.
  *
  * @returns JSON response with structured rules data
  */
 export async function GET(_request: NextRequest) {
 	try {
-		console.log("Fetching rules data from MongoDB with GitHub fallback");
+		console.log("Fetching rules data from MongoDB cache with local filesystem auto-priming");
 		const rulesData = await fetchAllRulesData();
 
 		revalidatePath("/select-rules");
@@ -31,7 +31,7 @@ export async function GET(_request: NextRequest) {
 			{
 				error: "Failed to fetch rules data",
 				message: error instanceof Error ? error.message : "Unknown error",
-				source: "MongoDB cache or GitHub fallback",
+				source: "MongoDB cache or local filesystem",
 			},
 			{
 				status: 500,
