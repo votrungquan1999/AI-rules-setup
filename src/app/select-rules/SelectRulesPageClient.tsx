@@ -9,6 +9,7 @@ import { SelectedRulesSidebar } from "src/components/selected-rules-sidebar";
 import { StrategySelector } from "src/components/strategy-selector";
 import { useManifests } from "src/lib/manifests.state";
 import { useSelectedAgent } from "src/lib/selection.state";
+import { AntigravityDisplay } from "./antigravity-display";
 import { ClaudeCodeDisplay } from "./claude-code-display";
 import { CursorRulesDisplay } from "./cursor-rules-display";
 
@@ -43,8 +44,14 @@ export function SelectRulesPageClient() {
 						{/* Search input */}
 						<SearchInput />
 
-						{/* Agent-specific display - early branching */}
-						{selectedAgent === "claude-code" ? <ClaudeCodeDisplay /> : <CursorRulesDisplay />}
+						{/* Agent-specific display */}
+						{selectedAgent === "antigravity" ? (
+							<AntigravityDisplay />
+						) : selectedAgent === "claude-code" ? (
+							<ClaudeCodeDisplay />
+						) : (
+							<CursorRulesDisplay />
+						)}
 					</div>
 
 					{/* Sidebar */}

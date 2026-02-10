@@ -4,10 +4,10 @@ import { RulesList } from "src/components/rules-list";
 import { SkillsList } from "src/components/skills-list";
 
 /**
- * Display component for Claude Code agent
+ * Display component for Antigravity agent
  * Shows both rules and skills sections
  */
-export function ClaudeCodeDisplay() {
+export function AntigravityDisplay() {
 	return (
 		<div className="space-y-4">
 			{/* Rules section */}
