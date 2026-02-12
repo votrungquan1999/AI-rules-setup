@@ -110,6 +110,8 @@ export interface InitOptions {
 	categories?: string[];
 	/** Specific workflows to install */
 	workflows?: string[];
+	/** Specific skills to install */
+	skills?: string[];
 	/** Overwrite strategy for file conflicts (prompt, force, skip) */
 	overwriteStrategy?: OverwriteStrategy;
 }

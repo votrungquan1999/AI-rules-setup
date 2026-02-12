@@ -19,6 +19,7 @@ program
 	.option("--agent <name>", "Specify the AI agent (cursor, windsurf, etc.)")
 	.option("--categories <list>", "Comma-separated list of category IDs to install")
 	.option("--workflows <list>", "Comma-separated list of workflow IDs to install")
+	.option("--skills <list>", "Comma-separated list of skill IDs to install")
 	.option(
 		"--overwrite-strategy <strategy>",
 		"Conflict resolution strategy: prompt (ask), force (overwrite), or skip (keep existing)",
@@ -31,6 +32,7 @@ program
 				agent: options.agent,
 				categories: options.categories ? options.categories.split(",").map((c: string) => c.trim()) : undefined,
 				workflows: options.workflows ? options.workflows.split(",").map((w: string) => w.trim()) : undefined,
+				skills: options.skills ? options.skills.split(",").map((s: string) => s.trim()) : undefined,
 				overwriteStrategy: options.overwriteStrategy,
 			};
 

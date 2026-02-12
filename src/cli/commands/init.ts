@@ -153,51 +153,69 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
 			installedRules.push(manifest.id);
 		}
 
-		// Install skills if available
-		console.log(chalk.blue("\n🎯 Checking for available skills..."));
-		const skills = await fetchSkills(selectedAgent);
+		// Install skills if requested via CLI
+		if (options.skills && options.skills.length > 0) {
+			console.log(chalk.blue("\n🎯 Checking for available skills..."));
+			const skills = await fetchSkills(selectedAgent);
 
-		if (skills.length > 0) {
-			let installedSkillsCount = 0;
+			// Filter to only selected skills
+			const selectedSkills = skills.filter((skill) => options.skills?.includes(skill.name));
 
-			for (const skill of skills) {
-				try {
-					// Apply skill naming convention for this agent
-					const targetPath = applySkillNamingConvention(selectedAgent as AIAgent, skill.name);
+			// Check for non-existent skills and warn
+			const availableSkillNames = skills.map((s) => s.name);
+			const requestedSkillNames = options.skills;
+			const notFoundSkills = requestedSkillNames.filter((name) => !availableSkillNames.includes(name));
 
-					// Check for conflicts
-					const conflict = await detectConflict(join(process.cwd(), targetPath));
-					if (conflict.hasConflict) {
-						// Handle conflict based on strategy
-						if (overwriteStrategy === "skip") {
-							console.log(chalk.yellow(`⏭️  Skipped (file exists): ${targetPath}`));
-							continue;
-						}
-
-						if (overwriteStrategy === "force") {
-							console.log(chalk.yellow(`⚠️  Overwriting: ${targetPath}`));
-						} else {
-							// prompt strategy
-							const shouldOverwrite = await promptConflictResolution(targetPath);
-							if (!shouldOverwrite) {
-								console.log(chalk.yellow(`⏭️  Skipped: ${targetPath}`));
-								continue;
-							}
-						}
-					}
-
-					// Write skill file
-					await writeRuleFile(skill.content, join(process.cwd(), targetPath));
-					console.log(chalk.green(`✓ Installed skill: ${skill.name}`));
-					installedSkillsCount++;
-				} catch (error) {
-					console.error(chalk.red(`❌ Error installing skill ${skill.name}: ${error}`));
-				}
+			if (notFoundSkills.length > 0) {
+				console.error(
+					chalk.red(
+						`\n❌ Error: The following skills were not found and will be skipped: ${notFoundSkills.join(", ")}`,
+					),
+				);
 			}
 
-			console.log(chalk.green(`\n🎉 Successfully installed ${installedSkillsCount} skills`));
-		} else {
-			console.log(chalk.yellow("No skills available"));
+			if (selectedSkills.length > 0) {
+				let installedSkillsCount = 0;
+
+				for (const skill of selectedSkills) {
+					try {
+						// Apply skill naming convention for this agent
+						const targetPath = applySkillNamingConvention(selectedAgent as AIAgent, skill.name);
+
+						// Check for conflicts
+						const conflict = await detectConflict(join(process.cwd(), targetPath));
+						if (conflict.hasConflict) {
+							// Handle conflict based on strategy
+							if (overwriteStrategy === "skip") {
+								console.log(chalk.yellow(`⏭️  Skipped (file exists): ${targetPath}`));
+								continue;
+							}
+
+							if (overwriteStrategy === "force") {
+								console.log(chalk.yellow(`⚠️  Overwriting: ${targetPath}`));
+							} else {
+								// prompt strategy
+								const shouldOverwrite = await promptConflictResolution(targetPath);
+								if (!shouldOverwrite) {
+									console.log(chalk.yellow(`⏭️  Skipped: ${targetPath}`));
+									continue;
+								}
+							}
+						}
+
+						// Write skill file
+						await writeRuleFile(skill.content, join(process.cwd(), targetPath));
+						console.log(chalk.green(`✓ Installed skill: ${skill.name}`));
+						installedSkillsCount++;
+					} catch (error) {
+						console.error(chalk.red(`❌ Error installing skill ${skill.name}: ${error}`));
+					}
+				}
+
+				console.log(chalk.green(`\n🎉 Successfully installed ${installedSkillsCount} skills`));
+			} else {
+				console.log(chalk.yellow("No matching skills found"));
+			}
 		}
 
 		// Install workflows if requested via CLI

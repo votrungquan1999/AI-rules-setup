@@ -68,32 +68,48 @@ Workflows are step-by-step procedures for common development tasks. Select workf
    - What common tasks do they perform? (testing, deployment, code review, etc.)
    - Any specific requirements or constraints?
 
-2. **Select Items**: Based on their answers, select the most relevant items:
+2. **Ask About Preferences**: After understanding their project, ask about installation preferences:
+   - **Overwrite Strategy**: How should conflicts with existing files be handled?
+     - \`prompt\` (default): Ask before overwriting each file
+     - \`force\`: Automatically overwrite all existing files
+     - \`skip\`: Skip files that already exist
+
+3. **Select Items**: Based on their answers, select the most relevant items:
    - **Categories**: Rule categories that match their tech stack
-   - **Skills**: Specialized procedures for their workflow
+   - **Skills**: Specialized procedures for their workflow (Note: skills are auto-installed, no flag needed)
    - **Workflows**: Common tasks they'll perform regularly
    
    Only select items that are actually relevant to their project.
 
-3. **Output Command**: Once you've made your selections, output the CLI command in this exact format:
+4. **Output Command**: Once you've made your selections, output the CLI command in this exact format:
 
 \`\`\`
-npx @quanvo99/ai-rules@latest init --agent ${agent} --categories {category1,category2} --skills {skill1,skill2} --workflows {workflow1,workflow2}
+npx @quanvo99/ai-rules@latest init --agent ${agent} --categories {category1,category2} --workflows {workflow1,workflow2} --overwrite-strategy {strategy}
 \`\`\`
 
-Replace the placeholders with the actual IDs/names you selected, separated by commas. You can omit --skills or --workflows flags if none are selected.
+Replace the placeholders with the actual IDs/names you selected, separated by commas. 
+
+**Available flags**:
+- \`--agent {name}\`: Required. AI agent name
+- \`--categories {cat1,cat2}\`: Required. Comma-separated category IDs
+- \`--workflows {workflow1,workflow2}\`: Optional. Comma-separated workflow names
+- \`--overwrite-strategy {prompt|force|skip}\`: Optional. How to handle file conflicts (default: prompt)
+
+**Note**: Skills are automatically installed for the selected agent and don't need a separate flag.
 
 ## Example
 
-If the developer says they're building a Next.js app with TypeScript, doing TDD, and needs commit workflows, you might select:
+If the developer says they're building a Next.js app with TypeScript, doing TDD, needs commit workflows, and wants to skip existing files, you might select:
 - Categories: typescript-conventions, react-server-components
-- Skills: test-quality-reviewer
 - Workflows: commit-plan, review-changes
+- Overwrite strategy: skip
 
 And output:
 \`\`\`
-npx @quanvo99/ai-rules@latest init --agent ${agent} --categories typescript-conventions,react-server-components --skills test-quality-reviewer --workflows commit-plan,review-changes
+npx @quanvo99/ai-rules@latest init --agent ${agent} --categories typescript-conventions,react-server-components --workflows commit-plan,review-changes --overwrite-strategy skip
 \`\`\`
+
+The test-quality-reviewer skill will be automatically installed since it's available for ${agent}.
 
 Now, let's start! Please tell me about your project.`;
 
