@@ -79,6 +79,10 @@ export function applyNamingConvention(agent: AIAgent, filename: string): string 
  */
 export function applySkillNamingConvention(agent: AIAgent, skillName: string): string {
 	switch (agent) {
+		case AIAgent.CURSOR:
+			// Cursor uses .cursor/skills/ directory
+			return `.cursor/skills/${skillName}/SKILL.md`;
+
 		case AIAgent.CLAUDE_CODE:
 			// Convert skill-name to skill-name/SKILL.md
 			return `.claude/skills/${skillName}/SKILL.md`;
