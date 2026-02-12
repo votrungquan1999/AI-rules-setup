@@ -62,6 +62,9 @@ export function applyNamingConvention(agent: AIAgent, filename: string): string 
 		case AIAgent.CLAUDE_CODE:
 			return `.claude/rules/${filename}`;
 
+		case AIAgent.ANTIGRAVITY:
+			return `.agent/rules/${filename}`;
+
 		default:
 			throw new Error(`Unsupported AI agent: ${agent}`);
 	}
@@ -79,6 +82,10 @@ export function applySkillNamingConvention(agent: AIAgent, skillName: string): s
 		case AIAgent.CLAUDE_CODE:
 			// Convert skill-name to skill-name/SKILL.md
 			return `.claude/skills/${skillName}/SKILL.md`;
+
+		case AIAgent.ANTIGRAVITY:
+			// Follows agentskills.io standard: skill-name/SKILL.md
+			return `.agent/skills/${skillName}/SKILL.md`;
 
 		default:
 			throw new Error(`Skills are not supported for agent: ${agent}`);

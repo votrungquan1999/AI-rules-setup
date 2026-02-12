@@ -2,7 +2,7 @@ import { join } from "node:path";
 import chalk from "chalk";
 import { addCategory, loadConfig, saveConfig } from "../lib/config";
 import { applyNamingConvention, applySkillNamingConvention, detectConflict, writeRuleFile } from "../lib/files";
-import { fetchAvailableAgents, fetchManifests, fetchRuleFile, fetchSkills } from "../lib/github";
+import { fetchAvailableAgents, fetchManifests, fetchRuleFile, fetchSkills, fetchWorkflows } from "../lib/github";
 import { promptAgentSelection, promptCategorySelection, promptConflictResolution } from "../lib/prompts";
 import type { AIAgent, Config, InitOptions } from "../lib/types";
 
@@ -17,7 +17,7 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
 		// Fetch available agents
 		const agents = await fetchAvailableAgents();
 		if (agents.length === 0) {
-			console.log(chalk.red("❌ No AI agents found. Make sure the API server is running."));
+			console.error(chalk.red("❌ No AI agents found. Make sure the API server is running."));
 			process.exit(1);
 		}
 
@@ -26,7 +26,7 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
 		if (options.agent) {
 			// Validate provided agent
 			if (!agents.includes(options.agent)) {
-				console.log(chalk.red(`❌ Invalid agent: ${options.agent}`));
+				console.error(chalk.red(`❌ Invalid agent: ${options.agent}`));
 				console.log(chalk.yellow(`Available agents: ${agents.join(", ")}`));
 				process.exit(1);
 			}
@@ -40,7 +40,7 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
 		// Fetch manifests for selected agent
 		const manifests = await fetchManifests(selectedAgent);
 		if (manifests.length === 0) {
-			console.log(chalk.red("❌ No rule categories found for this agent"));
+			console.error(chalk.red("❌ No rule categories found for this agent"));
 			return;
 		}
 
@@ -56,7 +56,7 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
 				const validCategories = manifests.map((m) => m.id);
 				const invalidCategories = options.categories.filter((cat) => !validCategories.includes(cat));
 				if (invalidCategories.length > 0) {
-					console.log(chalk.red(`❌ Invalid categories: ${invalidCategories.join(", ")}`));
+					console.error(chalk.red(`❌ Invalid categories: ${invalidCategories.join(", ")}`));
 					console.log(chalk.yellow(`Available categories: ${validCategories.join(", ")}`));
 					process.exit(1);
 				}
@@ -95,7 +95,7 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
 		for (const categoryId of selectedCategories) {
 			const manifest = manifests.find((m) => m.id === categoryId);
 			if (!manifest) {
-				console.log(chalk.red(`❌ Manifest not found for category: ${categoryId}`));
+				console.error(chalk.red(`❌ Manifest not found for category: ${categoryId}`));
 				continue;
 			}
 
@@ -107,7 +107,7 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
 					// Fetch file content
 					const content = await fetchRuleFile(selectedAgent, manifest.category, file.path);
 					if (!content) {
-						console.log(chalk.red(`❌ Failed to fetch file: ${file.path}`));
+						console.error(chalk.red(`❌ Failed to fetch file: ${file.path}`));
 						continue;
 					}
 
@@ -142,7 +142,7 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
 					await writeRuleFile(content, join(process.cwd(), targetPath));
 					console.log(chalk.green(`✓ Installed: ${targetPath}`));
 				} catch (error) {
-					console.log(chalk.red(`❌ Error processing ${file.path}: ${error}`));
+					console.error(chalk.red(`❌ Error processing ${file.path}: ${error}`));
 				}
 			}
 
@@ -153,18 +153,68 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
 			installedRules.push(manifest.id);
 		}
 
-		// For Claude Code, also install skills
-		if (selectedAgent === "claude-code") {
-			console.log(chalk.blue("\n🎯 Installing Claude Code skills..."));
-			const skills = await fetchSkills(selectedAgent);
+		// Install skills if available
+		console.log(chalk.blue("\n🎯 Checking for available skills..."));
+		const skills = await fetchSkills(selectedAgent);
 
-			if (skills.length > 0) {
-				let installedSkillsCount = 0;
+		if (skills.length > 0) {
+			let installedSkillsCount = 0;
 
-				for (const skill of skills) {
+			for (const skill of skills) {
+				try {
+					// Apply skill naming convention for this agent
+					const targetPath = applySkillNamingConvention(selectedAgent as AIAgent, skill.name);
+
+					// Check for conflicts
+					const conflict = await detectConflict(join(process.cwd(), targetPath));
+					if (conflict.hasConflict) {
+						// Handle conflict based on strategy
+						if (overwriteStrategy === "skip") {
+							console.log(chalk.yellow(`⏭️  Skipped (file exists): ${targetPath}`));
+							continue;
+						}
+
+						if (overwriteStrategy === "force") {
+							console.log(chalk.yellow(`⚠️  Overwriting: ${targetPath}`));
+						} else {
+							// prompt strategy
+							const shouldOverwrite = await promptConflictResolution(targetPath);
+							if (!shouldOverwrite) {
+								console.log(chalk.yellow(`⏭️  Skipped: ${targetPath}`));
+								continue;
+							}
+						}
+					}
+
+					// Write skill file
+					await writeRuleFile(skill.content, join(process.cwd(), targetPath));
+					console.log(chalk.green(`✓ Installed skill: ${skill.name}`));
+					installedSkillsCount++;
+				} catch (error) {
+					console.error(chalk.red(`❌ Error installing skill ${skill.name}: ${error}`));
+				}
+			}
+
+			console.log(chalk.green(`\n🎉 Successfully installed ${installedSkillsCount} skills`));
+		} else {
+			console.log(chalk.yellow("No skills available"));
+		}
+
+		// Install workflows if requested via CLI
+		if (options.workflows && options.workflows.length > 0) {
+			console.log(chalk.blue("\n🎯 Installing workflows..."));
+			const allWorkflows = await fetchWorkflows(selectedAgent);
+
+			// Filter to only selected workflows
+			const selectedWorkflows = allWorkflows.filter((w) => options.workflows?.includes(w.name));
+
+			if (selectedWorkflows.length > 0) {
+				let installedWorkflowsCount = 0;
+
+				for (const workflow of selectedWorkflows) {
 					try {
-						// Apply skill naming convention
-						const targetPath = applySkillNamingConvention(selectedAgent as AIAgent, skill.name);
+						// Workflows go to .agent/workflows/<name>.md
+						const targetPath = `.agent/workflows/${workflow.name}.md`;
 
 						// Check for conflicts
 						const conflict = await detectConflict(join(process.cwd(), targetPath));
@@ -187,18 +237,18 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
 							}
 						}
 
-						// Write skill file
-						await writeRuleFile(skill.content, join(process.cwd(), targetPath));
-						console.log(chalk.green(`✓ Installed skill: ${skill.name}`));
-						installedSkillsCount++;
+						// Write workflow file
+						await writeRuleFile(workflow.content, join(process.cwd(), targetPath));
+						console.log(chalk.green(`✓ Installed workflow: ${workflow.name}`));
+						installedWorkflowsCount++;
 					} catch (error) {
-						console.log(chalk.red(`❌ Error installing skill ${skill.name}: ${error}`));
+						console.error(chalk.red(`❌ Error installing workflow ${workflow.name}: ${error}`));
 					}
 				}
 
-				console.log(chalk.green(`\n🎉 Successfully installed ${installedSkillsCount} skills`));
+				console.log(chalk.green(`\n🎉 Successfully installed ${installedWorkflowsCount} workflows`));
 			} else {
-				console.log(chalk.yellow("No skills found for Claude Code"));
+				console.log(chalk.yellow("No matching workflows found"));
 			}
 		}
 

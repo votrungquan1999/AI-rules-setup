@@ -21,6 +21,11 @@ interface RulesResponse {
 				name: string;
 				content: string;
 			}>;
+			/** Optional workflows (currently only for Antigravity) */
+			workflows?: Array<{
+				name: string;
+				content: string;
+			}>;
 		};
 	};
 }
@@ -143,6 +148,27 @@ export async function fetchSkills(agent: string): Promise<Array<{ name: string; 
 		return agentData.skills;
 	} catch (error) {
 		console.error(`Error fetching skills for agent ${agent}:`, error);
+		return [];
+	}
+}
+
+/**
+ * Fetches all workflows for a specific agent from the API
+ * @param agent - AI agent name (e.g., 'antigravity')
+ * @returns Array of workflow objects with name and content, or empty array if no workflows
+ */
+export async function fetchWorkflows(agent: string): Promise<Array<{ name: string; content: string }>> {
+	try {
+		const data = await fetchRulesData();
+		const agentData = data.agents[agent];
+
+		if (!agentData || !agentData.workflows) {
+			return [];
+		}
+
+		return agentData.workflows;
+	} catch (error) {
+		console.error(`Error fetching workflows for agent ${agent}:`, error);
 		return [];
 	}
 }

@@ -108,6 +108,8 @@ export interface InitOptions {
 	agent?: string;
 	/** Specific categories to install */
 	categories?: string[];
+	/** Specific workflows to install */
+	workflows?: string[];
 	/** Overwrite strategy for file conflicts (prompt, force, skip) */
 	overwriteStrategy?: OverwriteStrategy;
 }

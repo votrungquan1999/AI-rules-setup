@@ -18,6 +18,7 @@ program
 	.description("Initialize AI rules for the current project")
 	.option("--agent <name>", "Specify the AI agent (cursor, windsurf, etc.)")
 	.option("--categories <list>", "Comma-separated list of category IDs to install")
+	.option("--workflows <list>", "Comma-separated list of workflow IDs to install")
 	.option(
 		"--overwrite-strategy <strategy>",
 		"Conflict resolution strategy: prompt (ask), force (overwrite), or skip (keep existing)",
@@ -29,6 +30,7 @@ program
 			const parsedOptions = {
 				agent: options.agent,
 				categories: options.categories ? options.categories.split(",").map((c: string) => c.trim()) : undefined,
+				workflows: options.workflows ? options.workflows.split(",").map((w: string) => w.trim()) : undefined,
 				overwriteStrategy: options.overwriteStrategy,
 			};
 
