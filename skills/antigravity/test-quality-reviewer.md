@@ -10,12 +10,11 @@ This Skill reviews test code using the **4 Pillars of Good Tests** framework to 
 
 ## The 4 Pillars Framework
 
-| Pillar | Core Question | Failure Mode |
-|--------|--------------|--------------|
-| **Reliability** | "Will this test give consistent results?" | Flaky tests, false failures |
-| **Validity** | "Does this test actually prove correctness?" | Tests pass but don't verify the real flow |
-| **Sensitivity** | "Will this test fail if there are bugs?" | Tests that pass despite defects |
-| **Resilience** | "Will this test survive legitimate refactoring?" | Brittle tests that break on every change |
+This skill uses the **4 Pillars of Good Tests** framework (see testing rules for detailed definitions):
+- **Reliability** - Consistent results
+- **Validity** - Actually proves correctness  
+- **Sensitivity** - Fails when bugs are present
+- **Resilience** - Survives legitimate refactoring
 
 **Important:** Different test types (unit, integration, E2E) emphasize different pillars. Unit tests may need lower resilience (testing implementation details), while E2E tests need high resilience (testing user behavior).
 
