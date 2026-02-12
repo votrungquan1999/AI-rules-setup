@@ -2,7 +2,7 @@
 
 import { Check, Copy } from "lucide-react";
 import { Button } from "src/components/ui/button";
-import { useWorkflows } from "src/lib/manifests.state";
+import { useSkills, useWorkflows } from "src/lib/manifests.state";
 import { generateChatGptPrompt } from "src/lib/prompt-generator";
 import { useSelectedAgent } from "src/lib/selection.state";
 import type { Manifest } from "src/server/types";
@@ -15,13 +15,13 @@ interface PromptDisplayProps {
 
 /**
  * Prompt display with copy-to-clipboard functionality using shadcn Button
- * Generates ChatGPT prompt from all available manifests
+ * Generates ChatGPT prompt from all available manifests, skills, and workflows
  */
 export function PromptDisplay({ manifests }: PromptDisplayProps) {
 	const agent = useSelectedAgent();
+	const skills = useSkills();
 	const workflows = useWorkflows();
-	const workflowNames = workflows.map((w) => w.name);
-	const prompt = generateChatGptPrompt(manifests, agent, workflowNames);
+	const prompt = generateChatGptPrompt(manifests, agent, skills, workflows);
 
 	return (
 		<div>
