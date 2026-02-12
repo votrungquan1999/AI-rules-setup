@@ -49,8 +49,11 @@ Use this workflow when:
    - **Breaking Changes**: Any breaking changes documented?
 
 6. **Testing Review**:
+   
+   For detailed test quality review, use the `test-quality-reviewer` skill.
+   
+   Quick checklist:
    - Tests cover main functionality?
-   - Tests follow 4 Pillars (Reliability, Validity, Sensitivity, Resilience)?
    - Edge cases tested?
    - Tests actually fail when code is broken?
 
