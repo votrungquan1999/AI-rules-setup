@@ -2,9 +2,9 @@
 
 import { createContext, useContext, useMemo } from "react";
 import type { Question } from "src/lib/question-types";
-import { extractManifestsForAgent, extractSkillsForAgent } from "src/lib/rules-data-utils";
+import { extractManifestsForAgent, extractSkillsForAgent, extractWorkflowsForAgent } from "src/lib/rules-data-utils";
 import { useSelectedAgent } from "src/lib/selection.state";
-import type { Manifest, RulesData, SkillFile } from "src/server/types";
+import type { Manifest, RulesData, SkillFile, WorkflowFile } from "src/server/types";
 
 /**
  * Manifests context value
@@ -94,5 +94,21 @@ export function useSkills(): SkillFile[] {
 
 	return useMemo(() => {
 		return extractSkillsForAgent(context.rulesData, selectedAgent);
+	}, [context.rulesData, selectedAgent]);
+}
+
+/**
+ * Hook to get workflows for the currently selected agent
+ */
+export function useWorkflows(): WorkflowFile[] {
+	const context = useContext(ManifestsContext);
+	if (!context) {
+		throw new Error("useWorkflows must be used within ManifestsProvider");
+	}
+
+	const selectedAgent = useSelectedAgent();
+
+	return useMemo(() => {
+		return extractWorkflowsForAgent(context.rulesData, selectedAgent);
 	}, [context.rulesData, selectedAgent]);
 }

@@ -2,6 +2,7 @@
 
 import { Check, Copy } from "lucide-react";
 import { Button } from "src/components/ui/button";
+import { useWorkflows } from "src/lib/manifests.state";
 import { generateChatGptPrompt } from "src/lib/prompt-generator";
 import { useSelectedAgent } from "src/lib/selection.state";
 import type { Manifest } from "src/server/types";
@@ -18,7 +19,9 @@ interface PromptDisplayProps {
  */
 export function PromptDisplay({ manifests }: PromptDisplayProps) {
 	const agent = useSelectedAgent();
-	const prompt = generateChatGptPrompt(manifests, agent);
+	const workflows = useWorkflows();
+	const workflowNames = workflows.map((w) => w.name);
+	const prompt = generateChatGptPrompt(manifests, agent, workflowNames);
 
 	return (
 		<div>
@@ -28,13 +31,7 @@ export function PromptDisplay({ manifests }: PromptDisplayProps) {
 					{prompt}
 				</pre>
 				<CopyButton value={prompt} asChild>
-					<Button
-						type="button"
-						variant="ghost"
-						size="icon"
-						className="absolute top-2 right-2"
-						aria-label="Copy prompt"
-					>
+					<Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2" aria-label="Copy prompt">
 						<CopiedContent>
 							<Check className="size-4 text-green-600" />
 						</CopiedContent>
@@ -50,4 +47,3 @@ export function PromptDisplay({ manifests }: PromptDisplayProps) {
 		</div>
 	);
 }
-

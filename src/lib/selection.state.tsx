@@ -14,6 +14,8 @@ interface SelectionState {
 	selectedIds: Set<string>;
 	/** Set of selected skill names */
 	selectedSkillNames: Set<string>;
+	/** Set of selected workflow names */
+	selectedWorkflowNames: Set<string>;
 	/** Overwrite strategy for conflicts */
 	overwriteStrategy: OverwriteStrategy;
 }
@@ -25,6 +27,7 @@ type SelectionAction =
 	| { type: "SET_AGENT"; payload: string }
 	| { type: "TOGGLE_SELECTION"; payload: string }
 	| { type: "TOGGLE_SKILL_SELECTION"; payload: string }
+	| { type: "TOGGLE_WORKFLOW_SELECTION"; payload: string }
 	| { type: "CLEAR_SELECTIONS" }
 	| { type: "SET_STRATEGY"; payload: OverwriteStrategy }
 	| { type: "SELECT_ALL"; payload: string[] };
@@ -36,6 +39,7 @@ const initialState: SelectionState = {
 	agent: "cursor",
 	selectedIds: new Set<string>(),
 	selectedSkillNames: new Set<string>(),
+	selectedWorkflowNames: new Set<string>(),
 	overwriteStrategy: "prompt",
 };
 
@@ -53,6 +57,7 @@ function selectionReducer(state: SelectionState, action: SelectionAction): Selec
 				agent: action.payload,
 				selectedIds: new Set<string>(),
 				selectedSkillNames: new Set<string>(),
+				selectedWorkflowNames: new Set<string>(),
 			};
 
 		case "TOGGLE_SELECTION": {
@@ -75,11 +80,22 @@ function selectionReducer(state: SelectionState, action: SelectionAction): Selec
 			return { ...state, selectedSkillNames: newSet };
 		}
 
+		case "TOGGLE_WORKFLOW_SELECTION": {
+			const newSet = new Set(state.selectedWorkflowNames);
+			if (newSet.has(action.payload)) {
+				newSet.delete(action.payload);
+			} else {
+				newSet.add(action.payload);
+			}
+			return { ...state, selectedWorkflowNames: newSet };
+		}
+
 		case "CLEAR_SELECTIONS":
 			return {
 				...state,
 				selectedIds: new Set<string>(),
 				selectedSkillNames: new Set<string>(),
+				selectedWorkflowNames: new Set<string>(),
 			};
 
 		case "SET_STRATEGY":
@@ -203,14 +219,30 @@ export function useToggleSkillSelection(): (skillName: string) => void {
 }
 
 /**
+ * Hook to get all selected workflow names
+ */
+export function useSelectedWorkflowNames(): Set<string> {
+	const state = useSelectionState();
+	return state.selectedWorkflowNames;
+}
+
+/**
+ * Hook to toggle workflow selection
+ */
+export function useToggleWorkflowSelection(): (workflowName: string) => void {
+	const dispatch = useSelectionDispatch();
+	return (workflowName: string) => dispatch({ type: "TOGGLE_WORKFLOW_SELECTION", payload: workflowName });
+}
+
+/**
  * Hook to get generated CLI command
  * Computes command from current state
  */
 export function useGeneratedCommand(allIds: string[]): string {
 	const state = useSelectionState();
 
-	// Generate command if rules or skills are selected
-	if (state.selectedIds.size === 0 && state.selectedSkillNames.size === 0) {
+	// Generate command if rules, skills, or workflows are selected
+	if (state.selectedIds.size === 0 && state.selectedSkillNames.size === 0 && state.selectedWorkflowNames.size === 0) {
 		return "";
 	}
 
@@ -223,8 +255,9 @@ export function useGeneratedCommand(allIds: string[]): string {
 		const categoryValue = isAllSelected ? ["all"] : categories;
 
 		const selectedSkills = Array.from(state.selectedSkillNames);
+		const selectedWorkflows = Array.from(state.selectedWorkflowNames);
 
-		return generateCliCommand(state.agent, categoryValue, state.overwriteStrategy, selectedSkills);
+		return generateCliCommand(state.agent, categoryValue, state.overwriteStrategy, selectedSkills, selectedWorkflows);
 	} catch (error) {
 		console.error("Error generating command:", error);
 		return "";

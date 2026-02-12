@@ -5,9 +5,10 @@ import type { Manifest } from "src/server/types";
  * for ChatGPT to ask questions and output the correct CLI command
  * @param manifests - Array of rule category manifests
  * @param agent - AI agent name (cursor, windsurf, etc.)
+ * @param workflows - Array of workflow names (optional)
  * @returns Complete prompt string ready to copy and paste into ChatGPT
  */
-export function generateChatGptPrompt(manifests: Manifest[], agent: string): string {
+export function generateChatGptPrompt(manifests: Manifest[], agent: string, workflows: string[] = []): string {
 	// Sort manifests alphabetically by id for consistent ordering
 	const sortedManifests = [...manifests].sort((a, b) => a.id.localeCompare(b.id));
 
@@ -30,6 +31,10 @@ The developer will paste this command into their terminal to install the rules.`
 - Tags: ${tagsList}`;
 		})
 		.join("\n\n");
+
+	// Build workflows section if workflows are provided
+	const workflowsSection =
+		workflows.length > 0 ? `\n\n## Available Workflows\n\n${workflows.map((name) => `- ${name}`).join("\n")}` : "";
 
 	// Build instructions section
 	const instructions = `## Instructions
@@ -69,8 +74,7 @@ Now, let's start! Please tell me about your project.`;
 
 ## Available Rule Categories
 
-${categoriesSection}
+${categoriesSection}${workflowsSection}
 
 ${instructions}`;
 }
-

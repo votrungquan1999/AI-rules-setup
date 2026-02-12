@@ -6,6 +6,7 @@ import type { OverwriteStrategy } from "src/cli/lib/types";
  * @param categories - Array of category IDs to install
  * @param overwriteStrategy - Conflict resolution strategy (prompt, force, skip)
  * @param skills - Array of skill names to install (optional, currently only for Claude Code)
+ * @param workflows - Array of workflow names to install (optional, currently only for Antigravity)
  * @returns Complete CLI command string ready to copy and run
  */
 export function generateCliCommand(
@@ -13,14 +14,15 @@ export function generateCliCommand(
 	categories: string[],
 	overwriteStrategy: OverwriteStrategy,
 	skills: string[] = [],
+	workflows: string[] = [],
 ): string {
 	// Validate inputs
 	if (!agent || !agent.trim()) {
 		throw new Error("Agent is required");
 	}
 
-	if (categories.length === 0 && skills.length === 0) {
-		throw new Error("At least one category or skill must be selected");
+	if (categories.length === 0 && skills.length === 0 && workflows.length === 0) {
+		throw new Error("At least one category, skill, or workflow must be selected");
 	}
 
 	const validStrategies: OverwriteStrategy[] = ["prompt", "force", "skip"];
@@ -32,6 +34,8 @@ export function generateCliCommand(
 	const sanitizedAgent = sanitizeCliInput(agent);
 	const sanitizedCategories = categories.length > 0 ? categories.map((cat) => sanitizeCliInput(cat)).join(",") : "";
 	const sanitizedSkills = skills.length > 0 ? skills.map((skill) => sanitizeCliInput(skill)).join(",") : "";
+	const sanitizedWorkflows =
+		workflows.length > 0 ? workflows.map((workflow) => sanitizeCliInput(workflow)).join(",") : "";
 	const sanitizedStrategy = overwriteStrategy; // Already validated above
 
 	// Build command with npx prefix and @latest suffix
@@ -43,6 +47,10 @@ export function generateCliCommand(
 
 	if (sanitizedSkills) {
 		command += ` --skills ${sanitizedSkills}`;
+	}
+
+	if (sanitizedWorkflows) {
+		command += ` --workflows ${sanitizedWorkflows}`;
 	}
 
 	command += ` --overwrite-strategy ${sanitizedStrategy}`;

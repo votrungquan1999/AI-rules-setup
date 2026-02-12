@@ -1,4 +1,4 @@
-import type { Manifest, RulesData, SkillFile } from "src/server/types";
+import type { Manifest, RulesData, SkillFile, WorkflowFile } from "src/server/types";
 
 /**
  * Extracts all manifests for a specific agent from complete rules data
@@ -28,4 +28,19 @@ export function extractSkillsForAgent(rulesData: RulesData, agent: string): Skil
 	}
 
 	return agentData.skills;
+}
+
+/**
+ * Extracts all workflows for a specific agent from complete rules data
+ * @param rulesData - Complete rules data containing all agents
+ * @param agent - Agent name to extract workflows for
+ * @returns Array of workflows for the specified agent, or empty array if agent not found or has no workflows
+ */
+export function extractWorkflowsForAgent(rulesData: RulesData, agent: string): WorkflowFile[] {
+	const agentData = rulesData.agents[agent];
+	if (!agentData || !agentData.workflows) {
+		return [];
+	}
+
+	return agentData.workflows;
 }
