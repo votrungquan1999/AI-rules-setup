@@ -33,6 +33,17 @@ For each task, Antigravity MUST double-check:
 - NEVER use try-catch blocks defensively around every operation.
 - ONLY place try-catch blocks at intentional error boundaries where you want to catch all errors from lower-level code.
 
+## Edit Verification and Retry Logic
+
+- After EVERY file edit operation (using tools like `replace_file_content` or `multi_replace_file_content`), MUST verify that the edit was successful.
+- If an edit fails:
+  1. Read the file again using `view_file` to understand the current state.
+  2. Retry the edit with corrected parameters based on the actual file content.
+  3. Repeat the verification process after each retry.
+  4. Continue this cycle until the edit succeeds or determine that manual intervention is required.
+- NEVER assume an edit succeeded without checking the tool's response.
+- If multiple consecutive retries fail (> 3 attempts), explain the issue to the user and request guidance.
+
 ## Planning Mode
 
 - When in planning mode and a `.md` file has already been generated, ALWAYS create a new file for any plan changes requested by the user.
