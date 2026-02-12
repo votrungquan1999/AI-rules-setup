@@ -7,8 +7,10 @@ import type {
 	SkillFile,
 	StoredRulesDocument,
 	StoredSkillsDocument,
+	StoredWorkflowsDocument,
+	WorkflowFile,
 } from "../../src/server/types";
-import { RULES_DATA_COLLECTION_NAME, SKILLS_COLLECTION_NAME } from "../../src/server/types";
+import { RULES_DATA_COLLECTION_NAME, SKILLS_COLLECTION_NAME, WORKFLOWS_COLLECTION_NAME } from "../../src/server/types";
 import { createStoredRulesDocument } from "../../src/server/utils";
 
 /**
@@ -24,6 +26,7 @@ interface TestFixtureAgent {
 	name: string;
 	categories: TestFixtureCategory[];
 	skills?: Array<{ name: string; content: string }>;
+	workflows?: Array<{ name: string; content: string }>;
 }
 
 interface TestFixtures {
@@ -67,7 +70,7 @@ async function getTestDatabase(): Promise<Db> {
  * Clean the test database by dropping collections
  */
 async function cleanTestDatabase(db: Db): Promise<void> {
-	const collections = [RULES_DATA_COLLECTION_NAME, SKILLS_COLLECTION_NAME];
+	const collections = [RULES_DATA_COLLECTION_NAME, SKILLS_COLLECTION_NAME, WORKFLOWS_COLLECTION_NAME];
 
 	for (const collectionName of collections) {
 		try {
@@ -112,6 +115,24 @@ async function storeSkillsInTestDatabase(db: Db, agent: string, skills: SkillFil
 }
 
 /**
+ * Store workflows data directly in the test database
+ */
+async function storeWorkflowsInTestDatabase(db: Db, agent: string, workflows: WorkflowFile[]): Promise<void> {
+	const collection = db.collection<StoredWorkflowsDocument>(WORKFLOWS_COLLECTION_NAME);
+	const now = new Date();
+	const document: StoredWorkflowsDocument = {
+		agent,
+		workflows,
+		githubCommitSha: "test-sha",
+		lastFetched: now,
+		createdAt: now,
+		updatedAt: now,
+	};
+
+	await collection.replaceOne({ agent }, document, { upsert: true });
+}
+
+/**
  * Seed the test database with all data from test fixtures
  * Connects directly to the test database using the database name from environment
  */
@@ -144,6 +165,11 @@ export async function seedTestDatabase(): Promise<void> {
 			// Process skills if they exist
 			if (agent.skills && agent.skills.length > 0) {
 				await storeSkillsInTestDatabase(db, agentName, agent.skills);
+			}
+
+			// Process workflows if they exist
+			if (agent.workflows && agent.workflows.length > 0) {
+				await storeWorkflowsInTestDatabase(db, agentName, agent.workflows);
 			}
 		}
 	} catch (error) {

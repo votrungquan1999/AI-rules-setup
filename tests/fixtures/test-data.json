@@ -959,6 +959,67 @@
           "name": "test-quality-reviewer",
           "content": "---\nname: test-quality-reviewer\ndescription: Reviews test code quality using the 4 Pillars framework (Reliability, Validity, Sensitivity, Resilience). Use when reviewing tests, analyzing test quality, checking test coverage, or when user says \"review these tests\", \"check test quality\", or \"analyze test coverage\".\nallowed-tools: Read, Grep, Glob\n---\n\n# Test Quality Reviewer\n\nThis Skill reviews test code using the **4 Pillars of Good Tests** framework to ensure tests are reliable, valid, sensitive, and appropriately resilient.\n\n## The 4 Pillars Framework\n\n| Pillar | Core Question | Failure Mode |\n|--------|--------------|--------------|\n| **Reliability** | \"Will this test give consistent results?\" | Flaky tests, false failures |\n| **Validity** | \"Does this test actually prove correctness?\" | Tests pass but don't verify the real flow |\n| **Sensitivity** | \"Will this test fail if there are bugs?\" | Tests that pass despite defects |\n| **Resilience** | \"Will this test survive legitimate refactoring?\" | Brittle tests that break on every change |\n\n**Important:** Different test types (unit, integration, E2E) emphasize different pillars. Unit tests may need lower resilience (testing implementation details), while E2E tests need high resilience (testing user behavior).\n\n---\n\n## Review Process\n\n### Step 1: Identify Test Files\n\nUse tools to find test files:\n```bash\n# Find test files\nGlob: **/*.test.ts\nGlob: **/*.test.tsx\nGlob: **/*.spec.ts\n```\n\n### Step 2: Read and Analyze Tests\n\nFor each test file, read and analyze:\n```bash\nRead: path/to/test-file.test.ts\n```\n\n### Step 3: Apply 4 Pillars Analysis\n\nFor each test in the file, evaluate:\n\n#### ✅ Pillar 1: Reliability (Critical for ALL tests)\n\n**Question:** Will this test give consistent results every time?\n\n**Look for:**\n- ❌ Hardcoded timeouts: `setTimeout(2000)`\n- ❌ Shared mutable state between tests\n- ❌ Dependencies on external systems without mocking\n- ❌ Tests that depend on execution order\n- ❌ Race conditions in async tests\n\n**Good patterns:**\n- ✅ Condition-based waits: `await waitFor(() => expect(element).toBeVisible())`\n- ✅ Each test sets up its own state\n- ✅ Proper cleanup in afterEach/beforeEach\n- ✅ Isolated test data\n\n#### ✅ Pillar 2: Validity (Critical for ALL tests)\n\n**Question:** Does this test actually prove what it claims to test?\n\n**Look for:**\n- ❌ Conditional assertions that may be skipped\n- ❌ forEach loops that might not run (empty arrays)\n- ❌ Generic \"truthy\" checks: `expect(result).toBeTruthy()`\n- ❌ Missing assertions for edge cases\n\n**Good patterns:**\n- ✅ All assertions always execute\n- ✅ Explicit array length checks before forEach\n- ✅ Specific assertions: `expect(result).toEqual({ status: \"success\", count: 5 })`\n- ✅ Edge cases explicitly tested\n\n#### ✅ Pillar 3: Sensitivity (High for unit, moderate for E2E)\n\n**Question:** Would this test fail if a bug was introduced?\n\n**Look for:**\n- ❌ Assertions using implementation constants: `expect(msg).toBe(ERROR_MESSAGES.INVALID)`\n- ❌ Overly loose assertions: `expect(result).toBeTruthy()`\n- ❌ Only checking that functions were called, not with what arguments\n- ❌ Over-mocking that bypasses real code\n\n**Good patterns:**\n- ✅ Static literal values: `expect(msg).toBe(\"Invalid input provided\")`\n- ✅ Specific assertions with exact values\n- ✅ Checking function arguments: `expect(fn).toHaveBeenCalledWith({ id: \"123\" })`\n- ✅ Minimal mocking, testing real integrations\n\n#### ✅ Pillar 4: Resilience (High for E2E, moderate for unit)\n\n**Question:** Will this test survive legitimate refactoring?\n\n**Look for:**\n- ❌ Testing internal state: `component.state.isLoading`\n- ❌ Testing private methods\n- ❌ Brittle CSS selectors: `container.querySelector(\"div.css-1abc123 > button\")`\n- ❌ Testing exact error messages that may change\n\n**Good patterns (E2E/Integration):**\n- ✅ Testing user-visible behavior: `getByRole(\"button\")`\n- ✅ Semantic selectors: `getByRole(\"button\", { name: \"Submit\" })`\n- ✅ Testing public API, not internals\n- ✅ Partial string matches for messages: `.toContain(\"failed\")`\n\n**Acceptable for unit tests:**\n- ✅ Testing internal logic may be necessary\n- ✅ Checking internal helper calls is OK for unit tests\n- ✅ Lower resilience acceptable when testing implementation\n\n---\n\n## Review Output Format\n\nFor each test file reviewed, provide:\n\n```markdown\n## Test File: [filename]\n\n### Overall Assessment\n- **Test Type:** [Unit / Integration / E2E]\n- **Total Tests:** [number]\n- **Quality Score:** [Excellent / Good / Needs Improvement / Poor]\n\n### Pillar Analysis\n\n#### ⚡ Reliability: [Pass / Issues Found]\n[List specific issues or confirm good patterns]\n\n#### ✓ Validity: [Pass / Issues Found]\n[List specific issues or confirm good patterns]\n\n#### 🎯 Sensitivity: [Pass / Issues Found]\n[List specific issues or confirm good patterns]\n\n#### 🛡️ Resilience: [Pass / Issues Found / Acceptable for Unit Tests]\n[List specific issues or confirm good patterns]\n\n### Specific Issues\n\n1. **[Test Name]** (Line X)\n   - **Issue:** [Description]\n   - **Pillar Violated:** [Which pillar]\n   - **Recommendation:** [How to fix]\n\n2. **[Test Name]** (Line Y)\n   - **Issue:** [Description]\n   - **Pillar Violated:** [Which pillar]\n   - **Recommendation:** [How to fix]\n\n### Strengths\n- [List what the tests do well]\n\n### Recommendations\n1. [Priority fix]\n2. [Other improvements]\n```\n\n---\n\n## Guidelines by Test Type\n\n### Unit Tests\n- **Reliability:** CRITICAL - Must be deterministic\n- **Validity:** CRITICAL - Must verify correct behavior\n- **Sensitivity:** HIGH - Should catch implementation bugs\n- **Resilience:** MODERATE - May test some implementation details (acceptable)\n\n### Integration Tests\n- **Reliability:** CRITICAL - Must be deterministic\n- **Validity:** CRITICAL - Must verify correct integration\n- **Sensitivity:** HIGH - Should catch integration bugs\n- **Resilience:** HIGH - Focus on interface contracts, not internals\n\n### E2E Tests\n- **Reliability:** CRITICAL - Must be deterministic\n- **Validity:** CRITICAL - Must verify real user flows\n- **Sensitivity:** MODERATE - Catch major user-facing bugs\n- **Resilience:** CRITICAL - Test user behavior, never implementation\n\n---\n\n## Common Anti-Patterns to Flag\n\n### ❌ Reliability Issues\n```typescript\n// BAD: Hardcoded timeout\nawait new Promise(resolve => setTimeout(resolve, 2000))\n\n// BAD: Shared state\nlet counter = 0\nit(\"test 1\", () => { counter++ })\nit(\"test 2\", () => { expect(counter).toBe(0) }) // Will fail!\n```\n\n### ❌ Validity Issues\n```typescript\n// BAD: Conditional assertion (might not run)\nif (\"error\" in result) {\n  expect(result.error.message).toBe(\"Failed\")\n}\n\n// BAD: forEach that might not run\nitems.forEach(item => {\n  expect(item.valid).toBe(true)\n})\n```\n\n### ❌ Sensitivity Issues\n```typescript\n// BAD: Using implementation constants\nexpect(result.message).toBe(ERROR_MESSAGES.INVALID)\n\n// BAD: Too loose\nexpect(result).toBeTruthy()\n\n// BAD: Not checking arguments\nexpect(apiCall).toHaveBeenCalled()\n```\n\n### ❌ Resilience Issues (E2E/Integration)\n```typescript\n// BAD: Testing internal state\nexpect(component.state.loading).toBe(false)\n\n// BAD: Brittle selector\ncontainer.querySelector(\".css-xyz123 button\")\n\n// BAD: Exact error message\nexpect(error).toBe(\"Error at line 42: Connection failed\")\n```\n\n---\n\n## When to Use This Skill\n\n**Trigger phrases:**\n- \"Review these tests\"\n- \"Check test quality\"\n- \"Analyze test coverage\"\n- \"Are my tests good?\"\n- \"How can I improve these tests?\"\n- \"Check for flaky tests\"\n\n**Use when:**\n- After writing new tests\n- During code review\n- Debugging flaky tests\n- Refactoring test suites\n- Auditing test quality\n\n**Output:**\n- Detailed analysis using 4 Pillars\n- Specific issues with line numbers\n- Concrete recommendations\n- Priority ranking of fixes\n\n---\n\n## Summary\n\nThis Skill uses the 4 Pillars framework to systematically review test quality:\n\n1. **Find test files** using Glob\n2. **Read tests** using Read\n3. **Analyze each pillar** based on test type\n4. **Provide specific feedback** with line numbers\n5. **Recommend improvements** with priority\n\n**Remember:** Different test types have different pillar priorities. Unit tests can have lower resilience (testing implementation), while E2E tests must have high resilience (testing behavior).\n"
         }
+      ],
+      "workflows": [
+        {
+          "name": "deploy-to-production",
+          "content": "---\ndescription: Deploy application to production environment\n---\n\n# Deploy to Production\n\nThis workflow guides you through deploying your application to production.\n\n## Prerequisites\n\n- All tests passing\n- Code reviewed and approved\n- Staging deployment successful\n\n## Steps\n\n1. Create production build\n2. Run final tests\n3. Deploy to production\n4. Verify deployment\n5. Monitor for issues\n"
+        },
+        {
+          "name": "setup-ci-cd",
+          "content": "---\ndescription: Set up continuous integration and deployment pipeline\n---\n\n# Setup CI/CD Pipeline\n\nThis workflow helps you set up automated testing and deployment.\n\n## Steps\n\n1. Choose CI/CD platform (GitHub Actions, CircleCI, etc.)\n2. Configure test automation\n3. Set up deployment pipeline\n4. Configure environment variables\n5. Test the pipeline\n"
+        }
+      ]
+    },
+    {
+      "name": "antigravity",
+      "categories": [
+        {
+          "name": "component-architecture",
+          "manifest": {
+            "id": "component-architecture",
+            "category": "component-architecture",
+            "tags": [
+              "architecture",
+              "react",
+              "file-structure"
+            ],
+            "description": "Component architecture patterns for Antigravity",
+            "version": "1.0.0",
+            "lastUpdated": "2025-01-17T00:00:00Z",
+            "files": [
+              {
+                "path": "file-structure-patterns.mdc",
+                "description": "File structure patterns",
+                "required": true
+              }
+            ],
+            "dependencies": [],
+            "conflicts": []
+          },
+          "files": [
+            {
+              "filename": "file-structure-patterns.mdc",
+              "content": "---\nalwaysApply: true\ndescription: 'File structure patterns'\n---\n\n# Component Architecture\n\nTest content for architecture patterns.\n"
+            }
+          ]
+        }
+      ],
+      "skills": [
+        {
+          "name": "postgres-query",
+          "content": "---\nname: PostgreSQL Query Helper\ndescription: Helper for writing and optimizing PostgreSQL queries\n---\n\n# PostgreSQL Query Helper\n\nThis skill helps you write efficient PostgreSQL queries.\n\n## Usage\n\nUse this skill when you need to:\n- Write complex SQL queries\n- Optimize query performance\n- Design database schemas\n"
+        }
+      ],
+      "workflows": [
+        {
+          "name": "deploy-to-production",
+          "content": "---\ndescription: Deploy application to production environment\n---\n\n# Deploy to Production\n\nThis workflow guides you through deploying your application to production.\n\n## Prerequisites\n\n- All tests passing\n- Code reviewed and approved\n- Staging deployment successful\n\n## Steps\n\n1. Create production build\n2. Run final tests\n3. Deploy to production\n4. Verify deployment\n5. Monitor for issues\n"
+        },
+        {
+          "name": "setup-ci-cd",
+          "content": "---\ndescription: Set up continuous integration and deployment pipeline\n---\n\n# Setup CI/CD Pipeline\n\nThis workflow helps you set up automated testing and deployment.\n\n## Steps\n\n1. Choose CI/CD platform (GitHub Actions, CircleCI, etc.)\n2. Configure test automation\n3. Set up deployment pipeline\n4. Configure environment variables\n5. Test the pipeline\n"
+        }
       ]
     }
   ]

@@ -52,6 +52,10 @@ describe("Cache Primer", () => {
 			expect(rulesAfterPrime?.agents["test-agent"]?.skills).toBeDefined();
 			expect(rulesAfterPrime?.agents["test-agent"]?.skills?.length).toBeGreaterThan(0);
 
+			// Should have workflows
+			expect(rulesAfterPrime?.agents["test-agent"]?.workflows).toBeDefined();
+			expect(rulesAfterPrime?.agents["test-agent"]?.workflows?.length).toBeGreaterThan(0);
+
 			// Verify DB count
 			const count = await getStoredRulesCount();
 			expect(count).toBeGreaterThan(0);
