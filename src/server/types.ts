@@ -75,6 +75,14 @@ export interface SkillFile {
 }
 
 /**
+ * Represents a single workflow file
+ */
+export interface WorkflowFile {
+	name: string;
+	content: string;
+}
+
+/**
  * Represents an agent with all its categories and optional skills
  */
 export interface RuleAgent {
@@ -83,6 +91,8 @@ export interface RuleAgent {
 	};
 	/** Optional skills (currently only for Claude Code) */
 	skills?: SkillFile[];
+	/** Optional workflows */
+	workflows?: WorkflowFile[];
 }
 
 /**
@@ -124,6 +134,21 @@ export interface StoredSkillsDocument {
 	createdAt: Date;
 	updatedAt: Date;
 }
+
+/**
+ * Database document type for stored workflows
+ * Follows the database patterns with Document suffix
+ */
+export interface StoredWorkflowsDocument {
+	agent: string;
+	workflows: WorkflowFile[];
+	githubCommitSha: string;
+	lastFetched: Date;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+export const WORKFLOWS_COLLECTION_NAME = "workflows";
 
 /**
  * Question document type for individual MongoDB documents
