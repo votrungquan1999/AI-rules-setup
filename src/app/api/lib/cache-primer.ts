@@ -2,6 +2,7 @@ import { getDatabase } from "../../../server/database";
 import { findAllStoredRules, storeRulesData, storeSkillsData } from "../../../server/rules-repository";
 import type { Manifest } from "../../../server/types";
 import { RULES_DATA_COLLECTION_NAME, SKILLS_COLLECTION_NAME } from "../../../server/types";
+import { storeWorkflowsData } from "../../../server/workflows-repository";
 import { fetchAllRulesDataLocal } from "./local-fetcher";
 
 /**
@@ -36,6 +37,11 @@ export async function primeCache(rootPath?: string): Promise<void> {
 		// Store skills if present
 		if (agent.skills && agent.skills.length > 0) {
 			await storeSkillsData(agentName, agent.skills, "local");
+		}
+
+		// Store workflows if present
+		if (agent.workflows && agent.workflows.length > 0) {
+			await storeWorkflowsData(agentName, agent.workflows, "local");
 		}
 	}
 

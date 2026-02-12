@@ -262,6 +262,12 @@ export async function fetchAllRulesDataLocal(rootPath?: string): Promise<RulesDa
 		if (skills.length > 0) {
 			result.agents[agentName].skills = skills;
 		}
+
+		// Fetch workflows for this agent
+		const workflows = await discoverWorkflowsLocal(agentName, rootPath);
+		if (workflows.length > 0) {
+			result.agents[agentName].workflows = workflows;
+		}
 	}
 
 	return result;
