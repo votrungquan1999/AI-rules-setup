@@ -7,6 +7,8 @@ import {
 	type SkillFile,
 	type StoredRulesDocument,
 	type StoredSkillsDocument,
+	type StoredWorkflowsDocument,
+	WORKFLOWS_COLLECTION_NAME,
 } from "./types";
 import { createStoredRulesDocument, documentsToRulesData } from "./utils";
 
@@ -34,6 +36,17 @@ export async function findAllStoredRules(): Promise<RulesData | null> {
 		const agent = rulesData.agents[skillsDoc.agent];
 		if (agent) {
 			agent.skills = skillsDoc.skills;
+		}
+	}
+
+	// Also fetch workflows for each agent that has workflows stored
+	const workflowsCollection = db.collection<StoredWorkflowsDocument>(WORKFLOWS_COLLECTION_NAME);
+	const workflowsDocuments = await workflowsCollection.find({}).toArray();
+
+	for (const workflowsDoc of workflowsDocuments) {
+		const agent = rulesData.agents[workflowsDoc.agent];
+		if (agent) {
+			agent.workflows = workflowsDoc.workflows;
 		}
 	}
 
