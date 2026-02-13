@@ -4,7 +4,7 @@ description: Review code changes for quality, correctness, and best practices be
 
 # Review Changes Workflow
 
-This workflow provides a systematic approach to reviewing code changes, focusing on correctness, security, maintainability, and adherence to project standards.
+You are a senior software engineer acting as an autonomous code review agent. This workflow provides a systematic approach to reviewing code changes with automated diff analysis.
 
 ## Usage
 
@@ -17,38 +17,81 @@ Use this workflow when:
 
 ## Steps
 
-1. **Understand Context**:
-   - Read PR/commit description
+// turbo
+1. **Execute Git Diff**:
+   ```bash
+   git diff base_branch
+   ```
+   - If on a feature branch, compare against the default branch (e.g., `main` or `develop`)
+   - If no changes are found, state that clearly and stop
+   - **Do NOT output the raw git diff or command output to the user**
+
+2. **Understand Context**:
+   - Read PR/commit description or ask the user for context
    - Identify the goal of the changes
    - Review related issues or requirements
 
-2. **High-Level Review**:
+3. **Create Changes Summary**:
+   
+   Analyze the diff and create a high-level functional summary:
+   - **What was added**: List new functions/features and which files they were added to
+   - **What was modified**: Describe functional changes to existing code (not line-by-line)
+   - **What was removed**: Note any deleted functions or features
+   - **User flow impact**: How do these changes affect the user experience or application behavior?
+   - **Overall purpose**: What problem does this PR solve?
+   
+   **Example**:
+   ```
+   - Added `calculatePoints()` function to `src/utils/scoring.ts`
+   - Modified user authentication flow in `src/auth/login.ts` to support OAuth
+   - Removed deprecated `oldAuth()` from `src/auth/legacy.ts`
+   - User flow: Users can now log in with Google/GitHub instead of just email/password
+   - Purpose: Add OAuth support to improve user onboarding
+   ```
+
+4. **High-Level Review**:
    - Does the change solve the stated problem?
    - Is the approach reasonable?
    - Are there any obvious alternatives?
 
-3. **Detailed Code Review** - Check for:
-   - **Correctness**: Does the code do what it's supposed to?
-   - **Security**: Any security vulnerabilities or data exposure?
-   - **Edge Cases**: Are edge cases handled?
-   - **Error Handling**: Proper error handling and user feedback?
-   - **Performance**: Any obvious performance issues?
-   - **Testing**: Are tests comprehensive and meaningful?
+5. **Detailed Code Review** - Check for (in priority order):
+   
+   Focus ONLY on code shown in the diff:
+   
+   1. **Correctness and logical errors**
+      - Does the code do what it's supposed to?
+      - Are there any logic bugs or flaws?
+   
+   2. **Security and data safety**
+      - Any security vulnerabilities or data exposure?
+      - Proper input validation and sanitization?
+   
+   3. **Edge cases and error handling**
+      - Are edge cases handled?
+      - Proper error handling and user feedback?
+   
+   4. **Performance regressions** (only if introduced by the change)
+      - Any obvious performance issues?
+      - Inefficient algorithms or queries?
+   
+   5. **Testing** (if tests are included in the diff)
+      - Are tests comprehensive and meaningful?
+      - Do tests cover the main functionality?
 
-4. **Code Quality Review** - Check for:
+6. **Code Quality Review** - Check for:
    - **Naming**: Clear, descriptive names for variables/functions?
    - **Structure**: Logical organization and flow?
    - **Duplication**: Any code duplication that should be extracted?
    - **Comments**: Necessary comments for complex logic?
    - **TypeScript**: Proper typing, no `any` types?
 
-5. **Standards Compliance** - Check for:
+7. **Standards Compliance** - Check for:
    - **Style Guide**: Follows project conventions?
    - **Patterns**: Uses established patterns?
    - **Dependencies**: New dependencies justified?
    - **Breaking Changes**: Any breaking changes documented?
 
-6. **Testing Review**:
+8. **Testing Review**:
    
    For detailed test quality review, use the `test-quality-reviewer` skill.
    
@@ -57,36 +100,60 @@ Use this workflow when:
    - Edge cases tested?
    - Tests actually fail when code is broken?
 
-7. **Create Review Report**:
+9. **Create Review Report**:
+
+   Use this exact format:
 
    ```markdown
-   # Code Review Summary
-
-   ## Changes Overview
-
-   [Brief description of changes]
+   ## Summary
+   
+   [Brief overview of what changed and overall risk level]
 
    ## Findings
 
-   ### Critical Issues
+   [If issues found, list each with:]
+   
+   ### [Issue Title]
+   - **Severity**: MUST FIX / SHOULD FIX / NIT
+   - **Description**: [What's wrong]
+   - **Why it matters**: [Impact/risk]
+   - **Suggested fix**: [Concrete, actionable suggestion; code snippet only if helpful]
 
-   - [Issue 1]
-
-   ### Suggestions
-
-   - [Suggestion 1]
-
-   ### Positive Notes
-
-   - [What was done well]
+   ## Positive Notes
+   
+   [Call out good practices or improvements]
 
    ## Recommendation
-
-   ✅ **Approved** / ⚠️ **Approved with comments** / ❌ **Needs changes**
+   
+   ✅ Safe to merge / ⚠️ Merge with comments / ❌ Needs changes before merge
    ```
+
+## Critical Review Rules
+
+**DO:**
+- Review ONLY the code shown in the diff
+- Assume intent is correct unless there is clear risk
+- Prefer concrete, actionable suggestions
+- Explain the "why" behind suggestions
+- Highlight good practices
+- If no issues are found, explicitly say the changes look good
+
+**DO NOT:**
+- Comment on unchanged code
+- Request large refactors unless necessary
+- Output the raw git diff to the user
+- Make nitpicky comments without justification
+- Suggest improvements unrelated to the change
+
+## Severity Definitions
+
+- **MUST FIX**: Critical issues that could cause bugs, security vulnerabilities, or data loss
+- **SHOULD FIX**: Important improvements for maintainability, performance, or best practices
+- **NIT**: Minor style or consistency suggestions (only mention if worth noting)
 
 ## Review Checklist
 
+- [ ] Git diff executed and analyzed
 - [ ] Code solves the stated problem
 - [ ] No security vulnerabilities
 - [ ] Edge cases handled
@@ -101,7 +168,6 @@ Use this workflow when:
 ## Notes
 
 - Focus on meaningful feedback, not nitpicks
-- Explain the "why" behind suggestions
-- Highlight good practices
+- Prioritize issues by severity (MUST FIX → SHOULD FIX → NIT)
 - Be constructive and specific
-- Prioritize issues (critical vs suggestions)
+- If the changes are safe to merge, clearly state that
