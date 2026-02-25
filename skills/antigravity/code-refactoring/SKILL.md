@@ -1,9 +1,6 @@
 ---
 name: code-refactoring
-description: >
-  Guides structured code refactoring with safety nets. Use when refactoring code,
-  cleaning up implementations, extracting functions, simplifying conditionals, or
-  when user says "refactor this", "clean up", "simplify", or "extract this".
+description: Guides structured code refactoring with test safety nets and incremental transformation patterns.
 ---
 
 # Code Refactoring

@@ -1,9 +1,6 @@
 ---
 name: create-implementation-plan
-description: >
-  Creates a comprehensive implementation plan before executing code changes. Use when
-  planning features, refactors, or architecture changes, or when user says "create a plan",
-  "plan this implementation", "design the approach", or "what's the plan".
+description: Creates a comprehensive implementation plan with research, design, and file-by-file change breakdown before execution.
 ---
 
 # Create Implementation Plan
@@ -35,6 +32,8 @@ Read as many relevant files as possible to understand:
 - Types, interfaces, and data models
 
 **Critical: Requirement Clarification First.** If anything is unclear or ambiguous, ask the user clarifying questions. Do not assume implementation details, architectural decisions, or requirements.
+
+When researching external libraries or APIs, use `@context7` for documentation queries and `@web-search` for broader research.
 
 **Mandatory Checkpoint:** Report how many files you read and ask the user whether to:
 - Read more files

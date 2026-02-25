@@ -1,10 +1,6 @@
 ---
 name: bdd-design
-description: >
-  Guides Behavior-Driven Development design using Given/When/Then scenarios with test-first
-  approach. Use when writing behavior specifications, acceptance tests, feature-level
-  tests, or when user says "use BDD", "behavior-driven", "write scenarios first",
-  "Given When Then", or "acceptance criteria tests".
+description: Guides Behavior-Driven Development using Given/When/Then scenarios with a test-first approach.
 ---
 
 # BDD Design

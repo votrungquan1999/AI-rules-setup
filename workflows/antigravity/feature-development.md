@@ -1,30 +1,25 @@
 ---
-description: Guides feature implementation using incremental development with planning, test-driven approach, and progress tracking. Use when implementing features, building functionality, or starting new development tasks.
+description: Guides feature implementation using task-driven incremental development with test-first approach. Use when implementing features, building functionality, or starting new development tasks.
 ---
 
 # Feature Development Workflow
 
-This workflow provides a structured approach for implementing features and tasks incrementally with a test-first approach and progress tracking.
+Structured approach for implementing features using context-first research, planning, and BDD-style test-first development.
 
 ## Core Principles
 
-1. **Understand Context First** - Read as many relevant files as possible to understand the codebase before planning
-2. **Plan High-Level** - Define steps and acceptance criteria, not implementation details
-3. **Test During Implementation** - Define test scenarios when implementing each step, not during planning
-4. **Track Progress** - Write progress to a file for context switching and interruptions
-5. **Incremental Progress** - Complete one step fully before moving to the next
-6. **Test Each Step** - Prove each step works before building on top of it
-7. **Red-Green-Refactor** - Write exactly one test, see it fail (red), make it pass (green), then refactor before the next test
+1. **Understand Context First** - Read as many relevant files as possible before planning or writing any code
+2. **Plan Before Code** - Use `@create-implementation-plan` skill to create a plan before implementation
+3. **One Step at a Time** - Create one step, complete it, evaluate, then create the next step
+4. **Test-First** - Every step must have tests written before implementation (red-green-refactor)
+5. **BDD by Default** - Use Given/When/Then scenarios for most feature behavior; TDD only for internal logic
+6. **Quality Gates** - Run quality checkpoints after every 2-3 completed steps
 
 ---
 
-## Phase 1: Planning
+## Phase 1: Understand Context
 
-**Goal:** Break down work into implementable steps with clear acceptance criteria.
-
-**Step 1: Understand the Context**
-
-Before creating your plan, read as many relevant files as possible to understand:
+Before planning or writing any code, read as many relevant files as possible to understand:
 
 - Existing patterns and conventions in the codebase
 - Related features or components that might be affected
@@ -32,132 +27,107 @@ Before creating your plan, read as many relevant files as possible to understand
 - Testing patterns and utilities already in place
 - Types, interfaces, and data models
 
-This context-gathering phase helps you create a more accurate plan and avoid surprises during implementation.
+**Critical: Requirement Clarification First.** If anything is unclear or ambiguous, ask the user clarifying questions. Do not assume implementation details, architectural decisions, or requirements.
 
-**Critical: Requirement Clarification First.** If anything is unclear or ambiguous, ask the user clarifying questions. Do not assume implementation details, architectural decisions, or requirements. You must proactively ask requirement-focused questions instead of assuming details.
+When researching external libraries or APIs, use `@context7` for documentation queries and `@web-search` for broader research.
 
-**Mandatory Checkpoint Before Step 2:** Report how many files you read and ask the user whether to read more files, ask more questions, or continue. Do not create a plan until the user explicitly says "continue"; otherwise, follow their instructions and ask again.
-
-**Step 2: Create the Plan**
-
-Create plan based on the gathered information. MUST pause for user review and wait for user to say "implement it" before starting implementation phase.
-
-**What to include:**
-
-- List of implementation steps in logical order
-- Acceptance criteria for each step (what "done" looks like)
-- Test type for each step (unit, integration, e2e, etc.) — ONLY the test type, not test cases yet
-- Dependencies between steps
-- Any known blockers or risks
-
-**What NOT to include:**
-
-- Specific test scenarios or test code
-- Detailed implementation approaches
-- Exact function signatures or component structure
-- Database schema details
-
-**Create Progress File:**
-Create a file (e.g., `IMPLEMENTATION_PROGRESS.md`) to track completed steps. Add steps ONLY as you work on them, not in advance.
+**Mandatory Checkpoint:** Report how many files you read and ask the user whether to read more files, ask more questions, or continue. Do not proceed until the user explicitly says "continue".
 
 ---
 
-## Phase 2: Implement Each Step
+## Phase 2: Plan
 
-**Default approach: BDD (Behavior-Driven Design)**
-- Use the `@bdd-design` skill for most feature steps — write Given/When/Then scenarios that describe behavior
-- Use the `@tdd-design` skill only when implementing specific internal logic, algorithms, or utilities that need fine-grained unit tests
+**Use the `@create-implementation-plan` skill** to create a detailed plan based on the context you've gathered.
 
-**The red-green-refactor cycle applies to ALL test-first work**, whether BDD or TDD:
-1. **Red** — Write one failing test
-2. **Green** — Write minimum code to make it pass
-3. **Refactor** — Improve structure, run tests again
+The skill will guide you through designing the approach and creating a file-by-file change breakdown.
 
-**For each step in your plan:**
+**After the plan is approved**, proceed to Phase 3.
 
-1. **Add step to progress file** - When starting a new step, add it with 🔄 In Progress status
-2. **Define test scenarios** - NOW figure out what tests are needed for THIS step (use Given/When/Then for behavior, unit tests only for internals)
+---
 
-**Then, for EACH test scenario, follow red-green-refactor:**
+## Phase 3: Implement
 
-3. **Write ONE test** - Write exactly 1 test at a time
-4. **Run the test** - Verify it fails (red)
-5. **Implement code** - Write the minimum code needed to make this ONE test pass (green)
-6. **Refactor** - Clean up while tests still pass
-7. **Repeat** - Continue until all test scenarios for this step are written and passing
+Each step is an **observable behavior** — something a user or system can observe, not an internal implementation detail.
 
-**After all tests are passing:**
+### Step Format
 
-8. **Run linting** - Check for code quality issues and fix any problems
-9. **Verify** - All tests pass, acceptance criteria met
-10. **Mark step as complete** - Update progress file with ✅ Done, test list, and notes
-11. **Move to next step** - Only after current step is complete
+**Each step title describes what the system does**, not what code to write:
+- ✅ `High-engagement open markets appear as "TRENDING"`
+- ✅ `No duplicate markets between trending and regular`
+- ❌ `Add isTrending field to Market model`
+- ❌ `Write SQL query for trending markets`
 
-### Periodic Quality Checkpoints
+**Sub-items track progress within the step:**
+- **Test → Implement → Verify** — when production code changes are needed
+- **Test → Verify (no production change needed)** — when existing code already handles the behavior
+- **Cleanup steps** can have multiple sub-items (e.g., remove old code, rewrite tests, delete dead helpers)
 
-**After every 2-3 completed steps**, pause to run quality checks:
+### How to Work Through Steps
 
-1. **Use `@test-quality-reviewer` skill** - Review all tests written so far against the 4 Pillars framework. Fix any issues before proceeding.
-2. **Use `@code-refactoring` skill** - Review implementation code for refactoring opportunities. Apply Extract Function, simplify conditionals, remove duplication. Run tests after each refactoring.
+**Create one step at a time.** After completing a step, evaluate what you learned and decide the next step. At most, create two steps upfront only if they are very closely related.
 
-These checkpoints prevent technical debt from accumulating during feature development.
+**For each step:**
+
+1. **Write the step title** as an observable behavior
+2. **Use `@bdd-design` to write a failing test** that describes the behavior with Given/When/Then
+   - Use `@tdd-design` only for internal logic, algorithms, or utilities
+3. **Implement** the minimum code to make the test pass (skip if no production change needed)
+4. **Verify** — run all tests, confirm the behavior works
+5. **Mark the step done** and evaluate — decide what the next step should be based on what you learned
+
+### Quality Checkpoints
+
+**After every 2-3 completed steps**, pause and:
+
+1. **Use `@test-quality-reviewer`** — Review tests against the 4 Pillars framework
+2. **Use `@code-refactoring`** — Review for refactoring opportunities (stops if tests are missing)
 
 ### When Writing Tests
 
-**IMPORTANT:** Before writing any tests, locate the "4 Pillars of Testing" document in the project (usually in `.cursor/rules/`, `docs/`, or `repo_knowledge/`). Use it to guide your test writing.
-
-**If you cannot find the 4 Pillars document:** STOP and ask the user where it is located.
+Before writing any tests, locate the "4 Pillars of Testing" document in the project (usually in `.cursor/rules/`, `docs/`, or `repo_knowledge/`). If you cannot find it, **STOP** and ask the user.
 
 ---
 
-## Progress Tracking Format
+## Task File Example
 
 ```markdown
-# Implementation Progress: [Task Name]
+## Implementation (BDD — each step = observable behavior)
 
-### Step 1: [Description]
+### Step 1: High-engagement open markets appear as "TRENDING"
+- [x] Test → Implement → Verify
 
-**Status:** ✅ Done
+### Step 2: Low-engagement markets are NOT trending
+- [x] Test → Verify (no production change needed)
 
-**Tests Written (2 tests, all passing ✅):**
+### Step 3: At most sampleSize trending markets returned
+- [x] Test → Verify (no production change needed)
 
-1. ✅ Test description
-2. ✅ Test description
+### Step 4: Fewer qualifying markets than sample size returns all available
+- [x] Test → Verify (no production change needed)
 
-**Notes:** Brief summary of what was accomplished
+### Step 5: No duplicate markets between trending and regular
+- [x] Test → Verify (no production change needed)
 
-### Step 2: [Description]
+### Quality Checkpoint (after steps 1-5)
+- [x] test-quality-reviewer: reviewed 5 tests, all passing 4 Pillars
+- [x] code-refactoring: extracted helper function, simplified query
 
-**Status:** 🔄 In Progress
+### Step 6: Old trending types no longer returned (cleanup)
+- [x] SQL cleaned — removed KING_OF_HILL/POPULAR_CLOSED CTEs
+- [x] Old tests removed/rewritten
+- [x] Dead helpers removed
 
-**Tests Written (1 of 3 tests passing ✅):**
-
-1. ✅ Test passing
-2. ⏳ Test not written yet
-3. ⏳ Test failing
-
-**Quality Checkpoint:** [After step 2-3, note test-quality-reviewer and refactoring results]
-
-**Notes:** Current work in progress
+### Step 7: → 🔄 [Next observable behavior]
+- [ ] Test → Implement → Verify
 ```
 
-**Status indicators:**
+---
 
-- ✅ Done - Step complete, tests passing, AC met
-- 🔄 In Progress - Currently working on this step
-
-**Update frequency:**
-
-- Add step when you start working on it (🔄 In Progress)
-- Update tests list as you write them (⏳ → ✅)
-- Mark complete when done (🔄 → ✅)
-- Add quality checkpoint notes after every 2-3 steps
-
-### What to Avoid During Implementation
+## What to Avoid
 
 - ❌ Skipping tests for any step
 - ❌ Moving to next step with failing tests
-- ❌ Not updating progress file
-- ❌ Writing tests without consulting project testing guidelines
+- ❌ Writing step titles as code tasks instead of observable behaviors
+- ❌ Creating all steps upfront — evaluate after each step
 - ❌ Skipping quality checkpoints after 2-3 steps
-- ❌ Accumulating more than 3 steps without running test-quality-reviewer
+- ❌ Implementing without a plan (use `@create-implementation-plan` first)

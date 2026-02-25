@@ -1,9 +1,6 @@
 ---
 name: tdd-design
-description: >
-  Guides Test-Driven Development design using the Red-Green-Refactor cycle. Use when writing
-  tests first, designing testable code, or when user says "use TDD", "test first", or
-  "red green refactor".
+description: Guides Test-Driven Development using the Red-Green-Refactor cycle with a test-first approach.
 ---
 
 # TDD Design
