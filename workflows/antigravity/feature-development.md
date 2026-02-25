@@ -1,11 +1,10 @@
 ---
-name: feature-development-workflow
-description: Guides feature implementation using incremental development with planning, test-driven approach, and progress tracking. Use when implementing features, building functionality, starting new development tasks, or when user says "implement feature", "build this", or "develop this functionality".
+description: Guides feature implementation using incremental development with planning, test-driven approach, and progress tracking. Use when implementing features, building functionality, or starting new development tasks.
 ---
 
 # Feature Development Workflow
 
-This Skill provides a structured approach for implementing features and tasks incrementally with test-driven development and progress tracking.
+This workflow provides a structured approach for implementing features and tasks incrementally with a test-first approach and progress tracking.
 
 ## Core Principles
 
@@ -15,7 +14,7 @@ This Skill provides a structured approach for implementing features and tasks in
 4. **Track Progress** - Write progress to a file for context switching and interruptions
 5. **Incremental Progress** - Complete one step fully before moving to the next
 6. **Test Each Step** - Prove each step works before building on top of it
-7. **One Test at a Time** - Write exactly one test, see it fail, make it pass, then move to the next test. This ensures incremental validation and prevents skipping test coverage.
+7. **Red-Green-Refactor** - Write exactly one test, see it fail (red), make it pass (green), then refactor before the next test
 
 ---
 
@@ -47,7 +46,7 @@ Create plan based on the gathered information. MUST pause for user review and wa
 
 - List of implementation steps in logical order
 - Acceptance criteria for each step (what "done" looks like)
-- Test type for each step (unit, integration, e2e, etc.) - ONLY the test type, not test cases yet
+- Test type for each step (unit, integration, e2e, etc.) — ONLY the test type, not test cases yet
 - Dependencies between steps
 - Any known blockers or risks
 
@@ -58,58 +57,34 @@ Create plan based on the gathered information. MUST pause for user review and wa
 - Exact function signatures or component structure
 - Database schema details
 
-**Example Plan:**
-
-```markdown
-## Task: [Task name]
-
-### Step 1: [High-level description]
-
-**AC:** [What must be true when this step is done]
-
-**Test Type:** unit
-
-### Step 2: [High-level description]
-
-**AC:** [What must be true when this step is done]
-
-**Test Type:** integration
-```
-
 **Create Progress File:**
 Create a file (e.g., `IMPLEMENTATION_PROGRESS.md`) to track completed steps. Add steps ONLY as you work on them, not in advance.
-
-```markdown
-# Implementation Progress: [Task Name]
-
-### Step 1: [Description]
-
-**Status:** ✅ Done
-
-**E2E Tests Written (2 tests, all passing ✅):**
-
-1. ✅ Popover open/close behavior
-2. ✅ Form inputs render correctly
-
-**Notes:** Created form components, added client-side validation
-```
 
 ---
 
 ## Phase 2: Implement Each Step
 
+**Default approach: BDD (Behavior-Driven Design)**
+- Use the `@bdd-design` skill for most feature steps — write Given/When/Then scenarios that describe behavior
+- Use the `@tdd-design` skill only when implementing specific internal logic, algorithms, or utilities that need fine-grained unit tests
+
+**The red-green-refactor cycle applies to ALL test-first work**, whether BDD or TDD:
+1. **Red** — Write one failing test
+2. **Green** — Write minimum code to make it pass
+3. **Refactor** — Improve structure, run tests again
+
 **For each step in your plan:**
 
 1. **Add step to progress file** - When starting a new step, add it with 🔄 In Progress status
-2. **Define test scenarios** - NOW figure out what tests are needed for THIS step (you can define empty test scenarios first)
+2. **Define test scenarios** - NOW figure out what tests are needed for THIS step (use Given/When/Then for behavior, unit tests only for internals)
 
-**Then, for EACH test scenario, follow this iterative process:**
+**Then, for EACH test scenario, follow red-green-refactor:**
 
-3. **Write ONE test** - Write exactly 1 test at a time (you can start with an empty test that just has a description)
-4. **Run the test** - Run the test to verify it fails (this confirms the test is actually testing something)
-5. **Implement code** - Write the minimum code needed to make this ONE test pass
-6. **Run the test again** - Verify the test now passes
-7. **Repeat** - If more test scenarios remain, go back to step 3 for the next test. Continue until all test scenarios are written and passing.
+3. **Write ONE test** - Write exactly 1 test at a time
+4. **Run the test** - Verify it fails (red)
+5. **Implement code** - Write the minimum code needed to make this ONE test pass (green)
+6. **Refactor** - Clean up while tests still pass
+7. **Repeat** - Continue until all test scenarios for this step are written and passing
 
 **After all tests are passing:**
 
@@ -118,15 +93,20 @@ Create a file (e.g., `IMPLEMENTATION_PROGRESS.md`) to track completed steps. Add
 10. **Mark step as complete** - Update progress file with ✅ Done, test list, and notes
 11. **Move to next step** - Only after current step is complete
 
+### Periodic Quality Checkpoints
+
+**After every 2-3 completed steps**, pause to run quality checks:
+
+1. **Use `@test-quality-reviewer` skill** - Review all tests written so far against the 4 Pillars framework. Fix any issues before proceeding.
+2. **Use `@code-refactoring` skill** - Review implementation code for refactoring opportunities. Apply Extract Function, simplify conditionals, remove duplication. Run tests after each refactoring.
+
+These checkpoints prevent technical debt from accumulating during feature development.
+
 ### When Writing Tests
 
 **IMPORTANT:** Before writing any tests, locate the "4 Pillars of Testing" document in the project (usually in `.cursor/rules/`, `docs/`, or `repo_knowledge/`). Use it to guide your test writing.
 
 **If you cannot find the 4 Pillars document:** STOP and ask the user where it is located.
-
-Follow the guidelines in the 4 Pillars document when defining test scenarios and writing tests.
-
-**Key TDD Principle:** Always write ONE test at a time, see it fail, make it pass, then move to the next test. This ensures you're building incrementally and each test is actually validating behavior.
 
 ---
 
@@ -156,6 +136,8 @@ Follow the guidelines in the 4 Pillars document when defining test scenarios and
 2. ⏳ Test not written yet
 3. ⏳ Test failing
 
+**Quality Checkpoint:** [After step 2-3, note test-quality-reviewer and refactoring results]
+
 **Notes:** Current work in progress
 ```
 
@@ -164,19 +146,12 @@ Follow the guidelines in the 4 Pillars document when defining test scenarios and
 - ✅ Done - Step complete, tests passing, AC met
 - 🔄 In Progress - Currently working on this step
 
-**Test indicators:**
-
-- ✅ Test passing
-- ⏳ Test not written yet or failing
-
 **Update frequency:**
 
-- Add step to progress file when you start working on it (🔄 In Progress)
+- Add step when you start working on it (🔄 In Progress)
 - Update tests list as you write them (⏳ → ✅)
-- Mark step complete when done (🔄 In Progress → ✅ Done)
-- Add notes about what was accomplished or issues encountered
-
-**Important:** Don't pre-create steps in the progress file. The plan file already has all steps defined. Only add a step to progress when you actually start working on it.
+- Mark complete when done (🔄 → ✅)
+- Add quality checkpoint notes after every 2-3 steps
 
 ### What to Avoid During Implementation
 
@@ -184,4 +159,5 @@ Follow the guidelines in the 4 Pillars document when defining test scenarios and
 - ❌ Moving to next step with failing tests
 - ❌ Not updating progress file
 - ❌ Writing tests without consulting project testing guidelines
-- ❌ Pre-creating steps in progress file (only add when working on them)
+- ❌ Skipping quality checkpoints after 2-3 steps
+- ❌ Accumulating more than 3 steps without running test-quality-reviewer
