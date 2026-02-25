@@ -2,6 +2,8 @@
 description: Build comprehensive repository knowledge by analyzing codebase and creating interconnected documentation
 ---
 
+// turbo-all
+
 # Repository Knowledge Workflow
 
 This workflow creates a comprehensive knowledge base for a repository by systematically analyzing the codebase and documenting meaningful patterns, architecture, and flows.

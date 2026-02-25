@@ -90,6 +90,7 @@ Use this workflow when:
    - **Patterns**: Uses established patterns?
    - **Dependencies**: New dependencies justified?
    - **Breaking Changes**: Any breaking changes documented?
+   - For refactoring suggestions, recommend the `@code-refactoring` skill
 
 8. **Testing Review**:
    

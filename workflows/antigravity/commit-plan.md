@@ -136,3 +136,7 @@ Add unit and E2E tests for workflows functionality across all agents. Includes w
 - Title should be concise (≤50 chars), description can be detailed
 - Present the complete plan with commands ready to execute
 - After approval, execute commands sequentially (one at a time)
+
+## Related
+
+- Consider running the `review-changes` workflow before creating a commit plan to catch issues early
