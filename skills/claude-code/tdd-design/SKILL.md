@@ -1,5 +1,5 @@
 ---
-name: tdd-workflow
+name: tdd-design
 description: Guides test-driven development using red-green-refactor cycle with test-first approach. Use when implementing features with TDD, writing tests before code, refactoring with test safety net, fixing bugs with test reproduction, or when user says "use TDD", "test-driven", "write tests first", or "red-green-refactor".
 ---
 

@@ -273,3 +273,8 @@ This Skill uses the 4 Pillars framework to systematically review test quality:
 5. **Recommend improvements** with priority
 
 **Remember:** Different test types have different pillar priorities. Unit tests can have lower resilience (testing implementation), while E2E tests must have high resilience (testing behavior).
+
+## Related Skills
+
+- `@tdd-design` - Use TDD to write tests following the red-green-refactor cycle
+- `@bdd-design` - Use BDD for behavior-level scenario testing with Given/When/Then

@@ -88,6 +88,7 @@ export async function fetchManifestLocal(agent: string, category: string, rootPa
 
 /**
  * Discovers all available skills for a given agent from skills/{agent}/
+ * Skills must follow the subdirectory format: skills/{agent}/{skill-name}/SKILL.md
  * @param agent - AI agent name (e.g., 'claude-code', 'antigravity')
  * @param rootPath - Optional root directory (defaults to process.cwd())
  * @returns Array of skill objects with name and content
@@ -111,25 +112,21 @@ export async function discoverSkillsLocal(
 
 		const entries = await fetchDirectoryContentsLocal(`skills/${agent}`, rootPath);
 
-		// Filter for .md files only (exclude README.md and SKILL.md)
-		const skillFiles = entries.filter(
-			(entry) =>
-				entry.type === "file" && entry.name.endsWith(".md") && entry.name !== "README.md" && entry.name !== "SKILL.md",
-		);
+		// Filter for directories only (each skill is a subdirectory containing SKILL.md)
+		const skillDirs = entries.filter((entry) => entry.type === "dir");
 
 		const skills: Array<{ name: string; content: string }> = [];
 
-		for (const file of skillFiles) {
+		for (const dir of skillDirs) {
 			try {
-				const content = await fetchFileContentLocal(`skills/${agent}/${file.name}`, rootPath);
-				// Extract skill name from filename (remove .md extension)
-				const skillName = file.name.replace(/\.md$/, "");
+				const content = await fetchFileContentLocal(`skills/${agent}/${dir.name}/SKILL.md`, rootPath);
 				skills.push({
-					name: skillName,
+					name: dir.name,
 					content,
 				});
 			} catch (error) {
-				console.warn(`Failed to fetch skill file ${file.name}:`, error);
+				// SKILL.md not found in this directory - skip silently
+				console.warn(`No SKILL.md found in skills/${agent}/${dir.name}:`, error);
 			}
 		}
 

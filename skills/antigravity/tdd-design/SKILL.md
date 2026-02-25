@@ -1,9 +1,12 @@
 ---
-name: tdd-workflow
-description: Guides test-driven development using red-green-refactor cycle with test-first approach. Use when implementing features with TDD, writing tests before code, refactoring with test safety net, fixing bugs with test reproduction, or when user says "use TDD", "test-driven", "write tests first", or "red-green-refactor".
+name: tdd-design
+description: >
+  Guides Test-Driven Development design using the Red-Green-Refactor cycle. Use when writing
+  tests first, designing testable code, or when user says "use TDD", "test first", or
+  "red green refactor".
 ---
 
-# TDD Workflow
+# TDD Design
 
 Test-Driven Development: write tests before implementation using red-green-refactor cycle.
 
@@ -70,3 +73,9 @@ Continue cycle for each test scenario until all implemented and passing.
 - ❌ Write multiple tests before implementing
 - ❌ Write implementation before tests
 - ❌ Consider test passed when the test not actually run
+
+## Related Skills
+
+- `@bdd-design` - Use BDD for behavior-level/acceptance testing alongside TDD for unit-level testing
+- `@test-quality-reviewer` - Review test quality using the 4 Pillars framework after writing tests
+- `@code-refactoring` - Apply refactoring patterns during the Refactor phase of the cycle
