@@ -4,7 +4,7 @@ import type { Manifest } from "../../server/types";
 const API_BASE_URL = process.env.AI_RULES_API_URL || "https://ai-rules-setup.vercel.app";
 
 // Types for API responses
-interface RulesResponse {
+export interface RulesResponse {
 	agents: {
 		[agentName: string]: {
 			categories: {
@@ -34,6 +34,22 @@ interface RulesResponse {
 let cachedRules: RulesResponse | null = null;
 let cacheTimestamp: number = 0;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+/**
+ * Set the cached rules data directly. Used for testing to avoid API calls.
+ */
+export function setCachedRules(data: RulesResponse): void {
+	cachedRules = data;
+	cacheTimestamp = Date.now();
+}
+
+/**
+ * Reset the cache. Used for testing cleanup.
+ */
+export function resetCache(): void {
+	cachedRules = null;
+	cacheTimestamp = 0;
+}
 
 /**
  * Fetches rules data from the API with caching

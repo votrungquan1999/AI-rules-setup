@@ -1,8 +1,8 @@
 import { join } from "node:path";
 import chalk from "chalk";
-import { addCategory, loadConfig, saveConfig } from "../lib/config";
+import { fetchAvailableAgents, fetchManifests, fetchRuleFile, fetchSkills, fetchWorkflows } from "../lib/api-client";
+import { addCategory, addSkill, addWorkflow, loadConfig, saveConfig } from "../lib/config";
 import { applyNamingConvention, applySkillNamingConvention, detectConflict, writeRuleFile } from "../lib/files";
-import { fetchAvailableAgents, fetchManifests, fetchRuleFile, fetchSkills, fetchWorkflows } from "../lib/github";
 import { promptAgentSelection, promptCategorySelection, promptConflictResolution } from "../lib/prompts";
 import type { AIAgent, Config, InitOptions } from "../lib/types";
 
@@ -85,6 +85,9 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
 				categories: [],
 			};
 		}
+
+		// Always update agent to match the selected agent
+		config = { ...config, agent: selectedAgent };
 
 		// Determine overwrite strategy
 		const overwriteStrategy = options.overwriteStrategy || "prompt";
@@ -207,6 +210,10 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
 						await writeRuleFile(skill.content, join(process.cwd(), targetPath));
 						console.log(chalk.green(`✓ Installed skill: ${skill.name}`));
 						installedSkillsCount++;
+
+						// Add skill to config
+						const updatedConfig = addSkill(config, skill.name);
+						Object.assign(config, updatedConfig);
 					} catch (error) {
 						console.error(chalk.red(`❌ Error installing skill ${skill.name}: ${error}`));
 					}
@@ -259,6 +266,10 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
 						await writeRuleFile(workflow.content, join(process.cwd(), targetPath));
 						console.log(chalk.green(`✓ Installed workflow: ${workflow.name}`));
 						installedWorkflowsCount++;
+
+						// Add workflow to config
+						const updatedConfig = addWorkflow(config, workflow.name);
+						Object.assign(config, updatedConfig);
 					} catch (error) {
 						console.error(chalk.red(`❌ Error installing workflow ${workflow.name}: ${error}`));
 					}
