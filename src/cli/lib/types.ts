@@ -116,6 +116,12 @@ export interface InitOptions {
 	workflows?: string[];
 	/** Specific skills to install */
 	skills?: string[];
+	/** Skip category installation entirely */
+	noCategories?: boolean;
+	/** Skip skill installation entirely */
+	noSkills?: boolean;
+	/** Skip workflow installation entirely */
+	noWorkflows?: boolean;
 	/** Overwrite strategy for file conflicts (prompt, force, skip) */
 	overwriteStrategy?: OverwriteStrategy;
 }

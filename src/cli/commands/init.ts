@@ -3,8 +3,116 @@ import chalk from "chalk";
 import { fetchAvailableAgents, fetchManifests, fetchRuleFile, fetchSkills, fetchWorkflows } from "../lib/api-client";
 import { addCategory, addSkill, addWorkflow, loadConfig, saveConfig } from "../lib/config";
 import { applyNamingConvention, applySkillNamingConvention, detectConflict, writeRuleFile } from "../lib/files";
-import { promptAgentSelection, promptCategorySelection, promptConflictResolution } from "../lib/prompts";
-import type { AIAgent, Config, InitOptions } from "../lib/types";
+import {
+	promptAgentSelection,
+	promptCategorySelection,
+	promptConflictResolution,
+	promptSkillSelection,
+	promptWorkflowSelection,
+} from "../lib/prompts";
+import type { AIAgent, Config, InitOptions, OverwriteStrategy } from "../lib/types";
+
+/**
+ * Installs selected skills for the given agent
+ */
+async function installSkills(
+	skills: Array<{ name: string; content: string }>,
+	agent: string,
+	overwriteStrategy: OverwriteStrategy,
+	config: Config,
+): Promise<void> {
+	let installedSkillsCount = 0;
+
+	for (const skill of skills) {
+		try {
+			// Apply skill naming convention for this agent
+			const targetPath = applySkillNamingConvention(agent as AIAgent, skill.name);
+
+			// Check for conflicts
+			const conflict = await detectConflict(join(process.cwd(), targetPath));
+			if (conflict.hasConflict) {
+				if (overwriteStrategy === "skip") {
+					console.log(chalk.yellow(`⏭️  Skipped (file exists): ${targetPath}`));
+					continue;
+				}
+
+				if (overwriteStrategy === "force") {
+					console.log(chalk.yellow(`⚠️  Overwriting: ${targetPath}`));
+				} else {
+					const shouldOverwrite = await promptConflictResolution(targetPath);
+					if (!shouldOverwrite) {
+						console.log(chalk.yellow(`⏭️  Skipped: ${targetPath}`));
+						continue;
+					}
+				}
+			}
+
+			// Write skill file
+			await writeRuleFile(skill.content, join(process.cwd(), targetPath));
+			console.log(chalk.green(`✓ Installed skill: ${skill.name}`));
+			installedSkillsCount++;
+
+			// Add skill to config
+			const updatedConfig = addSkill(config, skill.name);
+			Object.assign(config, updatedConfig);
+		} catch (error) {
+			console.error(chalk.red(`❌ Error installing skill ${skill.name}: ${error}`));
+		}
+	}
+
+	console.log(chalk.green(`\n🎉 Successfully installed ${installedSkillsCount} skills`));
+}
+
+/**
+ * Installs selected workflows for the given agent
+ */
+async function installWorkflows(
+	workflows: Array<{ name: string; content: string }>,
+	_agent: string,
+	overwriteStrategy: OverwriteStrategy,
+	config: Config,
+): Promise<void> {
+	let installedWorkflowsCount = 0;
+
+	for (const workflow of workflows) {
+		try {
+			// Workflows go to .agent/workflows/<name>.md
+			const targetPath = `.agent/workflows/${workflow.name}.md`;
+
+			// Check for conflicts
+			const conflict = await detectConflict(join(process.cwd(), targetPath));
+			if (conflict.hasConflict) {
+				if (overwriteStrategy === "skip") {
+					console.log(chalk.yellow(`⏭️  Skipped (file exists): ${targetPath}`));
+					continue;
+				}
+
+				if (overwriteStrategy === "force") {
+					console.log(chalk.yellow(`⚠️  Overwriting: ${targetPath}`));
+				} else {
+					const shouldOverwrite = await promptConflictResolution(targetPath);
+					if (!shouldOverwrite) {
+						console.log(chalk.yellow(`⏭️  Skipped: ${targetPath}`));
+						continue;
+					}
+				}
+			}
+
+			// Write workflow file
+			await writeRuleFile(workflow.content, join(process.cwd(), targetPath));
+			console.log(chalk.green(`✓ Installed workflow: ${workflow.name}`));
+			installedWorkflowsCount++;
+
+			// Add workflow to config
+			const updatedConfig = addWorkflow(config, workflow.name);
+			Object.assign(config, updatedConfig);
+		} catch (error) {
+			console.error(chalk.red(`❌ Error installing workflow ${workflow.name}: ${error}`));
+		}
+	}
+
+	console.log(chalk.green(`\n🎉 Successfully installed ${installedWorkflowsCount} workflows`));
+}
 
 /**
  * Initialize AI rules for the current project
@@ -37,39 +145,45 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
 			console.log(chalk.green(`✓ Selected agent: ${selectedAgent}\n`));
 		}
 
-		// Fetch manifests for selected agent
-		const manifests = await fetchManifests(selectedAgent);
-		if (manifests.length === 0) {
-			console.error(chalk.red("❌ No rule categories found for this agent"));
-			return;
-		}
-
-		// Category selection: use provided options or prompt
-		let selectedCategories: string[];
-		if (options.categories && options.categories.length > 0) {
-			// Check if "all" is specified
-			if (options.categories.includes("all")) {
-				selectedCategories = manifests.map((m) => m.id);
-				console.log(chalk.green(`✓ Selected all categories: ${selectedCategories.join(", ")}\n`));
-			} else {
-				// Validate provided categories
-				const validCategories = manifests.map((m) => m.id);
-				const invalidCategories = options.categories.filter((cat) => !validCategories.includes(cat));
-				if (invalidCategories.length > 0) {
-					console.error(chalk.red(`❌ Invalid categories: ${invalidCategories.join(", ")}`));
-					console.log(chalk.yellow(`Available categories: ${validCategories.join(", ")}`));
-					process.exit(1);
-				}
-				selectedCategories = options.categories;
-				console.log(chalk.green(`✓ Selected categories: ${selectedCategories.join(", ")}\n`));
-			}
+		// Category selection: skip if --no-categories, else use provided options or prompt
+		let selectedCategories: string[] = [];
+		let manifests: Awaited<ReturnType<typeof fetchManifests>> = [];
+		if (options.noCategories) {
+			console.log(chalk.yellow("⏭️  Skipping categories (--no-categories)\n"));
 		} else {
-			selectedCategories = await promptCategorySelection(manifests);
-			if (selectedCategories.length === 0) {
-				console.log(chalk.yellow("⚠️  No categories selected. Nothing to install."));
+			// Fetch manifests for selected agent
+			manifests = await fetchManifests(selectedAgent);
+			if (manifests.length === 0) {
+				console.error(chalk.red("❌ No rule categories found for this agent"));
 				return;
 			}
-			console.log(chalk.green(`✓ Selected categories: ${selectedCategories.join(", ")}\n`));
+
+			if (options.categories && options.categories.length > 0) {
+				// Check if "all" is specified
+				if (options.categories.includes("all")) {
+					selectedCategories = manifests.map((m) => m.id);
+					console.log(chalk.green(`✓ Selected all categories: ${selectedCategories.join(", ")}\n`));
+				} else {
+					// Validate provided categories
+					const validCategories = manifests.map((m) => m.id);
+					const invalidCategories = options.categories.filter((cat) => !validCategories.includes(cat));
+					if (invalidCategories.length > 0) {
+						console.error(chalk.red(`❌ Invalid categories: ${invalidCategories.join(", ")}`));
+						console.log(chalk.yellow(`Available categories: ${validCategories.join(", ")}`));
+						process.exit(1);
+					}
+					selectedCategories = options.categories;
+					console.log(chalk.green(`✓ Selected categories: ${selectedCategories.join(", ")}\n`));
+				}
+			} else {
+				selectedCategories = await promptCategorySelection(manifests);
+				if (selectedCategories.length === 0) {
+					console.log(chalk.yellow("⚠️  No categories selected.\n"));
+				}
+				if (selectedCategories.length > 0) {
+					console.log(chalk.green(`✓ Selected categories: ${selectedCategories.join(", ")}\n`));
+				}
+			}
 		}
 
 		// Load existing config or create default
@@ -156,8 +270,11 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
 			installedRules.push(manifest.id);
 		}
 
-		// Install skills if requested via CLI
-		if (options.skills && options.skills.length > 0) {
+		// Install skills: skip if --no-skills, else use CLI flag or interactive prompt
+		if (options.noSkills) {
+			console.log(chalk.yellow("\n⏭️  Skipping skills (--no-skills)"));
+		} else if (options.skills && options.skills.length > 0) {
+			// CLI flag provided: install named skills
 			console.log(chalk.blue("\n🎯 Checking for available skills..."));
 			const skills = await fetchSkills(selectedAgent);
 
@@ -178,55 +295,30 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
 			}
 
 			if (selectedSkills.length > 0) {
-				let installedSkillsCount = 0;
-
-				for (const skill of selectedSkills) {
-					try {
-						// Apply skill naming convention for this agent
-						const targetPath = applySkillNamingConvention(selectedAgent as AIAgent, skill.name);
-
-						// Check for conflicts
-						const conflict = await detectConflict(join(process.cwd(), targetPath));
-						if (conflict.hasConflict) {
-							// Handle conflict based on strategy
-							if (overwriteStrategy === "skip") {
-								console.log(chalk.yellow(`⏭️  Skipped (file exists): ${targetPath}`));
-								continue;
-							}
-
-							if (overwriteStrategy === "force") {
-								console.log(chalk.yellow(`⚠️  Overwriting: ${targetPath}`));
-							} else {
-								// prompt strategy
-								const shouldOverwrite = await promptConflictResolution(targetPath);
-								if (!shouldOverwrite) {
-									console.log(chalk.yellow(`⏭️  Skipped: ${targetPath}`));
-									continue;
-								}
-							}
-						}
-
-						// Write skill file
-						await writeRuleFile(skill.content, join(process.cwd(), targetPath));
-						console.log(chalk.green(`✓ Installed skill: ${skill.name}`));
-						installedSkillsCount++;
-
-						// Add skill to config
-						const updatedConfig = addSkill(config, skill.name);
-						Object.assign(config, updatedConfig);
-					} catch (error) {
-						console.error(chalk.red(`❌ Error installing skill ${skill.name}: ${error}`));
-					}
-				}
-
-				console.log(chalk.green(`\n🎉 Successfully installed ${installedSkillsCount} skills`));
+				await installSkills(selectedSkills, selectedAgent, overwriteStrategy, config);
 			} else {
 				console.log(chalk.yellow("No matching skills found"));
 			}
+		} else if (process.stdin.isTTY) {
+			// Interactive mode: fetch and prompt (only when TTY is available)
+			const skills = await fetchSkills(selectedAgent);
+			if (skills.length > 0) {
+				console.log(chalk.blue("\n🎯 Skills available for this agent:"));
+				const selectedSkillNames = await promptSkillSelection(skills);
+				if (selectedSkillNames.length > 0) {
+					const selectedSkills = skills.filter((s) => selectedSkillNames.includes(s.name));
+					await installSkills(selectedSkills, selectedAgent, overwriteStrategy, config);
+				} else {
+					console.log(chalk.yellow("No skills selected."));
+				}
+			}
 		}
 
-		// Install workflows if requested via CLI
-		if (options.workflows && options.workflows.length > 0) {
+		// Install workflows: skip if --no-workflows, else use CLI flag or interactive prompt
+		if (options.noWorkflows) {
+			console.log(chalk.yellow("\n⏭️  Skipping workflows (--no-workflows)"));
+		} else if (options.workflows && options.workflows.length > 0) {
+			// CLI flag provided: install named workflows
 			console.log(chalk.blue("\n🎯 Installing workflows..."));
 			const allWorkflows = await fetchWorkflows(selectedAgent);
 
@@ -234,50 +326,22 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
 			const selectedWorkflows = allWorkflows.filter((w) => options.workflows?.includes(w.name));
 
 			if (selectedWorkflows.length > 0) {
-				let installedWorkflowsCount = 0;
-
-				for (const workflow of selectedWorkflows) {
-					try {
-						// Workflows go to .agent/workflows/<name>.md
-						const targetPath = `.agent/workflows/${workflow.name}.md`;
-
-						// Check for conflicts
-						const conflict = await detectConflict(join(process.cwd(), targetPath));
-						if (conflict.hasConflict) {
-							// Handle conflict based on strategy
-							if (overwriteStrategy === "skip") {
-								console.log(chalk.yellow(`⏭️  Skipped (file exists): ${targetPath}`));
-								continue;
-							}
-
-							if (overwriteStrategy === "force") {
-								console.log(chalk.yellow(`⚠️  Overwriting: ${targetPath}`));
-							} else {
-								// prompt strategy
-								const shouldOverwrite = await promptConflictResolution(targetPath);
-								if (!shouldOverwrite) {
-									console.log(chalk.yellow(`⏭️  Skipped: ${targetPath}`));
-									continue;
-								}
-							}
-						}
-
-						// Write workflow file
-						await writeRuleFile(workflow.content, join(process.cwd(), targetPath));
-						console.log(chalk.green(`✓ Installed workflow: ${workflow.name}`));
-						installedWorkflowsCount++;
-
-						// Add workflow to config
-						const updatedConfig = addWorkflow(config, workflow.name);
-						Object.assign(config, updatedConfig);
-					} catch (error) {
-						console.error(chalk.red(`❌ Error installing workflow ${workflow.name}: ${error}`));
-					}
-				}
-
-				console.log(chalk.green(`\n🎉 Successfully installed ${installedWorkflowsCount} workflows`));
+				await installWorkflows(selectedWorkflows, selectedAgent, overwriteStrategy, config);
 			} else {
 				console.log(chalk.yellow("No matching workflows found"));
+			}
+		} else if (process.stdin.isTTY) {
+			// Interactive mode: fetch and prompt (only when TTY is available)
+			const allWorkflows = await fetchWorkflows(selectedAgent);
+			if (allWorkflows.length > 0) {
+				console.log(chalk.blue("\n⚡ Workflows available for this agent:"));
+				const selectedWorkflowNames = await promptWorkflowSelection(allWorkflows);
+				if (selectedWorkflowNames.length > 0) {
+					const selectedWorkflows = allWorkflows.filter((w) => selectedWorkflowNames.includes(w.name));
+					await installWorkflows(selectedWorkflows, selectedAgent, overwriteStrategy, config);
+				} else {
+					console.log(chalk.yellow("No workflows selected."));
+				}
 			}
 		}
 

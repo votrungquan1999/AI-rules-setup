@@ -19,8 +19,11 @@ program
 	.description("Initialize AI rules for the current project")
 	.option("--agent <name>", "Specify the AI agent (cursor, windsurf, etc.)")
 	.option("--categories <list>", "Comma-separated list of category IDs to install")
+	.option("--no-categories", "Skip category installation entirely")
 	.option("--workflows <list>", "Comma-separated list of workflow IDs to install")
+	.option("--no-workflows", "Skip workflow installation entirely")
 	.option("--skills <list>", "Comma-separated list of skill IDs to install")
+	.option("--no-skills", "Skip skill installation entirely")
 	.option(
 		"--overwrite-strategy <strategy>",
 		"Conflict resolution strategy: prompt (ask), force (overwrite), or skip (keep existing)",
@@ -31,9 +34,24 @@ program
 			// Parse categories from comma-separated string
 			const parsedOptions = {
 				agent: options.agent,
-				categories: options.categories ? options.categories.split(",").map((c: string) => c.trim()) : undefined,
-				workflows: options.workflows ? options.workflows.split(",").map((w: string) => w.trim()) : undefined,
-				skills: options.skills ? options.skills.split(",").map((s: string) => s.trim()) : undefined,
+				categories: options.categories
+					? typeof options.categories === "string"
+						? options.categories.split(",").map((c: string) => c.trim())
+						: undefined
+					: undefined,
+				workflows: options.workflows
+					? typeof options.workflows === "string"
+						? options.workflows.split(",").map((w: string) => w.trim())
+						: undefined
+					: undefined,
+				skills: options.skills
+					? typeof options.skills === "string"
+						? options.skills.split(",").map((s: string) => s.trim())
+						: undefined
+					: undefined,
+				noCategories: options.categories === false,
+				noSkills: options.skills === false,
+				noWorkflows: options.workflows === false,
 				overwriteStrategy: options.overwriteStrategy,
 			};
 

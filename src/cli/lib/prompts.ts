@@ -155,3 +155,89 @@ export async function promptConflictResolution(filePath: string): Promise<boolea
 
 	return overwrite;
 }
+
+/**
+ * Prompts user to select skills to install
+ * @param skills - Array of available skills with name and content
+ * @returns Array of selected skill names (can be empty)
+ */
+export async function promptSkillSelection(skills: Array<{ name: string; content: string }>): Promise<string[]> {
+	if (skills.length === 0) {
+		return [];
+	}
+
+	const ALL_OPTION = "__ALL__";
+
+	const choices = [
+		{
+			name: chalk.bold.green("🎯 Select All"),
+			value: ALL_OPTION,
+			short: "All",
+		},
+		...skills.map((skill) => ({
+			name: chalk.cyan.bold(skill.name),
+			value: skill.name,
+			short: skill.name,
+		})),
+	];
+
+	const { selectedSkills } = await inquirer.prompt([
+		{
+			type: "checkbox",
+			name: "selectedSkills",
+			message: "Select skills to install:\n(↑↓ to move, Space to select, Enter to confirm)",
+			choices,
+			pageSize: 10,
+		},
+	]);
+
+	// Handle "Select All" option
+	if (selectedSkills.includes(ALL_OPTION)) {
+		return skills.map((s) => s.name);
+	}
+
+	return selectedSkills.filter((s: string) => s !== ALL_OPTION);
+}
+
+/**
+ * Prompts user to select workflows to install
+ * @param workflows - Array of available workflows with name and content
+ * @returns Array of selected workflow names (can be empty)
+ */
+export async function promptWorkflowSelection(workflows: Array<{ name: string; content: string }>): Promise<string[]> {
+	if (workflows.length === 0) {
+		return [];
+	}
+
+	const ALL_OPTION = "__ALL__";
+
+	const choices = [
+		{
+			name: chalk.bold.green("⚡ Select All"),
+			value: ALL_OPTION,
+			short: "All",
+		},
+		...workflows.map((workflow) => ({
+			name: chalk.cyan.bold(workflow.name),
+			value: workflow.name,
+			short: workflow.name,
+		})),
+	];
+
+	const { selectedWorkflows } = await inquirer.prompt([
+		{
+			type: "checkbox",
+			name: "selectedWorkflows",
+			message: "Select workflows to install:\n(↑↓ to move, Space to select, Enter to confirm)",
+			choices,
+			pageSize: 10,
+		},
+	]);
+
+	// Handle "Select All" option
+	if (selectedWorkflows.includes(ALL_OPTION)) {
+		return workflows.map((w) => w.name);
+	}
+
+	return selectedWorkflows.filter((w: string) => w !== ALL_OPTION);
+}
