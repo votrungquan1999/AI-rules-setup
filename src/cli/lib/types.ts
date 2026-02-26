@@ -40,6 +40,10 @@ export interface Config {
 	agent: string;
 	/** List of installed rule categories */
 	categories: string[];
+	/** List of installed skills */
+	skills?: string[];
+	/** List of installed workflows */
+	workflows?: string[];
 }
 
 /**

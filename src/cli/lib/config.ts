@@ -73,3 +73,43 @@ export function addCategory(config: Config, category: string): Config {
 		categories: [...config.categories, category],
 	};
 }
+
+/**
+ * Adds a skill to the configuration
+ * @param config - Current configuration object
+ * @param skill - Skill name to add
+ * @returns Updated configuration object
+ */
+export function addSkill(config: Config, skill: string): Config {
+	const currentSkills = config.skills || [];
+
+	// Check if skill already exists
+	if (currentSkills.includes(skill)) {
+		return config;
+	}
+
+	return {
+		...config,
+		skills: [...currentSkills, skill],
+	};
+}
+
+/**
+ * Adds a workflow to the configuration
+ * @param config - Current configuration object
+ * @param workflow - Workflow name to add
+ * @returns Updated configuration object
+ */
+export function addWorkflow(config: Config, workflow: string): Config {
+	const currentWorkflows = config.workflows || [];
+
+	// Check if workflow already exists
+	if (currentWorkflows.includes(workflow)) {
+		return config;
+	}
+
+	return {
+		...config,
+		workflows: [...currentWorkflows, workflow],
+	};
+}

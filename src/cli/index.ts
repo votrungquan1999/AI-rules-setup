@@ -3,6 +3,7 @@
 import chalk from "chalk";
 import { Command } from "commander";
 import { initCommand } from "./commands/init";
+import { pullCommand } from "./commands/pull";
 
 const program = new Command();
 
@@ -44,6 +45,23 @@ program
 			}
 
 			await initCommand(parsedOptions);
+		} catch (error) {
+			console.error(chalk.red(`❌ Error: ${error}`));
+			process.exit(1);
+		}
+	});
+
+program
+	.command("pull")
+	.description("Pull latest versions of all configured rules, skills, and workflows")
+	.option(
+		"--overwrite-strategy <strategy>",
+		"Conflict resolution strategy: force (overwrite), skip (keep existing), or prompt (ask)",
+		"force",
+	)
+	.action(async (options) => {
+		try {
+			await pullCommand(options);
 		} catch (error) {
 			console.error(chalk.red(`❌ Error: ${error}`));
 			process.exit(1);
