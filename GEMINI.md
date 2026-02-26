@@ -1,6 +1,6 @@
-# CLAUDE.md
+# GEMINI.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Gemini when working with code in this repository.
 
 ## Comprehensive Documentation
 
@@ -55,9 +55,14 @@ npm run build:cli
 # Run tests (API server must be running)
 npm test
 
-# Watch mode
-npm test:watch
+# Run specific test file
+npx vitest run tests/path/to/test.ts
+
+# Run E2E tests
+npm run test:e2e -- tests/e2e/test-name.test.ts
 ```
+
+> **IMPORTANT:** Always run tests without watch mode in agent terminals. Watch mode hangs in non-interactive shells. Use `npx vitest run` instead of `npx vitest`.
 
 ### Linting
 ```bash
