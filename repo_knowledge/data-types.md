@@ -5,6 +5,7 @@ This document defines key interfaces and type definitions used throughout the co
 **Related Documentation:**
 - [CLI Flows](./cli-flows.md) - CLI types usage
 - [Rule System](./rule-system.md) - Rule types usage
+- [Skills & Workflows](./skills-workflows.md) - Skills/workflows types usage
 - [Question System](./question-system.md) - Question types usage
 - [Database Patterns](./database-patterns.md) - Database types usage
 
@@ -64,6 +65,8 @@ interface Config {
   version: string;              // Config schema version
   agent: string;                // Selected AI agent
   categories: string[];         // Installed category IDs
+  skills?: string[];            // Installed skill names
+  workflows?: string[];         // Installed workflow names
 }
 ```
 
@@ -77,7 +80,9 @@ enum AIAgent {
   WINDSURF = "windsurf",
   AIDER = "aider",
   CONTINUE = "continue",
-  CODY = "cody"
+  CODY = "cody",
+  CLAUDE_CODE = "claude-code",
+  ANTIGRAVITY = "antigravity"
 }
 ```
 
@@ -145,17 +150,31 @@ interface RuleAgent {
   categories: {
     [categoryName: string]: RuleCategory;
   };
+  skills?: Array<{ name: string; content: string }>;
+  workflows?: Array<{ name: string; content: string }>;
 }
 ```
 
-### RulesData
+### RulesData / RulesResponse
 
-Top-level data structure for all rules:
+Top-level data structure for all rules, skills, and workflows:
 
 ```typescript
+// Server-side (src/server/types.ts)
 interface RulesData {
   agents: {
     [agentName: string]: RuleAgent;
+  };
+}
+
+// Client-side (src/cli/lib/api-client.ts)
+interface RulesResponse {
+  agents: {
+    [agentName: string]: {
+      categories: { [categoryName: string]: { manifest: Manifest; files: Array<{ filename: string; content: string }> } };
+      skills?: Array<{ name: string; content: string }>;
+      workflows?: Array<{ name: string; content: string }>;
+    };
   };
 }
 ```

@@ -10,6 +10,7 @@ The repo_knowledge folder contains comprehensive documentation about:
 - [CLI Flows](./repo_knowledge/cli-flows.md) - Command flows and operations
 - [API Architecture](./repo_knowledge/api-architecture.md) - Server and caching
 - [Rule System](./repo_knowledge/rule-system.md) - Rule organization
+- [Skills & Workflows](./repo_knowledge/skills-workflows.md) - Skills and workflows system
 - [Question System](./repo_knowledge/question-system.md) - Question generation
 - [Database Patterns](./repo_knowledge/database-patterns.md) - MongoDB operations
 - [Search & Selection](./repo_knowledge/search-selection.md) - Search algorithm
@@ -18,10 +19,12 @@ The repo_knowledge folder contains comprehensive documentation about:
 
 ## Project Overview
 
-AI Rules CLI is a command-line tool that helps developers pull curated AI agent rules from a centralized repository into their projects. The system consists of:
+AI Rules CLI is a command-line tool that helps developers pull curated AI agent rules, skills, and workflows from a centralized repository into their projects. The system consists of:
 - **Next.js API Server** (`src/app/`) - Caches GitHub repository content and provides centralized rule management
-- **CLI Tool** (`src/cli/`) - Handles user interaction, file operations, and rule installation
+- **CLI Tool** (`src/cli/`) - Handles user interaction, file operations, and rule/skill/workflow installation
 - **Rules Repository** (`/rules`) - Collection of curated AI agent rules organized by agent and category
+- **Skills Repository** (`/skills`) - Reusable capability packages (e.g., TDD, BDD, code refactoring)
+- **Workflows Repository** (`/workflows`) - Step-by-step procedural guides (e.g., feature development, commit planning)
 - **Optional Web UI** - For visual rule selection and configuration
 
 ## Development Commands
@@ -92,6 +95,8 @@ This is a monorepo with both CLI and rules in the same repository. The structure
   /lib         # Shared utilities
   /server      # Server-side utilities (database, repositories)
 /rules         # Rule files organized by AI agent
+/skills        # Skill packages organized by AI agent
+/workflows     # Workflow files organized by AI agent
 /docs          # Architecture decision records and design docs
 ```
 
@@ -101,10 +106,10 @@ This is a monorepo with both CLI and rules in the same repository. The structure
 - This reduces GitHub API rate limiting and provides centralized management
 
 ### Data Flow
-1. CLI requests rules from API server
+1. CLI requests rules/skills/workflows from API server
 2. API server fetches from GitHub (or returns cached data)
-3. CLI writes rules to appropriate agent directories (`.cursor/rules/`, `.windsurf/rules/`)
-4. Configuration stored in `.ai-rules.json` at project root
+3. CLI writes rules to agent directories (`.cursor/rules/`, `.windsurf/rules/`), skills to `.agent/skills/`, and workflows to `.agent/workflows/`
+4. Configuration stored in `.ai-rules.json` at project root (tracks categories, skills, workflows)
 
 ## Key Architectural Patterns
 
@@ -121,7 +126,9 @@ This is a monorepo with both CLI and rules in the same repository. The structure
 - Never expose raw database documents to client components
 
 ### File Organization
-- Tool-specific folders: `/rules/cursor/`, `/rules/windsurf/`
+- Tool-specific folders: `/rules/cursor/`, `/rules/windsurf/`, `/rules/claude-code/`, `/rules/antigravity/`
+- Skills: `/skills/antigravity/`, `/skills/claude-code/`
+- Workflows: `/workflows/antigravity/`
 - Convention-based renaming: Files renamed to match AI agent conventions
 - Each category has a `manifest.json` describing available rules
 
@@ -169,9 +176,17 @@ See `.env.example` for required environment variables:
 ## Key Files
 
 ### CLI Entry Points
-- `src/cli/index.ts` - Main CLI entry point
-- `src/cli/commands/init.ts` - Interactive setup wizard
+- `src/cli/index.ts` - Main CLI entry point (init, pull commands)
+- `src/cli/commands/init.ts` - Interactive setup wizard (rules, skills, workflows)
+- `src/cli/commands/pull.ts` - Re-install tracked content from config
 - `src/cli/commands/generate-questions.ts` - Question generation for rule refinement
+
+### CLI Library
+- `src/cli/lib/api-client.ts` - API fetching with caching (rules, skills, workflows)
+- `src/cli/lib/config.ts` - Config load/save and addCategory/addSkill/addWorkflow helpers
+- `src/cli/lib/prompts.ts` - Interactive prompts (agent, category, skill, workflow selection)
+- `src/cli/lib/types.ts` - Type definitions (Config, AIAgent, InitOptions, etc.)
+- `src/cli/lib/files.ts` - File operations and naming conventions
 
 ### Server Components
 - `src/server/database.ts` - MongoDB connection and utilities

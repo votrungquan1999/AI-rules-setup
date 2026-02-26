@@ -9,10 +9,11 @@ The documentation is organized into interconnected files that reference each oth
 ### Core System Documentation
 
 1. **[CLI Flows](./cli-flows.md)** - Command-line interface flows and operations
-   - `ai-rules init` command flow
+   - `ai-rules init` command flow (rules, skills, workflows)
+   - `ai-rules pull` command flow
    - File operations and naming conventions
    - Configuration management
-   - Interactive prompts
+   - Interactive prompts (categories, skills, workflows)
 
 2. **[API Architecture](./api-architecture.md)** - Next.js API server and caching
    - Three-tier caching strategy
@@ -45,7 +46,7 @@ The documentation is organized into interconnected files that reference each oth
    - Command generation
 
 7. **[Data Types](./data-types.md)** - Type definitions and interfaces
-   - Core types (Manifest, Config, RulesData)
+   - Core types (Manifest, Config, RulesData/RulesResponse)
    - CLI types (AIAgent, ToolConventions)
    - Server types (RuleFile, RuleCategory)
    - Question types (Question union, QuestionAnswer)
@@ -57,6 +58,12 @@ The documentation is organized into interconnected files that reference each oth
    - State management with context providers
    - Command generation flow
 
+9. **[Skills & Workflows](./skills-workflows.md)** - Skills and workflows system
+   - Repository structure for skills and workflows
+   - API response format
+   - Per-agent installation paths
+   - Config tracking and CLI flags
+
 ## How to Use This Documentation
 
 ### For New Developers
@@ -64,15 +71,17 @@ The documentation is organized into interconnected files that reference each oth
 Start with this reading order:
 
 1. [Rule System](./rule-system.md) - Understand what the system manages
-2. [CLI Flows](./cli-flows.md) - Learn how users interact with the CLI
-3. [API Architecture](./api-architecture.md) - Understand the backend
-4. [Data Types](./data-types.md) - Reference for all type definitions
+2. [Skills & Workflows](./skills-workflows.md) - Understand skills and workflows
+3. [CLI Flows](./cli-flows.md) - Learn how users interact with the CLI
+4. [API Architecture](./api-architecture.md) - Understand the backend
+5. [Data Types](./data-types.md) - Reference for all type definitions
 
 ### For Feature Development
 
 Refer to specific documentation based on what you're building:
 
 - **CLI features** → [CLI Flows](./cli-flows.md), [Data Types](./data-types.md)
+- **Skills/workflows** → [Skills & Workflows](./skills-workflows.md), [CLI Flows](./cli-flows.md)
 - **API endpoints** → [API Architecture](./api-architecture.md), [Database Patterns](./database-patterns.md)
 - **Search features** → [Search & Selection](./search-selection.md), [Question System](./question-system.md)
 - **Web UI features** → [Web UI](./web-ui.md), [Search & Selection](./search-selection.md)
@@ -98,6 +107,8 @@ CLI Flows ←→ API Architecture ←→ Database Patterns
 Data Types ←→ Rule System ←→ Question System
     ↓              ↓                    ↓
 Web UI ←→ Search & Selection ←→ Question System
+    ↓
+Skills & Workflows ←→ CLI Flows ←→ Data Types
 ```
 
 ## Maintenance

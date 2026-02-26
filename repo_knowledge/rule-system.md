@@ -4,6 +4,7 @@ This document describes how rules are organized, structured, and managed.
 
 **Related Documentation:**
 - [CLI Flows](./cli-flows.md) - How rules are installed
+- [Skills & Workflows](./skills-workflows.md) - Skills and workflows (beyond rules)
 - [Data Types](./data-types.md) - Rule type definitions
 
 ## Repository Structure
@@ -24,7 +25,13 @@ This document describes how rules are organized, structured, and managed.
     /typescript
       manifest.json
       rules.md
+  /claude-code
+    /...                   # Claude Code specific categories
+  /antigravity
+    /...                   # Antigravity specific categories
 ```
+
+> **Note:** Skills and workflows live in separate top-level directories (`/skills`, `/workflows`) rather than under `/rules`. See [Skills & Workflows](./skills-workflows.md) for their structure.
 
 ## Manifest Format
 
