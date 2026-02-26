@@ -52,7 +52,7 @@ async function loadFixtures(): Promise<TestFixtures> {
  * Connect directly to the test database using the database name from environment
  * Does not use the production getDatabase() function
  */
-async function getTestDatabase(): Promise<Db> {
+export async function getTestDatabase(): Promise<Db> {
 	const dbName = process.env.MONGODB_DB_NAME || "ai-rules-cache-test";
 	const mongoUri = process.env.MONGODB_URI || "mongodb://localhost:27017/ai-rules-cache";
 
@@ -87,7 +87,7 @@ async function cleanTestDatabase(db: Db): Promise<void> {
 /**
  * Store rules data directly in the test database
  */
-async function storeRulesInTestDatabase(db: Db, dataToStore: RulesDataToStore): Promise<void> {
+export async function storeRulesInTestDatabase(db: Db, dataToStore: RulesDataToStore): Promise<void> {
 	const collection = db.collection<StoredRulesDocument>(RULES_DATA_COLLECTION_NAME);
 	const document = createStoredRulesDocument(dataToStore);
 
@@ -99,7 +99,7 @@ async function storeRulesInTestDatabase(db: Db, dataToStore: RulesDataToStore): 
 /**
  * Store skills data directly in the test database
  */
-async function storeSkillsInTestDatabase(db: Db, agent: string, skills: SkillFile[]): Promise<void> {
+export async function storeSkillsInTestDatabase(db: Db, agent: string, skills: SkillFile[]): Promise<void> {
 	const collection = db.collection<StoredSkillsDocument>(SKILLS_COLLECTION_NAME);
 	const now = new Date();
 	const document: StoredSkillsDocument = {
@@ -117,7 +117,7 @@ async function storeSkillsInTestDatabase(db: Db, agent: string, skills: SkillFil
 /**
  * Store workflows data directly in the test database
  */
-async function storeWorkflowsInTestDatabase(db: Db, agent: string, workflows: WorkflowFile[]): Promise<void> {
+export async function storeWorkflowsInTestDatabase(db: Db, agent: string, workflows: WorkflowFile[]): Promise<void> {
 	const collection = db.collection<StoredWorkflowsDocument>(WORKFLOWS_COLLECTION_NAME);
 	const now = new Date();
 	const document: StoredWorkflowsDocument = {

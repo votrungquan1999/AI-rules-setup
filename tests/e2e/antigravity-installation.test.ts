@@ -35,6 +35,8 @@ describe("E2E: Antigravity Installation Tests", () => {
 				"antigravity",
 				"--categories",
 				"component-architecture",
+				"--skills",
+				"postgres-query",
 				"--workflows",
 				"deploy-to-production",
 			],

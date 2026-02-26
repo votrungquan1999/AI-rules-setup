@@ -92,10 +92,21 @@ describe("E2E: Claude Code Installation Tests", () => {
 		testProjectDir = await createTestProject("skills-directory-structure-test");
 
 		// Run CLI with non-interactive options
-		const { result } = spawnCLI(["init", "--agent", "claude-code", "--categories", "brainstorming-patterns"], {
-			cwd: testProjectDir,
-			timeout: 30000,
-		});
+		const { result } = spawnCLI(
+			[
+				"init",
+				"--agent",
+				"claude-code",
+				"--categories",
+				"brainstorming-patterns",
+				"--skills",
+				"feature-development-workflow,structured-brainstorming,test-quality-reviewer",
+			],
+			{
+				cwd: testProjectDir,
+				timeout: 30000,
+			},
+		);
 
 		// Wait for completion
 		const finalResult = await result;
@@ -137,10 +148,21 @@ describe("E2E: Claude Code Installation Tests", () => {
 		testProjectDir = await createTestProject("skills-content-test");
 
 		// Run CLI with non-interactive options
-		const { result } = spawnCLI(["init", "--agent", "claude-code", "--categories", "brainstorming-patterns"], {
-			cwd: testProjectDir,
-			timeout: 30000,
-		});
+		const { result } = spawnCLI(
+			[
+				"init",
+				"--agent",
+				"claude-code",
+				"--categories",
+				"brainstorming-patterns",
+				"--skills",
+				"feature-development-workflow,structured-brainstorming,test-quality-reviewer",
+			],
+			{
+				cwd: testProjectDir,
+				timeout: 30000,
+			},
+		);
 
 		// Wait for completion
 		const finalResult = await result;
@@ -191,10 +213,21 @@ describe("E2E: Claude Code Installation Tests", () => {
 		testProjectDir = await createTestProject("skills-all-test");
 
 		// Run CLI with non-interactive options
-		const { result } = spawnCLI(["init", "--agent", "claude-code", "--categories", "brainstorming-patterns"], {
-			cwd: testProjectDir,
-			timeout: 30000,
-		});
+		const { result } = spawnCLI(
+			[
+				"init",
+				"--agent",
+				"claude-code",
+				"--categories",
+				"brainstorming-patterns",
+				"--skills",
+				"feature-development-workflow,structured-brainstorming,test-quality-reviewer",
+			],
+			{
+				cwd: testProjectDir,
+				timeout: 30000,
+			},
+		);
 
 		// Wait for completion
 		const finalResult = await result;
@@ -237,10 +270,21 @@ describe("E2E: Claude Code Installation Tests", () => {
 		testProjectDir = await createTestProject("skills-with-rules-test");
 
 		// Run CLI with non-interactive options
-		const { result } = spawnCLI(["init", "--agent", "claude-code", "--categories", "brainstorming-patterns"], {
-			cwd: testProjectDir,
-			timeout: 30000,
-		});
+		const { result } = spawnCLI(
+			[
+				"init",
+				"--agent",
+				"claude-code",
+				"--categories",
+				"brainstorming-patterns",
+				"--skills",
+				"feature-development-workflow,structured-brainstorming,test-quality-reviewer",
+			],
+			{
+				cwd: testProjectDir,
+				timeout: 30000,
+			},
+		);
 
 		// Wait for completion
 		const finalResult = await result;
