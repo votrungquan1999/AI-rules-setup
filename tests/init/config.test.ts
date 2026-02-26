@@ -1,7 +1,7 @@
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { addCategory, loadConfig, saveConfig } from "../../src/cli/lib/config";
+import { addCategory, addSkill, addWorkflow, loadConfig, saveConfig } from "../../src/cli/lib/config";
 import type { Config } from "../../src/cli/lib/types";
 
 describe("Config Manager", () => {
@@ -175,6 +175,63 @@ describe("Config Manager", () => {
 			expect(updatedConfig.categories).toHaveLength(2);
 			expect(updatedConfig.categories).toContain("react");
 			expect(updatedConfig.categories).toContain("typescript");
+		});
+	});
+
+	describe("addSkill", () => {
+		it("should add skill to config", () => {
+			// Given
+			const config: Config = {
+				version: "1.0.0",
+				agent: "claude-code",
+				categories: [],
+			};
+
+			// When
+			const updatedConfig = addSkill(config, "test-quality-reviewer");
+
+			// Then
+			expect(updatedConfig.skills).toHaveLength(1);
+			expect(updatedConfig.skills?.[0]).toBe("test-quality-reviewer");
+		});
+	});
+
+	describe("addWorkflow", () => {
+		it("should add workflow to config", () => {
+			// Given
+			const config: Config = {
+				version: "1.0.0",
+				agent: "antigravity",
+				categories: [],
+			};
+
+			// When
+			const updatedConfig = addWorkflow(config, "feature-development");
+
+			// Then
+			expect(updatedConfig.workflows).toHaveLength(1);
+			expect(updatedConfig.workflows?.[0]).toBe("feature-development");
+		});
+	});
+
+	describe("saveConfig with skills and workflows", () => {
+		it("should persist skills to .ai-rules.json when saved after addSkill", async () => {
+			// Given - simulate init flow: create config, add skill, save
+			let config: Config = {
+				version: "1.0.0",
+				agent: "claude-code",
+				categories: ["typescript"],
+			};
+			config = addSkill(config, "test-quality-reviewer");
+
+			// When
+			await saveConfig(testDir, config);
+
+			// Then - read raw file to verify it was persisted
+			const raw = await readFile(join(testDir, ".ai-rules.json"), "utf-8");
+			const parsed = JSON.parse(raw);
+			expect(parsed.skills).toEqual(["test-quality-reviewer"]);
+			expect(parsed.categories).toEqual(["typescript"]);
 		});
 	});
 });
