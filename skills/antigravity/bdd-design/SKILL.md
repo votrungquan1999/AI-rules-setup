@@ -1,6 +1,6 @@
 ---
 name: bdd-design
-description: Guides Behavior-Driven Development using Given/When/Then scenarios with a test-first approach.
+description: Guides Behavior-Driven Development using behavior scenarios with a test-first approach.
 ---
 
 # BDD Design
@@ -9,8 +9,8 @@ Behavior-Driven Development: define behavior through scenarios first, then imple
 
 ## Core Principles
 
-1. **Scenarios First** - Write Given/When/Then scenarios before any implementation
-2. **One Scenario at a Time** - Write one scenario → run to see it fail → implement → pass → next
+1. **Scenarios First** - Write behavior scenarios before any implementation
+2. **One Scenario at a Time** - Write one scenario → run to see result → implement → verify → next
 3. **User Behavior Focus** - Scenarios describe what the user/system does, not how it's coded
 4. **Living Documentation** - Scenarios serve as both tests and documentation
 5. **Ubiquitous Language** - Use domain language that stakeholders understand
@@ -23,26 +23,19 @@ Behavior-Driven Development: define behavior through scenarios first, then imple
 
 Write a feature description that captures the business value:
 
-```gherkin
-Feature: [Feature Name]
-  As a [role/persona]
-  I want [capability]
-  So that [business value]
-```
+- **Feature**: [Feature Name]
+- **As a**: [role/persona]
+- **I want**: [capability]
+- **So that**: [business value]
 
 ### Step 2: Write Scenarios
 
-Write scenarios using Given/When/Then format:
+Write scenarios describing behavior using three stages:
 
-```gherkin
-Scenario: [Descriptive scenario name]
-  Given [initial context/precondition]
-  And [additional context if needed]
-  When [action/event occurs]
-  And [additional action if needed]
-  Then [expected outcome]
-  And [additional expected outcome]
-```
+- **Scenario**: [Descriptive scenario name]
+  - **Setup**: [initial context/preconditions]
+  - **Action**: [what the user/system does]
+  - **Assert**: [expected outcome]
 
 **Guidelines for good scenarios:**
 - Each scenario tests ONE specific behavior
@@ -62,46 +55,45 @@ Scenario: [Descriptive scenario name]
 
 ## Phase 2: Implement Scenarios (Test-First)
 
-**For EACH scenario, follow this process:**
+**For EACH scenario, follow this loop. Do NOT batch scenarios or skip steps.**
 
-### Red: Write Failing Test
+### Step 1: Write ONE Scenario Test
 
 1. Write the test for ONE scenario
-2. Use the Given/When/Then structure in your test:
+2. Use the Setup/Action/Assert structure in your test:
    ```typescript
    describe("Feature: [name]", () => {
      describe("Scenario: [name]", () => {
        it("should [expected behavior]", async () => {
-         // Given
+         // Setup
          const context = setupContext();
          
-         // When
+         // Action
          const result = performAction(context);
          
-         // Then
+         // Assert
          expect(result).toEqual(expectedOutcome);
        });
      });
    });
    ```
-3. **MUST run the test** to verify it fails (not a syntax error, a genuine failure)
 
-### Green: Make It Pass
+### Step 2: Run the Test (Before Implementation)
 
-1. Write the **minimum code** needed to make this ONE scenario pass
+1. Run the new scenario test BEFORE writing any implementation
+2. If it **fails** → proceed to Step 3 (this is the expected path)
+3. If it **already passes** (covered by previous implementation) → this is acceptable, go back to Step 1 for the next scenario
+
+### Step 3: Minimum Implementation
+
+1. Write the **minimum** code needed to make this ONE scenario pass
 2. Focus on correctness, not elegance
-3. Run the test to verify it passes
-4. Run all previous scenarios to ensure nothing broke
 
-### Refactor (Optional)
+### Step 4: Verify
 
-1. Only after the scenario passes
-2. Improve code structure without changing behavior
-3. Run all tests again to verify nothing broke
-
-### Repeat
-
-Continue the Red-Green-Refactor cycle for each remaining scenario.
+1. Run the test again
+2. If it **passes** → also run all previous scenario tests to ensure nothing broke, then go back to Step 1 for the next scenario
+3. If it **fails** → go back to Step 3 and fix the implementation
 
 ---
 
@@ -119,44 +111,22 @@ After all scenarios pass:
 ## Scenario Patterns
 
 ### Happy Path
-```gherkin
-Scenario: User successfully creates an account
-  Given I am on the registration page
-  When I fill in valid registration details
-  Then my account is created
-  And I am redirected to the dashboard
-```
+- **Scenario**: User successfully creates an account
+  - **Setup**: User is on the registration page
+  - **Action**: Fill in valid registration details and submit
+  - **Assert**: Account is created, user is redirected to dashboard
 
 ### Edge Case
-```gherkin
-Scenario: User tries to register with existing email
-  Given a user with email "test@example.com" already exists
-  When I try to register with email "test@example.com"
-  Then I see an error "Email already registered"
-  And no new account is created
-```
+- **Scenario**: User tries to register with existing email
+  - **Setup**: A user with email "test@example.com" already exists
+  - **Action**: Try to register with email "test@example.com"
+  - **Assert**: Error "Email already registered" shown, no new account created
 
 ### Error Handling
-```gherkin
-Scenario: User submits form with missing required fields
-  Given I am on the registration page
-  When I submit the form without filling in the email
-  Then I see a validation error for the email field
-  And the form is not submitted
-```
-
-### Data-Driven (Scenario Outline)
-```gherkin
-Scenario Outline: Validate password strength
-  When I enter password "<password>"
-  Then the strength indicator shows "<strength>"
-  
-  Examples:
-    | password    | strength |
-    | abc         | weak     |
-    | abc123      | medium   |
-    | Abc123!@#   | strong   |
-```
+- **Scenario**: User submits form with missing required fields
+  - **Setup**: User is on the registration page
+  - **Action**: Submit the form without filling in the email
+  - **Assert**: Validation error shown for email field, form is not submitted
 
 ---
 
@@ -169,7 +139,7 @@ Scenario Outline: Validate password strength
 - ✅ Use descriptive scenario names that read like sentences
 - ❌ Don't write implementation-specific scenarios ("When the database query returns...")
 - ❌ Don't write multiple scenarios before implementing any
-- ❌ Don't skip the failing test step — always verify red before green
+- ❌ Don't skip running the test before writing implementation
 
 ---
 

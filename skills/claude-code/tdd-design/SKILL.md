@@ -3,46 +3,45 @@ name: tdd-design
 description: Guides test-driven development using red-green-refactor cycle with test-first approach. Use when implementing features with TDD, writing tests before code, refactoring with test safety net, fixing bugs with test reproduction, or when user says "use TDD", "test-driven", "write tests first", or "red-green-refactor".
 ---
 
-# TDD Workflow
+# TDD Design
 
-Test-Driven Development: write tests before implementation using red-green-refactor cycle.
+Test-Driven Development: write tests before implementation, one test at a time.
 
 ## Core Principles
 
-1. **Red-Green-Refactor** - Write failing test (Red), make it pass (Green), improve code (Refactor)
-2. **Test First** - Always write tests before implementation
-3. **One Test at a Time** - One test → MUST run test to see it fail → make it pass → next test
-4. **Minimum Implementation** - Only code needed to make test pass
-5. **Test Quality** - Follow 4 Pillars of Testing (Reliability, Validity, Sensitivity, Resilience)
+1. **Test First** - Always write and run tests before implementation
+2. **One Test at a Time** - Write one test → run it → implement → run again → next test
+3. **Minimum Implementation** - Only write code needed to make the current test pass
+4. **Test Quality** - Follow 4 Pillars of Testing (Reliability, Validity, Sensitivity, Resilience)
 
 ---
 
-## Red-Green-Refactor Cycle
+## Test-First Loop
 
-### Red: Write Failing Test
+**Follow this loop for EVERY test case. Do NOT batch tests or skip steps.**
 
-1. Write ONE test describing desired behavior
+### Step 1: Write ONE Test
+
+1. Write exactly ONE test describing desired behavior
 2. Use descriptive test names
 3. Follow Arrange-Act-Assert structure
-4. MUST Run test to verify it fails (not syntax error)
 
-### Green: Make Test Pass
+### Step 2: Run the Test (Before Implementation)
 
-1. Write minimum code to make test pass
-2. Don't optimize yet - focus on correctness
-3. Run test to verify it passes
+1. Run the new test BEFORE writing any implementation
+2. If it **fails** → proceed to Step 3 (this is the expected path)
+3. If it **already passes** (covered by previous implementation) → this is acceptable, go back to Step 1 for the next test
 
-### Refactor: Improve Code
+### Step 3: Minimum Implementation
 
-1. Ensure all tests pass before refactoring
-2. Improve quality (remove duplication, better naming, extract functions)
-3. Run tests again to verify nothing broke
+1. Write the **minimum** code needed to make this test pass
+2. Focus on correctness, not elegance or optimization
 
-**Important:** Only refactor when all tests are passing.
+### Step 4: Verify
 
-### Repeat
-
-Continue cycle for each test scenario until all implemented and passing.
+1. Run the test again
+2. If it **passes** → go back to Step 1 for the next test
+3. If it **fails** → go back to Step 3 and fix the implementation
 
 ---
 
@@ -68,5 +67,12 @@ Continue cycle for each test scenario until all implemented and passing.
 **Never:**
 
 - ❌ Write multiple tests before implementing
-- ❌ Write implementation before tests
+- ❌ Write implementation before running the new test
 - ❌ Consider test passed when the test not actually run
+- ❌ Skip running the test before writing implementation
+
+## Related Skills
+
+- `@bdd-design` - Use BDD for behavior-level/acceptance testing alongside TDD for unit-level testing
+- `@test-quality-reviewer` - Review test quality using the 4 Pillars framework after writing tests
+- `@code-refactoring` - Apply refactoring patterns to improve code quality
