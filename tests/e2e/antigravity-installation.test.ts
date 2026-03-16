@@ -53,16 +53,16 @@ describe("E2E: Antigravity Installation Tests", () => {
 		expect(finalResult.exitCode).toBe(0);
 
 		// Verify Antigravity file structure
-		// Rules: .agent/rules/<filename>
-		const ruleExists = await fileExists(testProjectDir, ".agent/rules/file-structure-patterns.mdc");
+		// Rules: .agents/rules/<filename>
+		const ruleExists = await fileExists(testProjectDir, ".agents/rules/file-structure-patterns.mdc");
 		expect(ruleExists).toBe(true);
 
-		// Skills: .agent/skills/<skill-name>/SKILL.md
-		const skillExists = await fileExists(testProjectDir, ".agent/skills/postgres-query/SKILL.md");
+		// Skills: .agents/skills/<skill-name>/SKILL.md
+		const skillExists = await fileExists(testProjectDir, ".agents/skills/postgres-query/SKILL.md");
 		expect(skillExists).toBe(true);
 
-		// Workflows: .agent/workflows/<workflow-name>.md
-		const workflowExists = await fileExists(testProjectDir, ".agent/workflows/deploy-to-production.md");
+		// Workflows: .agents/workflows/<workflow-name>.md
+		const workflowExists = await fileExists(testProjectDir, ".agents/workflows/deploy-to-production.md");
 		expect(workflowExists).toBe(true);
 	}, 30000);
 });

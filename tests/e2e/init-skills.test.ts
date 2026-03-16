@@ -35,12 +35,12 @@ describe("E2E: Init Command - Skills Installation", () => {
 		expect(finalResult.exitCode).toBe(0);
 
 		// Assert - verify rules were installed successfully
-		const rulesPath = path.join(testProjectPath, ".agent", "rules");
+		const rulesPath = path.join(testProjectPath, ".agents", "rules");
 		const rulesDir = await fs.readdir(rulesPath);
 		expect(rulesDir.length).toBeGreaterThan(0);
 
-		// Assert - verify .agent/skills directory does not exist
-		const skillsPath = path.join(testProjectPath, ".agent", "skills");
+		// Assert - verify .agents/skills directory does not exist
+		const skillsPath = path.join(testProjectPath, ".agents", "skills");
 
 		// Directory should not exist when no skills are installed
 		await expect(fs.access(skillsPath)).rejects.toThrow();

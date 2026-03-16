@@ -33,8 +33,8 @@ describe("E2E: Pull Command", () => {
 		expect(initOutput.exitCode).toBe(0);
 
 		// Verify original content is installed
-		const rulePath = path.join(testProjectDir, ".agent/rules/file-structure-patterns.mdc");
-		expect(await fileExists(testProjectDir, ".agent/rules/file-structure-patterns.mdc")).toBe(true);
+		const rulePath = path.join(testProjectDir, ".agents/rules/file-structure-patterns.mdc");
+		expect(await fileExists(testProjectDir, ".agents/rules/file-structure-patterns.mdc")).toBe(true);
 		const originalContent = await fs.readFile(rulePath, "utf-8");
 		expect(originalContent).toContain("Component Architecture");
 
@@ -100,7 +100,7 @@ describe("E2E: Pull Command", () => {
 		expect(initOutput.exitCode).toBe(0);
 
 		// Verify original skill content
-		const skillPath = path.join(testProjectDir, ".agent/skills/postgres-query/SKILL.md");
+		const skillPath = path.join(testProjectDir, ".agents/skills/postgres-query/SKILL.md");
 		const originalContent = await fs.readFile(skillPath, "utf-8");
 		expect(originalContent).toContain("PostgreSQL Query Helper");
 
@@ -146,7 +146,7 @@ describe("E2E: Pull Command", () => {
 		expect(initOutput.exitCode).toBe(0);
 
 		// Verify original workflow content
-		const workflowPath = path.join(testProjectDir, ".agent/workflows/deploy-to-production.md");
+		const workflowPath = path.join(testProjectDir, ".agents/workflows/deploy-to-production.md");
 		const originalContent = await fs.readFile(workflowPath, "utf-8");
 		expect(originalContent).toContain("Deploy to Production");
 
@@ -226,16 +226,16 @@ describe("E2E: Pull Command", () => {
 
 		// Assert: all files reflect V2 content
 		const ruleContent = await fs.readFile(
-			path.join(testProjectDir, ".agent/rules/file-structure-patterns.mdc"),
+			path.join(testProjectDir, ".agents/rules/file-structure-patterns.mdc"),
 			"utf-8",
 		);
 		expect(ruleContent).toContain("V2 Rules Content");
 
-		const skillContent = await fs.readFile(path.join(testProjectDir, ".agent/skills/postgres-query/SKILL.md"), "utf-8");
+		const skillContent = await fs.readFile(path.join(testProjectDir, ".agents/skills/postgres-query/SKILL.md"), "utf-8");
 		expect(skillContent).toContain("V2 Skill Content");
 
 		const workflowContent = await fs.readFile(
-			path.join(testProjectDir, ".agent/workflows/deploy-to-production.md"),
+			path.join(testProjectDir, ".agents/workflows/deploy-to-production.md"),
 			"utf-8",
 		);
 		expect(workflowContent).toContain("V2 Workflow Content");
