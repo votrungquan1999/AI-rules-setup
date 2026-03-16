@@ -76,8 +76,8 @@ async function installWorkflows(
 
 	for (const workflow of workflows) {
 		try {
-			// Workflows go to .agent/workflows/<name>.md
-			const targetPath = `.agent/workflows/${workflow.name}.md`;
+			// Workflows go to .agents/workflows/<name>.md
+			const targetPath = `.agents/workflows/${workflow.name}.md`;
 
 			// Check for conflicts
 			const conflict = await detectConflict(join(process.cwd(), targetPath));

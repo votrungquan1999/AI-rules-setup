@@ -88,7 +88,7 @@ export async function pullCommand(_options: PullOptions = {}): Promise<void> {
 				continue;
 			}
 
-			const targetPath = `.agent/workflows/${workflow.name}.md`;
+			const targetPath = `.agents/workflows/${workflow.name}.md`;
 			await writeRuleFile(workflow.content, join(process.cwd(), targetPath));
 			console.log(chalk.green(`  ✓ ${targetPath}`));
 			totalInstalled++;
