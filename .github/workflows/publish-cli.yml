@@ -19,60 +19,18 @@ concurrency:
 
 jobs:
   check-version:
-    name: Check if version needs publishing
-    runs-on: ubuntu-latest
-    outputs:
-      should_publish: ${{ steps.check.outputs.should_publish }}
-      package_version: ${{ steps.check.outputs.package_version }}
-      published_version: ${{ steps.check.outputs.published_version }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    name: Check Version
+    uses: ./.github/workflows/check-version.yml
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "24"
-
-      - name: Check version against npm
-        id: check
-        run: |
-          # Get version from package.json
-          PACKAGE_VERSION=$(node -p "require('./cli-package/package.json').version")
-          echo "Package version: $PACKAGE_VERSION"
-
-          # Get published version from npm (suppress errors if package doesn't exist)
-          PUBLISHED_VERSION=$(npm view @quanvo99/ai-rules version 2>/dev/null || echo "0.0.0")
-          echo "Published version: $PUBLISHED_VERSION"
-
-          # Compare versions using semver (node -p returns 1 if greater, 0 if equal, -1 if less)
-          COMPARISON=$(node -p "
-            const semver = (v) => v.split('.').map(Number);
-            const [a1, a2, a3] = semver('$PACKAGE_VERSION');
-            const [b1, b2, b3] = semver('$PUBLISHED_VERSION');
-            if (a1 > b1) process.exit(1);
-            if (a1 < b1) process.exit(0);
-            if (a2 > b2) process.exit(1);
-            if (a2 < b2) process.exit(0);
-            if (a3 > b3) process.exit(1);
-            process.exit(0);
-          " && echo "equal_or_less" || echo "greater")
-
-          if [ "$COMPARISON" = "greater" ]; then
-            echo "✅ Package version is greater than published - will publish"
-            echo "should_publish=true" >> $GITHUB_OUTPUT
-          else
-            echo "⏭️  Package version is not greater than published - skipping publish"
-            echo "should_publish=false" >> $GITHUB_OUTPUT
-          fi
-
-          # Export versions for later steps
-          echo "package_version=$PACKAGE_VERSION" >> $GITHUB_OUTPUT
-          echo "published_version=$PUBLISHED_VERSION" >> $GITHUB_OUTPUT
+  run-tests:
+    name: Run Tests
+    needs: check-version
+    if: needs.check-version.outputs.should_publish == 'true'
+    uses: ./.github/workflows/run-tests.yml
 
   publish:
     name: Build and Publish CLI
-    needs: check-version
+    needs: [check-version, run-tests]
     if: needs.check-version.outputs.should_publish == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
