@@ -68,7 +68,7 @@ The CLI is built with Commander.js and provides two main commands: `init` and `p
    ├─ Use --workflows flag for non-interactive mode
    ├─ Interactive prompt if TTY available (process.stdin.isTTY)
    ├─ Fetch available workflows via fetchWorkflows()
-   └─ Install to .agent/workflows/<name>.md
+   └─ Install to .agents/workflows/<name>.md
 
 8. Config Update
    ├─ Add installed categories, skills, and workflows to config
@@ -128,7 +128,7 @@ Re-installs all content tracked in `.ai-rules.json` config with latest versions 
 4. Pull Workflows
    ├─ For each workflow in config:
    │  ├─ Find matching workflow from API
-   │  └─ Write to .agent/workflows/<name>.md
+   │  └─ Write to .agents/workflows/<name>.md
 
 5. Report results
    └─ Display total items pulled
@@ -155,7 +155,7 @@ ai-rules pull --overwrite-strategy skip
 - **`detectConflict(filePath)`** - Checks if file exists at target path
 - **`writeRuleFile(content, targetPath)`** - Creates directories and writes file
 - **`applyNamingConvention(agent, filename)`** - Generates `.{agent}/rules/{filename}` paths
-- **`applySkillNamingConvention(agent, skillName)`** - Generates skill installation paths (e.g., `.agent/skills/{name}/SKILL.md` for Antigravity)
+- **`applySkillNamingConvention(agent, skillName)`** - Generates skill installation paths (e.g., `.agents/skills/{name}/SKILL.md` for Antigravity)
 
 ### Tool Conventions
 

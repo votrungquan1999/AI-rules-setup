@@ -108,7 +108,7 @@ This is a monorepo with both CLI and rules in the same repository. The structure
 ### Data Flow
 1. CLI requests rules/skills/workflows from API server
 2. API server fetches from GitHub (or returns cached data)
-3. CLI writes rules to agent directories (`.cursor/rules/`, `.windsurf/rules/`), skills to `.agent/skills/`, and workflows to `.agent/workflows/`
+3. CLI writes rules to agent directories (`.cursor/rules/`, `.windsurf/rules/`), skills to `.agents/skills/`, and workflows to `.agents/workflows/`
 4. Configuration stored in `.ai-rules.json` at project root (tracks categories, skills, workflows)
 
 ## Key Architectural Patterns

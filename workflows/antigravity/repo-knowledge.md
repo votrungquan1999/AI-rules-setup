@@ -25,7 +25,7 @@ Creates a comprehensive knowledge base for a repository by analyzing the codebas
 2. **Analyze High-Level Structure**:
    - Analyze directory layout, main modules/packages, and entry files
    - Review `package.json` / dependency files for key dependencies
-   - Read `README.md` and agent rules (`.cursor/rules/`, `.agent/rules/`, `.github/copilot-instructions.md`)
+   - Read `README.md` and agent rules (`.cursor/rules/`, `.agents/rules/`, `.github/copilot-instructions.md`)
    - **Extract only meaningful, non-generic content** — don't copy entire files
 
 3. **Deep-Dive Analysis**:

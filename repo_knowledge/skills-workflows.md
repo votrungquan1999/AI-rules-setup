@@ -83,13 +83,13 @@ Skills and workflows are optional fields — agents that don't have them simply 
 Skills are installed to the Antigravity SKILL.md subdirectory structure:
 
 ```
-.agent/skills/<skill-name>/SKILL.md
+.agents/skills/<skill-name>/SKILL.md
 ```
 
 Workflows are installed to:
 
 ```
-.agent/workflows/<workflow-name>.md
+.agents/workflows/<workflow-name>.md
 ```
 
 ### Claude Code Agent
@@ -155,4 +155,4 @@ Both use the same pattern as the existing category selection: a `__ALL__` sentin
 
 3. **Same cache** — Skills and workflows share the same API cache as rules (`fetchRulesData()`), so a single API call fetches all content types.
 
-4. **Agent-specific paths** — `applySkillNamingConvention()` in `src/cli/lib/files.ts` handles per-agent skill installation paths, while workflows always go to `.agent/workflows/`.
+4. **Agent-specific paths** — `applySkillNamingConvention()` in `src/cli/lib/files.ts` handles per-agent skill installation paths, while workflows always go to `.agents/workflows/`.
