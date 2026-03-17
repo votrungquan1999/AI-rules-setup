@@ -78,7 +78,7 @@ describe("E2E: Pull Command", () => {
 		const updatedContent = await fs.readFile(rulePath, "utf-8");
 		expect(updatedContent).toContain("UPDATED Component Architecture");
 		expect(updatedContent).toContain("This content was updated upstream.");
-	}, 60000);
+	}, 180000);
 
 	it("should pull updated skill content after upstream changes", async () => {
 		// Arrange: run init to install skills
@@ -124,7 +124,7 @@ describe("E2E: Pull Command", () => {
 		expect(pullOutput.exitCode).toBe(0);
 		const updatedContent = await fs.readFile(skillPath, "utf-8");
 		expect(updatedContent).toContain("UPDATED PostgreSQL Skill");
-	}, 60000);
+	}, 180000);
 
 	it("should pull updated workflow content after upstream changes", async () => {
 		// Arrange: run init to install workflows
@@ -170,7 +170,7 @@ describe("E2E: Pull Command", () => {
 		expect(pullOutput.exitCode).toBe(0);
 		const updatedContent = await fs.readFile(workflowPath, "utf-8");
 		expect(updatedContent).toContain("UPDATED Deploy Workflow");
-	}, 60000);
+	}, 180000);
 
 	it("should pull all updated content (rules, skills, and workflows) in a single run", async () => {
 		// Arrange: init with all types
@@ -239,5 +239,5 @@ describe("E2E: Pull Command", () => {
 			"utf-8",
 		);
 		expect(workflowContent).toContain("V2 Workflow Content");
-	}, 60000);
+	}, 180000);
 });

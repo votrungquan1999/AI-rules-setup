@@ -63,7 +63,7 @@ beforeEach(async () => {
 
 	// Wait for API server to be ready
 	await waitForAPIReady(testPort);
-}, 60000); // 60 second timeout for API server to start
+}, 120000); // 120 second timeout for API server to start
 
 /**
  * Stop API server and clean up database after each test

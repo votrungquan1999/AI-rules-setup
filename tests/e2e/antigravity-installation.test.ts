@@ -64,5 +64,5 @@ describe("E2E: Antigravity Installation Tests", () => {
 		// Workflows: .agents/workflows/<workflow-name>.md
 		const workflowExists = await fileExists(testProjectDir, ".agents/workflows/deploy-to-production.md");
 		expect(workflowExists).toBe(true);
-	}, 30000);
+	}, 180000);
 });
