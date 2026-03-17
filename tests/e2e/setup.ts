@@ -1,20 +1,13 @@
 import { type ChildProcess, spawn } from "node:child_process";
-import { rm } from "node:fs/promises";
-import { join } from "node:path";
-import { afterEach, beforeEach } from "vitest";
+import { afterAll, beforeAll } from "vitest";
 
 let apiServerProcess: ChildProcess | null = null;
-let testDbName: string | null = null;
-let testPort: number | null = null;
-let testApiUrl: string | null = null;
 
 /**
- * Generate a unique port number for the test
+ * Generate a unique port number for the test suite run
  * Uses a range starting from 4000 to avoid conflicts
  */
 function generateTestPort(): number {
-	// Use timestamp-based port to ensure uniqueness
-	// Port range: 4000-4999 (using modulo to keep in range)
 	const basePort = 4000;
 	const timestamp = Date.now();
 	const random = Math.floor(Math.random() * 100);
@@ -23,99 +16,93 @@ function generateTestPort(): number {
 }
 
 /**
- * Start API server with test database for each test
- * Each E2E test gets its own isolated database and server on a unique port
+ * Start a single API server shared across all E2E tests.
+ * Each test file seeds its own data via beforeEach, so DB isolation is handled per-test.
  */
-beforeEach(async () => {
-	// Generate unique test database name for this test
-	const timestamp = Date.now();
-	const random = Math.random().toString(36).substring(2, 9);
-	testDbName = `ai-rules-e2e-${timestamp}-${random}`;
+beforeAll(async () => {
+	const testDbName = "ai-rules-e2e-test";
+	const testPort = generateTestPort();
+	const testApiUrl = `http://localhost:${testPort}`;
 
-	// Generate unique port for this test
-	testPort = generateTestPort();
-	testApiUrl = `http://localhost:${testPort}`;
-
-	// Set environment variables for API server
+	// Set environment variables for both the API server and CLI/test helpers
 	process.env.MONGODB_DB_NAME = testDbName;
 	process.env.PORT = testPort.toString();
-	// Set API URL for CLI to use
 	process.env.AI_RULES_API_URL = testApiUrl;
 
-	// Remove Next.js lock file if it exists to avoid conflicts between test runs
-	const lockFile = join(process.cwd(), ".next", "dev", "lock");
-	try {
-		await rm(lockFile, { force: true });
-	} catch {
-		// Lock file might not exist, which is fine
-	}
-
-	// Start API server with custom port
+	// Start API server
 	apiServerProcess = spawn("npm", ["run", "dev:api"], {
 		env: {
 			...process.env,
 			MONGODB_DB_NAME: testDbName,
 			PORT: testPort.toString(),
 		},
-		stdio: "ignore", // Ignore all output from dev server
+		stdio: "ignore",
 		shell: true,
+		detached: true,
 	});
 
 	// Wait for API server to be ready
 	await waitForAPIReady(testPort);
-}, 120000); // 120 second timeout for API server to start
+}, 120000);
 
 /**
- * Stop API server and clean up database after each test
+ * Stop the shared API server after all tests complete
  */
-afterEach(async () => {
+afterAll(async () => {
 	if (apiServerProcess) {
-		apiServerProcess.kill();
+		// Kill the entire process group (shell + child Next.js process)
+		const pid = apiServerProcess.pid;
+		if (pid) {
+			try {
+				process.kill(-pid, "SIGTERM");
+			} catch {
+				// Process may have already exited
+			}
+		}
+		// Wait for the process to fully exit
+		await Promise.race([
+			new Promise<void>((resolve) => {
+				if (apiServerProcess?.exitCode !== null) return resolve();
+				apiServerProcess?.on("close", () => resolve());
+			}),
+			new Promise<void>((resolve) => setTimeout(resolve, 5000)),
+		]);
 		apiServerProcess = null;
 	}
 
-	if (testDbName) {
-		// Drop test database
+	// Drop the test database
+	try {
 		const { getDatabase } = await import("../../src/server/database");
 		const db = await getDatabase();
-		try {
-			await db.dropDatabase();
-		} catch (error) {
-			console.error(`⚠️  Failed to drop E2E test database: ${error}`);
-		}
-		testDbName = null;
+		await db.dropDatabase();
+	} catch (error) {
+		console.error(`⚠️  Failed to drop E2E test database: ${error}`);
 	}
 
 	// Clean up environment variables
-	if (testPort) {
-		delete process.env.PORT;
-		testPort = null;
-	}
-	if (testApiUrl) {
-		delete process.env.AI_RULES_API_URL;
-		testApiUrl = null;
-	}
+	delete process.env.PORT;
+	delete process.env.AI_RULES_API_URL;
+	delete process.env.MONGODB_DB_NAME;
 }, 10000);
 
 /**
  * Wait for API server to be ready by polling the health check endpoint
- * @param port - The port number the API server is running on
  */
 async function waitForAPIReady(port: number): Promise<void> {
-	const maxAttempts = 60; // Increase attempts for slower startup
+	const maxAttempts = 60;
 	const delay = 1000;
 	const healthUrl = `http://localhost:${port}/api/health`;
 
 	for (let i = 0; i < maxAttempts; i++) {
 		try {
 			const response = await fetch(healthUrl, {
-				signal: AbortSignal.timeout(2000), // 2 second timeout per request
+				signal: AbortSignal.timeout(2000),
 			});
 			if (response.ok) {
 				return;
 			}
 		} catch {
-			// Server not ready yet - continue waiting
+			// Server not ready yet
 		}
 		await new Promise((resolve) => setTimeout(resolve, delay));
 	}
