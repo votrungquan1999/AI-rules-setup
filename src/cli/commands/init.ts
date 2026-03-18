@@ -278,20 +278,24 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
 			console.log(chalk.blue("\n🎯 Checking for available skills..."));
 			const skills = await fetchSkills(selectedAgent);
 
-			// Filter to only selected skills
-			const selectedSkills = skills.filter((skill) => options.skills?.includes(skill.name));
+			// Handle "all" keyword or filter to only selected skills
+			const selectedSkills = options.skills.includes("all")
+				? skills
+				: skills.filter((skill) => options.skills?.includes(skill.name));
 
-			// Check for non-existent skills and warn
-			const availableSkillNames = skills.map((s) => s.name);
-			const requestedSkillNames = options.skills;
-			const notFoundSkills = requestedSkillNames.filter((name) => !availableSkillNames.includes(name));
+			// Check for non-existent skills and warn (skip when "all" is used)
+			if (!options.skills.includes("all")) {
+				const availableSkillNames = skills.map((s) => s.name);
+				const requestedSkillNames = options.skills;
+				const notFoundSkills = requestedSkillNames.filter((name) => !availableSkillNames.includes(name));
 
-			if (notFoundSkills.length > 0) {
-				console.error(
-					chalk.red(
-						`\n❌ Error: The following skills were not found and will be skipped: ${notFoundSkills.join(", ")}`,
-					),
-				);
+				if (notFoundSkills.length > 0) {
+					console.error(
+						chalk.red(
+							`\n❌ Error: The following skills were not found and will be skipped: ${notFoundSkills.join(", ")}`,
+						),
+					);
+				}
 			}
 
 			if (selectedSkills.length > 0) {
@@ -322,8 +326,10 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
 			console.log(chalk.blue("\n🎯 Installing workflows..."));
 			const allWorkflows = await fetchWorkflows(selectedAgent);
 
-			// Filter to only selected workflows
-			const selectedWorkflows = allWorkflows.filter((w) => options.workflows?.includes(w.name));
+			// Handle "all" keyword or filter to only selected workflows
+			const selectedWorkflows = options.workflows.includes("all")
+				? allWorkflows
+				: allWorkflows.filter((w) => options.workflows?.includes(w.name));
 
 			if (selectedWorkflows.length > 0) {
 				await installWorkflows(selectedWorkflows, selectedAgent, overwriteStrategy, config);
