@@ -2,6 +2,7 @@
 
 import chalk from "chalk";
 import { Command } from "commander";
+import { addCommand } from "./commands/add";
 import { initCommand } from "./commands/init";
 import { pullCommand } from "./commands/pull";
 
@@ -80,6 +81,45 @@ program
 	.action(async (options) => {
 		try {
 			await pullCommand(options);
+		} catch (error) {
+			console.error(chalk.red(`❌ Error: ${error}`));
+			process.exit(1);
+		}
+	});
+
+program
+	.command("add")
+	.description("Add categories, skills, or workflows to an existing project")
+	.option("--categories <list>", "Comma-separated list of category IDs to add (use 'all' for all)")
+	.option("--skills <list>", "Comma-separated list of skill IDs to add (use 'all' for all)")
+	.option("--workflows <list>", "Comma-separated list of workflow IDs to add (use 'all' for all)")
+	.option(
+		"--overwrite-strategy <strategy>",
+		"Conflict resolution strategy: prompt (ask), force (overwrite), or skip (keep existing)",
+		"prompt",
+	)
+	.action(async (options) => {
+		try {
+			const parsedOptions = {
+				categories: options.categories
+					? typeof options.categories === "string"
+						? options.categories.split(",").map((c: string) => c.trim())
+						: undefined
+					: undefined,
+				skills: options.skills
+					? typeof options.skills === "string"
+						? options.skills.split(",").map((s: string) => s.trim())
+						: undefined
+					: undefined,
+				workflows: options.workflows
+					? typeof options.workflows === "string"
+						? options.workflows.split(",").map((w: string) => w.trim())
+						: undefined
+					: undefined,
+				overwriteStrategy: options.overwriteStrategy,
+			};
+
+			await addCommand(parsedOptions);
 		} catch (error) {
 			console.error(chalk.red(`❌ Error: ${error}`));
 			process.exit(1);

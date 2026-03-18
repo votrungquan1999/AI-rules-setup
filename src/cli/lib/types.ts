@@ -125,3 +125,17 @@ export interface InitOptions {
 	/** Overwrite strategy for file conflicts (prompt, force, skip) */
 	overwriteStrategy?: OverwriteStrategy;
 }
+
+/**
+ * CLI options for the add command
+ */
+export interface AddOptions {
+	/** Specific categories to add */
+	categories?: string[];
+	/** Specific skills to add */
+	skills?: string[];
+	/** Specific workflows to add */
+	workflows?: string[];
+	/** Overwrite strategy for file conflicts (prompt, force, skip) */
+	overwriteStrategy?: OverwriteStrategy;
+}
