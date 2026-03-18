@@ -141,6 +141,7 @@ This is a monorepo with both CLI and rules in the same repository. The structure
 - NEVER implement unused/future features not explicitly requested
 - Ask 1-2 clarifying questions before implementing (more if explanation >100 chars)
 - NEVER use defensive try-catch blocks around every operation (only at intentional error boundaries)
+- Only extract reusable components/functions when the same logic is repeated at least **3 times**. Two occurrences do not justify extraction — wait for the third to ensure a good abstraction emerges.
 
 ### Rule File Management
 - When changing rule files for one AI agent, update corresponding files for other agents
