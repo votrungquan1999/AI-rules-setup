@@ -30,11 +30,18 @@ For each task, Claude Code MUST double-check:
 - MUST ask 1-2 clarifying questions before implementing (or more if user explanation >100 characters).
 - Focus on what exists in the system currently, not what could be extended unless explicitly requested by the user.
 - When user provides long explanations (>100 characters), ask additional clarifying questions to verify scope and approach before proceeding.
+- Only extract reusable components/functions when the same logic is repeated at least **3 times**. Two occurrences do not justify extraction — wait for the third to ensure a good abstraction emerges.
 
 ## Error Handling
 
 - NEVER use try-catch blocks defensively around every operation.
 - ONLY place try-catch blocks at intentional error boundaries where you want to catch all errors from lower-level code.
+
+## Test-First Enforcement
+
+- When doing test-first: NEVER write implementation code before running the test.
+- ONE test at a time. Run it. See the result. Then decide whether to implement.
+- The test run is a GATE — skipping it is a rule violation.
 
 ## Planning Mode
 
