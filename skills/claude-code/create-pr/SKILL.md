@@ -56,6 +56,7 @@ The goal is to answer: *"What changed and why should I care?"* — not to docume
 - Focus on what matters for review, skip the obvious
 - Call out anything risky, breaking, or surprising
 - Don't repeat commit messages or list every file
+- NEVER include internal tool references (e.g., `cci:1://file:///Users/...`, `file:///absolute/path/...`) in the description. When referencing files, use the file name only (e.g., `config.ts`). Use short relative paths only when multiple files share the same name
 
 ### Step 5: Present to User
 
