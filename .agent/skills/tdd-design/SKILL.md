@@ -9,40 +9,45 @@ Test-Driven Development: write tests before implementation using red-green-refac
 
 ## Core Principles
 
-1. **Red-Green-Refactor** - Write failing test (Red), make it pass (Green), improve code (Refactor)
-2. **Test First** - Always write tests before implementation
-3. **One Test at a Time** - One test → MUST run test to see it fail → make it pass → next test
-4. **Minimum Implementation** - Only code needed to make test pass
-5. **Test Quality** - Follow 4 Pillars of Testing (Reliability, Validity, Sensitivity, Resilience)
+1. **Test First** - Always write and run tests before implementation
+2. **One Test at a Time** - Write one test → run it → implement → run again → next test
+3. **Minimum Implementation** - Only write code needed to make the current test pass
+4. **Test Quality** - Follow 4 Pillars of Testing (Reliability, Validity, Sensitivity, Resilience)
 
 ---
 
-## Red-Green-Refactor Cycle
+## Test-First Loop
 
-### Red: Write Failing Test
+**Follow this loop for EVERY test case. Do NOT batch tests or skip steps.**
 
-1. Write ONE test describing desired behavior
+---
+
+### Step 1: Write ONE Test
+
+1. Write exactly ONE test describing desired behavior
 2. Use descriptive test names
 3. Follow Arrange-Act-Assert structure
-4. MUST Run test to verify it fails (not syntax error)
 
-### Green: Make Test Pass
+### 🚫 Step 2: GATE — Run the Test (Before Implementation)
 
-1. Write minimum code to make test pass
-2. Don't optimize yet - focus on correctness
-3. Run test to verify it passes
+1. Run the new test BEFORE writing any implementation
+2. If it **fails** → proceed to Step 3 (implement)
+3. If it **already passes** → behavior is already covered, skip Step 3, go back to Step 1
 
-### Refactor: Improve Code
+**This gate is NON-NEGOTIABLE. Writing implementation before running the test = violation.**
 
-1. Ensure all tests pass before refactoring
-2. Improve quality (remove duplication, better naming, extract functions)
-3. Run tests again to verify nothing broke
+### Step 3: Minimum Implementation
 
-**Important:** Only refactor when all tests are passing.
+1. Write the **minimum** code needed to make this test pass
+2. Focus on correctness, not elegance or optimization
 
-### Repeat
+### 🚫 Step 4: GATE — Verify
 
-Continue cycle for each test scenario until all implemented and passing.
+1. Run the test again
+2. If it **passes** → go back to Step 1 for the next test
+3. If it **fails** → go back to Step 3 and fix the implementation
+
+**Do NOT write a second test before completing this gate.**
 
 ---
 
@@ -67,11 +72,10 @@ Continue cycle for each test scenario until all implemented and passing.
 
 **Never:**
 
-- ❌ Write multiple tests before implementing
-- ❌ Write implementation before tests
-- ❌ Consider test passed when the test not actually run
-
-## Related Skills
+- ❌ Write implementation code before running the test (even "obvious" code)
+- ❌ Write a second test before the current cycle completes
+- ❌ Skip a test run because you "know" the result
+- ❌ Batch multiple tests then implement them all at once
 
 - `@bdd-design` - Use BDD for behavior-level/acceptance testing alongside TDD for unit-level testing
 - `@test-quality-reviewer` - Review test quality using the 4 Pillars framework after writing tests

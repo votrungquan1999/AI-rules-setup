@@ -64,7 +64,7 @@ Scenario: [Descriptive scenario name]
 
 **For EACH scenario, follow this process:**
 
-### Red: Write Failing Test
+### 🚫 GATE: Run the Test Before Implementing
 
 1. Write the test for ONE scenario
 2. Use the Given/When/Then structure in your test:
@@ -84,13 +84,17 @@ Scenario: [Descriptive scenario name]
      });
    });
    ```
-3. **MUST run the test** to verify it fails (not a syntax error, a genuine failure)
+3. **Run the test** — you MUST see the result before writing any implementation
+   - If it **fails** → proceed to implement
+   - If it **already passes** → behavior is covered, skip implementation, go to next scenario
+
+**This gate is NON-NEGOTIABLE. Writing implementation before running the test = violation.**
 
 ### Green: Make It Pass
 
 1. Write the **minimum code** needed to make this ONE scenario pass
 2. Focus on correctness, not elegance
-3. Run the test to verify it passes
+3. **Run the test again** to verify it passes
 4. Run all previous scenarios to ensure nothing broke
 
 ### Refactor (Optional)
@@ -101,7 +105,7 @@ Scenario: [Descriptive scenario name]
 
 ### Repeat
 
-Continue the Red-Green-Refactor cycle for each remaining scenario.
+Continue the cycle for each remaining scenario. **NEVER write a second test before completing the current cycle.**
 
 ---
 
@@ -164,12 +168,13 @@ Scenario Outline: Validate password strength
 
 - ✅ Write scenarios in domain language, not code language
 - ✅ One scenario = one behavior = one test
-- ✅ Run tests after every implementation step
+- ✅ Run the test after writing it, BEFORE writing implementation
 - ✅ Keep scenarios independent — no test ordering dependencies
 - ✅ Use descriptive scenario names that read like sentences
 - ❌ Don't write implementation-specific scenarios ("When the database query returns...")
 - ❌ Don't write multiple scenarios before implementing any
-- ❌ Don't skip the failing test step — always verify red before green
+- ❌ Don't skip the test run — always run the test before implementing
+- ❌ Don't write implementation code before seeing the test result
 
 ---
 

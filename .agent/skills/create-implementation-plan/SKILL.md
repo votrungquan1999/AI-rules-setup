@@ -78,6 +78,32 @@ Link to files using markdown: `[filename](file:///absolute/path)`
 
 **Group by component** and **order logically** (dependencies first).
 
+### Step 5b: Test-Case Plan (for TDD/BDD)
+
+When following test-first development, **also** organize the implementation by test cases, not just by files. **Create a task file** that lists each behavior as a step with explicit sub-items:
+
+```markdown
+## Implementation (each step = one test-first cycle)
+
+### Step 1: [observable behavior]
+- [ ] Write test
+- [ ] Run test
+- [ ] Implement (if needed)
+- [ ] Run test (if implemented)
+
+### Step 2: [observable behavior]
+- [ ] Write test
+- [ ] Run test
+- [ ] Implement (if needed)
+- [ ] Run test (if implemented)
+
+### Quality Checkpoint (after every 2-3 steps)
+- [ ] Review test quality
+- [ ] Review code for refactoring
+```
+
+Each step = one test-first cycle. The sub-items enforce the gate: you cannot implement before running the test.
+
 ### Step 6: Plan Verification
 
 Document how you'll verify the changes:
