@@ -87,16 +87,45 @@ export async function fetchManifestLocal(agent: string, category: string, rootPa
 }
 
 /**
+ * Recursively collects all non-SKILL.md files in a skill directory
+ * @param skillDirPath - Absolute path to the skill directory
+ * @param basePath - Base path for computing relative paths (same as skillDirPath on first call)
+ * @returns Array of supporting files with relative paths and content
+ */
+async function collectSupportingFiles(
+	skillDirPath: string,
+	basePath: string,
+): Promise<Array<{ path: string; content: string }>> {
+	const supportingFiles: Array<{ path: string; content: string }> = [];
+	const entries = await readdir(skillDirPath, { withFileTypes: true });
+
+	for (const entry of entries) {
+		const fullPath = join(skillDirPath, entry.name);
+		if (entry.isDirectory()) {
+			const nested = await collectSupportingFiles(fullPath, basePath);
+			supportingFiles.push(...nested);
+		} else if (entry.isFile() && entry.name !== "SKILL.md") {
+			const relativePath = fullPath.slice(basePath.length + 1); // +1 for trailing /
+			const content = await readFile(fullPath, "utf-8");
+			supportingFiles.push({ path: relativePath, content });
+		}
+	}
+
+	return supportingFiles;
+}
+
+/**
  * Discovers all available skills for a given agent from skills/{agent}/
  * Skills must follow the subdirectory format: skills/{agent}/{skill-name}/SKILL.md
+ * Supporting files in subdirectories (e.g., nodes/, scripts/) are also collected.
  * @param agent - AI agent name (e.g., 'claude-code', 'antigravity')
  * @param rootPath - Optional root directory (defaults to process.cwd())
- * @returns Array of skill objects with name and content
+ * @returns Array of skill objects with name, content, and optional supportingFiles
  */
 export async function discoverSkillsLocal(
 	agent: string,
 	rootPath?: string,
-): Promise<Array<{ name: string; content: string }>> {
+): Promise<Array<{ name: string; content: string; supportingFiles?: Array<{ path: string; content: string }> }>> {
 	try {
 		// Check if skills directory exists for this agent
 		const root = rootPath || process.cwd();
@@ -115,15 +144,27 @@ export async function discoverSkillsLocal(
 		// Filter for directories only (each skill is a subdirectory containing SKILL.md)
 		const skillDirs = entries.filter((entry) => entry.type === "dir");
 
-		const skills: Array<{ name: string; content: string }> = [];
+		const skills: Array<{ name: string; content: string; supportingFiles?: Array<{ path: string; content: string }> }> =
+			[];
 
 		for (const dir of skillDirs) {
 			try {
 				const content = await fetchFileContentLocal(`skills/${agent}/${dir.name}/SKILL.md`, rootPath);
-				skills.push({
+				const skillDirFullPath = join(root, `skills/${agent}/${dir.name}`);
+
+				// Collect supporting files from subdirectories
+				const supportingFiles = await collectSupportingFiles(skillDirFullPath, skillDirFullPath);
+
+				const skill: { name: string; content: string; supportingFiles?: Array<{ path: string; content: string }> } = {
 					name: dir.name,
 					content,
-				});
+				};
+
+				if (supportingFiles.length > 0) {
+					skill.supportingFiles = supportingFiles;
+				}
+
+				skills.push(skill);
 			} catch (error) {
 				// SKILL.md not found in this directory - skip silently
 				console.warn(`No SKILL.md found in skills/${agent}/${dir.name}:`, error);
