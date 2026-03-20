@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import { useSelectedAgent } from "src/lib/selection.state";
 import { extractManifestsForAgent } from "src/lib/rules-data-utils";
+import { useSelectedAgent } from "src/lib/selection.state";
 import type { Manifest, RulesData } from "src/server/types";
 
 /**
@@ -15,4 +15,3 @@ export function useAgentManifests(rulesData: RulesData): Manifest[] {
 		return extractManifestsForAgent(rulesData, selectedAgent);
 	}, [rulesData, selectedAgent]);
 }
-

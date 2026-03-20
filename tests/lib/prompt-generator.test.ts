@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
-import type { Manifest } from "src/server/types";
 import { generateChatGptPrompt } from "src/lib/prompt-generator";
+import type { Manifest } from "src/server/types";
+import { describe, expect, it } from "vitest";
 
 describe("generateChatGptPrompt", () => {
 	/**
@@ -225,4 +225,3 @@ describe("generateChatGptPrompt", () => {
 		expect(mIndex).toBeLessThan(zIndex);
 	});
 });
-

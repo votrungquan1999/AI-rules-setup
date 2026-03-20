@@ -2,8 +2,8 @@
 
 import { useMemo } from "react";
 import { createReducerContext } from "src/app/hooks/createReducerContext";
-import type { Question, QuestionAnswer } from "src/lib/question-types";
 import { useManifests, useQuestions } from "src/lib/manifests.state";
+import type { Question, QuestionAnswer } from "src/lib/question-types";
 import { eng, removeStopwords } from "stopword";
 import { type SearchResult, searchRules } from "./search";
 

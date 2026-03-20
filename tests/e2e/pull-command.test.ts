@@ -231,7 +231,10 @@ describe("E2E: Pull Command", () => {
 		);
 		expect(ruleContent).toContain("V2 Rules Content");
 
-		const skillContent = await fs.readFile(path.join(testProjectDir, ".agents/skills/postgres-query/SKILL.md"), "utf-8");
+		const skillContent = await fs.readFile(
+			path.join(testProjectDir, ".agents/skills/postgres-query/SKILL.md"),
+			"utf-8",
+		);
 		expect(skillContent).toContain("V2 Skill Content");
 
 		const workflowContent = await fs.readFile(
