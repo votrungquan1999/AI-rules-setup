@@ -2,7 +2,13 @@ import { join } from "node:path";
 import chalk from "chalk";
 import { fetchAvailableAgents, fetchManifests, fetchRuleFile, fetchSkills, fetchWorkflows } from "../lib/api-client";
 import { addCategory, addSkill, addWorkflow, loadConfig, saveConfig } from "../lib/config";
-import { applyNamingConvention, applySkillNamingConvention, detectConflict, writeRuleFile } from "../lib/files";
+import {
+	applyNamingConvention,
+	applySkillFileNamingConvention,
+	applySkillNamingConvention,
+	detectConflict,
+	writeRuleFile,
+} from "../lib/files";
 import {
 	promptAgentSelection,
 	promptCategorySelection,
@@ -13,10 +19,10 @@ import {
 import type { AIAgent, Config, InitOptions, OverwriteStrategy } from "../lib/types";
 
 /**
- * Installs selected skills for the given agent
+ * Installs selected skills for the given agent, including any supporting files
  */
 async function installSkills(
-	skills: Array<{ name: string; content: string }>,
+	skills: Array<{ name: string; content: string; supportingFiles?: Array<{ path: string; content: string }> }>,
 	agent: string,
 	overwriteStrategy: OverwriteStrategy,
 	config: Config,
@@ -47,8 +53,17 @@ async function installSkills(
 				}
 			}
 
-			// Write skill file
+			// Write main skill file (SKILL.md)
 			await writeRuleFile(skill.content, join(process.cwd(), targetPath));
+
+			// Write supporting files if present
+			if (skill.supportingFiles && skill.supportingFiles.length > 0) {
+				for (const supportingFile of skill.supportingFiles) {
+					const supportingPath = applySkillFileNamingConvention(agent as AIAgent, skill.name, supportingFile.path);
+					await writeRuleFile(supportingFile.content, join(process.cwd(), supportingPath));
+				}
+			}
+
 			console.log(chalk.green(`✓ Installed skill: ${skill.name}`));
 			installedSkillsCount++;
 

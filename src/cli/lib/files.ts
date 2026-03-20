@@ -95,3 +95,15 @@ export function applySkillNamingConvention(agent: AIAgent, skillName: string): s
 			throw new Error(`Skills are not supported for agent: ${agent}`);
 	}
 }
+
+/**
+ * Applies naming conventions for supporting files within a skill directory
+ * @param agent - AI agent type
+ * @param skillName - Name of the skill
+ * @param relativePath - Relative path within the skill directory (e.g., 'nodes/node-research.md')
+ * @returns Target file path for the supporting file
+ */
+export function applySkillFileNamingConvention(agent: AIAgent, skillName: string, relativePath: string): string {
+	const skillBase = applySkillNamingConvention(agent, skillName);
+	return skillBase.replace(/SKILL\.md$/, relativePath);
+}

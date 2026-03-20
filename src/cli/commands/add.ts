@@ -3,9 +3,15 @@ import { join } from "node:path";
 import chalk from "chalk";
 import { fetchManifests, fetchRuleFile, fetchSkills, fetchWorkflows } from "../lib/api-client";
 import { addCategory, addSkill, addWorkflow, loadConfig, saveConfig } from "../lib/config";
-import { applyNamingConvention, applySkillNamingConvention, detectConflict, writeRuleFile } from "../lib/files";
+import {
+	applyNamingConvention,
+	applySkillFileNamingConvention,
+	applySkillNamingConvention,
+	detectConflict,
+	writeRuleFile,
+} from "../lib/files";
 import { promptConflictResolution } from "../lib/prompts";
-import type { AIAgent, AddOptions, Config, OverwriteStrategy } from "../lib/types";
+import type { AddOptions, AIAgent, Config, OverwriteStrategy } from "../lib/types";
 
 /**
  * Add categories, skills, or workflows to an existing project.
@@ -155,6 +161,15 @@ async function addSkillsToProject(
 		}
 
 		await writeRuleFile(skill.content, join(process.cwd(), targetPath));
+
+		// Write supporting files if present
+		if (skill.supportingFiles && skill.supportingFiles.length > 0) {
+			for (const supportingFile of skill.supportingFiles) {
+				const supportingPath = applySkillFileNamingConvention(agent, skill.name, supportingFile.path);
+				await writeRuleFile(supportingFile.content, join(process.cwd(), supportingPath));
+			}
+		}
+
 		console.log(chalk.green(`✓ Installed skill: ${skill.name}`));
 
 		const updatedConfig = addSkill(config, skill.name);
