@@ -152,4 +152,38 @@ describe("E2E: Init Command - Skills Installation", () => {
 		expect(installedSkills).toContain("feature-development-workflow");
 		expect(installedSkills).not.toContain("nonexistent-skill");
 	});
+
+	it("should install supporting files for multi-file skills", async () => {
+		// Arrange & Act: Install multi-file-skill for antigravity agent
+		const { result } = spawnCLI(
+			["init", "--agent", "antigravity", "--categories", "all", "--skills", "multi-file-skill"],
+			{
+				cwd: testProjectPath,
+				timeout: 30000,
+			},
+		);
+
+		const { stdout, stderr, exitCode } = await result;
+		console.log("=== MULTI-FILE SKILL OUTPUT ===");
+		console.log("stdout:", stdout);
+		console.log("stderr:", stderr);
+		console.log("exitCode:", exitCode);
+		expect(exitCode).toBe(0);
+
+		// Assert: Main SKILL.md is installed
+		const skillDir = path.join(testProjectPath, ".agents", "skills", "multi-file-skill");
+		const mainSkillPath = path.join(skillDir, "SKILL.md");
+		const mainContent = await fs.readFile(mainSkillPath, "utf-8");
+		expect(mainContent).toContain("Multi File Skill");
+
+		// Assert: Supporting file nodes/step-one.md is installed
+		const stepOnePath = path.join(skillDir, "nodes", "step-one.md");
+		const stepOneContent = await fs.readFile(stepOnePath, "utf-8");
+		expect(stepOneContent).toContain("Step One");
+
+		// Assert: Supporting file references/glossary.md is installed
+		const glossaryPath = path.join(skillDir, "references", "glossary.md");
+		const glossaryContent = await fs.readFile(glossaryPath, "utf-8");
+		expect(glossaryContent).toContain("Glossary");
+	});
 });

@@ -38,10 +38,10 @@ describe("E2E: Add Command", () => {
 		expect(configBefore.categories).toContain("component-architecture");
 
 		// When I run `add --categories database-patterns`
-		const { result } = spawnCLI(
-			["add", "--categories", "database-patterns", "--overwrite-strategy", "force"],
-			{ cwd: testProjectPath, timeout: 30000 },
-		);
+		const { result } = spawnCLI(["add", "--categories", "database-patterns", "--overwrite-strategy", "force"], {
+			cwd: testProjectPath,
+			timeout: 30000,
+		});
 
 		const { exitCode, stderr } = await result;
 		expect(stderr).toBe("");
@@ -106,10 +106,10 @@ describe("E2E: Add Command", () => {
 		await initProject("claude-code", "component-architecture");
 
 		// When I run `add --categories all`
-		const { result } = spawnCLI(
-			["add", "--categories", "all", "--overwrite-strategy", "force"],
-			{ cwd: testProjectPath, timeout: 30000 },
-		);
+		const { result } = spawnCLI(["add", "--categories", "all", "--overwrite-strategy", "force"], {
+			cwd: testProjectPath,
+			timeout: 30000,
+		});
 
 		const { exitCode, stderr } = await result;
 		expect(stderr).toBe("");
@@ -128,10 +128,10 @@ describe("E2E: Add Command", () => {
 		await initProject("claude-code", "component-architecture");
 
 		// When I run `add --categories component-architecture` (already installed)
-		const { result } = spawnCLI(
-			["add", "--categories", "component-architecture", "--overwrite-strategy", "force"],
-			{ cwd: testProjectPath, timeout: 30000 },
-		);
+		const { result } = spawnCLI(["add", "--categories", "component-architecture", "--overwrite-strategy", "force"], {
+			cwd: testProjectPath,
+			timeout: 30000,
+		});
 
 		const { exitCode } = await result;
 		expect(exitCode).toBe(0);
@@ -155,5 +155,36 @@ describe("E2E: Add Command", () => {
 		// Then the command fails with an error about missing config
 		expect(exitCode).not.toBe(0);
 		expect(stderr).toContain("No .ai-rules.json found");
+	});
+
+	it("should install supporting files when adding a multi-file skill", async () => {
+		// Given an initialized project with agent "antigravity"
+		await initProject("antigravity", "component-architecture");
+
+		// When I run `add --skills multi-file-skill`
+		const { result } = spawnCLI(["add", "--skills", "multi-file-skill"], {
+			cwd: testProjectPath,
+			timeout: 30000,
+		});
+
+		const { exitCode, stderr } = await result;
+		expect(stderr).toBe("");
+		expect(exitCode).toBe(0);
+
+		// Then the main SKILL.md is written
+		const skillDir = path.join(testProjectPath, ".agents", "skills", "multi-file-skill");
+		const mainContent = await fs.readFile(path.join(skillDir, "SKILL.md"), "utf-8");
+		expect(mainContent).toContain("Multi File Skill");
+
+		// And supporting files are written in their subdirectories
+		const stepOneContent = await fs.readFile(path.join(skillDir, "nodes", "step-one.md"), "utf-8");
+		expect(stepOneContent).toContain("Step One");
+
+		const glossaryContent = await fs.readFile(path.join(skillDir, "references", "glossary.md"), "utf-8");
+		expect(glossaryContent).toContain("Glossary");
+
+		// And config tracks the skill
+		const config = JSON.parse(await fs.readFile(path.join(testProjectPath, ".ai-rules.json"), "utf-8"));
+		expect(config.skills).toContain("multi-file-skill");
 	});
 });

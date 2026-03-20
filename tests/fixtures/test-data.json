@@ -1009,6 +1009,20 @@
         {
           "name": "postgres-query",
           "content": "---\nname: PostgreSQL Query Helper\ndescription: Helper for writing and optimizing PostgreSQL queries\n---\n\n# PostgreSQL Query Helper\n\nThis skill helps you write efficient PostgreSQL queries.\n\n## Usage\n\nUse this skill when you need to:\n- Write complex SQL queries\n- Optimize query performance\n- Design database schemas\n"
+        },
+        {
+          "name": "multi-file-skill",
+          "content": "---\nname: Multi File Skill\ndescription: A test skill with supporting files\n---\n\n# Multi File Skill\n\nThis skill has multiple files including nodes.\n",
+          "supportingFiles": [
+            {
+              "path": "nodes/step-one.md",
+              "content": "# Step One\n\nThis is the first step of the multi-file skill.\n"
+            },
+            {
+              "path": "references/glossary.md",
+              "content": "# Glossary\n\nTerms used in this skill.\n"
+            }
+          ]
         }
       ],
       "workflows": [

@@ -25,7 +25,7 @@ interface TestFixtureCategory {
 interface TestFixtureAgent {
 	name: string;
 	categories: TestFixtureCategory[];
-	skills?: Array<{ name: string; content: string }>;
+	skills?: Array<{ name: string; content: string; supportingFiles?: Array<{ path: string; content: string }> }>;
 	workflows?: Array<{ name: string; content: string }>;
 }
 

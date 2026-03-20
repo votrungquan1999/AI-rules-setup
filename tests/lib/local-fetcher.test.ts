@@ -111,6 +111,23 @@ describe("Local Fetcher", () => {
 		}
 	});
 
+	it("discoverSkillsLocal - should return supportingFiles for skills with subdirectories", async () => {
+		// Act
+		const skills = await discoverSkillsLocal("test-agent", FIXTURE_ROOT);
+
+		// Assert
+		const testSkill = skills.find((s) => s.name === "test-skill");
+		expect(testSkill).toBeDefined();
+
+		// Should have supportingFiles array
+		expect(testSkill?.supportingFiles).toBeDefined();
+		expect(Array.isArray(testSkill?.supportingFiles)).toBe(true);
+
+		// Should contain the node-example.md file with correct relative path
+		const nodeFile = testSkill?.supportingFiles?.find((f) => f.path === "nodes/node-example.md");
+		expect(nodeFile).toBeDefined();
+		expect(nodeFile?.content).toContain("Node Example");
+	});
 	it("discoverWorkflowsLocal - should discover workflows for a given agent", async () => {
 		// Act
 		const workflows = await discoverWorkflowsLocal("test-agent", FIXTURE_ROOT);
