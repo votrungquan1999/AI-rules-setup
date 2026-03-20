@@ -72,6 +72,8 @@ export interface RuleCategory {
 export interface SkillFile {
 	name: string;
 	content: string;
+	/** Optional supporting files (nodes, scripts, references, etc.) */
+	supportingFiles?: Array<{ path: string; content: string }>;
 }
 
 /**

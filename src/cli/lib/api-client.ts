@@ -20,6 +20,7 @@ export interface RulesResponse {
 			skills?: Array<{
 				name: string;
 				content: string;
+				supportingFiles?: Array<{ path: string; content: string }>;
 			}>;
 			/** Optional workflows (currently only for Antigravity) */
 			workflows?: Array<{
@@ -152,7 +153,9 @@ export async function fetchRuleFile(agent: string, category: string, filename: s
  * @param agent - AI agent name (e.g., 'claude-code')
  * @returns Array of skill objects with name and content, or empty array if no skills
  */
-export async function fetchSkills(agent: string): Promise<Array<{ name: string; content: string }>> {
+export async function fetchSkills(
+	agent: string,
+): Promise<Array<{ name: string; content: string; supportingFiles?: Array<{ path: string; content: string }> }>> {
 	try {
 		const data = await fetchRulesData();
 		const agentData = data.agents[agent];
