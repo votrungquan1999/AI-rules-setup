@@ -4,8 +4,8 @@ Execute one red-green-refactor cycle for a single observable behavior.
 
 ## Input
 
-Read `/tmp/workflow-state/plan-steps.md` to find the next `pending` step.
-Read `/tmp/workflow-state/loop-state.json` for the current step counter.
+Read the `plan-steps.md` artifact to find the next `pending` step.
+Read the `loop-state.json` artifact for the current step counter.
 
 ## Execution
 
@@ -55,10 +55,10 @@ Only if there's an obvious improvement. Keep it small. Run tests again.
 
 ## Output
 
-Update `/tmp/workflow-state/plan-steps.md`:
+Update the `plan-steps.md` artifact:
 - Change the completed step's status to `done` (or `done (already covered)`)
 
-Write to `/tmp/workflow-state/step-result.md`:
+Write to the `step-result.md` artifact:
 
 ```markdown
 # Step Result
@@ -73,4 +73,4 @@ Write to `/tmp/workflow-state/step-result.md`:
 ## Notes: [anything worth mentioning]
 ```
 
-Update `loop-state.json`: increment `current_step`.
+Update `loop-state.json` artifact: increment `current_step`.

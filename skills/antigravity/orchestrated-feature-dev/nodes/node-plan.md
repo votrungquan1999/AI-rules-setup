@@ -4,23 +4,23 @@ Create a detailed implementation plan using research output as context.
 
 ## Input
 
-Read `/tmp/workflow-state/research-output.md` for context about the codebase.
+Read the `research-output.md` artifact from the brain directory for context about the codebase.
 
 ## Execution
 
 1. **Read the research output** to understand patterns, affected areas, and existing code.
 
-2. **Use `@create-implementation-plan`** to create the plan. When the skill asks you to research, point it to the research output file instead of re-reading the codebase — the research is already done.
+2. **Use `@create-implementation-plan`** to create the plan. When the skill asks you to research, point it to the research output artifact instead of re-reading the codebase — the research is already done.
 
 3. **Ensure the plan includes a test-case breakdown** (Step 5b from create-implementation-plan). Each step should be an observable behavior, not a code task:
    - ✅ `User sees trending markets at the top`
    - ❌ `Add isTrending field to database`
 
-4. **Write the step list** to the workflow state for the TDD loop to consume.
+4. **Write the step list** to the workflow state artifact for the TDD loop to consume.
 
 ## Output
 
-After the plan is approved, write the step list to `/tmp/workflow-state/plan-steps.md`:
+After the plan is approved, write the step list to the `plan-steps.md` artifact:
 
 ```markdown
 # Planned Steps

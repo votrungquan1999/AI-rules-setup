@@ -32,7 +32,7 @@ Read the user's feature request from the conversation context.
 
 ## Output
 
-Write findings to `/tmp/workflow-state/research-output.md`:
+Write findings to the `research-output.md` artifact in the brain directory:
 
 ```markdown
 # Research Output

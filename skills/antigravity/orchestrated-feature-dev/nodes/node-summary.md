@@ -4,12 +4,12 @@ Generate a final summary of the entire orchestrated workflow execution.
 
 ## Input
 
-Read all workflow state files:
-- `/tmp/workflow-state/research-output.md`
-- `/tmp/workflow-state/plan-steps.md`
-- `/tmp/workflow-state/loop-state.json`
-- `/tmp/workflow-state/quality-result.md` (if exists)
-- `/tmp/workflow-state/step-result.md` (latest)
+Read all workflow state artifacts from the brain directory:
+- `research-output.md`
+- `plan-steps.md`
+- `loop-state.json`
+- `quality-result.md` (if exists)
+- `step-result.md` (latest)
 
 ## Execution
 
@@ -52,9 +52,4 @@ Present to the user:
 - [Any caveats, follow-ups, or things to watch out for]
 ```
 
-## Cleanup
-
-After presenting the summary, clean up:
-```bash
-rm -rf /tmp/workflow-state
-```
+No cleanup needed — artifacts are managed by the Antigravity platform and persist with the conversation.

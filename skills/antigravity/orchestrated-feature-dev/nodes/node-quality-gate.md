@@ -4,8 +4,8 @@ Periodic quality check that reviews recent tests and implementation for issues.
 
 ## Input
 
-Read `/tmp/workflow-state/loop-state.json` for the current step counter.
-Read `/tmp/workflow-state/plan-steps.md` to identify which steps were completed since the last quality check.
+Read the `loop-state.json` artifact for the current step counter.
+Read the `plan-steps.md` artifact to identify which steps were completed since the last quality check.
 
 ## Execution
 
@@ -38,7 +38,7 @@ If issues are found:
 
 ## Output
 
-Write to `/tmp/workflow-state/quality-result.md`:
+Write to the `quality-result.md` artifact:
 
 ```markdown
 # Quality Gate Result
@@ -60,4 +60,4 @@ Write to `/tmp/workflow-state/quality-result.md`:
 - **Notes**: [anything the orchestrator needs to know]
 ```
 
-Update `loop-state.json`: increment `quality_checks`.
+Update `loop-state.json` artifact: increment `quality_checks`.

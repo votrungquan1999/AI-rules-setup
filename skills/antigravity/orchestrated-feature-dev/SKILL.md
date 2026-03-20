@@ -9,7 +9,7 @@ An n8n-style workflow that orchestrates specialized node skills through a struct
 
 ## How This Works
 
-This skill acts as an **orchestrator** — it sequences specialized node skills, passes data between them via artifact files, and makes routing decisions based on results. Each node reads from and writes to `/tmp/workflow-state/`.
+This skill acts as an **orchestrator** — it sequences specialized node skills, passes data between them via artifact files, and makes routing decisions based on results. Each node reads from and writes to the Antigravity artifact directory (`<appDataDir>/brain/<conversation-id>/`).
 
 ```
 [research] → [plan] → [tdd-step] ↔ [quality-gate] → [summary]
@@ -17,12 +17,16 @@ This skill acts as an **orchestrator** — it sequences specialized node skills,
                            └── loop back ──┘
 ```
 
-## Setup
+## Artifact Convention
 
-Before starting, create the workflow state directory:
-```bash
-mkdir -p /tmp/workflow-state
-```
+All workflow state files are created as Antigravity artifacts in the brain directory for the current conversation. Use `write_to_file` with `IsArtifact: true` to create/update these files. The artifact directory path is provided to you at the start of each conversation.
+
+**Workflow artifacts:**
+- `research-output.md` — Research findings
+- `plan-steps.md` — Step list for the TDD loop
+- `loop-state.json` — Loop counter and metadata
+- `step-result.md` — Latest TDD step result
+- `quality-result.md` — Latest quality gate result
 
 ---
 
@@ -30,7 +34,7 @@ mkdir -p /tmp/workflow-state
 
 Read the node instructions from `nodes/node-research.md` in this skill's directory, then execute them.
 
-**After completion**, read `/tmp/workflow-state/research-output.md` and report:
+**After completion**, read the `research-output.md` artifact and report:
 - Number of files read
 - Key patterns found
 - Affected areas identified
@@ -56,7 +60,7 @@ The plan node will use `@create-implementation-plan` to create the plan, reading
 This is the core loop — it alternates between TDD steps and quality gates.
 
 ### Initialize
-Set iteration counter: write `{"current_step": 1, "quality_checks": 0, "max_steps": 20}` to `/tmp/workflow-state/loop-state.json`.
+Set iteration counter: write `{"current_step": 1, "quality_checks": 0, "max_steps": 20}` to the `loop-state.json` artifact.
 
 ### For Each Step
 
@@ -69,7 +73,7 @@ The node will:
 2. Write a test for it
 3. Run the test (MUST see result before implementing)
 4. Implement if test failed; skip if test already passes
-5. Write the step result to `/tmp/workflow-state/step-result.md`
+5. Write the step result to the `step-result.md` artifact
 
 **After completion**, read `step-result.md` and decide:
 - If step succeeded → increment `current_step` in `loop-state.json`
@@ -84,7 +88,7 @@ Read the node instructions from `nodes/node-quality-gate.md` in this skill's dir
 The quality gate will:
 1. Run `@test-quality-reviewer` on recent tests
 2. Run `@code-refactoring` review on recent implementation
-3. Write findings to `/tmp/workflow-state/quality-result.md`
+3. Write findings to the `quality-result.md` artifact
 
 **After completion**, read `quality-result.md` and route:
 - If `quality: "pass"` → continue to next TDD step
@@ -114,6 +118,6 @@ Present the final summary to the user with:
 
 ## Error Handling
 
-- If any node fails unexpectedly → write error to `/tmp/workflow-state/error.md`, stop, and report to user
+- If any node fails unexpectedly → write error to an `error.md` artifact, stop, and report to user
 - If user wants to skip a phase → mark it skipped in loop-state and proceed
 - If context feels bloated → summarize what's done so far, use `task_boundary` to mark a new phase
