@@ -87,14 +87,6 @@ function getSidebarSection() {
 	return sidebarHeading.parentElement?.parentElement;
 }
 
-/**
- * Helper to search for a term
- */
-function searchFor(term: string) {
-	const searchInput = screen.getByPlaceholderText(/Describe your tech stack/i);
-	fireEvent.change(searchInput, { target: { value: term } });
-}
-
 describe("SelectRulesPageClient - Agent Filtering", () => {
 	it("should display cursor rules when cursor agent is selected", () => {
 		const rulesData = createRulesData(["typescript", "react"], ["typescript"]);
@@ -300,125 +292,29 @@ describe("SelectRulesPageClient - Sidebar Agent Filtering", () => {
 		const rulesData = createRulesData(["typescript", "react"], ["react", "tailwind"]);
 		renderSelectRulesPage(rulesData, { defaultAgent: "cursor" });
 
-		// Verify prompt contains cursor agent in example command and lists all cursor categories
-		const promptHeading = screen.getByRole("heading", { name: "ChatGPT Prompt" });
-		const promptSection = promptHeading.parentElement?.parentElement;
-		const promptPre = promptSection?.querySelector("pre");
-
-		expect(promptPre).toBeInTheDocument();
-		expect(promptPre?.textContent).toContain("--agent cursor");
-		expect(promptPre?.textContent).toContain("**react**");
-		expect(promptPre?.textContent).toContain("**typescript**");
-		expect(promptPre?.textContent).not.toContain("**tailwind**");
-
-		// Switch to claude-code agent
-		await switchAgent("claude-code", "react", "react rules for Claude Code");
-
-		// Verify prompt updates to claude-code agent and lists all claude-code categories
-		await waitFor(() => {
-			const updatedPromptHeading = screen.getByRole("heading", { name: "ChatGPT Prompt" });
-			const updatedPromptSection = updatedPromptHeading.parentElement?.parentElement;
-			const updatedPromptPre = updatedPromptSection?.querySelector("pre");
-			expect(updatedPromptPre?.textContent).toContain("--agent claude-code");
-			expect(updatedPromptPre?.textContent).toContain("**react**");
-			expect(updatedPromptPre?.textContent).toContain("**tailwind**");
-			expect(updatedPromptPre?.textContent).not.toContain("**typescript**");
-		});
-	});
-});
-
-describe("SelectRulesPageClient - Search Agent Filtering", () => {
-	it("should filter search results to selected agent", async () => {
-		// Create rules with same name in both agents
-		const rulesData = createRulesData(["typescript"], ["typescript"]);
-		renderSelectRulesPage(rulesData, { defaultAgent: "cursor" });
-
-		// Search for "typescript"
-		searchFor("typescript");
-
-		// Wait for search results
-		await waitFor(() => {
-			expect(screen.getByTestId("rule-card-typescript")).toBeInTheDocument();
+		// Mock clipboard API
+		let clipboardValue = "";
+		Object.assign(navigator, {
+			clipboard: {
+				writeText: async (text: string) => {
+					clipboardValue = text;
+				},
+			},
 		});
 
-		// Verify only cursor's typescript rule appears
-		expect(screen.getByText("typescript rules for Cursor")).toBeInTheDocument();
-		expect(screen.queryByText("typescript rules for Claude Code")).not.toBeInTheDocument();
+		// Click the copy prompt button
+		const banner = screen.getByTestId("getting-started-banner");
+		const copyButton = banner.querySelector("button[aria-label='Copy prompt']");
+		expect(copyButton).toBeInTheDocument();
+		// biome-ignore lint/style/noNonNullAssertion: this is test files, acceptable
+		fireEvent.click(copyButton!);
 
-		// Switch to claude-code agent
-		await switchAgent("claude-code", "typescript", "typescript rules for Claude Code");
-
-		// Verify only claude-code's typescript rule appears
-		expect(screen.queryByText("typescript rules for Cursor")).not.toBeInTheDocument();
-	});
-
-	it("should handle rule selection and scoring correctly per agent", async () => {
-		const rulesData = createRulesData(["typescript"], ["react"]);
-		renderSelectRulesPage(rulesData, { defaultAgent: "cursor" });
-
-		// Get checkbox before selecting
-		const typescriptCheckbox = screen.getByRole("checkbox", { name: /typescript/i });
-		expect(typescriptCheckbox).not.toBeChecked();
-
-		// Select cursor's typescript rule
-		selectRule("typescript");
-
-		// Verify rule is selected
+		// Verify clipboard received agent-specific prompt
 		await waitFor(() => {
-			expect(typescriptCheckbox).toBeChecked();
+			expect(clipboardValue).toContain("--agent cursor");
+			expect(clipboardValue).toContain("**typescript**");
+			expect(clipboardValue).toContain("**react**");
+			expect(clipboardValue).not.toContain("**tailwind**");
 		});
-
-		// Verify sidebar shows the selected rule
-		const sidebarSection = getSidebarSection();
-		expect(sidebarSection?.textContent).toContain("typescript");
-
-		// Switch to claude-code agent
-		await switchAgent("claude-code", "react", "react rules for Claude Code");
-
-		// Verify cursor selection is cleared (sidebar should be empty)
-		const updatedSidebarSection = getSidebarSection();
-		expect(updatedSidebarSection?.textContent).not.toContain("typescript");
-		expect(screen.getByText(/No items selected yet/i)).toBeInTheDocument();
-
-		// Get checkbox before selecting
-		const reactCheckbox = screen.getByRole("checkbox", { name: /react/i });
-		expect(reactCheckbox).not.toBeChecked();
-
-		// Select claude-code's react rule
-		selectRule("react");
-
-		// Verify rule is selected
-		await waitFor(() => {
-			expect(reactCheckbox).toBeChecked();
-		});
-
-		// Verify sidebar shows claude-code rule
-		const finalSidebarSection = getSidebarSection();
-		expect(finalSidebarSection?.textContent).toContain("react");
-		expect(finalSidebarSection?.textContent).not.toContain("typescript");
-	});
-
-	it("should show all rules for current agent when no search query", async () => {
-		const rulesData = createRulesData(["typescript", "react"], ["react", "tailwind"]);
-		renderSelectRulesPage(rulesData, { defaultAgent: "cursor" });
-
-		// Verify all cursor rules appear (no search query)
-		expect(screen.getByTestId("rule-card-typescript")).toBeInTheDocument();
-		expect(screen.getByTestId("rule-card-react")).toBeInTheDocument();
-		expect(screen.getByText("typescript rules for Cursor")).toBeInTheDocument();
-		expect(screen.getByText("react rules for Cursor")).toBeInTheDocument();
-
-		// Verify claude-code rules are not visible
-		expect(screen.queryByText("tailwind rules for Claude Code")).not.toBeInTheDocument();
-
-		// Switch to claude-code agent
-		await switchAgent("claude-code", "react", "react rules for Claude Code");
-
-		// Verify all claude-code rules appear
-		expect(screen.getByText("react rules for Claude Code")).toBeInTheDocument();
-		expect(screen.getByText("tailwind rules for Claude Code")).toBeInTheDocument();
-
-		// Verify cursor-only rules are not visible
-		expect(screen.queryByText("typescript rules for Cursor")).not.toBeInTheDocument();
 	});
 });

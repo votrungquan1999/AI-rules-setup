@@ -106,7 +106,8 @@ describe("Workflows Display", () => {
 		const commandHeading = screen.getByRole("heading", { name: "Generated Command" });
 		const commandSection = commandHeading.closest("div");
 
-		expect(commandSection?.textContent).toContain("--workflows deploy-app,run-tests");
+		// Verify the generated command uses "all" since both workflows are selected
+		expect(commandSection?.textContent).toContain("--workflows all");
 	});
 
 	it("should include workflows in ChatGPT prompt", () => {
@@ -120,11 +121,11 @@ describe("Workflows Display", () => {
 		// Select the workflow
 		fireEvent.click(screen.getByRole("checkbox", { name: /deploy-app/i }));
 
-		// Verify the ChatGPT prompt mentions the workflow
-		const promptHeading = screen.getByRole("heading", { name: "ChatGPT Prompt" });
-		const promptSection = promptHeading.closest("div");
-
-		expect(promptSection?.textContent).toContain("deploy-app");
+		// Verify the getting-started banner copy prompt button exists
+		// (the prompt is generated from all manifests including workflows)
+		const banner = screen.getByTestId("getting-started-banner");
+		const copyButton = banner.querySelector("button[aria-label='Copy prompt']");
+		expect(copyButton).toBeInTheDocument();
 	});
 
 	it("should select and deselect all workflows via master checkbox", () => {

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { SelectRulesPageClient } from "src/app/select-rules/SelectRulesPageClient";
 import { ManifestsProvider } from "src/lib/manifests.state";
 import { SearchProvider } from "src/lib/search.state";
@@ -151,24 +151,31 @@ describe("Page Layout", () => {
 		expect(screen.getByTestId("content-area")).toBeInTheDocument();
 	});
 
-	it("should show preset cards in the content view when presets are available", () => {
+	it("should show preset dropdown in the getting-started card when presets are available", () => {
 		const rulesData = createMultiAgentRulesData();
 		const presets = createTestPresets();
 		renderWithProviders(rulesData, { defaultAgent: "antigravity", presets });
 
-		// Preset cards should render for the selected agent
-		expect(screen.getByTestId("preset-cards")).toBeInTheDocument();
-		expect(screen.getByTestId("preset-card-nextjs-fullstack")).toBeInTheDocument();
-		expect(screen.getByTestId("preset-card-react-client")).toBeInTheDocument();
+		// Preset dropdown trigger should render inside the getting-started banner
+		expect(screen.getByTestId("getting-started-banner")).toBeInTheDocument();
+		expect(screen.getByTestId("preset-dropdown-trigger")).toBeInTheDocument();
 	});
 
-	it("should auto-select rules, skills, and workflows when a preset card is clicked", () => {
+	it("should auto-select rules, skills, and workflows when a preset is selected from dropdown", async () => {
 		const rulesData = createMultiAgentRulesData();
 		const presets = createTestPresets();
 		renderWithProviders(rulesData, { defaultAgent: "antigravity", presets });
 
-		// Click the "Next.js Fullstack" preset
-		fireEvent.click(screen.getByTestId("preset-card-nextjs-fullstack"));
+		// Open the preset dropdown (Radix DropdownMenu activates on pointerDown)
+		fireEvent.pointerDown(screen.getByTestId("preset-dropdown-trigger"), { button: 0, pointerType: "mouse" });
+
+		// Wait for dropdown content to render in portal
+		await waitFor(() => {
+			expect(screen.getByTestId("preset-option-nextjs-fullstack")).toBeInTheDocument();
+		});
+
+		// Click the "Next.js Fullstack" preset option
+		fireEvent.click(screen.getByTestId("preset-option-nextjs-fullstack"));
 
 		// Check skills (default active tab)
 		const skillCheckbox = screen.getByRole("checkbox", { name: /tdd-design/i });
@@ -193,8 +200,8 @@ describe("Page Layout", () => {
 		const banner = screen.getByTestId("getting-started-banner");
 		expect(banner).toBeInTheDocument();
 
-		// It should contain a CTA heading and a copy prompt button
-		expect(screen.getByText(/not sure what to pick/i)).toBeInTheDocument();
+		// It should contain the new heading and a copy prompt button
+		expect(screen.getByText(/not sure where to start/i)).toBeInTheDocument();
 		const copyButton = banner.querySelector("button[aria-label='Copy prompt']");
 		expect(copyButton).toBeInTheDocument();
 	});
@@ -213,24 +220,24 @@ describe("Page Layout", () => {
 		expect(screen.getByRole("tab", { name: /rules/i })).toBeInTheDocument();
 	});
 
-	it("should show selection counts in tab labels", () => {
+	it("should show total available counts in tab labels", () => {
 		const rulesData = createMultiAgentRulesData();
 		renderWithProviders(rulesData, { defaultAgent: "antigravity" });
 
-		// Click the Workflows tab
-		fireEvent.mouseDown(screen.getByRole("tab", { name: /workflows/i }));
+		// Skills tab should show total available skills count (1 skill: tdd-design)
+		const skillsTab = screen.getByRole("tab", { name: /skills/i });
+		expect(skillsTab.textContent).toContain("Skills");
+		expect(skillsTab.textContent).toContain("(1)");
 
-		// Select a workflow
-		fireEvent.click(screen.getByRole("checkbox", { name: /feature-development/i }));
-
-		// The Workflows tab should now display a "(1)" count badge
+		// Workflows tab should show total available workflows count (1 workflow: feature-development)
 		const workflowsTab = screen.getByRole("tab", { name: /workflows/i });
 		expect(workflowsTab.textContent).toContain("Workflows");
 		expect(workflowsTab.textContent).toContain("(1)");
 
-		// Skills tab is initially 0
-		const skillsTab = screen.getByRole("tab", { name: /skills/i });
-		expect(skillsTab.textContent).toContain("(0)");
+		// Rules tab should show total available rules count (1 rule: meta)
+		const rulesTab = screen.getByRole("tab", { name: /rules/i });
+		expect(rulesTab.textContent).toContain("Rules");
+		expect(rulesTab.textContent).toContain("(1)");
 	});
 
 	it("should display selected items in the sidebar grouped by type with sub-headings and section-level clear buttons", () => {

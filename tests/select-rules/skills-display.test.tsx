@@ -100,8 +100,7 @@ describe("Skills Display", () => {
 		const commandPre = commandSection?.querySelector("pre");
 
 		expect(commandPre).toBeInTheDocument();
-		expect(commandPre?.textContent).toContain("tdd-design");
-		expect(commandPre?.textContent).toContain("--skills");
+		expect(commandPre?.textContent).toContain("--skills all");
 	});
 
 	it("should select and deselect all skills via master checkbox", () => {
