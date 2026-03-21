@@ -300,8 +300,13 @@ export function useHasSelectedAgent(): boolean {
 /**
  * Hook to get generated CLI command
  * Computes command from current state
+ * Uses "all" shorthand when all items in a category are selected
  */
-export function useGeneratedCommand(allIds: string[]): string {
+export function useGeneratedCommand(
+	allIds: string[],
+	allSkillNames: string[],
+	allWorkflowNames: string[],
+): string {
 	const state = useSelectionState();
 
 	// Generate command if rules, skills, or workflows are selected
@@ -312,15 +317,27 @@ export function useGeneratedCommand(allIds: string[]): string {
 	try {
 		// Check if all categories are selected
 		const categories = Array.from(state.selectedIds);
-		const isAllSelected = categories.length === allIds.length && categories.every((id) => allIds.includes(id));
+		const isAllCategoriesSelected =
+			categories.length === allIds.length && categories.every((id) => allIds.includes(id));
+		const categoryValue = isAllCategoriesSelected ? ["all"] : categories;
 
-		// If all are selected, use "all" as the category value
-		const categoryValue = isAllSelected ? ["all"] : categories;
-
+		// Check if all skills are selected
 		const selectedSkills = Array.from(state.selectedSkillNames);
-		const selectedWorkflows = Array.from(state.selectedWorkflowNames);
+		const isAllSkillsSelected =
+			allSkillNames.length > 0 &&
+			selectedSkills.length === allSkillNames.length &&
+			selectedSkills.every((name) => allSkillNames.includes(name));
+		const skillValue = isAllSkillsSelected ? ["all"] : selectedSkills;
 
-		return generateCliCommand(state.agent, categoryValue, state.overwriteStrategy, selectedSkills, selectedWorkflows);
+		// Check if all workflows are selected
+		const selectedWorkflows = Array.from(state.selectedWorkflowNames);
+		const isAllWorkflowsSelected =
+			allWorkflowNames.length > 0 &&
+			selectedWorkflows.length === allWorkflowNames.length &&
+			selectedWorkflows.every((name) => allWorkflowNames.includes(name));
+		const workflowValue = isAllWorkflowsSelected ? ["all"] : selectedWorkflows;
+
+		return generateCliCommand(state.agent, categoryValue, state.overwriteStrategy, skillValue, workflowValue);
 	} catch (error) {
 		console.error("Error generating command:", error);
 		return "";

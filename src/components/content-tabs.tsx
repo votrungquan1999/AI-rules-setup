@@ -4,9 +4,7 @@ import { RulesList } from "src/components/rules-list";
 import { SkillsList } from "src/components/skills-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "src/components/ui/tabs";
 import { WorkflowsList } from "src/components/workflows-list";
-import { useSkills, useWorkflows } from "src/lib/manifests.state";
-
-import { useSelectedRuleIds, useSelectedSkillNames, useSelectedWorkflowNames } from "src/lib/selection.state";
+import { useManifests, useSkills, useWorkflows } from "src/lib/manifests.state";
 
 /**
  * Tabbed content layout for agent displays.
@@ -16,10 +14,7 @@ import { useSelectedRuleIds, useSelectedSkillNames, useSelectedWorkflowNames } f
 export function ContentTabs() {
 	const skills = useSkills();
 	const workflows = useWorkflows();
-
-	const selectedSkills = useSelectedSkillNames();
-	const selectedWorkflows = useSelectedWorkflowNames();
-	const selectedRules = useSelectedRuleIds();
+	const manifests = useManifests();
 
 	const hasSkills = skills.length > 0;
 	const hasWorkflows = workflows.length > 0;
@@ -30,9 +25,9 @@ export function ContentTabs() {
 	return (
 		<Tabs data-testid="content-tabs" defaultValue={defaultTab}>
 			<TabsList>
-				{hasSkills && <TabsTrigger value="skills">Skills ({selectedSkills.size})</TabsTrigger>}
-				{hasWorkflows && <TabsTrigger value="workflows">Workflows ({selectedWorkflows.size})</TabsTrigger>}
-				<TabsTrigger value="rules">Rules ({selectedRules.size})</TabsTrigger>
+				{hasSkills && <TabsTrigger value="skills">Skills ({skills.length})</TabsTrigger>}
+				{hasWorkflows && <TabsTrigger value="workflows">Workflows ({workflows.length})</TabsTrigger>}
+				<TabsTrigger value="rules">Rules ({manifests.length})</TabsTrigger>
 			</TabsList>
 
 			{hasSkills && (

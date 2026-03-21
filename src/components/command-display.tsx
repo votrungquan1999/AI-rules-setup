@@ -2,6 +2,7 @@
 
 import { Check, Copy } from "lucide-react";
 import { Button } from "src/components/ui/button";
+import { useSkills, useWorkflows } from "src/lib/manifests.state";
 import { useGeneratedCommand } from "src/lib/selection.state";
 import type { Manifest } from "src/server/types";
 import { CopiedContent, CopyButton, DefaultContent } from "./copy-button";
@@ -17,7 +18,11 @@ interface CommandDisplayProps {
  */
 export function CommandDisplay({ manifests }: CommandDisplayProps) {
 	const allIds = manifests.map((m) => m.id);
-	const command = useGeneratedCommand(allIds);
+	const skills = useSkills();
+	const workflows = useWorkflows();
+	const allSkillNames = skills.map((s) => s.name);
+	const allWorkflowNames = workflows.map((w) => w.name);
+	const command = useGeneratedCommand(allIds, allSkillNames, allWorkflowNames);
 
 	if (!command) {
 		return (

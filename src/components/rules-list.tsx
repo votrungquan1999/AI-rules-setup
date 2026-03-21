@@ -1,10 +1,13 @@
 "use client";
 
+import * as React from "react";
 import { RuleCardCheckbox, RuleCardLabel, RuleCardProvider } from "src/components/rule-card-wrapper";
 import { ScoreBadge } from "src/components/score-badge";
 import { TruncatedDescription } from "src/components/truncated-description";
+import { Checkbox } from "src/components/ui/checkbox";
 import { useDisplayManifests } from "src/hooks/useDisplayManifests";
 import { useManifests } from "src/lib/manifests.state";
+import { useSelectAll, useSelectedRuleIds } from "src/lib/selection.state";
 
 /**
  * Reusable component for displaying a list of rules
@@ -13,10 +16,43 @@ import { useManifests } from "src/lib/manifests.state";
 export function RulesList() {
 	const displayManifests = useDisplayManifests();
 	const allManifests = useManifests();
+	const selectedIds = useSelectedRuleIds();
+	const selectAll = useSelectAll();
+
+	const allIds = allManifests.map((m) => m.id);
+	const isAllSelected = allManifests.length > 0 && selectedIds.size === allManifests.length;
+	const isIndeterminate = selectedIds.size > 0 && selectedIds.size < allManifests.length;
+
+	const selectAllId = React.useId();
+
+	const handleMasterToggle = () => {
+		if (isAllSelected) {
+			selectAll([]);
+		} else {
+			selectAll(allIds);
+		}
+	};
 
 	return (
 		<div data-testid="rules-section" className="space-y-4">
-			<h2 className="text-2xl font-semibold text-foreground">Rules</h2>
+			<div className="flex items-center justify-between">
+				<h2 className="text-2xl font-semibold text-foreground">Rules</h2>
+				{allManifests.length > 0 && (
+					<label
+						htmlFor={selectAllId}
+						className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer hover:text-foreground"
+					>
+						<Checkbox
+							id={selectAllId}
+							checked={isAllSelected}
+							onCheckedChange={handleMasterToggle}
+							data-state={isIndeterminate ? "indeterminate" : isAllSelected ? "checked" : "unchecked"}
+							aria-label="Select all rules"
+						/>
+						Select All
+					</label>
+				)}
+			</div>
 			<div className="flex flex-col gap-3">
 				{allManifests.length === 0 ? (
 					<div data-testid="empty-state" className="p-6 text-center text-muted-foreground">
