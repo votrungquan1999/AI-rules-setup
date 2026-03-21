@@ -106,8 +106,10 @@ Each step = one test-first cycle. The sub-items enforce the gate: you cannot imp
 
 ### Step 6: Plan Verification
 
+**First, check `package.json` scripts** to identify existing commands for testing, linting, building, etc. Reference these project-defined commands in the verification plan instead of crafting ad-hoc commands.
+
 Document how you'll verify the changes:
-- **Automated Tests**: What tests you'll write or run
+- **Automated Tests**: What tests you'll write or run (use existing `package.json` scripts)
 - **Manual Verification**: What you'll test manually
 - **Browser/UI Testing**: If applicable, what flows to test
 

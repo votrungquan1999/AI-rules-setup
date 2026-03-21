@@ -28,9 +28,10 @@ Test-Driven Development: write tests before implementation, one test at a time.
 
 ### 🚫 Step 2: GATE — Run the Test (Before Implementation)
 
-1. Run the new test BEFORE writing any implementation
-2. If it **fails** → proceed to Step 3 (implement)
-3. If it **already passes** → behavior is already covered, skip Step 3, go back to Step 1
+1. **Check `package.json` scripts** first to see if there's an existing command for running tests (e.g., `npm test`, `npm run test:unit`). Use the project's defined command instead of crafting your own.
+2. Run the new test BEFORE writing any implementation
+3. If it **fails** → proceed to Step 3 (implement)
+4. If it **already passes** → behavior is already covered, skip Step 3, go back to Step 1
 
 **This gate is NON-NEGOTIABLE. Writing implementation before running the test = violation.**
 

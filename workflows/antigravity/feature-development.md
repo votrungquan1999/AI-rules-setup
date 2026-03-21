@@ -69,7 +69,7 @@ Each step is an **observable behavior** — something a user or system can obser
 **For each step:**
 
 1. **Write the test** describing the behavior (Given/When/Then)
-2. **🚫 GATE: Run the test** — you MUST see the result before writing any implementation
+2. **🚫 GATE: Run the test** — check `package.json` scripts for existing test commands (e.g., `npm test`). Use the project's defined command. You MUST see the result before writing any implementation.
    - If it **fails** → proceed to step 3
    - If it **passes** → behavior is already covered, skip step 3, mark done
 3. **Implement** the minimum code to make the test pass, then **run the test again** to confirm
