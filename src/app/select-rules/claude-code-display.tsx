@@ -1,20 +1,11 @@
 "use client";
 
-import { RulesList } from "src/components/rules-list";
-import { SkillsList } from "src/components/skills-list";
+import { ContentTabs } from "src/components/content-tabs";
 
 /**
  * Display component for Claude Code agent
- * Shows both rules and skills sections
+ * Uses tabbed layout for skills and rules
  */
 export function ClaudeCodeDisplay() {
-	return (
-		<div className="space-y-4">
-			{/* Rules section */}
-			<RulesList />
-
-			{/* Skills section */}
-			<SkillsList />
-		</div>
-	);
+	return <ContentTabs />;
 }

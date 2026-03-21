@@ -1,11 +1,11 @@
 "use client";
 
-import { RulesList } from "src/components/rules-list";
+import { ContentTabs } from "src/components/content-tabs";
 
 /**
  * Display component for Cursor agent
- * Shows only rules section (no skills)
+ * Uses tabbed layout (rules only for Cursor)
  */
 export function CursorRulesDisplay() {
-	return <RulesList />;
+	return <ContentTabs />;
 }

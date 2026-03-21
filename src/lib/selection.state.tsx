@@ -10,6 +10,8 @@ import { generateCliCommand } from "./command-generator";
 interface SelectionState {
 	/** Selected agent name */
 	agent: string;
+	/** Whether the user has confirmed their agent selection (landing page → content view) */
+	hasSelectedAgent: boolean;
 	/** Set of selected rule IDs */
 	selectedIds: Set<string>;
 	/** Set of selected skill names */
@@ -30,13 +32,17 @@ type SelectionAction =
 	| { type: "TOGGLE_WORKFLOW_SELECTION"; payload: string }
 	| { type: "CLEAR_SELECTIONS" }
 	| { type: "SET_STRATEGY"; payload: OverwriteStrategy }
-	| { type: "SELECT_ALL"; payload: string[] };
+	| { type: "SELECT_ALL"; payload: string[] }
+	| { type: "SET_SELECTED_SKILLS"; payload: string[] }
+	| { type: "SET_SELECTED_WORKFLOWS"; payload: string[] }
+	| { type: "APPLY_PRESET"; payload: { rules: string[]; skills: string[]; workflows: string[] } };
 
 /**
  * Initial selection state
  */
 const initialState: SelectionState = {
 	agent: "cursor",
+	hasSelectedAgent: false,
 	selectedIds: new Set<string>(),
 	selectedSkillNames: new Set<string>(),
 	selectedWorkflowNames: new Set<string>(),
@@ -55,6 +61,7 @@ function selectionReducer(state: SelectionState, action: SelectionAction): Selec
 			return {
 				...state,
 				agent: action.payload,
+				hasSelectedAgent: true,
 				selectedIds: new Set<string>(),
 				selectedSkillNames: new Set<string>(),
 				selectedWorkflowNames: new Set<string>(),
@@ -104,6 +111,20 @@ function selectionReducer(state: SelectionState, action: SelectionAction): Selec
 		case "SELECT_ALL":
 			return { ...state, selectedIds: new Set(action.payload) };
 
+		case "SET_SELECTED_SKILLS":
+			return { ...state, selectedSkillNames: new Set(action.payload) };
+
+		case "SET_SELECTED_WORKFLOWS":
+			return { ...state, selectedWorkflowNames: new Set(action.payload) };
+
+		case "APPLY_PRESET":
+			return {
+				...state,
+				selectedIds: new Set(action.payload.rules),
+				selectedSkillNames: new Set(action.payload.skills),
+				selectedWorkflowNames: new Set(action.payload.workflows),
+			};
+
 		default:
 			return state;
 	}
@@ -116,7 +137,7 @@ const [SelectionProviderBase, useSelectionState, useSelectionDispatch] = createR
 );
 
 interface SelectionProviderProps {
-	/** Default agent */
+	/** Default agent — when provided, skips landing page (hasSelectedAgent = true) */
 	defaultAgent?: string;
 	/** Child components */
 	children: React.ReactNode;
@@ -125,9 +146,19 @@ interface SelectionProviderProps {
 /**
  * Selection context provider that manages rule selection and command generation
  * Tracks selected rules, agent choice, and conflict resolution strategy
+ *
+ * When `defaultAgent` is provided, the landing page is skipped (agent is pre-selected).
+ * When omitted, the landing page is shown for the user to pick an agent.
  */
-export function SelectionProvider({ defaultAgent = "cursor", children }: SelectionProviderProps) {
-	return <SelectionProviderBase agent={defaultAgent}>{children}</SelectionProviderBase>;
+export function SelectionProvider({ defaultAgent, children }: SelectionProviderProps) {
+	const agent = defaultAgent ?? "cursor";
+	const hasSelectedAgent = defaultAgent !== undefined;
+
+	return (
+		<SelectionProviderBase agent={agent} hasSelectedAgent={hasSelectedAgent}>
+			{children}
+		</SelectionProviderBase>
+	);
 }
 
 /**
@@ -232,6 +263,38 @@ export function useSelectedWorkflowNames(): Set<string> {
 export function useToggleWorkflowSelection(): (workflowName: string) => void {
 	const dispatch = useSelectionDispatch();
 	return (workflowName: string) => dispatch({ type: "TOGGLE_WORKFLOW_SELECTION", payload: workflowName });
+}
+
+/**
+ * Hook to set all selected skills
+ */
+export function useSetSelectedSkills(): (skillNames: string[]) => void {
+	const dispatch = useSelectionDispatch();
+	return (skillNames: string[]) => dispatch({ type: "SET_SELECTED_SKILLS", payload: skillNames });
+}
+
+/**
+ * Hook to set all selected workflows
+ */
+export function useSetSelectedWorkflows(): (workflowNames: string[]) => void {
+	const dispatch = useSelectionDispatch();
+	return (workflowNames: string[]) => dispatch({ type: "SET_SELECTED_WORKFLOWS", payload: workflowNames });
+}
+
+/**
+ * Hook to apply a preset — batch-selects rules, skills, and workflows
+ */
+export function useApplyPreset(): (preset: { rules: string[]; skills: string[]; workflows: string[] }) => void {
+	const dispatch = useSelectionDispatch();
+	return (preset) => dispatch({ type: "APPLY_PRESET", payload: preset });
+}
+
+/**
+ * Hook to check if user has confirmed their agent selection
+ */
+export function useHasSelectedAgent(): boolean {
+	const state = useSelectionState();
+	return state.hasSelectedAgent;
 }
 
 /**
