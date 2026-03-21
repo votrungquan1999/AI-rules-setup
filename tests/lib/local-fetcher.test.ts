@@ -5,6 +5,7 @@ import {
 	discoverCategoriesLocal,
 	discoverSkillsLocal,
 	discoverWorkflowsLocal,
+	extractDescription,
 	fetchAllRulesDataLocal,
 	fetchDirectoryContentsLocal,
 	fetchFileContentLocal,
@@ -13,6 +14,38 @@ import {
 
 // Use test fixtures instead of live rules directory for test resilience
 const FIXTURE_ROOT = join(__dirname, "../fixtures/local-fetcher");
+
+describe("Local Fetcher - extractDescription", () => {
+	it("should return undefined for content without frontmatter", () => {
+		const content = "# Just a header\nSome text content.";
+		expect(extractDescription(content)).toBeUndefined();
+	});
+
+	it("should return undefined for frontmatter without description", () => {
+		const content = "---\ntitle: Some Title\n---\n# Header";
+		expect(extractDescription(content)).toBeUndefined();
+	});
+
+	it("should extract description without quotes", () => {
+		const content = "---\ndescription: This is a test description\n---\n# Header";
+		expect(extractDescription(content)).toBe("This is a test description");
+	});
+
+	it("should extract description with double quotes", () => {
+		const content = '---\ndescription: "Quoted description"\n---\n# Header';
+		expect(extractDescription(content)).toBe("Quoted description");
+	});
+
+	it("should extract description with single quotes", () => {
+		const content = "---\ndescription: 'Single quoted description'\n---\n# Header";
+		expect(extractDescription(content)).toBe("Single quoted description");
+	});
+
+	it("should handle trailing whitespace inside quoted description", () => {
+		const content = '---\ndescription: "Quoted with trailing space"   \n---\n# Header';
+		expect(extractDescription(content)).toBe("Quoted with trailing space");
+	});
+});
 
 describe("Local Fetcher", () => {
 	it("fetchDirectoryContentsLocal - should read directory contents from local filesystem", async () => {
@@ -109,6 +142,10 @@ describe("Local Fetcher", () => {
 			expect(typeof skill.name).toBe("string");
 			expect(typeof skill.content).toBe("string");
 		}
+
+		const testSkill = skills.find((s) => s.name === "test-skill");
+		expect(testSkill).toBeDefined();
+		expect(testSkill?.description).toBe("Test skill for unit testing");
 	});
 
 	it("discoverSkillsLocal - should return supportingFiles for skills with subdirectories", async () => {
@@ -145,6 +182,10 @@ describe("Local Fetcher", () => {
 			expect(workflow).toHaveProperty("name");
 			expect(workflow).toHaveProperty("content");
 		}
+
+		const testWorkflow = workflows.find((w) => w.name === "test-workflow");
+		expect(testWorkflow).toBeDefined();
+		expect(testWorkflow?.description).toBe("Test workflow");
 	});
 
 	it("fetchAllRulesDataLocal - should aggregate all rules data from local filesystem", async () => {

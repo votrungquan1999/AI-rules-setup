@@ -1,6 +1,21 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { GitHubFile, Manifest, RulesData } from "../../../server/types";
+import type { GitHubFile, Manifest, RulesData, SkillFile, WorkflowFile } from "../../../server/types";
+
+/**
+ * Extracts the description from YAML frontmatter (between --- and ---)
+ */
+export function extractDescription(content: string): string | undefined {
+	const match = content.match(/^---\n([\s\S]*?)\n---/m);
+	if (match?.[1]) {
+		const descriptionMatch = match[1].match(/^description:\s*(.+)$/m);
+		if (descriptionMatch?.[1]) {
+			// Strip surrounding quotes if they exist
+			return descriptionMatch[1].trim().replace(/^["'](.*)["']$/, "$1");
+		}
+	}
+	return undefined;
+}
 
 /**
  * Fetches directory contents from local filesystem
@@ -122,10 +137,7 @@ async function collectSupportingFiles(
  * @param rootPath - Optional root directory (defaults to process.cwd())
  * @returns Array of skill objects with name, content, and optional supportingFiles
  */
-export async function discoverSkillsLocal(
-	agent: string,
-	rootPath?: string,
-): Promise<Array<{ name: string; content: string; supportingFiles?: Array<{ path: string; content: string }> }>> {
+export async function discoverSkillsLocal(agent: string, rootPath?: string): Promise<SkillFile[]> {
 	try {
 		// Check if skills directory exists for this agent
 		const root = rootPath || process.cwd();
@@ -144,8 +156,7 @@ export async function discoverSkillsLocal(
 		// Filter for directories only (each skill is a subdirectory containing SKILL.md)
 		const skillDirs = entries.filter((entry) => entry.type === "dir");
 
-		const skills: Array<{ name: string; content: string; supportingFiles?: Array<{ path: string; content: string }> }> =
-			[];
+		const skills: SkillFile[] = [];
 
 		for (const dir of skillDirs) {
 			try {
@@ -155,10 +166,16 @@ export async function discoverSkillsLocal(
 				// Collect supporting files from subdirectories
 				const supportingFiles = await collectSupportingFiles(skillDirFullPath, skillDirFullPath);
 
-				const skill: { name: string; content: string; supportingFiles?: Array<{ path: string; content: string }> } = {
+				const description = extractDescription(content);
+
+				const skill: SkillFile = {
 					name: dir.name,
 					content,
 				};
+
+				if (description) {
+					skill.description = description;
+				}
 
 				if (supportingFiles.length > 0) {
 					skill.supportingFiles = supportingFiles;
@@ -184,10 +201,7 @@ export async function discoverSkillsLocal(
  * @param rootPath - Optional root directory (defaults to process.cwd())
  * @returns Array of workflow objects with name and content
  */
-export async function discoverWorkflowsLocal(
-	agent: string,
-	rootPath?: string,
-): Promise<Array<{ name: string; content: string }>> {
+export async function discoverWorkflowsLocal(agent: string, rootPath?: string): Promise<WorkflowFile[]> {
 	try {
 		// Check if workflows directory exists for this agent
 		const root = rootPath || process.cwd();
@@ -208,17 +222,24 @@ export async function discoverWorkflowsLocal(
 			(entry) => entry.type === "file" && entry.name.endsWith(".md") && entry.name !== "README.md",
 		);
 
-		const workflows: Array<{ name: string; content: string }> = [];
+		const workflows: WorkflowFile[] = [];
 
 		for (const file of workflowFiles) {
 			try {
 				const content = await fetchFileContentLocal(`workflows/${agent}/${file.name}`, rootPath);
 				// Extract workflow name from filename (remove .md extension)
 				const workflowName = file.name.replace(/\.md$/, "");
-				workflows.push({
+				const description = extractDescription(content);
+				const workflow: WorkflowFile = {
 					name: workflowName,
 					content,
-				});
+				};
+
+				if (description) {
+					workflow.description = description;
+				}
+
+				workflows.push(workflow);
 			} catch (error) {
 				console.warn(`Failed to fetch workflow file ${file.name}:`, error);
 			}
