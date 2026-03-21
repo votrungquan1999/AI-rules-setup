@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Check, ChevronDown, Copy, Lightbulb, Sparkles } from "lucide-react";
 import { Button } from "src/components/ui/button";
 import {
@@ -30,8 +31,10 @@ export function GettingStartedBanner({ manifests }: GettingStartedBannerProps) {
 	const presets = usePresets();
 	const applyPreset = useApplyPreset();
 	const prompt = generateChatGptPrompt(manifests, agent, skills, workflows);
+	const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
 
 	const hasPresets = presets.length > 0;
+	const selectedPreset = presets.find((p) => p.id === selectedPresetId);
 
 	return (
 		<div
@@ -66,7 +69,14 @@ export function GettingStartedBanner({ manifests }: GettingStartedBannerProps) {
 									className="w-full justify-between"
 									data-testid="preset-dropdown-trigger"
 								>
-									Choose a preset…
+									{selectedPreset ? (
+										<span className="flex items-center gap-2">
+											<span>{selectedPreset.icon}</span>
+											<span>{selectedPreset.name}</span>
+										</span>
+									) : (
+										"Choose a preset…"
+									)}
 									<ChevronDown className="size-4 ml-2 opacity-50" />
 								</Button>
 							</DropdownMenuTrigger>
@@ -75,7 +85,10 @@ export function GettingStartedBanner({ manifests }: GettingStartedBannerProps) {
 									<DropdownMenuItem
 										key={preset.id}
 										data-testid={`preset-option-${preset.id}`}
-										onSelect={() => applyPreset(preset)}
+										onSelect={() => {
+											setSelectedPresetId(preset.id);
+											applyPreset(preset);
+										}}
 										className="flex flex-col items-start gap-0.5 py-2.5 cursor-pointer"
 									>
 										<div className="flex items-center gap-2">
