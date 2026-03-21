@@ -71,6 +71,7 @@ export interface RuleCategory {
  */
 export interface SkillFile {
 	name: string;
+	description?: string;
 	content: string;
 	/** Optional supporting files (nodes, scripts, references, etc.) */
 	supportingFiles?: Array<{ path: string; content: string }>;
@@ -81,6 +82,7 @@ export interface SkillFile {
  */
 export interface WorkflowFile {
 	name: string;
+	description?: string;
 	content: string;
 }
 
@@ -192,3 +194,30 @@ export interface QuestionsResponse {
 
 export const QUESTIONS_COLLECTION_NAME = "questions";
 export const SKILLS_COLLECTION_NAME = "skills_data";
+export const PRESETS_COLLECTION_NAME = "presets";
+
+/**
+ * Preset interface for tech-stack quick-start presets
+ */
+export interface Preset {
+	id: string;
+	name: string;
+	icon: string;
+	description: string;
+	skills: string[];
+	workflows: string[];
+	rules: string[];
+}
+
+/**
+ * Database document type for stored presets
+ * Follows the database patterns with Document suffix
+ */
+export interface StoredPresetsDocument {
+	agent: string;
+	presets: Preset[];
+	githubCommitSha: string;
+	lastFetched: Date;
+	createdAt: Date;
+	updatedAt: Date;
+}

@@ -1,0 +1,29 @@
+[
+	{
+		"id": "nextjs-fullstack",
+		"name": "Next.js Fullstack",
+		"icon": "▲",
+		"description": "Full-stack Next.js with server components, database, and testing",
+		"skills": ["tdd-design", "create-pr"],
+		"workflows": [],
+		"rules": ["meta", "react-server-components", "react-hooks", "component-architecture", "typescript", "database", "testing", "styling"]
+	},
+	{
+		"id": "react-client",
+		"name": "React Client",
+		"icon": "⚛️",
+		"description": "Client-side React app with hooks, components, and testing",
+		"skills": ["tdd-design", "create-pr"],
+		"workflows": [],
+		"rules": ["meta", "react-hooks", "component-architecture", "typescript", "testing", "styling"]
+	},
+	{
+		"id": "node-ts-backend",
+		"name": "Node TS Backend",
+		"icon": "🟢",
+		"description": "Node.js TypeScript backend with database and testing focus",
+		"skills": ["tdd-design", "test-quality-reviewer", "create-pr"],
+		"workflows": [],
+		"rules": ["meta", "typescript", "database", "testing"]
+	}
+]

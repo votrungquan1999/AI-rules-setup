@@ -1,7 +1,10 @@
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { getDatabase } from "../../../server/database";
+import { storePresetsData } from "../../../server/presets-repository";
 import { findAllStoredRules, storeRulesData, storeSkillsData } from "../../../server/rules-repository";
-import type { Manifest } from "../../../server/types";
-import { RULES_DATA_COLLECTION_NAME, SKILLS_COLLECTION_NAME } from "../../../server/types";
+import type { Manifest, Preset } from "../../../server/types";
+import { PRESETS_COLLECTION_NAME, RULES_DATA_COLLECTION_NAME, SKILLS_COLLECTION_NAME } from "../../../server/types";
 import { storeWorkflowsData } from "../../../server/workflows-repository";
 import { fetchAllRulesDataLocal } from "./local-fetcher";
 
@@ -45,6 +48,17 @@ export async function primeCache(rootPath?: string): Promise<void> {
 		}
 	}
 
+	// Store presets from JSON files
+	const agentNames = Object.keys(data.agents);
+	for (const agentName of agentNames) {
+		const presetsPath = join(rootPath ?? process.cwd(), "presets", `${agentName}.json`);
+		if (existsSync(presetsPath)) {
+			const raw = readFileSync(presetsPath, "utf-8");
+			const presets = JSON.parse(raw) as Preset[];
+			await storePresetsData(agentName, presets, "local");
+		}
+	}
+
 	console.log("✅ Cache primed successfully");
 }
 
@@ -67,6 +81,7 @@ export async function clearCache(): Promise<void> {
 	await Promise.allSettled([
 		db.collection(RULES_DATA_COLLECTION_NAME).drop(),
 		db.collection(SKILLS_COLLECTION_NAME).drop(),
+		db.collection(PRESETS_COLLECTION_NAME).drop(),
 	]);
 
 	console.log("✅ Cache cleared successfully");

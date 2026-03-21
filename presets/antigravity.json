@@ -1,0 +1,38 @@
+[
+	{
+		"id": "nextjs-fullstack",
+		"name": "Next.js Fullstack",
+		"icon": "▲",
+		"description": "Full-stack Next.js with server components, database, and testing",
+		"skills": ["tdd-design", "code-refactoring", "create-implementation-plan", "context7"],
+		"workflows": ["feature-development", "commit-plan"],
+		"rules": ["meta", "react-server-components", "react-hooks", "component-architecture", "typescript", "database", "testing", "styling"]
+	},
+	{
+		"id": "react-client",
+		"name": "React Client",
+		"icon": "⚛️",
+		"description": "Client-side React app with hooks, components, and testing",
+		"skills": ["tdd-design", "code-refactoring", "context7"],
+		"workflows": ["feature-development", "commit-plan"],
+		"rules": ["meta", "react-hooks", "component-architecture", "typescript", "testing", "styling"]
+	},
+	{
+		"id": "node-ts-backend",
+		"name": "Node TS Backend",
+		"icon": "🟢",
+		"description": "Node.js TypeScript backend with database and testing focus",
+		"skills": ["tdd-design", "bdd-design", "code-refactoring", "create-implementation-plan"],
+		"workflows": ["feature-development", "commit-plan"],
+		"rules": ["meta", "typescript", "database", "testing"]
+	},
+	{
+		"id": "testing-focus",
+		"name": "Testing Focus",
+		"icon": "🧪",
+		"description": "TDD and BDD skills with test quality review",
+		"skills": ["tdd-design", "bdd-design", "test-quality-reviewer", "code-refactoring"],
+		"workflows": ["feature-development"],
+		"rules": ["meta", "testing"]
+	}
+]
