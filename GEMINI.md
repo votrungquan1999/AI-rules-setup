@@ -7,25 +7,21 @@ This file provides guidance to Gemini when working with code in this repository.
 **For detailed architecture and flows, see [`/repo_knowledge/`](./repo_knowledge/README.md)**
 
 The repo_knowledge folder contains comprehensive documentation about:
-- [CLI Flows](./repo_knowledge/cli-flows.md) - Command flows and operations
-- [API Architecture](./repo_knowledge/api-architecture.md) - Server and caching
-- [Rule System](./repo_knowledge/rule-system.md) - Rule organization
-- [Skills & Workflows](./repo_knowledge/skills-workflows.md) - Skills and workflows system
-- [Question System](./repo_knowledge/question-system.md) - Question generation
-- [Database Patterns](./repo_knowledge/database-patterns.md) - MongoDB operations
-- [Search & Selection](./repo_knowledge/search-selection.md) - Search algorithm
-- [Data Types](./repo_knowledge/data-types.md) - Type definitions
-- [Web UI](./repo_knowledge/web-ui.md) - Web interface architecture
+- [Overview](./repo_knowledge/overview.md) - Project purpose, tech stack, supported agents
+- [Architecture](./repo_knowledge/architecture.md) - System design, data fetching, web UI
+- [Patterns](./repo_knowledge/patterns.md) - Code conventions, state management, search
+- [Flows](./repo_knowledge/flows.md) - CLI command flows, API data flow
+- [Testing](./repo_knowledge/testing.md) - Test infrastructure and patterns
 
 ## Project Overview
 
 AI Rules CLI is a command-line tool that helps developers pull curated AI agent rules, skills, and workflows from a centralized repository into their projects. The system consists of:
-- **Next.js API Server** (`src/app/`) - Caches GitHub repository content and provides centralized rule management
-- **CLI Tool** (`src/cli/`) - Handles user interaction, file operations, and rule/skill/workflow installation
-- **Rules Repository** (`/rules`) - Collection of curated AI agent rules organized by agent and category
+- **Next.js API Server** (`src/app/`) - Caches content in MongoDB with local filesystem auto-priming
+- **CLI Tool** (`src/cli/`) - Handles user interaction, file operations, and content installation
+- **Rules Repository** (`/rules`) - Curated AI agent rules organized by agent and category
 - **Skills Repository** (`/skills`) - Reusable capability packages (e.g., TDD, BDD, code refactoring)
 - **Workflows Repository** (`/workflows`) - Step-by-step procedural guides (e.g., feature development, commit planning)
-- **Optional Web UI** - For visual rule selection and configuration
+- **Web UI** (`/select-rules`) - Visual rule selection with CLI command and ChatGPT prompt generation
 
 ## Development Commands
 
@@ -35,7 +31,7 @@ AI Rules CLI is a command-line tool that helps developers pull curated AI agent 
 npm run dev:api
 
 # Run CLI in development mode (in separate terminal)
-npm run dev:cli init
+npm run dev init
 
 # Start web UI with database
 docker-compose up -d
@@ -43,9 +39,6 @@ docker-compose up -d
 
 ### Building
 ```bash
-# Build CLI
-npm run build
-
 # Build API server
 npm run build:api
 
@@ -69,7 +62,7 @@ npm run test:e2e -- tests/e2e/test-name.test.ts
 
 ### Linting
 ```bash
-# Check code
+# Check code (Biome)
 npm run lint
 
 # Auto-fix issues
@@ -85,31 +78,33 @@ npm run generate-questions
 ## Architecture
 
 ### Monorepo Structure
-This is a monorepo with both CLI and rules in the same repository. The structure follows ADR-002:
+This is a monorepo with both CLI and rules in the same repository:
 
 ```
 /src
   /app         # Next.js API server (pages, API routes, web UI)
   /cli         # CLI tool (commands, lib utilities)
-  /components  # Shared React components
-  /lib         # Shared utilities
+  /components  # React UI components
+  /hooks       # Custom React hooks
+  /lib         # Shared client/server logic (search, state, generators)
   /server      # Server-side utilities (database, repositories)
 /rules         # Rule files organized by AI agent
 /skills        # Skill packages organized by AI agent
 /workflows     # Workflow files organized by AI agent
+/cli-package   # Published npm package workspace
 /docs          # Architecture decision records and design docs
 ```
 
-### Two-Tier Architecture
-- **API Server** fetches rules from GitHub, caches for 5 minutes, and serves to CLI
-- **CLI** consumes API, manages local file operations, and handles user interaction
-- This reduces GitHub API rate limiting and provides centralized management
+### Local-First Architecture
+- **API Server** reads rules from local filesystem, caches in MongoDB, serves to CLI
+- **CLI** consumes API, manages local file operations, handles user interaction
+- MongoDB cache auto-primes from filesystem when empty (no GitHub dependency at runtime)
 
 ### Data Flow
 1. CLI requests rules/skills/workflows from API server
-2. API server fetches from GitHub (or returns cached data)
-3. CLI writes rules to agent directories (`.cursor/rules/`, `.windsurf/rules/`), skills to `.agents/skills/`, and workflows to `.agents/workflows/`
-4. Configuration stored in `.ai-rules.json` at project root (tracks categories, skills, workflows)
+2. API server returns cached data (auto-primes from local filesystem if cache empty)
+3. CLI writes rules to agent directories, skills to skill paths, workflows to `.agents/workflows/`
+4. Configuration stored in `.ai-rules.json` at project root
 
 ## Key Architectural Patterns
 
@@ -120,16 +115,15 @@ This is a monorepo with both CLI and rules in the same repository. The structure
 - Pass complete elements as `children`, don't recreate in client components
 
 ### Database Patterns
-- All database document types MUST have "Document" suffix (e.g., `ProductDocument`)
+- All database document types MUST have "Document" suffix (e.g., `StoredRulesDocument`)
 - Always separate database types from client-facing interfaces
 - Convert database documents to client interfaces when returning data
 - Never expose raw database documents to client components
 
 ### File Organization
-- Tool-specific folders: `/rules/cursor/`, `/rules/windsurf/`, `/rules/claude-code/`, `/rules/antigravity/`
+- Rules per agent: `/rules/cursor/`, `/rules/claude-code/`, `/rules/antigravity/`
 - Skills: `/skills/antigravity/`, `/skills/claude-code/`
 - Workflows: `/workflows/antigravity/`
-- Convention-based renaming: Files renamed to match AI agent conventions
 - Each category has a `manifest.json` describing available rules
 
 ## Important Rules and Guidelines
@@ -142,15 +136,16 @@ This is a monorepo with both CLI and rules in the same repository. The structure
 - Ask 1-2 clarifying questions before implementing (more if explanation >100 chars)
 - NEVER use defensive try-catch blocks around every operation (only at intentional error boundaries)
 - Only extract reusable components/functions when the same logic is repeated at least **3 times**. Two occurrences do not justify extraction — wait for the third to ensure a good abstraction emerges.
+- If a file edit fails **twice consecutively**, split the edit into multiple smaller, independent edits targeting smaller sections of the file. Large edits are prone to timeouts — smaller, focused edits are more reliable.
 
 ### Rule File Management
 - When changing rule files for one AI agent, update corresponding files for other agents
 - When changing rule content, update the manifest.json file as well
 - Cursor rule files MUST be strictly less than 200 lines (preferably ~150 lines)
-- Use `/rules.md` as master rule file and follow it for all user requests
+
 
 ### Testing
-- NEVER run tests automatically - user will run them and provide output
+- Run tests automatically to verify changes when appropriate
 - Tests run against real Next.js API server
 - Start API server before running tests: `npm run dev:api` then `npm test`
 - **ALWAYS run tests without watch mode in agent terminals** (watch mode hangs in non-interactive shells)
@@ -171,34 +166,7 @@ See `.env.example` for required environment variables:
 - `/docs/system-design.md` - Detailed system architecture
 - `/docs/adr/` - Architecture Decision Records
 - `/docs/roadmap.md` - Project roadmap
-- `/.cursor/rules/` - Development rules for AI agents
+- `/docs/manifest-schema.md` - Manifest JSON schema
 - `/rules/README.md` - Rule file guidelines
 
-## Key Files
 
-### CLI Entry Points
-- `src/cli/index.ts` - Main CLI entry point (init, pull commands)
-- `src/cli/commands/init.ts` - Interactive setup wizard (rules, skills, workflows)
-- `src/cli/commands/pull.ts` - Re-install tracked content from config
-- `src/cli/commands/generate-questions.ts` - Question generation for rule refinement
-
-### CLI Library
-- `src/cli/lib/api-client.ts` - API fetching with caching (rules, skills, workflows)
-- `src/cli/lib/config.ts` - Config load/save and addCategory/addSkill/addWorkflow helpers
-- `src/cli/lib/prompts.ts` - Interactive prompts (agent, category, skill, workflow selection)
-- `src/cli/lib/types.ts` - Type definitions (Config, AIAgent, InitOptions, etc.)
-- `src/cli/lib/files.ts` - File operations and naming conventions
-
-### Server Components
-- `src/server/database.ts` - MongoDB connection and utilities
-- `src/server/rules-repository.ts` - Rule fetching and caching
-- `src/server/questions-repository.ts` - Question management
-
-### API Routes
-- `src/app/api/rules/route.ts` - Rules API endpoint
-- `src/app/api/lib/github-fetcher.ts` - GitHub API integration
-
-### Configuration
-- `vitest.config.ts` - Test configuration (60s timeout, single fork)
-- `tsconfig.json` - TypeScript configuration
-- `next.config.ts` - Next.js configuration

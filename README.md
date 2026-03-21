@@ -1,191 +1,121 @@
 # AI Rules CLI
 
-A command-line tool that helps developers pull curated AI agent rules from a centralized repository into their projects. No more hunting through scattered rule files - get the exact rules you need for your tech stack with a simple command.
+A command-line tool that helps developers pull curated AI agent rules, skills, and workflows from a centralized repository into their projects. No more hunting through scattered rule files — get the exact rules you need for your tech stack with a simple command.
 
 ## Quick Start
 
-### 1. Start the Database (Optional)
-
-For local development, you can use Docker to run MongoDB:
-
 ```bash
-# Start MongoDB with Docker Compose
-docker-compose up -d mongodb
-
-# Or start with web UI
-docker-compose up -d
+# Install and configure rules for your project (one command!)
+npx @quanvo99/ai-rules@latest init
 ```
 
-See [DOCKER_README.md](./DOCKER_README.md) for detailed setup instructions.
+Or use the [Web UI](https://ai-rules-setup.vercel.app/select-rules) to visually select rules and generate the CLI command.
 
-### 2. Start the API Server
-
-```bash
-# Clone the repository
-git clone https://github.com/votrungquan1999/AI-rules-setup.git
-cd AI-rules-setup
-
-# Install dependencies
-npm install
-
-# Start the Next.js API server (in one terminal)
-npm run dev:api
-```
-
-### 3. Use the CLI
-
-```bash
-# In another terminal, run the CLI
-npm run dev:cli init
-
-# Or build and install globally
-npm run build
-npm install -g .
-ai-rules init
-```
-
-### 4. Development
-
-```bash
-# Run API server
-npm run dev:api
-
-# Run CLI in development mode
-npm run dev:cli init
-```
-
-## What is AI Rules CLI?
+## What Is This?
 
 AI Rules CLI solves the problem of scattered, hard-to-find AI agent rule files across different projects. Instead of manually copying rules from various sources, you can:
 
-- **Discover** rules by tech stack using natural language search
-- **Install** only the rules you need for your specific project
-- **Update** to the latest rule versions with a single command
-- **Refine** your selection through intelligent questioning
+- **Discover** rules, skills, and workflows for your AI agent
+- **Install** only what you need for your specific project
+- **Update** to the latest versions with a single command
+- **Add** more content to an existing project without re-initializing
 
 ## Supported AI Agents
 
-- **Cursor** - `.cursor/rules/` directory with `.cursorrules` files
-- **Windsurf** - `.windsurf/rules/` directory with `.windsurfrules` files
-- **More coming soon** - Aider, Continue, Cody, and others
+| Agent           | Rules | Skills | Workflows |
+| --------------- | ----- | ------ | --------- |
+| **Cursor**      | ✅    | ✅     | —         |
+| **Claude Code** | ✅    | ✅     | —         |
+| **Antigravity** | ✅    | ✅     | ✅        |
+| **Windsurf**    | ✅    | —      | —         |
+| **Aider**       | ✅    | —      | —         |
+| **Continue**    | ✅    | —      | —         |
+| **Cody**        | ✅    | —      | —         |
 
-## Key Features
+## Commands
 
-### 🎯 Smart Rule Discovery
+### `ai-rules init`
 
-Use natural language to find relevant rules:
-
-```bash
-ai-rules search "nextjs 15 server components tailwind"
-```
-
-### 🔍 Interactive Refinement
-
-Get personalized recommendations through guided questions:
-
-- "Are you using App Router or Pages Router?"
-- "What's your primary data fetching strategy?"
-- "Do you prefer Tailwind or styled-components?"
-
-### 📦 Easy Management
+Interactive setup wizard — or use flags for non-interactive mode:
 
 ```bash
-# See what's installed
-ai-rules status
+# Interactive (prompts for everything)
+ai-rules init
 
-# Add more rules
-ai-rules add nextjs database
+# Non-interactive with specific selections
+ai-rules init --agent cursor --categories typescript,react-hooks --overwrite-strategy force
 
-# Remove unused rules
-ai-rules remove old-framework
+# With skills and workflows
+ai-rules init --agent antigravity --categories all --skills tdd-design,bdd-design --workflows feature-development
 
-# Update everything
-ai-rules update
+# Skip certain content types
+ai-rules init --agent cursor --no-skills --no-workflows
 ```
+
+### `ai-rules pull`
+
+Re-install all content tracked in `.ai-rules.json` with latest versions:
+
+```bash
+ai-rules pull
+ai-rules pull --overwrite-strategy skip
+```
+
+### `ai-rules add`
+
+Add content to an already-initialized project:
+
+```bash
+ai-rules add --categories testing,database
+ai-rules add --skills test-quality-reviewer --workflows commit-plan
+ai-rules add --categories all --overwrite-strategy force
+```
+
+## Available Content
+
+### Rule Categories
+
+Categories include: `typescript`, `react-hooks`, `react-server-components`, `component-architecture`, `styling`, `testing`, `database`, `meta`, `url-state`, and more.
+
+### Skills
+
+Reusable capability packages: TDD, BDD, code refactoring, context7 integration, web search, create-PR, implementation planning, test quality review, and more.
+
+### Workflows
+
+Step-by-step procedural guides: feature development, commit planning, code review, repo knowledge generation, structured brainstorming.
 
 ## Architecture
 
-The system uses a two-tier architecture for optimal performance:
+The system uses a **local-first** architecture:
 
-### Next.js API Server (`src/app/`)
-
-- **Caches** GitHub repository content for 5 minutes
-- **Reduces** GitHub API rate limiting
-- **Provides** centralized rule management
-- **Runs** on `https://ai-rules-setup.vercel.app` by default (or `http://localhost:3000` for local development)
-
-### CLI Tool (`src/cli/`)
-
-- **Fetches** rules from the API server instead of local files
-- **Handles** user interaction and file operations
-- **Manages** project configuration and rule installation
-
-## How It Works
-
-1. **Start API** - Next.js server fetches and caches rules from GitHub
-2. **Initialize** - Choose your AI agent and tech stack
-3. **Discover** - Search for relevant rules using natural language
-4. **Refine** - Answer questions to get personalized recommendations
-5. **Install** - Rules are automatically placed in the correct locations
-6. **Update** - Keep your rules current with the latest versions
-
-## Project Structure
+1. **Next.js API Server** reads content from the local filesystem and caches in MongoDB
+2. **CLI Tool** fetches from the API server and installs to the correct agent-specific paths
+3. **Web UI** provides visual rule selection with CLI command and ChatGPT prompt generation
 
 ```
-your-project/
-├── .cursor/
-│   └── rules/
-│       ├── typescript-strict.md
-│       ├── react-server-components.md
-│       └── tailwind-best-practices.md
-├── .ai-rules.json          # Configuration file
-└── package.json
+Content Repository (/rules, /skills, /workflows)
+        ↓ (local filesystem)
+API Server (Next.js + MongoDB cache)
+        ↓ (HTTP API)
+CLI Tool → installs to project
 ```
 
-## Available Rule Categories
-
-### Languages
-
-- **TypeScript** - Strict typing, best practices, advanced patterns
-- **JavaScript** - Modern ES6+, async patterns, error handling
-
-### Frameworks
-
-- **React** - Hooks, server components, performance optimization
-- **Next.js** - App Router, Pages Router, SSR/SSG patterns
-- **Vue** - Composition API, Nuxt.js patterns
-
-### Styling
-
-- **Tailwind CSS** - Utility-first, component patterns, responsive design
-- **CSS Modules** - Scoped styling, naming conventions
-- **Styled Components** - CSS-in-JS patterns, theming
-
-### Database
-
-- **Prisma** - Schema design, query optimization, migrations
-- **MongoDB** - Document modeling, aggregation pipelines
-- **PostgreSQL** - Query patterns, indexing strategies
-
-### Testing
-
-- **Jest** - Unit testing, mocking, test organization
-- **Playwright** - E2E testing, page object patterns
-- **Testing Library** - Component testing, accessibility
-
-## Testing
-
-The tests run against the real Next.js API server. Before running tests, start the API server:
+## Development
 
 ```bash
-# Terminal 1: Start the API server
+# Start API server
 npm run dev:api
 
-# Terminal 2: Run tests
-npm test
-```
+# Run CLI in dev mode
+npm run dev init
 
-The tests will automatically detect if the API server is running and test against real data from the GitHub repository.
+# Run tests (API server must be running)
+npm test
+
+# Lint
+npm run lint
+```
 
 ## Configuration
 
@@ -193,99 +123,25 @@ The CLI creates a `.ai-rules.json` file in your project root:
 
 ```json
 {
-  "agent": "cursor",
-  "rules": [
-    {
-      "id": "typescript-strict",
-      "category": "typescript",
-      "installedAt": "2024-01-15T10:30:00Z",
-      "source": "github.com/your-org/ai-rules"
-    }
-  ],
-  "preferences": {
-    "autoUpdate": false,
-    "conflictResolution": "prompt"
-  }
+  "version": "1.0",
+  "agent": "antigravity",
+  "categories": ["typescript", "react-hooks"],
+  "skills": ["tdd-design", "bdd-design"],
+  "workflows": ["feature-development", "commit-plan"]
 }
 ```
 
-## Commands
+## Documentation
 
-### `ai-rules init`
-
-Interactive setup wizard that guides you through:
-
-- AI agent selection
-- Tech stack identification
-- Rule discovery and selection
-- Installation configuration
-
-### `ai-rules add <categories...>`
-
-Add specific rule categories to your project:
-
-```bash
-ai-rules add typescript react nextjs
-```
-
-### `ai-rules remove <categories...>`
-
-Remove rule categories from your project:
-
-```bash
-ai-rules remove old-framework
-```
-
-### `ai-rules update`
-
-Update all installed rules to their latest versions:
-
-```bash
-ai-rules update
-```
-
-### `ai-rules list [--filter <tag>]`
-
-List available rule categories with optional filtering:
-
-```bash
-ai-rules list --filter frontend
-```
-
-### `ai-rules status`
-
-Show currently installed rules and their status:
-
-```bash
-ai-rules status
-```
-
-### `ai-rules search "<query>"`
-
-Search for rules using natural language:
-
-```bash
-ai-rules search "nextjs 15 server components with tailwind"
-```
-
-### `ai-rules refine`
-
-Re-run the refinement process for better rule selection:
-
-```bash
-ai-rules refine
-```
+- [Repository Knowledge](./repo_knowledge/README.md) — Comprehensive codebase docs
+- [System Design](./docs/system-design.md) — Detailed architecture
+- [ADRs](./docs/adr/) — Architecture Decision Records
+- [Manifest Schema](./docs/manifest-schema.md) — Rule manifest format
+- [Rules README](./rules/README.md) — How to write rules
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
-
-## Support
-
-- 📖 [Documentation](docs/)
-- 🐛 [Report Issues](https://github.com/your-org/ai-rules/issues)
-- 💬 [Discussions](https://github.com/your-org/ai-rules/discussions)
-- 📧 [Email Support](mailto:support@ai-rules.dev)
+MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
