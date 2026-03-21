@@ -4,10 +4,6 @@ import { AgentLanding } from "src/components/agent-landing";
 import { AgentSelector } from "src/components/agent-selector";
 import { CommandDisplay } from "src/components/command-display";
 import { GettingStartedBanner } from "src/components/getting-started-banner";
-import { PresetCards } from "src/components/preset-cards";
-import { PromptDisplay } from "src/components/prompt-display";
-// import { QuestionsDialog } from "src/components/questions-dialog";
-import { SearchInput } from "src/components/search-input";
 import { SelectedRulesSidebar } from "src/components/selected-rules-sidebar";
 import { StrategySelector } from "src/components/strategy-selector";
 import { useManifests } from "src/lib/manifests.state";
@@ -41,10 +37,8 @@ export function SelectRulesPageClient() {
 					<div data-testid="content-area" className="grid grid-cols-[1fr_400px] gap-6">
 						{/* Main content */}
 						<div className="space-y-4">
-							<PresetCards />
 							<GettingStartedBanner manifests={allManifests} />
 							<AgentSelector />
-							<SearchInput />
 
 							{selectedAgent === "antigravity" ? (
 								<AntigravityDisplay />
@@ -61,10 +55,6 @@ export function SelectRulesPageClient() {
 
 							<div className="p-6 border-b border-border">
 								<StrategySelector />
-							</div>
-
-							<div className="p-6 border-b border-border">
-								<PromptDisplay manifests={allManifests} />
 							</div>
 
 							<div className="p-6">
