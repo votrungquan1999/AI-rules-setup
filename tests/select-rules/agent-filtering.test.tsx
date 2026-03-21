@@ -1,10 +1,7 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { SelectRulesPageClient } from "src/app/select-rules/SelectRulesPageClient";
-import { ManifestsProvider } from "src/lib/manifests.state";
-import { SearchProvider } from "src/lib/search.state";
-import { SelectionProvider } from "src/lib/selection.state";
-import type { Manifest, RulesData } from "src/server/types";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
+import type { RulesData } from "src/server/types";
 import { describe, expect, it } from "vitest";
+import { createManifest, renderSelectRulesPage } from "../helpers/select-rules-utils";
 
 /**
  * Integration tests for Agent-Specific Rule Filtering
@@ -17,23 +14,6 @@ import { describe, expect, it } from "vitest";
  * - Search results are filtered by agent
  */
 
-/**
- * Helper to create test manifest
- */
-function createManifest(id: string, description: string): Manifest {
-	return {
-		id,
-		category: id,
-		tags: [id],
-		description,
-		whenToUse: `When using ${id}`,
-		files: [],
-	};
-}
-
-/**
- * Helper to create test rules data
- */
 function createRulesData(cursorRules: string[], claudeCodeRules: string[]): RulesData {
 	const agents: RulesData["agents"] = {};
 
@@ -66,22 +46,6 @@ function createRulesData(cursorRules: string[], claudeCodeRules: string[]): Rule
 	}
 
 	return { agents };
-}
-
-/**
- * Helper to render component with providers
- */
-function renderWithProviders(rulesData: RulesData, agent: string) {
-	const agents = Object.keys(rulesData.agents);
-	return render(
-		<SelectionProvider defaultAgent={agent}>
-			<ManifestsProvider rulesData={rulesData} questions={[]} agents={agents}>
-				<SearchProvider>
-					<SelectRulesPageClient />
-				</SearchProvider>
-			</ManifestsProvider>
-		</SelectionProvider>,
-	);
 }
 
 /**
@@ -119,7 +83,7 @@ function selectRule(ruleName: string) {
  * Helper to get sidebar section
  */
 function getSidebarSection() {
-	const sidebarHeading = screen.getByRole("heading", { name: /Selected Rules/i });
+	const sidebarHeading = screen.getByRole("heading", { name: /Selected Items/i });
 	return sidebarHeading.parentElement?.parentElement;
 }
 
@@ -135,7 +99,7 @@ describe("SelectRulesPageClient - Agent Filtering", () => {
 	it("should display cursor rules when cursor agent is selected", () => {
 		const rulesData = createRulesData(["typescript", "react"], ["typescript"]);
 
-		renderWithProviders(rulesData, "cursor");
+		renderSelectRulesPage(rulesData, { defaultAgent: "cursor" });
 
 		// Check that rule cards are displayed using test IDs
 		expect(screen.getByTestId("rule-card-typescript")).toBeInTheDocument();
@@ -151,7 +115,7 @@ describe("SelectRulesPageClient - Agent Filtering", () => {
 	it("should display claude-code rules when claude-code agent is selected", () => {
 		const rulesData = createRulesData(["typescript"], ["typescript", "react"]);
 
-		renderWithProviders(rulesData, "claude-code");
+		renderSelectRulesPage(rulesData, { defaultAgent: "claude-code" });
 
 		// Check that rule cards are displayed using test IDs
 		expect(screen.getByTestId("rule-card-typescript")).toBeInTheDocument();
@@ -173,7 +137,7 @@ describe("SelectRulesPageClient - Agent Filtering", () => {
 			},
 		};
 
-		renderWithProviders(rulesData, "cursor");
+		renderSelectRulesPage(rulesData, { defaultAgent: "cursor" });
 
 		expect(screen.getByTestId("empty-state")).toBeInTheDocument();
 		expect(screen.getByText("No rules available for the selected agent.")).toBeInTheDocument();
@@ -183,7 +147,7 @@ describe("SelectRulesPageClient - Agent Filtering", () => {
 		const rulesData = createRulesData(["typescript"], ["react"]);
 
 		// Test with cursor selected - render fresh
-		const { unmount } = renderWithProviders(rulesData, "cursor");
+		const { unmount } = renderSelectRulesPage(rulesData, { defaultAgent: "cursor" });
 
 		// Check cursor-specific content using test IDs
 		expect(screen.getByTestId("rule-card-typescript")).toBeInTheDocument();
@@ -195,7 +159,7 @@ describe("SelectRulesPageClient - Agent Filtering", () => {
 		unmount();
 
 		// Test with claude-code selected - render fresh
-		renderWithProviders(rulesData, "claude-code");
+		renderSelectRulesPage(rulesData, { defaultAgent: "claude-code" });
 
 		// Check claude-code-specific content using test IDs
 		expect(screen.getByTestId("rule-card-react")).toBeInTheDocument();
@@ -208,7 +172,7 @@ describe("SelectRulesPageClient - Agent Filtering", () => {
 describe("SelectRulesPageClient - Agent Switching", () => {
 	it("should update rules when agent is switched via UI", async () => {
 		const rulesData = createRulesData(["typescript"], ["react"]);
-		renderWithProviders(rulesData, "cursor");
+		renderSelectRulesPage(rulesData, { defaultAgent: "cursor" });
 
 		// Verify initial state: cursor's typescript rule is shown
 		expect(screen.getByTestId("rule-card-typescript")).toBeInTheDocument();
@@ -254,7 +218,7 @@ describe("SelectRulesPageClient - Agent Switching", () => {
 describe("SelectRulesPageClient - Sidebar Agent Filtering", () => {
 	it("should clear sidebar selections when switching agents", async () => {
 		const rulesData = createRulesData(["typescript"], ["react"]);
-		renderWithProviders(rulesData, "cursor");
+		renderSelectRulesPage(rulesData, { defaultAgent: "cursor" });
 
 		// Select a cursor rule
 		selectRule("typescript");
@@ -269,12 +233,12 @@ describe("SelectRulesPageClient - Sidebar Agent Filtering", () => {
 		// Verify sidebar is cleared (selections should be cleared on agent switch)
 		const updatedSidebarSection = getSidebarSection();
 		expect(updatedSidebarSection?.textContent).not.toContain("typescript");
-		expect(screen.getByText(/No rules selected yet/i)).toBeInTheDocument();
+		expect(screen.getByText(/No items selected yet/i)).toBeInTheDocument();
 	});
 
 	it("should show only current agent's rules in sidebar after switching and selecting", async () => {
 		const rulesData = createRulesData(["typescript"], ["react"]);
-		renderWithProviders(rulesData, "cursor");
+		renderSelectRulesPage(rulesData, { defaultAgent: "cursor" });
 
 		// Select cursor's typescript rule
 		selectRule("typescript");
@@ -300,7 +264,7 @@ describe("SelectRulesPageClient - Sidebar Agent Filtering", () => {
 	it("should generate agent-specific command", async () => {
 		// Create multiple rules to ensure selecting one doesn't mean "all" are selected
 		const rulesData = createRulesData(["typescript", "react"], ["react", "tailwind"]);
-		renderWithProviders(rulesData, "cursor");
+		renderSelectRulesPage(rulesData, { defaultAgent: "cursor" });
 
 		// Select cursor's typescript rule (not all rules)
 		selectRule("typescript");
@@ -334,7 +298,7 @@ describe("SelectRulesPageClient - Sidebar Agent Filtering", () => {
 
 	it("should generate agent-specific prompt", async () => {
 		const rulesData = createRulesData(["typescript", "react"], ["react", "tailwind"]);
-		renderWithProviders(rulesData, "cursor");
+		renderSelectRulesPage(rulesData, { defaultAgent: "cursor" });
 
 		// Verify prompt contains cursor agent in example command and lists all cursor categories
 		const promptHeading = screen.getByRole("heading", { name: "ChatGPT Prompt" });
@@ -367,7 +331,7 @@ describe("SelectRulesPageClient - Search Agent Filtering", () => {
 	it("should filter search results to selected agent", async () => {
 		// Create rules with same name in both agents
 		const rulesData = createRulesData(["typescript"], ["typescript"]);
-		renderWithProviders(rulesData, "cursor");
+		renderSelectRulesPage(rulesData, { defaultAgent: "cursor" });
 
 		// Search for "typescript"
 		searchFor("typescript");
@@ -390,7 +354,7 @@ describe("SelectRulesPageClient - Search Agent Filtering", () => {
 
 	it("should handle rule selection and scoring correctly per agent", async () => {
 		const rulesData = createRulesData(["typescript"], ["react"]);
-		renderWithProviders(rulesData, "cursor");
+		renderSelectRulesPage(rulesData, { defaultAgent: "cursor" });
 
 		// Get checkbox before selecting
 		const typescriptCheckbox = screen.getByRole("checkbox", { name: /typescript/i });
@@ -414,7 +378,7 @@ describe("SelectRulesPageClient - Search Agent Filtering", () => {
 		// Verify cursor selection is cleared (sidebar should be empty)
 		const updatedSidebarSection = getSidebarSection();
 		expect(updatedSidebarSection?.textContent).not.toContain("typescript");
-		expect(screen.getByText(/No rules selected yet/i)).toBeInTheDocument();
+		expect(screen.getByText(/No items selected yet/i)).toBeInTheDocument();
 
 		// Get checkbox before selecting
 		const reactCheckbox = screen.getByRole("checkbox", { name: /react/i });
@@ -436,7 +400,7 @@ describe("SelectRulesPageClient - Search Agent Filtering", () => {
 
 	it("should show all rules for current agent when no search query", async () => {
 		const rulesData = createRulesData(["typescript", "react"], ["react", "tailwind"]);
-		renderWithProviders(rulesData, "cursor");
+		renderSelectRulesPage(rulesData, { defaultAgent: "cursor" });
 
 		// Verify all cursor rules appear (no search query)
 		expect(screen.getByTestId("rule-card-typescript")).toBeInTheDocument();
