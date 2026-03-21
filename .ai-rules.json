@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "agent": "cursor",
+  "agent": "antigravity",
   "categories": [
     "component-architecture",
     "database-patterns",
@@ -11,6 +11,25 @@
     "typescript-conventions",
     "url-state-management",
     "brainstorming-patterns",
-    "testing-pillars"
+    "testing-pillars",
+    "testing-guidelines"
+  ],
+  "skills": [
+    "bdd-design",
+    "code-refactoring",
+    "context7",
+    "create-implementation-plan",
+    "create-pr",
+    "orchestrated-feature-dev",
+    "tdd-design",
+    "test-quality-reviewer",
+    "web-search"
+  ],
+  "workflows": [
+    "commit-plan",
+    "feature-development",
+    "repo-knowledge",
+    "review-changes",
+    "structured-brainstorming"
   ]
 }
