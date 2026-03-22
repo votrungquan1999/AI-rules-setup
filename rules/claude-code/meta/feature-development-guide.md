@@ -104,7 +104,7 @@ Create a file (e.g., `IMPLEMENTATION_PROGRESS.md`) to track completed steps. Add
 
 **Then, for EACH test scenario, follow this iterative process:**
 
-3. **Write ONE test** - Write exactly 1 test at a time (you can start with an empty test that just has a description)
+3. **Write ONE test** - Write exactly 1 test at a time (you can start with an empty test that just has a description). **CRITICAL: NEVER write multiple tests at once.**
 4. **Run the test** - Run the test to verify it fails (this confirms the test is actually testing something)
 5. **Implement code** - Write the minimum code needed to make this ONE test pass
 6. **Run the test again** - Verify the test now passes
