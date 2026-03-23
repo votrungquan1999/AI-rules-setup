@@ -16,11 +16,10 @@ export default async function SelectRulesPage() {
 
 	// Flatten rules for easier processing
 	const agents = Object.keys(rulesData.agents);
-	const defaultAgent = agents[0] || "cursor";
 	const presets = await findAllStoredPresets();
 
 	return (
-		<SelectionProvider defaultAgent={defaultAgent}>
+		<SelectionProvider>
 			<ManifestsProvider rulesData={rulesData} questions={[]} agents={agents} presets={presets}>
 				<SearchProvider>
 					<SelectRulesPageClient />
