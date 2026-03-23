@@ -10,25 +10,27 @@ Read the `loop-state.json` artifact for the current step counter.
 ## Execution
 
 ### 1. Identify the Behavior
+
 Find the first step with `Status: pending` in `plan-steps.md`. This is your target behavior.
 
 ### 2. Write the Test
+
 Use BDD-style Given/When/Then structure:
 
 ```typescript
-describe("[Feature/Scenario name]", () => {
-  it("should [expected outcome]", async () => {
+describe('[Feature/Scenario name]', () => {
+  it('should [expected outcome]', async () => {
     // Given
     // When
     // Then
-  });
+  })
 
   // Use nested describe only to group multiple related tests:
   // describe("when [specific condition]", () => {
   //   it("should [outcome A]", ...);
   //   it("should [outcome B]", ...);
   // });
-});
+})
 ```
 
 ### 2b. One Test Per Step
@@ -62,6 +64,7 @@ Only if there's an obvious improvement. Keep it small. Run tests again.
 ## Output
 
 Update the `plan-steps.md` artifact:
+
 - Change the completed step's status to `done` (or `done (already covered)`)
 
 Write to the `step-result.md` artifact:
@@ -70,12 +73,18 @@ Write to the `step-result.md` artifact:
 # Step Result
 
 ## Step: [step number]
+
 ## Behavior: [what was implemented]
+
 ## Test Result: [red → green | already covered]
+
 ## Files Changed:
+
 - [file1]: [what changed]
 - [file2]: [what changed]
+
 ## Regressions: [none | list]
+
 ## Notes: [anything worth mentioning]
 ```
 
