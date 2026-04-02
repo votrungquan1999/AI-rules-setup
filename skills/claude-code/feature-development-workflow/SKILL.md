@@ -106,7 +106,7 @@ Create a file (e.g., `IMPLEMENTATION_PROGRESS.md`) to track completed steps. Add
 **Then, for EACH test scenario, follow this iterative process:**
 
 3. **Write ONE test** - Write exactly 1 test at a time (you can start with an empty test that just has a description). **CRITICAL: NEVER write multiple tests at once.**
-4. **Run the test** - Run the test to verify it fails (this confirms the test is actually testing something)
+4. **Run the test** - **Check `package.json` scripts** first for an existing test command (e.g., `npm test`, `npm run test:unit`). Use the project's defined command. Run the test to verify it fails (this confirms the test is actually testing something)
 5. **Implement code** - Write the minimum code needed to make this ONE test pass
 6. **Run the test again** - Verify the test now passes
 7. **Repeat** - If more test scenarios remain, go back to step 3 for the next test. Continue until all test scenarios are written and passing.
@@ -185,3 +185,19 @@ Follow the guidelines in the 4 Pillars document when defining test scenarios and
 - ❌ Not updating progress file
 - ❌ Writing tests without consulting project testing guidelines
 - ❌ Pre-creating steps in progress file (only add when working on them)
+
+### Quality Checkpoints
+
+**Every 2-3 completed steps**, pause to review quality:
+- Use `@test-quality-reviewer` to check recent test quality against the 4 Pillars
+- Use `@code-refactoring` to identify cleanup opportunities in recent implementation
+- Fix any issues before continuing to the next step
+
+## Related Skills
+
+- `@tdd-design` - Core TDD loop methodology used during implementation
+- `@bdd-design` - Use BDD for behavior-level acceptance testing
+- `@test-quality-reviewer` - Review test quality during quality checkpoints
+- `@code-refactoring` - Apply refactoring patterns during quality checkpoints
+- `@create-implementation-plan` - Use for more detailed planning with design decisions
+- `@orchestrated-feature-dev` - Premium version with automated quality gates and sub-agent phases
