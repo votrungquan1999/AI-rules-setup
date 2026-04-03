@@ -61,3 +61,20 @@ The goal is to answer: *"What changed and why should I care?"* — not to docume
 ### Step 5: Present to User
 
 Show the title and description for review before creating the PR.
+
+**Format for easy copying:** Present the PR title and description each inside a markdown code block so the user can copy-paste them directly into GitHub without formatting issues.
+
+Example:
+
+````
+**Title:**
+```
+[TICKET-123] Add user authentication flow
+```
+
+**Description:**
+```markdown
+## What
+Add JWT-based authentication...
+```
+````
