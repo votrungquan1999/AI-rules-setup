@@ -40,7 +40,7 @@ When researching external libraries or APIs, use `@context7` for documentation q
 - Ask more questions
 - Continue to planning
 
-**Do not proceed to Step 2 until the user explicitly says "continue".**
+**CRITICAL: You MUST stop execution here and wait.** Do not proceed to Step 2 or start writing the plan until the user explicitly says "continue with implementation plan" or "continue". Answer any user questions during this pause.
 
 ### Step 2: Analyze Requirements
 
@@ -76,8 +76,10 @@ Each behavior must be:
 - **Not a code task** — describe what the system does, not how
 
 > ✅ `User sees trending markets at the top of the list`
+> ✅ `Valid inputs are persisted to the standard settings`
 > ✅ `Markets with score below threshold are excluded from trending`
 > ❌ `Add isTrending field to Market model`
+> ❌ `Add StandardSettings interface to types file`
 > ❌ `Write SQL query for trending markets`
 
 For each behavior, plan the test-first cycle:

@@ -16,7 +16,9 @@ Read the `RESEARCH_OUTPUT.md` file from the project root for context about the c
    - **Technical Design**: Only significant decisions (new fields, API changes, strategy choices). Skip anything obvious.
    - **Behaviors to Implement**: Observable behaviors as TDD steps — not code tasks:
      - ✅ `User sees trending markets at the top`
+     - ✅ `Valid inputs are persisted to the standard settings`
      - ❌ `Add isTrending field to database`
+     - ❌ `Add StandardSettings validation schema`
 
 4. **Write the step list** to the workflow state file for the TDD loop to consume.
 

@@ -22,6 +22,7 @@ This skill acts as an **orchestrator** — it sequences specialized node skills,
 All workflow state files are created as Antigravity artifacts in the brain directory for the current conversation. Use `write_to_file` with `IsArtifact: true` to create/update these files. The artifact directory path is provided to you at the start of each conversation.
 
 **Workflow artifacts:**
+
 - `research-output.md` — Research findings
 - `plan-steps.md` — Step list for the TDD loop
 - `loop-state.json` — Loop counter and metadata
@@ -30,7 +31,7 @@ All workflow state files are created as Antigravity artifacts in the brain direc
 
 ---
 
-## Phase 0: Clarify Requirements First *(mandatory gate)*
+## Phase 0: Clarify Requirements First _(mandatory gate)_
 
 **Before reading a single file, clarify the feature request.**
 
@@ -39,6 +40,7 @@ All workflow state files are created as Antigravity artifacts in the brain direc
 > The user always knows more about the requirements than you do.
 
 Ask about **every dimension you're unsure of**:
+
 - **What** should be built: exact behavior, scope boundaries, user-facing vs internal
 - **Why** it's needed: reveals hidden constraints and priorities
 - **How** edge cases should behave: error states, empty states, boundary conditions
@@ -54,15 +56,18 @@ Ask about **every dimension you're unsure of**:
 Read the node instructions from `nodes/node-research.md` in this skill's directory, then execute them.
 
 **After completion**, read the `research-output.md` artifact and report:
+
 - Number of files read
 - Key patterns found
 - Affected areas identified
 - Any open questions or ambiguities found during research
 
 **Gate:** Ask the user: "Research complete. Read more files, ask clarifying questions, or continue to planning?"
+
 - If "more files" → re-run this phase with expanded scope
 - If "questions" → pause, ask, wait for answers, then continue
 - If "continue" → proceed to Phase 2
+- **CRITICAL:** You MUST stop execution here and wait for the user's response. Do NOT proceed to Phase 2 until the user explicitly says "continue with implementation plan" or "continue".
 
 ---
 
@@ -81,6 +86,7 @@ The plan node will use `@create-implementation-plan` to create the plan, reading
 This is the core loop — it alternates between TDD steps and quality gates.
 
 ### Initialize
+
 Set iteration counter: write `{"current_step": 1, "quality_checks": 0, "max_steps": 20}` to the `loop-state.json` artifact.
 
 ### For Each Step
@@ -90,6 +96,7 @@ Set iteration counter: write `{"current_step": 1, "quality_checks": 0, "max_step
 Read the node instructions from `nodes/node-tdd-step.md` in this skill's directory, then execute them.
 
 The node will:
+
 1. Determine the next observable behavior to implement
 2. Write a test for it
 3. Run the test (MUST see result before implementing)
@@ -97,6 +104,7 @@ The node will:
 5. Write the step result to the `step-result.md` artifact
 
 **After completion**, read `step-result.md` and decide:
+
 - If step succeeded → increment `current_step` in `loop-state.json`
 - If step had issues → ask user for guidance before continuing
 
@@ -107,11 +115,13 @@ Read `loop-state.json`. Every **2-3 completed steps**, trigger the quality gate:
 Read the node instructions from `nodes/node-quality-gate.md` in this skill's directory, then execute them.
 
 The quality gate will:
+
 1. Run `@test-quality-reviewer` on recent tests
 2. Run `@code-refactoring` review on recent implementation
 3. Write findings to the `quality-result.md` artifact
 
 **After completion**, read `quality-result.md` and route:
+
 - If `quality: "pass"` → continue to next TDD step
 - If `quality: "needs-fixes"` → fix issues, then re-run quality gate
 - **Max 2 quality re-checks** per checkpoint to prevent infinite loops
@@ -119,6 +129,7 @@ The quality gate will:
 ### Loop Termination
 
 Stop the implementation loop when:
+
 - All planned behaviors are implemented (check against the plan)
 - User explicitly says "stop" or "done"
 - `current_step` exceeds `max_steps` (safety limit)
@@ -130,6 +141,7 @@ Stop the implementation loop when:
 Read the node instructions from `nodes/node-summary.md` in this skill's directory, then execute them.
 
 Present the final summary to the user with:
+
 - All steps completed
 - Test results
 - Quality gate outcomes

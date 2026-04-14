@@ -60,3 +60,5 @@ Write findings to `RESEARCH_OUTPUT.md` in the project root:
 ## Unknowns / Questions
 - [Anything unclear that needs user input]
 ```
+
+**CRITICAL:** After writing the output, you MUST PAUSE execution. Ask the user if the research is sufficient and wait for their explicit command to "continue with implementation plan" or "continue" before moving to the next node. Answer any questions the user has about the research during this pause.

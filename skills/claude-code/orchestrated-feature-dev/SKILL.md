@@ -60,9 +60,10 @@ Task("Read the instructions in [this skill's directory]/nodes/node-research.md
 
 **After the sub-agent returns**, read the `RESEARCH_OUTPUT.md` file and present findings to the user.
 
-**Gate:** Ask the user: "Research complete. Read more files, ask questions, or continue?"
+**Gate:** Ask the user: "Research complete. Is this information enough to continue? Read more files, ask questions, or continue?"
 - If "more files" → spawn another research sub-agent with expanded scope
-- If "continue" → proceed to Phase 2
+- If user has questions → answer them and wait for further instruction
+- **CRITICAL:** You MUST stop execution here and wait for the user's response. Do NOT proceed to Phase 2 until the user explicitly says "continue with implementation plan" or "continue".
 
 ---
 

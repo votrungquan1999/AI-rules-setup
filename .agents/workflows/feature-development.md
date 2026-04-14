@@ -30,7 +30,8 @@ Before planning or writing any code, read as many relevant files as possible to 
 **Fundamental Rule: Ask, Don't Assume.**
 Never assume when you could ask. A wrong assumption invalidates the entire plan. Every unconfirmed assumption is a risk.
 
-**Requirement Clarification — mandatory before planning.** If *anything* is unclear or ambiguous, stop and ask. This includes:
+**Requirement Clarification — mandatory before planning.** If _anything_ is unclear or ambiguous, stop and ask. This includes:
+
 - **What** should be built: behavior, user-facing vs internal, exact scope
 - **Why** it's needed: this reveals constraints and priorities you'd otherwise miss
 - **How** it should behave in edge cases: error states, empty states, boundary conditions
@@ -42,6 +43,7 @@ Do not assume implementation details, architectural decisions, technology choice
 When researching external libraries or APIs, use `@context7` for documentation queries and `@web-search` for broader research.
 
 **Mandatory Checkpoint:** After reading files, summarize what you found and list any remaining open questions. Ask the user explicitly:
+
 - Are there more files to read?
 - Are there open questions to resolve?
 - Should we continue to planning?
@@ -67,12 +69,14 @@ Each step is an **observable behavior** — something a user or system can obser
 ### Step Format
 
 **Each step title describes what the system does**, not what code to write:
+
 - ✅ `High-engagement open markets appear as "TRENDING"`
 - ✅ `No duplicate markets between trending and regular`
 - ❌ `Add isTrending field to Market model`
 - ❌ `Write SQL query for trending markets`
 
 **Sub-items track progress within the step:**
+
 - **Test → Implement → Verify** — when production code changes are needed
 - **Test → Verify (no production change needed)** — when existing code already handles the behavior
 - **Cleanup steps** can have multiple sub-items (e.g., remove old code, rewrite tests, delete dead helpers)
@@ -113,30 +117,36 @@ Before writing any tests, locate the "4 Pillars of Testing" document in the proj
 ## Implementation (each step = one test-first cycle)
 
 ### Step 1: High-engagement open markets appear as "TRENDING"
+
 - [x] Write test
 - [x] Run test (Red — fails as expected)
 - [x] Implement minimum code
 - [x] Run test (Green — passes)
 
 ### Step 2: Low-engagement markets are NOT trending
+
 - [x] Write test
 - [x] Run test (Green — already covered by step 1 implementation)
 
 ### Step 3: At most sampleSize trending markets returned
+
 - [x] Write test
 - [x] Run test (Green — already covered)
 
 ### Quality Checkpoint (after steps 1-3)
+
 - [x] test-quality-reviewer: reviewed 3 tests
 - [x] code-refactoring: no changes needed
 
 ### Step 4: No duplicate markets between trending and regular
+
 - [x] Write test
 - [x] Run test (Red)
 - [x] Implement deduplication logic
 - [x] Run test (Green)
 
 ### Step 5: → 🔄 [Next observable behavior]
+
 - [ ] Write test
 - [ ] Run test
 - [ ] Implement (if needed)
