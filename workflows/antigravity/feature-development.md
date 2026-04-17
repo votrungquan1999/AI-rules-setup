@@ -27,11 +27,26 @@ Before planning or writing any code, read as many relevant files as possible to 
 - Testing patterns and utilities already in place
 - Types, interfaces, and data models
 
-**Critical: Requirement Clarification First.** If anything is unclear or ambiguous, ask the user clarifying questions. Do not assume implementation details, architectural decisions, or requirements.
+**Fundamental Rule: Ask, Don't Assume.**
+Never assume when you could ask. A wrong assumption invalidates the entire plan. Every unconfirmed assumption is a risk.
+
+**Requirement Clarification — mandatory before planning.** If *anything* is unclear or ambiguous, stop and ask. This includes:
+- **What** should be built: behavior, user-facing vs internal, exact scope
+- **Why** it's needed: this reveals constraints and priorities you'd otherwise miss
+- **How** it should behave in edge cases: error states, empty states, boundary conditions
+- **What's out of scope**: clarify explicitly, don't guess
+- **Any assumption you're tempted to make**: surface it, ask the user to confirm or correct it
+
+Do not assume implementation details, architectural decisions, technology choices, or requirements. Do not fill in gaps with "reasonable" guesses — ask.
 
 When researching external libraries or APIs, use `@context7` for documentation queries and `@web-search` for broader research.
 
-**Mandatory Checkpoint:** Report how many files you read and ask the user whether to read more files, ask more questions, or continue. Do not proceed until the user explicitly says "continue".
+**Mandatory Checkpoint:** After reading files, summarize what you found and list any remaining open questions. Ask the user explicitly:
+- Are there more files to read?
+- Are there open questions to resolve?
+- Should we continue to planning?
+
+**Do not proceed to Phase 2 until the user explicitly says "continue".**
 
 ---
 
@@ -132,6 +147,9 @@ Before writing any tests, locate the "4 Pillars of Testing" document in the proj
 
 ## What to Avoid
 
+- ❌ Assuming anything that isn't explicitly stated — ask instead
+- ❌ Inferring scope based on how similar things were done before — scope can change, always confirm
+- ❌ Moving forward when requirements feel unclear — unclear requirements = stop and ask
 - ❌ Skipping tests for any step
 - ❌ Moving to next step with failing tests
 - ❌ Writing step titles as code tasks instead of observable behaviors

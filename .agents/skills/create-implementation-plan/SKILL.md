@@ -31,14 +31,24 @@ Read as many relevant files as possible to understand:
 - Testing patterns and utilities already in place
 - Types, interfaces, and data models
 
-**Critical: Requirement Clarification First.** If anything is unclear or ambiguous, ask the user clarifying questions. Do not assume implementation details, architectural decisions, or requirements.
+**Fundamental Rule: Ask, Don't Assume.**
+Never assume when you could ask. A wrong assumption invalidates the entire plan. Every unconfirmed assumption is a risk.
+
+**Requirement Clarification — mandatory before planning.** If *anything* is unclear or ambiguous, stop and ask. Specifically:
+- **What** should be built: exact behavior, scope boundaries, user-facing vs internal
+- **Why** it's needed: reveals hidden constraints and priorities
+- **How** edge cases should behave: error states, empty states, boundary conditions
+- **What's explicitly out of scope**: don't guess, always confirm
+- **Any assumption you're tempted to make**: state it explicitly and ask the user to confirm or correct it
+
+Do not fill in gaps with "reasonable" guesses. Do not assume implementation details, technology choices, or architectural direction. Ask.
 
 When researching external libraries or APIs, use `@context7` for documentation queries and `@web-search` for broader research.
 
-**Mandatory Checkpoint:** Report how many files you read and ask the user whether to:
-- Read more files
-- Ask more questions
-- Continue to planning
+**Mandatory Checkpoint:** After reading files, summarize what you found and list any remaining open questions. Ask the user explicitly:
+- Are there more files to read?
+- Are there open questions to resolve?
+- Should we continue to planning?
 
 **Do not proceed to Step 2 until the user explicitly says "continue".**
 
@@ -146,10 +156,13 @@ Brief description of the problem and what the change accomplishes.
 
 ## Best Practices
 
+- ✅ Ask clarifying questions before planning — surface every assumption you're tempted to make
 - ✅ Capture decisions that require deliberate thought or trade-offs
 - ✅ Write behaviors as observable outcomes, not code tasks
 - ✅ Use mermaid diagrams for complex architecture
 - ✅ Highlight breaking changes and decisions needing user input
+- ❌ Don't assume anything that isn't explicitly stated — ask instead
+- ❌ Don't infer scope or requirements from similar past work — confirm
 - ❌ Don't list every file that will be touched
 - ❌ Don't describe implementation details that follow obviously from existing patterns
 - ❌ Don't add a verification plan — test-first development verifies as you go

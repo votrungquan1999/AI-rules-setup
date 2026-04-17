@@ -9,10 +9,15 @@ This workflow provides a structured approach to brainstorming and problem-solvin
 ## Core Methodology
 
 1. **Problem Definition** - Clearly state the problem at the top
-2. **Clarification** - Ask questions before generating ideas
+2. **Clarification First, Always** - Ask questions before generating ANY ideas — never assume
 3. **Zoom Out First** - Start with the widest view, then progressively zoom in
 4. **Iterate** - Generate multiple alternatives, refine, and build upon ideas
 5. **Document Everything** - Write to .md files for context preservation
+
+> **Fundamental Rule: Ask, Don't Assume.**
+> When requirements are unclear, scope is ambiguous, or constraints are unstated — **STOP and ask**.
+> Wrong assumptions lead to wasted brainstorming. Every assumption that isn't confirmed is a risk.
+> The user always knows more about the problem than you do.
 
 ---
 
@@ -26,18 +31,22 @@ This workflow provides a structured approach to brainstorming and problem-solvin
    - Constraints and requirements
    - Stakeholders and impact areas
 
-2. **Ask Clarifying Questions**
+2. **Ask Clarifying Questions** *(mandatory gate — do NOT skip)*
 
-   **MUST ask clarifying questions before generating ideas.**
+   **MUST ask clarifying questions before generating ideas.** This is a hard gate.
 
-   Questions to cover:
-   - **Scope**: What's in scope? What's out of scope?
-   - **Constraints**: Technical, time, resource, budget limitations?
-   - **Goals**: What defines success? What are we optimizing for?
-   - **Success Criteria**: How will we measure success?
-   - **Context**: What's the current situation? What led to this?
+   Ask about **every dimension you're unsure of**:
+   - **Scope**: What's in scope? What's explicitly out of scope? Who decides scope boundaries?
+   - **Constraints**: Technical, time, resource, budget limitations? Existing systems that must be preserved?
+   - **Goals**: What defines success? Whose definition of success counts?
+   - **Success Criteria**: How will we measure success? What does "done" look like?
+   - **Context**: What's the current situation? What led to this problem? What has already been tried?
+   - **Stakeholders**: Who is impacted? Who has decision-making authority?
+   - **Assumptions you're tempted to make**: Surface these explicitly and ask the user to confirm or correct them.
 
-   Continue asking until the problem is well-defined. User can defer some questions to leave room for exploration.
+   **Do NOT make assumptions to move faster.** A wrong brainstorm wastes more time than asking upfront.
+
+   After asking, **wait for responses before generating ideas**. User can defer some questions to leave room for exploration, but you must acknowledge which questions remain open.
 
 3. **Zoom Out First — Widest View**
 
@@ -115,12 +124,17 @@ Current situation, background, what led here
 
 ## Best Practices
 
+- ✅ Ask clarifying questions before generating any ideas
+- ✅ Surface your assumptions explicitly and ask the user to confirm or correct them
 - ✅ Focus on quantity initially before quality
 - ✅ Withhold criticism during idea generation
 - ✅ Encourage wild and unconventional ideas
 - ✅ Build on previous iterations
 - ✅ Use tables for side-by-side comparisons
 - ✅ Use mermaid diagrams for complex relationships
+- ❌ Don't assume scope — ask if it's unclear
+- ❌ Don't start generating ideas before clarifying questions are answered
+- ❌ Don't guess at constraints or success criteria — ask
 
 ## When NOT to Use
 

@@ -19,6 +19,20 @@ Behavior-Driven Development: define behavior through scenarios first, then imple
 
 ## Phase 1: Define Feature and Scenarios
 
+### Step 0: Clarify Before Designing *(mandatory gate)*
+
+**MUST clarify requirements before writing any scenarios.** Assumptions made here invalidate every scenario that follows.
+
+Ask about:
+- **Feature scope**: What exactly is in scope? What is NOT in scope?
+- **User roles**: Who uses this feature? Are there different permissions or access levels?
+- **Edge cases**: What should happen when data is missing, invalid, or in unexpected states?
+- **Error handling**: What should the system communicate when things go wrong?
+- **Success definition**: What does the user see/experience when it works correctly?
+- **Any assumptions you're tempted to make**: State them explicitly and ask the user to confirm or correct them
+
+**Do not write a single scenario before getting answers.** If the user cannot answer now, note which questions are open and flag them in the scenario review step.
+
 ### Step 1: Describe the Feature
 
 Write a feature description that captures the business value:
@@ -50,6 +64,7 @@ Write scenarios describing behavior using three stages:
 - Key edge cases identified?
 - Error/failure scenarios included?
 - Scenarios use domain language, not implementation language?
+- Any open questions from Step 0 surfaced and flagged?
 
 ---
 
@@ -150,12 +165,15 @@ After all scenarios pass:
 
 ## Best Practices
 
+- ✅ Ask clarifying questions before writing any scenarios — surface every assumption
 - ✅ Write scenarios in domain language, not code language
 - ✅ One scenario = one behavior = one `it()` block
 - ✅ Use `describe` to group related tests, not to label a single test
 - ✅ Run the test after writing it, BEFORE writing implementation
 - ✅ Keep scenarios independent — no test ordering dependencies
 - ✅ Use descriptive `it()` names that read like sentences
+- ❌ Don't assume scope, edge cases, or error behavior — ask
+- ❌ Don't start writing scenarios before requirements are clear
 - ❌ Don't wrap a single `it()` in its own `describe` just to add a label prefix
 - ❌ Don't write implementation-specific scenarios ("When the database query returns...")
 - ❌ Don't write multiple scenarios before implementing any

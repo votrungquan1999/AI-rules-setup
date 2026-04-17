@@ -8,15 +8,23 @@ Read the user's feature request from the conversation context.
 
 ## Execution
 
-1. **Identify the feature area** — what part of the codebase is affected?
+1. **Surface requirements gaps first.**
+   Before reading files, review the feature request from conversation context and identify:
+   - Anything that is unclear or underspecified
+   - Any assumption you would be tempted to make
+   - Any edge cases or error states not described
 
-2. **Read broadly first:**
+   If critical requirements are unclear, **stop and ask before reading files**. Document open questions in the output.
+
+2. **Identify the feature area** — what part of the codebase is affected?
+
+3. **Read broadly first:**
    - Entry points and main files for the affected area
    - Related tests to understand existing behavior
    - Types, interfaces, and data models
    - Configuration files if relevant
 
-3. **Read deeply second:**
+4. **Read deeply second:**
    - Implementation details in the core affected files
    - Patterns used in similar features (if any exist)
    - Utility functions and shared helpers that might be reused
@@ -58,5 +66,7 @@ Write findings to the `research-output.md` artifact in the brain directory:
 - [Testing utilities available]
 
 ## Unknowns / Questions
-- [Anything unclear that needs user input]
+- [Requirements that were unclear from the feature request]
+- [Assumptions made during research — flag these for user confirmation]
+- [Anything discovered during reading that needs user input]
 ```

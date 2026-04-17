@@ -30,6 +30,25 @@ All workflow state files are created as Antigravity artifacts in the brain direc
 
 ---
 
+## Phase 0: Clarify Requirements First *(mandatory gate)*
+
+**Before reading a single file, clarify the feature request.**
+
+> **Fundamental Rule: Ask, Don't Assume.**
+> Every unconfirmed assumption wastes research effort and invalidates the plan.
+> The user always knows more about the requirements than you do.
+
+Ask about **every dimension you're unsure of**:
+- **What** should be built: exact behavior, scope boundaries, user-facing vs internal
+- **Why** it's needed: reveals hidden constraints and priorities
+- **How** edge cases should behave: error states, empty states, boundary conditions
+- **What's explicitly out of scope**: don't guess, always confirm
+- **Any assumption you're tempted to make**: state it explicitly and ask the user to confirm or correct it
+
+**Do NOT proceed to Phase 1 until the feature is sufficiently understood.** If the user says "just start" without answering critical questions, note the open assumptions in `research-output.md` and flag them at the Phase 1 gate.
+
+---
+
 ## Phase 1: Research Node
 
 Read the node instructions from `nodes/node-research.md` in this skill's directory, then execute them.
@@ -38,9 +57,11 @@ Read the node instructions from `nodes/node-research.md` in this skill's directo
 - Number of files read
 - Key patterns found
 - Affected areas identified
+- Any open questions or ambiguities found during research
 
-**Gate:** Ask the user: "Research complete. Read more files, ask questions, or continue?"
+**Gate:** Ask the user: "Research complete. Read more files, ask clarifying questions, or continue to planning?"
 - If "more files" → re-run this phase with expanded scope
+- If "questions" → pause, ask, wait for answers, then continue
 - If "continue" → proceed to Phase 2
 
 ---
