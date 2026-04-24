@@ -1,6 +1,7 @@
 ---
 name: create-implementation-plan
 description: Creates a focused implementation plan with technical design decisions and behavior-based test scenarios before execution. Use when planning features, designing changes, creating technical specs, or when user says "create a plan", "plan this feature", "design the approach", or "implementation plan".
+allowed-tools: Read, Grep, Glob, Bash, Write, Agent
 ---
 
 # Create Implementation Plan

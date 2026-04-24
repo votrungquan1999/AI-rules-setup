@@ -1,7 +1,8 @@
 ---
 name: test-quality-reviewer
 description: Reviews test code quality using the 4 Pillars framework (Reliability, Validity, Sensitivity, Resilience). Use when reviewing tests, analyzing test quality, checking test coverage, or when user says "review these tests", "check test quality", or "analyze test coverage".
-allowed-tools: Read, Grep, Glob
+allowed-tools: Read, Grep, Glob, Write
+context: fork
 ---
 
 # Test Quality Reviewer
@@ -274,3 +275,7 @@ This Skill uses the 4 Pillars framework to systematically review test quality:
 5. **Recommend improvements** with priority
 
 **Remember:** Different test types have different pillar priorities. Unit tests can have lower resilience (testing implementation), while E2E tests must have high resilience (testing behavior).
+
+## Output
+
+Write your complete findings to `./tmp/test-quality-review.md` in the project root (create the `tmp/` directory if it doesn't exist) before finishing, so the caller and user can review the full results.

@@ -1,6 +1,10 @@
 ---
 name: web-search
 description: Guides effective web search for researching solutions, finding documentation, and gathering external context. Use when researching errors, looking up documentation, comparing tools, finding best practices, or when user says "search for", "look up", "research this", or "find documentation".
+allowed-tools: Read, WebSearch, WebFetch, Bash, Write
+context: fork
+model: sonnet
+effort: low
 ---
 
 # Web Search
@@ -93,6 +97,10 @@ When a search result looks promising:
 - ❌ Don't trust a single source blindly
 - ❌ Don't spend more than 2-3 search attempts on the same question
 - ❌ Don't copy code without understanding it
+
+## Output
+
+Write your complete findings to `./tmp/web-search-results.md` in the project root (create the `tmp/` directory if it doesn't exist) before finishing, so the caller and user can review the full results.
 
 ## Related Skills
 

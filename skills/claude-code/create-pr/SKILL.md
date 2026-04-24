@@ -1,11 +1,17 @@
 ---
 name: create-pr
-description: Generates a PR title and description by analyzing the branch diff against the base branch.
+description: Generates a PR title and description by analyzing the branch diff against the base branch. Use when creating a pull request, generating PR description, or when user says "create PR", "generate PR", "draft PR", or "prepare PR".
+allowed-tools: Read, Grep, Glob, Bash
 ---
 
 # Generate PR Title & Description
 
 Analyze the current branch changes and produce a concise PR title and description for review.
+
+## Current Branch Context
+
+Branch: !`git branch --show-current`
+Commits: !`git log --oneline $(git merge-base HEAD main 2>/dev/null || git merge-base HEAD master 2>/dev/null || echo HEAD~5)..HEAD 2>/dev/null || echo "Could not determine commits"`
 
 ## When to Use
 

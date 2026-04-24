@@ -1,6 +1,10 @@
 ---
 name: context7
 description: Queries up-to-date library documentation and code examples via Context7 MCP server. Use when looking up API docs, finding code examples, checking framework patterns, or when user says "look up docs", "check documentation", or "how does this library work".
+allowed-tools: Read, mcp__context7__resolve-library-id, mcp__context7__query-docs, Write
+context: fork
+model: sonnet
+effort: low
 ---
 
 # Context7
@@ -81,6 +85,10 @@ Args:
 - ❌ Don't query without resolving the library ID first
 - ❌ Don't exceed the per-question call limits
 - ❌ Don't include sensitive information (API keys, credentials) in queries
+
+## Output
+
+Write your complete findings to `./tmp/docs-lookup.md` in the project root (create the `tmp/` directory if it doesn't exist) before finishing, so the caller and user can review the full results.
 
 ## Related Skills
 
