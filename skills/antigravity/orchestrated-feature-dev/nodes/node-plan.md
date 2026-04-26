@@ -31,20 +31,32 @@ After the plan is approved, write the step list to the `plan-steps.md` artifact:
 
 ## Step 1: [Observable behavior]
 - Status: pending
+- Affected files: [file1, file2, ...]
+- Dependencies: none | [step numbers this depends on]
 
 ## Step 2: [Observable behavior]
 - Status: pending
+- Affected files: [file1, file3, ...]
+- Dependencies: none | Step 1
 
-## Step 3: [Observable behavior]  
+## Step 3: [Observable behavior]
 - Status: pending
+- Affected files: [file2, file4, ...]
+- Dependencies: none | Step 1, Step 2
 
 ## Quality Checkpoint (after steps 1-3)
 - Status: pending
 
 ## Step 4: [Observable behavior]
 - Status: pending
+- Affected files: [file5, ...]
+- Dependencies: none | Step 2
 
 ...
 ```
+
+Each step MUST include:
+- **Affected files** — every file that will be created, modified, or read during implementation
+- **Dependencies** — which other steps must complete first (or "none")
 
 The implementation plan itself remains in the brain artifact directory per the `@create-implementation-plan` skill convention.
