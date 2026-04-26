@@ -5,31 +5,47 @@ description: Orchestrated feature development with sub-agent phases, quality gat
 
 # Orchestrated Feature Development
 
-A structured workflow that orchestrates specialized node phases through a pipeline with quality gate loops. Each phase runs as a **sub-agent** with isolated context, keeping the main session clean.
+A structured workflow that orchestrates specialized node phases through a pipeline with quality gate loops. Each phase runs as a **sub-agent** with isolated context. The main session is the **orchestrator only** — it manages files and routing, never performs research, implementation, or analysis itself.
 
 ## How This Works
 
-This skill acts as an **orchestrator** — it spawns sub-agents for each phase using the `Task` tool, passes data between them via project-local files, and makes routing decisions based on results.
+This skill acts as an **orchestrator** — it spawns sub-agents for each phase using the `Agent` tool, passes data between them via project-local files, and makes routing decisions based on results.
 
 ```
-[research] → [plan] → [tdd-step] ↔ [quality-gate] → [summary]
-                           ↑              |
-                           └── loop back ──┘
+[research] → [plan] → [investigation (parallel)] → [tdd-step] ↔ [quality-gate] → [validation (parallel)] → [summary]
+                              ↑                         ↑              |
+                              fix plan if needed         └── loop back ──┘
 ```
+
+## Orchestrator Rules
+
+The main session MUST:
+- **Only manage files and routing** — never read code, analyze findings, or write implementation
+- **Spawn sub-agents** for all research, planning, investigation, implementation, and validation work
+- **Read state files** only to make routing decisions (pass/fail, next step, done/not done)
+- **Present sub-agent outputs** to the user by reading and relaying their output files
+- **Fix state files** when investigation reveals plan issues (update `PLAN_STEPS.md` and `implementation-plan.md`)
+
+The main session MUST NOT:
+- Read source code files directly
+- Analyze or summarize research findings in its own words
+- Write any implementation or test code
+- Make judgment calls about code quality — delegate to sub-agents
 
 ## Sub-Agent Architecture
 
-Each phase runs as a sub-agent spawned via the `Task` tool. This provides:
+Each phase runs as a sub-agent spawned via the `Agent` tool. This provides:
 - **Isolated context** — each phase gets a clean context window, preventing bloat
 - **Focused execution** — sub-agents only see their node instructions and relevant state files
 - **Clean summaries** — only the results are returned to the orchestrator
 
 **How to spawn a phase sub-agent:**
 
-Use the `Task` tool with the following pattern:
+Use the `Agent` tool with the following pattern:
 ```
-Task(
-  description: "Read the instructions in [path to node file] and execute them. 
+Agent(
+  description: "[phase name] - [brief]",
+  prompt: "Read the instructions in [path to node file] and execute them.
     [Additional context: user request, relevant state files to read, etc.]
     When done, report: [what the orchestrator needs to know]"
 )
@@ -42,41 +58,49 @@ The sub-agent will execute the node instructions and return a summary. The orche
 All workflow state is tracked in project-local files (add to `.gitignore`):
 
 - `RESEARCH_OUTPUT.md` — Research findings (written by research node)
-- `PLAN_STEPS.md` — Step list for the TDD loop (written by plan node)
+- `PLAN_STEPS.md` — Step list with affected files and dependencies (written by plan node)
+- `implementation-plan.md` — Full implementation plan (written by plan node)
 - `IMPLEMENTATION_PROGRESS.md` — Progress tracking with test results (written by TDD step node)
+- `INVESTIGATION_STEP_[N].md` — Per-step investigation findings (written by investigation nodes)
+- `VALIDATION_STEP_[N].md` — Per-step validation results (written by validation nodes)
 
 ---
 
-## Phase 1: Research Node
+## Phase 1: Research
 
 **Spawn a sub-agent** to run the research phase:
 
 ```
-Task("Read the instructions in [this skill's directory]/nodes/node-research.md 
-  and execute them for the following feature request: [user's request].
-  Write findings to RESEARCH_OUTPUT.md in the project root.
-  Report back: number of files read, key patterns found, affected areas.")
+Agent(
+  description: "Research phase",
+  prompt: "Read the instructions in [this skill's directory]/nodes/node-research.md
+    and execute them for the following feature request: [user's request].
+    Write findings to RESEARCH_OUTPUT.md in the project root.
+    Report back: number of files read, key patterns found, affected areas."
+)
 ```
 
-**After the sub-agent returns**, read the `RESEARCH_OUTPUT.md` file and present findings to the user.
+**After the sub-agent returns**, read `RESEARCH_OUTPUT.md` and present findings to the user.
 
-**Gate:** Ask the user: "Research complete. Is this information enough to continue? Read more files, ask questions, or continue?"
-- If "more files" → spawn another research sub-agent with expanded scope
-- If user has questions → answer them and wait for further instruction
-- **CRITICAL:** You MUST stop execution here and wait for the user's response. Do NOT proceed to Phase 2 until the user explicitly says "continue with implementation plan" or "continue".
+**Gate:** Ask the user: "Research complete. Continue to planning, or investigate more?"
+- If "more" → spawn another research sub-agent with expanded scope
+- **CRITICAL:** You MUST stop and wait for the user's explicit "continue" before proceeding.
 
 ---
 
-## Phase 2: Plan Node
+## Phase 2: Plan
 
 **Spawn a sub-agent** to run the planning phase:
 
 ```
-Task("Read the instructions in [this skill's directory]/nodes/node-plan.md
-  and execute them. Read RESEARCH_OUTPUT.md for context.
-  Use @create-implementation-plan to create the plan.
-  Write the step list to PLAN_STEPS.md.
-  Report back: the plan summary and number of planned steps.")
+Agent(
+  description: "Planning phase",
+  prompt: "Read the instructions in [this skill's directory]/nodes/node-plan.md
+    and execute them. Read RESEARCH_OUTPUT.md for context.
+    Use @create-implementation-plan to create the plan.
+    Write the step list to PLAN_STEPS.md (include affected files and dependencies per step).
+    Report back: the plan summary and number of planned steps."
+)
 ```
 
 **After the sub-agent returns**, present the plan for user review.
@@ -85,35 +109,80 @@ Task("Read the instructions in [this skill's directory]/nodes/node-plan.md
 
 ---
 
-## Phase 3: Implementation Loop
+## Phase 3: Investigation (Parallel)
+
+After plan approval, spawn **one sub-agent per plan step** in parallel. Each investigates its assigned step in deep detail, with full knowledge of the entire plan.
+
+**Spawn all investigation sub-agents at once:**
+
+For each step N in `PLAN_STEPS.md`:
+```
+Agent(
+  description: "Investigate step [N]",
+  prompt: "Read the instructions in [this skill's directory]/nodes/node-investigation.md
+    and execute them. You are assigned Step [N]: [behavior description].
+    Read implementation-plan.md for the full plan context.
+    Read PLAN_STEPS.md for the step list.
+    Write findings to INVESTIGATION_STEP_[N].md in the project root.
+    Report back: verdict (can proceed / needs fixes / needs rework) and any blocking issues."
+)
+```
+
+**IMPORTANT:** Launch all investigation agents in a single message so they run in parallel.
+
+**After all sub-agents return:**
+
+1. Read all `INVESTIGATION_STEP_[N].md` files
+2. Collect all findings: mismatches, conflicts, missing dependencies, already-implemented steps
+3. **Fix the plan yourself** — update `PLAN_STEPS.md` and `implementation-plan.md` to address:
+   - Remove steps for behaviors already implemented
+   - Fix file paths, type names, or function references that were wrong
+   - Reorder steps if dependency issues were found
+   - Add missing steps if gaps were identified
+   - Resolve conflicts between steps
+4. **Present to the user:**
+   - What problems were found (grouped by category: already implemented, mismatches, conflicts, missing deps, edge cases)
+   - What fixes you applied to the plan
+   - The updated plan
+5. **Gate:** Wait for user approval of the updated plan before proceeding.
+
+---
+
+## Phase 4: Implementation Loop
 
 This is the core loop — it alternates between TDD steps and quality gates.
 
 ### For Each Step
 
-**3a. TDD Step Node**
+**4a. TDD Step Node**
 
 **Spawn a sub-agent** for each TDD step:
 
 ```
-Task("Read the instructions in [this skill's directory]/nodes/node-tdd-step.md
-  and execute them. Read PLAN_STEPS.md to find the next pending step.
-  Update PLAN_STEPS.md and IMPLEMENTATION_PROGRESS.md when done.
-  Report back: which behavior was implemented, test result, any regressions.")
+Agent(
+  description: "TDD step [N]",
+  prompt: "Read the instructions in [this skill's directory]/nodes/node-tdd-step.md
+    and execute them. Read PLAN_STEPS.md to find the next pending step.
+    Update PLAN_STEPS.md and IMPLEMENTATION_PROGRESS.md when done.
+    Report back: which behavior was implemented, test result, any regressions."
+)
 ```
 
 **After the sub-agent returns**, check the report:
 - If step succeeded → continue
 - If step had issues → ask user for guidance before continuing
 
-**3b. Quality Gate Check**
+**4b. Quality Gate Check**
 
 Every **2-3 completed steps**, **spawn a sub-agent** for the quality gate:
 
 ```
-Task("Read the instructions in [this skill's directory]/nodes/node-quality-gate.md
-  and execute them. Review tests and code from the most recent 2-3 steps.
-  Report back: quality score, issues found, issues fixed, pass/needs-fixes.")
+Agent(
+  description: "Quality gate after steps [X-Y]",
+  prompt: "Read the instructions in [this skill's directory]/nodes/node-quality-gate.md
+    and execute them. Review tests and code from the most recent 2-3 steps.
+    Report back: quality score, issues found, issues fixed, pass/needs-fixes."
+)
 ```
 
 **After the sub-agent returns**, route based on quality result:
@@ -130,15 +199,49 @@ Stop the implementation loop when:
 
 ---
 
-## Phase 4: Summary Node
+## Phase 5: Validation (Parallel)
+
+After all implementation steps are complete, spawn **one sub-agent per step** in parallel for independent validation.
+
+**Spawn all validation sub-agents at once:**
+
+For each completed step N:
+```
+Agent(
+  description: "Validate step [N]",
+  prompt: "Read the instructions in [this skill's directory]/nodes/node-validation.md
+    and execute them. You are assigned Step [N]: [behavior description].
+    Read implementation-plan.md for the full plan.
+    Read PLAN_STEPS.md for all step statuses.
+    Read IMPLEMENTATION_PROGRESS.md for implementation details across all steps.
+    Write findings to VALIDATION_STEP_[N].md in the project root.
+    Report back: verdict (valid / valid with caveats / invalid) and any issues found."
+)
+```
+
+**IMPORTANT:** Launch all validation agents in a single message so they run in parallel.
+
+**After all sub-agents return:**
+
+1. Read all `VALIDATION_STEP_[N].md` files
+2. Collect all issues found
+3. If any step is invalid → spawn fix sub-agents, then re-validate
+4. Present validation results to the user
+
+---
+
+## Phase 6: Summary
 
 **Spawn a sub-agent** for the final summary:
 
 ```
-Task("Read the instructions in [this skill's directory]/nodes/node-summary.md
-  and execute them. Read RESEARCH_OUTPUT.md, PLAN_STEPS.md, and 
-  IMPLEMENTATION_PROGRESS.md. Run the full test suite and linting.
-  Report back: complete summary with steps, quality gates, test results, files changed.")
+Agent(
+  description: "Final summary",
+  prompt: "Read the instructions in [this skill's directory]/nodes/node-summary.md
+    and execute them. Read RESEARCH_OUTPUT.md, PLAN_STEPS.md, and
+    IMPLEMENTATION_PROGRESS.md. Run the full test suite and linting.
+    Report back: complete summary with steps, quality gates, test results, files changed."
+)
 ```
 
 Present the final summary to the user.
@@ -155,7 +258,7 @@ Present the final summary to the user.
 ## Related Skills
 
 - `@create-implementation-plan` - Used in Phase 2 for plan creation
-- `@tdd-design` - Core TDD methodology used in Phase 3
+- `@tdd-design` - Core TDD methodology used in Phase 4
 - `@test-quality-reviewer` - Used in quality gate checks
 - `@code-refactoring` - Used in quality gate reviews
 - `@context7` - Used for library documentation during research
