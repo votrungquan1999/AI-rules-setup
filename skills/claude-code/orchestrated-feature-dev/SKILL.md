@@ -5,11 +5,11 @@ description: Orchestrated feature development with sub-agent phases, quality gat
 
 # Orchestrated Feature Development
 
-A structured workflow that orchestrates specialized node phases through a pipeline with quality gate loops. Each phase runs as a **sub-agent** with isolated context. The main session is the **orchestrator only** — it manages files and routing, never performs research, implementation, or analysis itself.
+A structured workflow that orchestrates specialized node phases through a pipeline with quality gate loops. **Parallel and isolation-critical phases** (research, investigation, validation, quality-gate) run as sub-agents with isolated context. **The sequential implementation loop (TDD steps) runs in the main session** to avoid wasting tokens re-reading the same files on every step.
 
 ## How This Works
 
-This skill acts as an **orchestrator** — it spawns sub-agents for each phase using the `Agent` tool, passes data between them via project-local files, and makes routing decisions based on results.
+This skill acts as an **orchestrator** — it spawns sub-agents for the phases that benefit from isolation or parallelism, runs the TDD loop inline (since each step shares heavy context with the previous one), and passes data between phases via project-local files.
 
 ```
 [research] → [plan] → [investigation (parallel)] → [tdd-step] ↔ [quality-gate] → [validation (parallel)] → [summary]
@@ -19,18 +19,17 @@ This skill acts as an **orchestrator** — it spawns sub-agents for each phase u
 
 ## Orchestrator Rules
 
-The main session MUST:
-- **Only manage files and routing** — never read code, analyze findings, or write implementation
-- **Spawn sub-agents** for all research, planning, investigation, implementation, and validation work
-- **Read state files** only to make routing decisions (pass/fail, next step, done/not done)
-- **Present sub-agent outputs** to the user by reading and relaying their output files
-- **Fix state files** when investigation reveals plan issues (update `PLAN_STEPS.md` and `implementation-plan.md`)
+The main session:
+- **Spawns sub-agents** for research, planning, investigation (parallel), quality-gate, and validation (parallel) — these benefit from isolated context or parallelism
+- **Runs the TDD step loop inline** — each step shares heavy context (same plan, same files, same patterns) with the previous one, so isolating each step wastes tokens on re-reading. The investigation phase already produced curated per-step context in `INVESTIGATION_STEP_[N].md`.
+- **Reads state files** to make routing decisions and to drive the TDD loop
+- **Presents sub-agent outputs** to the user by reading and relaying their output files
+- **Fixes state files** when investigation reveals plan issues (update `PLAN_STEPS.md` and `implementation-plan.md`)
 
 The main session MUST NOT:
-- Read source code files directly
+- Perform research, planning, investigation, validation, or quality review itself — always delegate to sub-agents for those
 - Analyze or summarize research findings in its own words
-- Write any implementation or test code
-- Make judgment calls about code quality — delegate to sub-agents
+- Make independent judgment calls about code quality — delegate to the quality-gate sub-agent
 
 ## Sub-Agent Architecture
 
@@ -154,23 +153,21 @@ This is the core loop — it alternates between TDD steps and quality gates.
 
 ### For Each Step
 
-**4a. TDD Step Node**
+**4a. TDD Step (run inline in the main session)**
 
-**Spawn a sub-agent** for each TDD step:
+Do NOT spawn a sub-agent for TDD steps. The main session executes them directly:
 
-```
-Agent(
-  description: "TDD step [N]",
-  prompt: "Read the instructions in [this skill's directory]/nodes/node-tdd-step.md
-    and execute them. Read PLAN_STEPS.md to find the next pending step.
-    Update PLAN_STEPS.md and IMPLEMENTATION_PROGRESS.md when done.
-    Report back: which behavior was implemented, test result, any regressions."
-)
-```
+1. Read `nodes/node-tdd-step.md` for the procedure (only needs to be read once at the start of the loop — keep it in context)
+2. Read `PLAN_STEPS.md` to find the next pending step
+3. Read the corresponding `INVESTIGATION_STEP_[N].md` for the curated context (affected files, existing patterns, gotchas) so you don't have to re-investigate
+4. Execute the red-green-refactor cycle following `node-tdd-step.md`
+5. Update `PLAN_STEPS.md` and `IMPLEMENTATION_PROGRESS.md` when done
 
-**After the sub-agent returns**, check the report:
-- If step succeeded → continue
+After each step:
+- If step succeeded → continue to the next pending step (or quality gate)
 - If step had issues → ask user for guidance before continuing
+
+**Why inline:** consecutive TDD steps usually touch the same module and reuse the same imports, types, and helpers. A fresh sub-agent per step would re-read those files every time. Running inline keeps that context warm.
 
 **4b. Quality Gate Check**
 
