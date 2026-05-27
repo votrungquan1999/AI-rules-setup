@@ -71,14 +71,25 @@ Ask about **every dimension you're unsure of**:
 
 ---
 
-## Phase 1: Research
+## Phase 1: Research (Convergence Loop)
 
-Read the node instructions from `nodes/node-research.md` in this skill's directory, then execute them.
+Research runs as a loop that **keeps re-running until no code-answerable threads remain**. The orchestrator never reports "more stuff needs checking" to the user — open code-level threads are resolved by another research pass, not by handing them back to the user.
 
-**After completion**, read the `research-output.md` artifact and present findings to the user.
+**Round 1 — initial research.** Read the node instructions from `nodes/node-research.md` in this skill's directory, then execute them. The node writes `research-output.md`.
+
+**After completion**, read `research-output.md` and look at **Follow-up Investigations Needed**.
+
+**Round 2+ — targeted follow-ups (loop).** While that section is non-empty:
+1. Re-run `nodes/node-research.md` focused on the listed follow-up items only, appending findings to `research-output.md`.
+2. Rebuild the "Follow-up Investigations Needed" list from any *new* threads uncovered (drop the resolved ones).
+3. Repeat if the list is still non-empty.
+
+**Stop the loop** when "Follow-up Investigations Needed" is empty or after **3 rounds** (safety limit — if still non-empty, note the remaining threads when presenting).
+
+**Then present to the user.** Read the consolidated `research-output.md` and present findings, including only the **Open Questions for the User** (genuine product/requirement decisions).
 
 **Gate:** Ask the user: "Research complete. Continue to planning, or investigate more?"
-- If "more" → re-run this phase with expanded scope
+- If "more" → start a new follow-up round with the user's expanded scope as a follow-up item
 - **CRITICAL:** You MUST stop and wait for the user's explicit "continue" before proceeding.
 
 ---

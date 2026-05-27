@@ -57,6 +57,7 @@ The sub-agent will execute the node instructions and return a summary. The orche
 All workflow state is tracked in project-local files (add to `.gitignore`):
 
 - `RESEARCH_OUTPUT.md` — Research findings (written by research node)
+- `RESEARCH_FOLLOWUP_[id].md` — Targeted follow-up research findings (written by follow-up research sub-agents, folded back into `RESEARCH_OUTPUT.md`)
 - `PLAN_STEPS.md` — Step list with affected files and dependencies (written by plan node)
 - `implementation-plan.md` — Full implementation plan (written by plan node)
 - `IMPLEMENTATION_PROGRESS.md` — Progress tracking with test results (written by TDD step node)
@@ -65,24 +66,47 @@ All workflow state is tracked in project-local files (add to `.gitignore`):
 
 ---
 
-## Phase 1: Research
+## Phase 1: Research (Convergence Loop)
 
-**Spawn a sub-agent** to run the research phase:
+Research runs as a loop that **keeps spawning targeted sub-agents until no code-answerable threads remain**. The orchestrator never reports "more stuff needs checking" to the user — open code-level threads are resolved by spawning more agents, not by handing them back to the user.
+
+**Round 1 — initial research.** Spawn a sub-agent:
 
 ```
 Agent(
   description: "Research phase",
   prompt: "Read the instructions in [this skill's directory]/nodes/node-research.md
     and execute them for the following feature request: [user's request].
-    Write findings to RESEARCH_OUTPUT.md in the project root.
-    Report back: number of files read, key patterns found, affected areas."
+    You are the INITIAL research agent. Write findings to RESEARCH_OUTPUT.md in the project root.
+    Report back: number of files read, key patterns found, affected areas, and whether
+    the 'Follow-up Investigations Needed' section is empty."
 )
 ```
 
-**After the sub-agent returns**, read `RESEARCH_OUTPUT.md` and present findings to the user.
+**After it returns**, read `RESEARCH_OUTPUT.md` and look at **Follow-up Investigations Needed**.
+
+**Round 2+ — targeted follow-ups (loop).** While that section is non-empty:
+
+1. Spawn **one targeted sub-agent per follow-up item, all in a single message** so they run in parallel:
+   ```
+   Agent(
+     description: "Follow-up research [id]",
+     prompt: "Read the instructions in [this skill's directory]/nodes/node-research.md
+       and execute them. You are a TARGETED FOLLOW-UP agent. Investigate ONLY this item:
+       [the follow-up question + starting files from RESEARCH_OUTPUT.md].
+       Read RESEARCH_OUTPUT.md for context. Write findings to RESEARCH_FOLLOWUP_[id].md.
+       Report back: what you resolved and any new follow-up items you uncovered."
+   )
+   ```
+2. After they return, read every `RESEARCH_FOLLOWUP_[id].md`, **fold their findings into `RESEARCH_OUTPUT.md`**, and rebuild its "Follow-up Investigations Needed" list from any *new* threads the follow-up agents reported (drop the resolved ones).
+3. Repeat from step 1 if the list is non-empty.
+
+**Stop the loop** when "Follow-up Investigations Needed" is empty or after **3 rounds** (safety limit — if still non-empty, note the remaining threads when presenting).
+
+**Then present to the user.** Read the consolidated `RESEARCH_OUTPUT.md` and present findings, including only the **Open Questions for the User** (genuine product/requirement decisions).
 
 **Gate:** Ask the user: "Research complete. Continue to planning, or investigate more?"
-- If "more" → spawn another research sub-agent with expanded scope
+- If "more" → start a new follow-up round with the user's expanded scope as a follow-up item
 - **CRITICAL:** You MUST stop and wait for the user's explicit "continue" before proceeding.
 
 ---

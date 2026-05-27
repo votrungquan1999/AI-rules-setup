@@ -38,6 +38,15 @@ Read the user's feature request from the conversation context.
 
 6. **Count what you read** — track the number of files examined.
 
+7. **Resolve code-answerable questions yourself — do not defer them.**
+   If something can be answered by reading the code (how a function behaves, where a type is defined, whether a pattern already exists, how an existing flow works), keep reading until you have the answer. Do NOT write "this needs further investigation" or "the code should be checked to understand X" for anything you could resolve by reading more files.
+
+   A thread belongs in **Follow-up Investigations Needed** ONLY when it is code-answerable but you genuinely could not finish chasing it in this pass — e.g. the scope is too large, it branches into a separate subsystem, or you discovered it late. Each item must be a concrete, self-contained investigation target (a specific question + where to look), NOT a vague "look into this more."
+
+   A thread belongs in **Open Questions for the User** ONLY when it is a product/requirement decision the code cannot answer (desired behavior, scope boundary, business rule).
+
+   If you were re-run with a **specific follow-up item** to chase, investigate only that item, append your findings to the artifact, and resolve it — only re-list it if it branches into further code-answerable threads.
+
 ## Output
 
 Write findings to the `research-output.md` artifact in the brain directory:
@@ -65,10 +74,13 @@ Write findings to the `research-output.md` artifact in the brain directory:
 - [How tests are organized in this part of the codebase]
 - [Testing utilities available]
 
-## Unknowns / Questions
-- [Requirements that were unclear from the feature request]
-- [Assumptions made during research — flag these for user confirmation]
-- [Anything discovered during reading that needs user input]
+## Follow-up Investigations Needed
+<!-- Code-answerable threads you could not finish this pass. The orchestrator will re-run research on each. Leave empty if research is complete. -->
+- [Concrete question]: [Exact files/dirs/symbols to start from]
+
+## Open Questions for the User
+<!-- Product/requirement decisions only — NOT things the code can answer. -->
+- [Decision the user must make]
 ```
 
-**CRITICAL:** After writing the output, you MUST PAUSE execution. Ask the user if the research is sufficient and wait for their explicit command to "continue with implementation plan" or "continue" before moving to the next node. Answer any questions the user has about the research during this pause.
+**CRITICAL:** After writing the output, report to the orchestrator whether "Follow-up Investigations Needed" is empty. Do NOT pause for the user while that section is non-empty — the orchestrator (see the skill's Phase 1) re-runs research to resolve those threads first. Only once it is empty does the orchestrator pause to ask the user if research is sufficient. Answer any questions the user has during that pause.
