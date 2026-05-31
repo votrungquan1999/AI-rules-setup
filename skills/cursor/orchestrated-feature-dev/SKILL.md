@@ -1,6 +1,6 @@
 ---
 name: orchestrated-feature-dev
-description: Orchestrate end-to-end feature delivery with phased subagent execution, parallel investigation/validation, TDD implementation loops, and quality gates. Use for complex multi-step feature work.
+description: Orchestrate end-to-end feature delivery with phased subagent execution, parallel investigation/validation, BDD scenario loops, and quality gates. Use for complex multi-step feature work.
 ---
 
 # Orchestrated Feature Development
@@ -10,7 +10,7 @@ Structured pipeline for large feature delivery using parallelizable phases and e
 ## Pipeline
 
 ```text
-[research] -> [plan] -> [investigation parallel] -> [tdd loop] <-> [quality gate]
+[research] -> [plan] -> [investigation parallel] -> [bdd loop] <-> [quality gate]
                                           -> [validation parallel] -> [summary]
 ```
 
@@ -34,7 +34,7 @@ Use project-local state under `tmp/orchestrated-feature-dev/`:
   - quality review
   - validation
   - final summary
-- Run TDD implementation steps inline for continuity.
+- Run BDD scenario steps inline for continuity.
 - Route based on state files and gate outcomes.
 - Pause for user approval at plan gates.
 
@@ -43,7 +43,7 @@ Use project-local state under `tmp/orchestrated-feature-dev/`:
 - `nodes/node-research.md`
 - `nodes/node-plan.md`
 - `nodes/node-investigation.md`
-- `nodes/node-tdd-step.md`
+- `nodes/node-bdd-step.md`
 - `nodes/node-quality-gate.md`
 - `nodes/node-validation.md`
 - `nodes/node-summary.md`
@@ -51,7 +51,7 @@ Use project-local state under `tmp/orchestrated-feature-dev/`:
 ## Execution Rules
 
 - Research and planning must converge before coding.
-- One behavior/test per TDD step.
+- One behavior/test per BDD scenario step.
 - Trigger quality gate every 2-3 completed steps.
 - Run investigation and validation in parallel when steps are independent.
 - Stop on blocking uncertainty and request user decision.

@@ -23,10 +23,12 @@
     "test-best-practices",
     "test-driven-development",
     "tdd",
+    "bdd",
+    "behavior-driven-development",
     "red-green-refactor",
     "test-first"
   ],
-  "description": "Comprehensive testing guidelines for Claude Code including the 4 Pillars of Good Tests framework and TDD workflow. Covers test quality principles (Reliability, Validity, Sensitivity, Resilience) and test-driven development practices with red-green-refactor cycle, test-first approach, and quality assurance",
+  "description": "Comprehensive testing guidelines for Antigravity including the 4 Pillars of Good Tests framework and the TDD workflow. Covers test quality principles (Reliability, Validity, Sensitivity, Resilience) plus TDD vs BDD guidance — BDD as the outer user-facing behavior loop and TDD as the inner unit/algorithm loop — with a shared red-green-refactor cycle, test-first GATE, one-at-a-time discipline, and quality assurance",
   "version": "1.0.0",
   "lastUpdated": "2026-02-05T00:00:00Z",
   "activation": {
@@ -41,7 +43,7 @@
     },
     {
       "path": "tdd-guidelines.md",
-      "description": "Test-Driven Development guidelines with red-green-refactor cycle, test-first approach, and quality assurance practices",
+      "description": "Test-Driven Development guidelines with red-green-refactor cycle, test-first approach, quality assurance practices, and TDD vs BDD guidance (BDD outer loop, TDD inner loop) sharing the test-first GATE and one-at-a-time discipline",
       "targetPath": "tdd-guidelines.md",
       "required": true
     }

@@ -12,6 +12,12 @@ Test-Driven Development: write tests before implementation using red-green-refac
 5. **Test Quality** - Follow 4 Pillars of Testing (Reliability, Validity, Sensitivity, Resilience)
 
 
+## TDD vs BDD — when to use which
+
+- **BDD = outer loop.** Drive user-facing feature behavior with scenarios written as Given/When/Then. This is the default framing for feature development.
+- **TDD = inner loop.** Drive internal logic, algorithms, and utilities underneath a BDD scenario.
+- **Both share the same discipline:** the test-run GATE (run the test before implementing) and one-at-a-time (one BDD scenario / one TDD test, see it fail, make it pass, then next). Test-first applies to both — BDD is also test-first.
+
 ## Test Quality Checklist
 
 **4 Pillars:**

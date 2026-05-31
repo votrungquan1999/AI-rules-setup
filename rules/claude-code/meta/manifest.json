@@ -39,7 +39,7 @@
   "files": [
     {
       "path": "meta-rules.md",
-      "description": "Meta rules for rule application and code quality",
+      "description": "Meta rules for rule application and code quality, including mode-aware test-first enforcement (the test-run GATE and one-at-a-time discipline apply to both BDD scenarios and TDD unit tests)",
       "required": true
     },
     {

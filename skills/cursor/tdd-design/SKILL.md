@@ -1,6 +1,6 @@
 ---
 name: tdd-design
-description: Apply strict red-green-refactor cycles with one-test-at-a-time execution. Use when implementing logic incrementally with strong safety and feedback loops.
+description: Inner-loop helper for unit-level/algorithm development. Apply strict red-green-refactor cycles with one-test-at-a-time execution WITHIN a single BDD scenario step (not the feature workflow's default loop). Use to drive internal logic, algorithms, or utilities when a scenario needs fine-grained test-first coverage.
 ---
 
 # TDD Design

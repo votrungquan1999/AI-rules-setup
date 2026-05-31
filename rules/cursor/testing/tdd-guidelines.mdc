@@ -16,6 +16,14 @@ Test-Driven Development: write tests before implementation using red-green-refac
 
 ---
 
+## TDD vs BDD — when to use which
+
+- **BDD = outer loop.** Drives user-facing feature behavior. Express scenarios as Given/When/Then and let each scenario be one observable behavior. This is the default framing for feature work.
+- **TDD = inner loop.** Drives internal logic, algorithms, and utilities below a scenario. Use it when a BDD scenario needs fine-grained, unit-level coverage.
+- **Shared discipline.** Both are test-first: write the test, run it to see it fail (the GATE), then implement. Both go one at a time — one scenario (BDD) or one test (TDD). Test-first does not conflict with BDD; BDD is also test-first.
+
+---
+
 ## Red-Green-Refactor Cycle
 
 ### Red: Write Failing Test

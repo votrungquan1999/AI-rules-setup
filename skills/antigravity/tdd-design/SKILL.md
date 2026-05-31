@@ -1,6 +1,6 @@
 ---
 name: tdd-design
-description: Guides Test-Driven Development using the Red-Green-Refactor cycle with a test-first approach.
+description: Inner-loop helper for unit-level TDD of internal logic, algorithms, and utilities WITHIN a single BDD scenario step. Use the Red-Green-Refactor cycle, test-first, one test at a time. This is NOT the feature workflow's default loop — BDD (@bdd-design) drives the outer, user-facing behavior; invoke this only to drive the internal units underneath a scenario.
 ---
 
 # TDD Design

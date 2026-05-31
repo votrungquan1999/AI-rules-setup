@@ -52,8 +52,9 @@ For each task, Cursor MUST double-check:
 
 ## Test-First Enforcement
 
-- When doing test-first: NEVER write implementation code before running the test.
-- ONE test at a time. Run it. See the result. Then decide whether to implement.
+- The test-run GATE applies to BOTH modes: BDD (outer-loop, user-facing behavior) and TDD (inner-loop, internal logic). Both are test-first; test-first does not conflict with BDD.
+- NEVER write implementation code before running the test.
+- ONE at a time: one scenario (BDD) or one test (TDD). Run it. See the result. Then decide whether to implement.
 - The test run is a GATE — skipping it is a rule violation.
 
 ## Planning Mode

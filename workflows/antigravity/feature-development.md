@@ -11,8 +11,8 @@ Structured approach for implementing features using context-first research, plan
 1. **Understand Context First** - Read as many relevant files as possible before planning or writing any code
 2. **Plan Before Code** - Use `@create-implementation-plan` skill to create a plan before implementation
 3. **One Step at a Time** - Create one step, complete it, evaluate, then create the next step
-4. **Test-First** - Every step must have tests written before implementation (red-green-refactor)
-5. **BDD by Default** - Use Given/When/Then scenarios for most feature behavior; TDD only for internal logic
+4. **BDD by Default (outer loop)** - Frame each step as a user-facing behavior scenario in Given/When/Then. This is the primary framing. Drop to TDD only for the internal logic/algorithms underneath a scenario.
+5. **Test-First (within every scenario)** - Test-first is HOW each BDD scenario runs, not a competing approach. Write the scenario test before implementation; observe red → green within the scenario. BDD is test-first — no conflict.
 6. **Quality Gates** - Run quality checkpoints after every 2-3 completed steps
 
 ---
@@ -80,14 +80,16 @@ Each step is an **observable behavior** — something a user or system can obser
 
 **Create one step at a time.** After completing a step, evaluate what you learned and decide the next step. At most, create two steps upfront only if they are very closely related.
 
-**For each step:**
+**For each step (BDD-first ordering):**
 
-1. **Write the test** describing the behavior (Given/When/Then)
-2. **🚫 GATE: Run the test** — check `package.json` scripts for existing test commands (e.g., `npm test`). Use the project's defined command. You MUST see the result before writing any implementation.
-   - If it **fails** → proceed to step 3
-   - If it **passes** → behavior is already covered, skip step 3, mark done
-3. **Implement** the minimum code to make the test pass, then **run the test again** to confirm
-4. **Mark the step done** and evaluate — decide what the next step should be based on what you learned
+1. **Define the behavior scenario** in Given/When/Then — the observable, user-facing outcome.
+2. **Clarify if needed** — if the scenario's behavior or edge cases are ambiguous, stop and ask before writing the test.
+3. **Write the scenario test** capturing that Given/When/Then behavior. (For internal logic underneath the scenario, drop to a TDD unit test — still one at a time.)
+4. **🚫 GATE: Run the test** — check `package.json` scripts for existing test commands (e.g., `npm test`). Use the project's defined command. You MUST see the result before writing any implementation.
+   - If it **fails** → proceed to step 5
+   - If it **passes** → behavior is already covered, skip step 5, mark done
+5. **Implement** the minimum code to make the test pass, then **run the test again** to confirm (red → green)
+6. **Mark the step done** and evaluate — decide what the next step should be based on what you learned
 
 ### Quality Checkpoints
 

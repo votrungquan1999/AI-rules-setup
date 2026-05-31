@@ -1,6 +1,6 @@
-# Node: TDD Step
+# Node: BDD Scenario Step
 
-Execute one red-green-refactor cycle for a single observable behavior.
+Execute one BDD scenario (test-first) for a single observable behavior.
 
 ## Input
 
@@ -35,7 +35,7 @@ describe('[Feature/Scenario name]', () => {
 
 ### 2b. One Test Per Step
 
-**IMPORTANT:** Write exactly **one test** (one `it()` block) per TDD step. Do NOT batch multiple behaviors into the same step. Each step = one observable behavior = one test = one implementation cycle.
+**IMPORTANT:** Write exactly **one test** (one `it()` block) per BDD scenario step. Do NOT batch multiple behaviors into the same step. Each step = one observable behavior = one test = one implementation cycle.
 
 ### 3. 🚫 GATE: Run the Test
 

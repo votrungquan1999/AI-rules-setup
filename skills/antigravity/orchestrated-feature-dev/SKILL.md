@@ -12,7 +12,7 @@ An n8n-style workflow that orchestrates specialized node skills through a struct
 This skill acts as an **orchestrator** — it sequences specialized node skills, passes data between them via artifact files, and makes routing decisions based on results. Each node reads from and writes to the Antigravity artifact directory (`<appDataDir>/brain/<conversation-id>/`).
 
 ```
-[research] → [plan] → [investigation] → [tdd-step] ↔ [quality-gate] → [validation] → [summary]
+[research] → [plan] → [investigation] → [bdd-step] ↔ [quality-gate] → [validation] → [summary]
                             ↑                 ↑              |
                             fix plan          └── loop back ──┘
 ```
@@ -42,7 +42,7 @@ All workflow state files are created as Antigravity artifacts in the brain direc
 - `plan-steps.md` — Step list with affected files and dependencies
 - `implementation-plan.md` — Full implementation plan
 - `loop-state.json` — Loop counter and metadata
-- `step-result.md` — Latest TDD step result
+- `step-result.md` — Latest BDD scenario step result
 - `quality-result.md` — Latest quality gate result
 - `investigation-step-[N].md` — Per-step investigation findings
 - `investigation-summary.md` — Consolidated investigation results
@@ -142,7 +142,7 @@ The investigation node will:
 
 ## Phase 4: Implementation Loop
 
-This is the core loop — it alternates between TDD steps and quality gates.
+This is the core loop — it alternates between BDD scenario steps and quality gates.
 
 ### Initialize
 
@@ -150,9 +150,9 @@ Update `loop-state.json`: set `"current_step": 1, "quality_checks": 0, "max_step
 
 ### For Each Step
 
-**4a. TDD Step Node**
+**4a. BDD Scenario Step Node**
 
-Read the node instructions from `nodes/node-tdd-step.md` in this skill's directory, then execute them.
+Read the node instructions from `nodes/node-bdd-step.md` in this skill's directory, then execute them.
 
 The node will:
 
@@ -181,7 +181,7 @@ The quality gate will:
 
 **After completion**, read `quality-result.md` and route:
 
-- If `quality: "pass"` → continue to next TDD step
+- If `quality: "pass"` → continue to next BDD scenario step
 - If `quality: "needs-fixes"` → fix issues, then re-run quality gate
 - **Max 2 quality re-checks** per checkpoint to prevent infinite loops
 

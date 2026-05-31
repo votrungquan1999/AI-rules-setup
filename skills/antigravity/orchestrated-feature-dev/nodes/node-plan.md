@@ -14,13 +14,13 @@ Read the `research-output.md` artifact from the brain directory for context abou
 
 3. **Ensure the plan has the two key sections:**
    - **Technical Design**: Only significant decisions (new fields, API changes, strategy choices). Skip anything obvious.
-   - **Behaviors to Implement**: Observable behaviors as TDD steps — not code tasks:
+   - **Behaviors to Implement**: Observable behaviors as BDD scenario steps — not code tasks:
      - ✅ `User sees trending markets at the top`
      - ✅ `Valid inputs are persisted to the standard settings`
      - ❌ `Add isTrending field to database`
      - ❌ `Add StandardSettings validation schema`
 
-4. **Write the step list** to the workflow state artifact for the TDD loop to consume.
+4. **Write the step list** to the workflow state artifact for the BDD scenario loop to consume.
 
 ## Output
 

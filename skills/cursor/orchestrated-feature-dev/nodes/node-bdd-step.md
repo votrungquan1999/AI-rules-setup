@@ -1,6 +1,6 @@
-# Node: TDD Step
+# Node: BDD Scenario Step
 
-Execute one red-green-refactor cycle for a single planned behavior.
+Execute one BDD scenario (test-first) for a single observable behavior.
 
 ## Input
 
