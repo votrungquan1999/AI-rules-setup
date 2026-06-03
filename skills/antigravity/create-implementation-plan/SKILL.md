@@ -83,14 +83,22 @@ List the behaviors the system should exhibit, ordered by implementation priority
 **CRITICAL: ONE TEST AT A TIME**
 Never batch behaviors or write multiple tests at once. Each step must be exactly one behavior, which translates to exactly one test, followed immediately by its implementation.
 
+**Identify the client first.** Before listing any behavior, name the client/stakeholder of the feature. By DEFAULT this is a business or end-user stakeholder — frame every behavior as an outcome they would recognize and care about, in their words, traced to value. ONLY when the user explicitly states the client is a developer or an internal/consuming system (e.g. a library/API contract) may you phrase behaviors in developer terms.
+
 Each behavior must be:
 - **Observable** — something a user or system can verify externally
+- **In the client's language** — the outcome the stakeholder sees, NOT implementation mechanics (no schemas, fields, tables, queries, error codes, function/method/class names, the linter, CI, HTTP status)
 - **Not a code task** — describe what the system does, not how
+
+**Litmus test:** Read the behavior aloud to the stakeholder. Would they recognize it as something they asked for and care about? If it mentions code or internal mechanics, it FAILS — rewrite before proceeding.
 
 > ✅ `User sees trending markets at the top of the list`
 > ✅ `Valid inputs are persisted to the standard settings`
 > ✅ `Markets with score below threshold are excluded from trending`
-> ❌ `Add isTrending field to Market model`
+> ❌ `Add isTrending field to Market model` → ✅ `A trader sees trending markets at the top of the list` (client: trader)
+> ❌ `Reading a card whose stored shape violates the schema throws ERR_SCHEMA_DRIFT and logs the drift` → ✅ `A user is never shown a corrupted card — a damaged card is blocked and surfaced as an error instead of displayed` (client: end-user)
+> ❌ `Migrate listTasks onto findManyZ and assert parsed shape and order` → ✅ `A user sees their tasks listed in the expected order` (client: end-user)
+> ❌ `Running the linter reports no violations on a clean repo` → ✅ `Code that doesn't meet the team's quality bar is caught automatically before it can merge` (client: the team)
 > ❌ `Add StandardSettings interface to types file`
 > ❌ `Write SQL query for trending markets`
 
@@ -112,7 +120,7 @@ Group quality checkpoints after every 2-3 behaviors:
 
 ### Step 5: Write the Plan Document
 
-Write to `<appDataDir>/brain/<conversation-id>/implementation_plan.md` using this format:
+Write to `<appDataDir>/brain/<conversation-id>/implementation-plan.md` using this format:
 
 ```markdown
 # [Goal Description]
@@ -153,6 +161,10 @@ Brief description of the problem and what the change accomplishes.
 ### Step 6: Request Review
 
 **MUST pause for user review.** Use `notify_user` to request approval before any implementation begins.
+
+**What the user reviews:** Present the **implementation plan document** (`implementation-plan.md`) — the rich plan containing **Technical Design** + **Behaviors to Implement**. This document is the review artifact.
+
+**NEVER present a steps file for review.** A bare step list (the derived workflow-state artifact consumed by the BDD scenario loop) is NOT what the user reviews. Write any such steps file ONLY AFTER the plan is approved, and do not ask the user to review it.
 
 ---
 

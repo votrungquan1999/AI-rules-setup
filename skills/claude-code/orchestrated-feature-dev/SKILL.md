@@ -58,8 +58,8 @@ All workflow state is tracked in project-local files (add to `.gitignore`):
 
 - `RESEARCH_OUTPUT.md` — Research findings (written by research node)
 - `RESEARCH_FOLLOWUP_[id].md` — Targeted follow-up research findings (written by follow-up research sub-agents, folded back into `RESEARCH_OUTPUT.md`)
-- `PLAN_STEPS.md` — Step list with affected files and dependencies (written by plan node)
-- `implementation-plan.md` — Full implementation plan (written by plan node)
+- `PLAN_STEPS.md` — Step list with affected files and dependencies (written by plan node). Derived workflow state for the BDD loop — NOT presented for user review.
+- `implementation-plan.md` — Full implementation plan with Technical Design + Behaviors (written by plan node). This is the artifact the user reviews.
 - `IMPLEMENTATION_PROGRESS.md` — Progress tracking with test results (written by BDD scenario step node)
 - `INVESTIGATION_STEP_[N].md` — Per-step investigation findings (written by investigation nodes)
 - `VALIDATION_STEP_[N].md` — Per-step validation results (written by validation nodes)
@@ -126,7 +126,7 @@ Agent(
 )
 ```
 
-**After the sub-agent returns**, present the plan for user review.
+**After the sub-agent returns**, present `implementation-plan.md` (the rich plan with Technical Design + Behaviors) for user review. **NEVER present `PLAN_STEPS.md` for review** — it is derived workflow state for the BDD loop, not the artifact the user reviews.
 
 **Gate:** Do NOT proceed until the user approves the plan.
 

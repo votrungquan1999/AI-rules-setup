@@ -19,8 +19,8 @@ Structured pipeline for large feature delivery using parallelizable phases and e
 Use project-local state under `tmp/orchestrated-feature-dev/`:
 
 - `RESEARCH_OUTPUT.md`
-- `PLAN_STEPS.md`
-- `implementation-plan.md`
+- `PLAN_STEPS.md` — derived workflow state for the BDD loop; NOT presented for user review
+- `implementation-plan.md` — the rich plan document (Technical Design + Behaviors) the user reviews
 - `IMPLEMENTATION_PROGRESS.md`
 - `INVESTIGATION_STEP_<N>.md`
 - `VALIDATION_STEP_<N>.md`
@@ -36,7 +36,7 @@ Use project-local state under `tmp/orchestrated-feature-dev/`:
   - final summary
 - Run BDD scenario steps inline for continuity.
 - Route based on state files and gate outcomes.
-- Pause for user approval at plan gates.
+- Pause for user approval at plan gates. The review artifact is `implementation-plan.md` (Technical Design + Behaviors) — never present `PLAN_STEPS.md`, which is derived loop state written only after the plan is approved.
 
 ## Phase Entry Points
 

@@ -9,11 +9,33 @@ Behavior-Driven Development: define behavior through scenarios first, then imple
 
 ## Core Principles
 
-1. **Scenarios First** - Write behavior scenarios before any implementation
-2. **One Scenario at a Time** - Write one scenario → run to see result → implement → verify → next
-3. **User Behavior Focus** - Scenarios describe what the user/system does, not how it's coded
-4. **Living Documentation** - Scenarios serve as both tests and documentation
-5. **Ubiquitous Language** - Use domain language that stakeholders understand
+1. **Client's Language First** - Identify the client/stakeholder, then write every behavior in their business/end-user language and value — never in implementation mechanics (see [Write Behaviors in the Client's Language](#write-behaviors-in-the-clients-language))
+2. **Scenarios First** - Write behavior scenarios before any implementation
+3. **One Scenario at a Time** - Write one scenario → run to see result → implement → verify → next
+4. **User Behavior Focus** - Scenarios describe what the user/system does, not how it's coded
+5. **Living Documentation** - Scenarios serve as both tests and documentation
+6. **Ubiquitous Language** - Use domain language that stakeholders understand
+
+---
+
+## Write Behaviors in the Client's Language
+
+- **Identify the client first.** Before listing any behavior, name the client/stakeholder of the feature. By DEFAULT this is a business or end-user stakeholder.
+- **Business/end-user language is the default.** Frame every behavior as an outcome that stakeholder would recognize and care about, in their words. Tie behaviors to value via "As a [stakeholder], I want [capability], So that [value]".
+- **No implementation mechanics in a behavior.** A behavior must NOT name code artifacts or internals: schemas, fields, tables, queries, error codes, function/method/class names, the linter, CI, HTTP status, etc. If it does, it is written at the wrong altitude — rewrite it as the outcome the stakeholder sees.
+- **Litmus test:** Read the behavior aloud to the stakeholder. Would they recognize it as something they asked for and care about? If it mentions code or internal mechanics, it FAILS — rewrite before proceeding.
+- **Escape hatch:** ONLY when the user explicitly states the client is a developer or an internal/consuming system (e.g. a library/API contract) may you phrase behaviors in developer terms. Otherwise, always trace to business/end-user value.
+
+**Reframing examples** (client shown in parentheses):
+
+- ❌ "Reading a card whose stored shape violates the schema throws ERR_SCHEMA_DRIFT and logs the drift"
+  ✅ "A user is never shown a corrupted card — a damaged card is blocked and surfaced as an error instead of displayed" (client: end-user)
+- ❌ "Migrate listTasks onto findManyZ and assert parsed shape and order"
+  ✅ "A user sees their tasks listed in the expected order" (client: end-user)
+- ❌ "Running the linter reports no violations on a clean repo"
+  ✅ "Code that doesn't meet the team's quality bar is caught automatically before it can merge" (client: the team)
+- ❌ "Add isTrending field to the Market model"
+  ✅ "A trader sees trending markets at the top of the list" (client: trader)
 
 ---
 
@@ -64,6 +86,7 @@ Write scenarios describing behavior using three stages:
 - Key edge cases identified?
 - Error/failure scenarios included?
 - Scenarios use domain language, not implementation language?
+- Does every scenario read in the client's language (no code/internals)?
 - Any open questions from Step 0 surfaced and flagged?
 
 ---

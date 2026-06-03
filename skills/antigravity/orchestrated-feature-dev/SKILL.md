@@ -39,8 +39,8 @@ All workflow state files are created as Antigravity artifacts in the brain direc
 **Workflow artifacts:**
 
 - `research-output.md` — Research findings
-- `plan-steps.md` — Step list with affected files and dependencies
-- `implementation-plan.md` — Full implementation plan
+- `plan-steps.md` — Derived workflow state for the BDD loop (step list with affected files and dependencies); NOT presented for user review
+- `implementation-plan.md` — Full implementation plan (Technical Design + Behaviors); this is the document the user reviews
 - `loop-state.json` — Loop counter and metadata
 - `step-result.md` — Latest BDD scenario step result
 - `quality-result.md` — Latest quality gate result
@@ -100,7 +100,7 @@ Read the node instructions from `nodes/node-plan.md` in this skill's directory, 
 
 The plan node will use `@create-implementation-plan` to create the plan, reading research output as additional context. The step list must include affected files and dependencies per step.
 
-**Gate:** The plan node will request user review. Do NOT proceed until the user approves.
+**Gate:** The plan node will request user review of the **`implementation-plan.md`** document (the rich plan with Technical Design + Behaviors). NEVER present `plan-steps.md` for review — it is derived workflow state for the BDD loop, written only after approval. Do NOT proceed until the user approves.
 
 ---
 

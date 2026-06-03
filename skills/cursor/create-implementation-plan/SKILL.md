@@ -21,9 +21,23 @@ Plan first for medium/large tasks so implementation stays predictable.
    - data/API shape changes
    - strategy choices and tradeoffs
    - risk areas
-4. Convert scope into behavior-based implementation steps.
+4. Convert scope into behavior-based implementation steps (define observable behaviors):
+   - **Identify the client first.** Name the client/stakeholder of the feature before listing any behavior. By default this is a business or end-user stakeholder.
+   - **Business/end-user language is the default.** Frame each behavior as an outcome that stakeholder would recognize and care about, in their words, traced to value. No implementation mechanics: a behavior must NOT name schemas, fields, tables, queries, error codes, function/method/class names, the linter, CI, or HTTP status.
+   - **Litmus test:** Read the behavior aloud to the stakeholder. Would they recognize it as something they asked for and care about? If it mentions code or internal mechanics, it FAILS — rewrite before proceeding.
+   - **Escape hatch:** ONLY when the user explicitly states the client is a developer or an internal/consuming system (e.g. a library/API contract) may you phrase behaviors in developer terms. Otherwise, always trace to business/end-user value.
+
+   Reframing examples (client in parentheses):
+   - ❌ "Reading a card whose stored shape violates the schema throws ERR_SCHEMA_DRIFT and logs the drift"
+     ✅ "A user is never shown a corrupted card — a damaged card is blocked and surfaced as an error instead of displayed" (client: end-user)
+   - ❌ "Migrate listTasks onto findManyZ and assert parsed shape and order"
+     ✅ "A user sees their tasks listed in the expected order" (client: end-user)
+   - ❌ "Running the linter reports no violations on a clean repo"
+     ✅ "Code that doesn't meet the team's quality bar is caught automatically before it can merge" (client: the team)
+   - ❌ "Add isTrending field to the Market model"
+     ✅ "A trader sees trending markets at the top of the list" (client: trader)
 5. Include a test strategy for each step.
-6. Present plan and wait for approval before coding.
+6. Present `implementation-plan.md` (the rich plan document with Technical Design + Behaviors) for review and wait for approval before coding. This document — NOT any derived steps file — is what the user reviews. The steps file (`PLAN_STEPS.md`) is a derived workflow-state artifact that the BDD scenario loop consumes; write it ONLY AFTER the plan is approved, and never ask the user to review it.
 
 ## Output Shape
 

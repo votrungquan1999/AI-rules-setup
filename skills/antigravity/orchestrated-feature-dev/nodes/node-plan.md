@@ -14,17 +14,22 @@ Read the `research-output.md` artifact from the brain directory for context abou
 
 3. **Ensure the plan has the two key sections:**
    - **Technical Design**: Only significant decisions (new fields, API changes, strategy choices). Skip anything obvious.
-   - **Behaviors to Implement**: Observable behaviors as BDD scenario steps — not code tasks:
+   - **Behaviors to Implement**: Observable behaviors as BDD scenario steps — not code tasks. First name the client/stakeholder; write each behavior in their language and value; reject implementation mechanics (schemas, fields, tables, queries, error codes, function/class names, the linter, CI). By DEFAULT the client is a business/end-user; only phrase in developer terms if the user explicitly says the client is a developer or internal/consuming system.
+     - **Litmus test:** read it aloud to the stakeholder — if it mentions code or internals, it FAILS; rewrite it.
      - ✅ `User sees trending markets at the top`
      - ✅ `Valid inputs are persisted to the standard settings`
-     - ❌ `Add isTrending field to database`
-     - ❌ `Add StandardSettings validation schema`
+     - ❌ `Add isTrending field to the Market model` → ✅ `A trader sees trending markets at the top of the list` (client: trader)
+     - ❌ `Reading a card whose stored shape violates the schema throws ERR_SCHEMA_DRIFT and logs the drift` → ✅ `A user is never shown a corrupted card — a damaged card is blocked and surfaced as an error instead of displayed` (client: end-user)
+     - ❌ `Migrate listTasks onto findManyZ and assert parsed shape and order` → ✅ `A user sees their tasks listed in the expected order` (client: end-user)
+     - ❌ `Running the linter reports no violations on a clean repo` → ✅ `Code that doesn't meet the team's quality bar is caught automatically before it can merge` (client: the team)
 
-4. **Write the step list** to the workflow state artifact for the BDD scenario loop to consume.
+4. **Write the step list** to the workflow state artifact for the BDD scenario loop to consume — but only AFTER plan approval (see Output).
+
+**What the user reviews:** The review (requested via `@create-implementation-plan`) is performed on the **`implementation-plan.md`** document — the rich plan with **Technical Design** + **Behaviors**. NEVER present `plan-steps.md` for review.
 
 ## Output
 
-After the plan is approved, write the step list to the `plan-steps.md` artifact:
+After the plan is approved, write the step list to the `plan-steps.md` artifact. This file is internal loop state **derived from the approved plan** and is consumed by the BDD scenario loop — it is NOT presented to the user for review:
 
 ```markdown
 # Planned Steps
