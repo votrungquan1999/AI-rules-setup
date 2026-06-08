@@ -31,7 +31,7 @@ This Skill provides a structured approach to brainstorming and problem-solving u
 **Document Structure:**
 - Use markdown sections for organization
 - Use markdown links to refer between sections for easy navigation
-- Keep documents 200-300 lines for readability
+- Keep documents small and reasonable in size for readability
 
 ---
 
@@ -106,7 +106,7 @@ Questions to cover:
 
 ### File Organization
 - Create separate `.md` files for complex brainstorms
-- Split into multiple files when a single file exceeds 300 lines
+- Split into multiple files when a single file grows too large
 - Use descriptive filenames: `brainstorm-authentication-approach.md`
 - Link between files using markdown links
 
@@ -146,7 +146,7 @@ Current situation, background, what led here
 ```
 
 ### Keep Documents Modular
-- Each file: 200-300 lines for easy comprehension
+- Each file: small and reasonable in size for easy comprehension
 - Cross-reference with markdown links
 - Example: `For authentication details, see [auth-design.md](./auth-design.md)`
 
@@ -216,7 +216,7 @@ When helpful, use:
 7. **Review and refine** solutions
 8. **Zoom in one level** and repeat
 9. **Iterate until reaching implementation details**
-10. **Split into multiple files** if document exceeds 300 lines
+10. **Split into multiple files** if the document grows too large
 11. **Use markdown links** to connect related documents
 
 **Remember:** Start wide, zoom in progressively, iterate at each layer, document everything, and keep files modular for readability.

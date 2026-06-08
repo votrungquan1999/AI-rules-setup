@@ -81,8 +81,8 @@ This workflow provides a structured approach to brainstorming and problem-solvin
 
 7. **Split if Needed**
 
-   - Keep documents 200-300 lines for readability
-   - Split into multiple files when exceeding 300 lines
+   - Keep documents small and reasonable in size for readability
+   - Split into multiple files when a document grows too large
    - Cross-reference with markdown links
 
 ---

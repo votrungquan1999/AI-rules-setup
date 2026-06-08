@@ -69,7 +69,7 @@ Questions are stored in separate JSON files, grouped by relevancy in the `questi
 
 ### Key Requirements
 
-- Each file should be under 300 lines
+- Each file should be small and reasonable in size
 - All questions must have `tags` array for fuzzy search matching
 - Yes/no questions must have `keywords` array (added to context if user answers yes)
 - Choice questions have `options` array (selected option's keywords added to context)

@@ -129,7 +129,7 @@ This is a monorepo with both CLI and rules in the same repository:
 ## Important Rules and Guidelines
 
 ### Meta Rules (ALWAYS APPLY)
-- Keep files under **300 lines** for AI context management
+- Keep file size small and reasonable for AI context management
 - NEVER run `npm run build` or `npm run dev` after completing tasks
 - ALWAYS use `npm install` to install packages (never edit package.json directly)
 - NEVER implement unused/future features not explicitly requested
@@ -141,7 +141,7 @@ This is a monorepo with both CLI and rules in the same repository:
 ### Rule File Management
 - When changing rule files for one AI agent, update corresponding files for other agents
 - When changing rule content, update the manifest.json file as well
-- Cursor rule files MUST be strictly less than 200 lines (preferably ~150 lines)
+- Keep Cursor rule files small and reasonable in size
 
 
 ### Testing

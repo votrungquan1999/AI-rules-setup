@@ -13,7 +13,7 @@ For each task, Claude Code MUST double-check:
 
 - ALWAYS check all applicable rules before making any changes.
 - ALWAYS explain which rules were applied in the output.
-- MUST keep files under **300 lines** for AI context management.
+- MUST keep file size small and reasonable for AI context management.
 - NEVER require running/building the server to validate output.
 - NEVER run `npm run build` or `npm run dev` after completing tasks, the user will handle this.
 - ALWAYS use `npm install` to install packages. NEVER add packages directly to `package.json`.
