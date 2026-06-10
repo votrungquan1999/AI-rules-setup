@@ -14,16 +14,29 @@ Structured pipeline for large feature delivery using parallelizable phases and e
                                           -> [validation parallel] -> [summary]
 ```
 
+## Phase 0: Establish Task Workspace
+
+**Before writing any notes, spawning any subagent, or creating any artifact**, establish the task identifier and working directory — this is the very first step.
+
+1. Ask the user for a **task identifier** — a ticket id (e.g. `JIRA-123`, `LINEAR-456`) or any short label for this work.
+2. If the user has none, **derive a short kebab-case slug** from the feature request (e.g. `add-trending-markets`) and **confirm it** before proceeding.
+3. Create the working directory `./tmp/<identifier>/`.
+4. From here on, `<ws>` = `./tmp/<identifier>/`. Use it as the prefix for every state file, and **include this path in every subagent prompt** ("The task working directory is `<ws>` — read and write all state files there.").
+
+**Gate:** Do NOT start research until the identifier is set, confirmed, and the directory exists.
+
 ## State Files
 
-Use project-local state under `tmp/orchestrated-feature-dev/`:
+Every run is scoped to its task identifier so **multiple tasks run in parallel** without colliding. All state lives under the per-task workspace `<ws>` = `./tmp/<identifier>/`:
 
-- `RESEARCH_OUTPUT.md`
-- `PLAN_STEPS.md` — derived workflow state for the BDD loop; NOT presented for user review
-- `implementation-plan.md` — the rich plan document (Technical Design + Behaviors) the user reviews
-- `IMPLEMENTATION_PROGRESS.md`
-- `INVESTIGATION_STEP_<N>.md`
-- `VALIDATION_STEP_<N>.md`
+- `<ws>/RESEARCH_OUTPUT.md`
+- `<ws>/PLAN_STEPS.md` — derived workflow state for the BDD loop; NOT presented for user review
+- `<ws>/implementation-plan.md` — the rich plan document (Technical Design + Behaviors) the user reviews
+- `<ws>/IMPLEMENTATION_PROGRESS.md`
+- `<ws>/INVESTIGATION_STEP_<N>.md`
+- `<ws>/VALIDATION_STEP_<N>.md`
+
+`./tmp/` should be in `.gitignore`; delete `<ws>` once the feature is merged.
 
 ## Orchestrator Responsibilities
 
@@ -36,7 +49,8 @@ Use project-local state under `tmp/orchestrated-feature-dev/`:
   - final summary
 - Run BDD scenario steps inline for continuity.
 - Route based on state files and gate outcomes.
-- Pause for user approval at plan gates. The review artifact is `implementation-plan.md` (Technical Design + Behaviors) — never present `PLAN_STEPS.md`, which is derived loop state written only after the plan is approved.
+- Pass the task workspace path `<ws>` to every subagent it spawns.
+- Pause for user approval at plan gates. The review artifact is `<ws>/implementation-plan.md` (Technical Design + Behaviors) — never present `<ws>/PLAN_STEPS.md`, which is derived loop state written only after the plan is approved.
 
 ## Phase Entry Points
 

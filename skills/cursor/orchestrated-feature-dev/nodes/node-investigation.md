@@ -2,10 +2,12 @@
 
 Investigate one planned step in depth before implementation.
 
+> **Task workspace:** All state files live in the task working directory `<ws>` (`./tmp/<identifier>/`) given in your prompt. Every state-file path below is relative to `<ws>`.
+
 ## Input
 
-- `tmp/orchestrated-feature-dev/implementation-plan.md`
-- `tmp/orchestrated-feature-dev/PLAN_STEPS.md`
+- `<ws>/implementation-plan.md`
+- `<ws>/PLAN_STEPS.md`
 - Assigned step number `N`
 
 ## Workflow
@@ -18,7 +20,7 @@ Investigate one planned step in depth before implementation.
 
 ## Output
 
-Write `tmp/orchestrated-feature-dev/INVESTIGATION_STEP_<N>.md`:
+Write `<ws>/INVESTIGATION_STEP_<N>.md`:
 
 ```markdown
 ## Step

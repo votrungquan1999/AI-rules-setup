@@ -2,10 +2,12 @@
 
 Deep-dive investigation of a single plan step. Multiple instances run in parallel — one per step — each with full plan context.
 
+> **Task workspace:** All state files live in the task working directory `<ws>` (`./tmp/<identifier>/`) given in your prompt. Every state-file path below is relative to `<ws>`.
+
 ## Input
 
-- Read `implementation-plan.md` for the **full plan** (all steps, technical design, architecture decisions)
-- Read `PLAN_STEPS.md` for the step list
+- Read `<ws>/implementation-plan.md` for the **full plan** (all steps, technical design, architecture decisions)
+- Read `<ws>/PLAN_STEPS.md` for the step list
 - You are assigned **Step [N]** — investigate this step only, but use the full plan to understand how it relates to other steps
 
 ## Execution
@@ -56,7 +58,7 @@ Compare what the plan says against what the codebase actually has:
 
 ## Output
 
-Write findings to `INVESTIGATION_STEP_[N].md` in the project root:
+Write findings to `<ws>/INVESTIGATION_STEP_[N].md`:
 
 ```markdown
 # Investigation: Step [N] — [behavior description]

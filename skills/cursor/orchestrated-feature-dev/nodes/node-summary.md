@@ -2,14 +2,16 @@
 
 Produce final delivery summary after validation.
 
+> **Task workspace:** All state files live in the task working directory `<ws>` (`./tmp/<identifier>/`) given in your prompt. Every state-file path below is relative to `<ws>`. Remind the user the whole `<ws>` folder can be deleted once the feature is merged.
+
 ## Input
 
-- `tmp/orchestrated-feature-dev/RESEARCH_OUTPUT.md`
-- `tmp/orchestrated-feature-dev/implementation-plan.md`
-- `tmp/orchestrated-feature-dev/PLAN_STEPS.md`
-- `tmp/orchestrated-feature-dev/IMPLEMENTATION_PROGRESS.md`
-- `tmp/orchestrated-feature-dev/QUALITY_RESULT.md` (if present)
-- `tmp/orchestrated-feature-dev/VALIDATION_STEP_<N>.md` files
+- `<ws>/RESEARCH_OUTPUT.md`
+- `<ws>/implementation-plan.md`
+- `<ws>/PLAN_STEPS.md`
+- `<ws>/IMPLEMENTATION_PROGRESS.md`
+- `<ws>/QUALITY_RESULT.md` (if present)
+- `<ws>/VALIDATION_STEP_<N>.md` files
 
 ## Workflow
 
@@ -20,7 +22,7 @@ Produce final delivery summary after validation.
 
 ## Output
 
-Create `tmp/orchestrated-feature-dev/FINAL_SUMMARY.md`:
+Create `<ws>/FINAL_SUMMARY.md`:
 
 ```markdown
 ## Feature Outcome

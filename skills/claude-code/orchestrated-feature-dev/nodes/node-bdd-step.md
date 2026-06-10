@@ -2,15 +2,17 @@
 
 Execute one BDD scenario (test-first) for a single observable behavior.
 
+> **Task workspace:** All state files live in the task working directory `<ws>` (`./tmp/<identifier>/`) given in your prompt. Every state-file path below is relative to `<ws>`.
+
 ## Input
 
-Read the `PLAN_STEPS.md` file to find the next `pending` step.
+Read the `<ws>/PLAN_STEPS.md` file to find the next `pending` step.
 
 ## Execution
 
 ### 1. Identify the Behavior
 
-Find the first step with `Status: pending` in `PLAN_STEPS.md`. This is your target behavior.
+Find the first step with `Status: pending` in `<ws>/PLAN_STEPS.md`. This is your target behavior.
 
 ### 2. Write the Test
 
@@ -43,7 +45,7 @@ describe('[Feature/Scenario name]', () => {
 Run the test. You **MUST** see the result before writing ANY implementation code.
 
 - **If it fails** → proceed to step 4
-- **If it passes** → behavior is already covered. Update `PLAN_STEPS.md` to mark this step as `done (already covered)`. Skip to Output.
+- **If it passes** → behavior is already covered. Update `<ws>/PLAN_STEPS.md` to mark this step as `done (already covered)`. Skip to Output.
 
 ### 4. Implement
 
@@ -62,10 +64,10 @@ Only if there's an obvious improvement. Keep it small. Run tests again.
 
 ## Output
 
-Update `PLAN_STEPS.md`:
+Update `<ws>/PLAN_STEPS.md`:
 - Change the completed step's status to `done` (or `done (already covered)`)
 
-Update `IMPLEMENTATION_PROGRESS.md` with the step result:
+Update `<ws>/IMPLEMENTATION_PROGRESS.md` with the step result:
 
 ```markdown
 ### Step [number]: [behavior]

@@ -2,10 +2,12 @@
 
 Run periodic quality checks across recent implementation steps.
 
+> **Task workspace:** State files live in the task working directory `<ws>` (`./tmp/<identifier>/`) given in your prompt.
+
 ## Input
 
-- `tmp/orchestrated-feature-dev/PLAN_STEPS.md`
-- `tmp/orchestrated-feature-dev/IMPLEMENTATION_PROGRESS.md`
+- `<ws>/PLAN_STEPS.md`
+- `<ws>/IMPLEMENTATION_PROGRESS.md`
 
 ## Workflow
 
@@ -16,7 +18,7 @@ Run periodic quality checks across recent implementation steps.
 
 ## Output
 
-Write `tmp/orchestrated-feature-dev/QUALITY_RESULT.md`:
+Write `<ws>/QUALITY_RESULT.md`:
 
 ```markdown
 ## Checkpoint

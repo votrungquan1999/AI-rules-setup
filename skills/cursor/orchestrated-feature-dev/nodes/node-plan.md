@@ -2,9 +2,11 @@
 
 Create an execution-ready implementation plan from research findings.
 
+> **Task workspace:** All state files live in the task working directory `<ws>` (`./tmp/<identifier>/`) given in your prompt. Every state-file path below is relative to `<ws>`.
+
 ## Input
 
-- `tmp/orchestrated-feature-dev/RESEARCH_OUTPUT.md`
+- `<ws>/RESEARCH_OUTPUT.md`
 
 ## Workflow
 
@@ -12,7 +14,7 @@ Create an execution-ready implementation plan from research findings.
 2. Define behavior-based step list (not code tasks). First name the client/stakeholder; write each behavior in their language and value; reject implementation mechanics (schemas, fields, error codes, function/method/class names, the linter, CI, HTTP status). Litmus test: would the stakeholder recognize this as something they asked for and care about? If it mentions code/internals, it FAILS — rewrite. (Escape hatch: only when the user explicitly states the client is a developer or internal/consuming system may you use developer terms.)
 3. Include dependencies and likely touched files per step.
 4. Add quality checkpoint markers every 2-3 steps.
-5. Present for user approval before implementation. Run the review via @create-implementation-plan on `implementation-plan.md` (the rich plan with Technical Design + Behaviors) — this document, NOT `PLAN_STEPS.md`, is what the user reviews.
+5. Present for user approval before implementation. Run the review via @create-implementation-plan on `<ws>/implementation-plan.md` (the rich plan with Technical Design + Behaviors) — this document, NOT `<ws>/PLAN_STEPS.md`, is what the user reviews.
 
 ### Behaviors to Implement — reframing examples (client in parentheses)
 
@@ -29,10 +31,10 @@ Create an execution-ready implementation plan from research findings.
 
 Write:
 
-- `tmp/orchestrated-feature-dev/implementation-plan.md` (the review artifact)
-- `tmp/orchestrated-feature-dev/PLAN_STEPS.md` — internal loop state derived from the approved plan; write it ONLY AFTER the plan is approved and never present it to the user for review
+- `<ws>/implementation-plan.md` (the review artifact)
+- `<ws>/PLAN_STEPS.md` — internal loop state derived from the approved plan; write it ONLY AFTER the plan is approved and never present it to the user for review
 
-`PLAN_STEPS.md` format:
+`<ws>/PLAN_STEPS.md` format:
 
 ```markdown
 ## Step 1: <observable behavior>

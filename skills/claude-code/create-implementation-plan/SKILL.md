@@ -21,6 +21,15 @@ Ensures significant changes are well-thought-out and reviewed before implementat
 
 ## Instructions
 
+### Step 0: Establish the Task Workspace
+
+**Before writing any notes or the plan document**, decide where artifacts go:
+
+- **If a caller gave you a working directory** (e.g. the orchestrator passes `<ws>` = `./tmp/<identifier>/`), use it as-is — write the plan there and skip the rest of this step.
+- **Otherwise**, ask the user for a **task identifier** — a ticket id (e.g. `JIRA-123`) or any short label. If they have none, **derive a short kebab-case slug** from the request and **confirm it**. Then use `<ws>` = `./tmp/<identifier>/` and create that directory.
+
+Throughout this skill, `<ws>` refers to that working directory. Scoping artifacts under `./tmp/<identifier>/` lets multiple planning tasks coexist without overwriting each other.
+
 ### Step 1: Research the Codebase
 
 **Goal:** Understand the existing implementation before planning.
@@ -111,7 +120,7 @@ Group quality checkpoints after every 2-3 behaviors:
 
 ### Step 5: Write the Plan Document
 
-Write the plan to a file in the project (e.g., `implementation-plan.md`) using this format:
+Write the plan to `<ws>/implementation-plan.md` (the task workspace from Step 0) using this format:
 
 ```markdown
 # [Goal Description]
@@ -144,9 +153,9 @@ Brief description of the problem and what the change accomplishes.
 
 ### Step 6: Request Review
 
-**MUST pause for user review.** Present the implementation plan document (`implementation-plan.md`) — the rich plan with Technical Design + Behaviors — and wait for approval before any implementation begins.
+**MUST pause for user review.** Present the implementation plan document (`<ws>/implementation-plan.md`) — the rich plan with Technical Design + Behaviors — and wait for approval before any implementation begins.
 
-**NEVER present a steps file for review.** A derived steps file (e.g. `PLAN_STEPS.md`) is workflow-state for the BDD scenario loop, not the artifact the user reviews. Write it only AFTER the plan is approved, and do not ask the user to review it.
+**NEVER present a steps file for review.** A derived steps file (e.g. `<ws>/PLAN_STEPS.md`) is workflow-state for the BDD scenario loop, not the artifact the user reviews. Write it only AFTER the plan is approved, and do not ask the user to review it.
 
 ---
 

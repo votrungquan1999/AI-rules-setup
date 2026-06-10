@@ -2,15 +2,17 @@
 
 Create a focused implementation plan using research output as context.
 
+> **Task workspace:** All state files live in the task working directory `<ws>` (`./tmp/<identifier>/`) given in your prompt. Every state-file path below is relative to `<ws>`.
+
 ## Input
 
-Read the `RESEARCH_OUTPUT.md` file from the project root for context about the codebase.
+Read the `<ws>/RESEARCH_OUTPUT.md` file for context about the codebase.
 
 ## Execution
 
 1. **Read the research output** to understand patterns, affected areas, and existing code.
 
-2. **Use `@create-implementation-plan`** to create the plan. When the skill asks you to research, point it to the research output file instead of re-reading the codebase — the research is already done. The review it performs is on `implementation-plan.md` (the rich plan with Technical Design + Behaviors) — never on the steps file.
+2. **Use `@create-implementation-plan`** to create the plan, telling it to write the plan to `<ws>/implementation-plan.md`. When the skill asks you to research, point it to the research output file instead of re-reading the codebase — the research is already done. The review it performs is on `<ws>/implementation-plan.md` (the rich plan with Technical Design + Behaviors) — never on the steps file.
 
 3. **Ensure the plan has the two key sections:**
    - **Technical Design**: Only significant decisions (new fields, API changes, strategy choices). Skip anything obvious.
@@ -28,7 +30,7 @@ Read the `RESEARCH_OUTPUT.md` file from the project root for context about the c
 
 ## Output
 
-After the plan is approved, write the step list to `PLAN_STEPS.md` in the project root. This file is internal loop state derived from the approved plan — the BDD scenario loop consumes it. It is NOT presented to the user for review; the user reviews `implementation-plan.md`.
+After the plan is approved, write the step list to `<ws>/PLAN_STEPS.md`. This file is internal loop state derived from the approved plan — the BDD scenario loop consumes it. It is NOT presented to the user for review; the user reviews `<ws>/implementation-plan.md`.
 
 ```markdown
 # Planned Steps
@@ -63,4 +65,4 @@ Each step MUST include:
 - **Affected files** — every file that will be created, modified, or read during implementation
 - **Dependencies** — which other steps must complete first (or "none")
 
-The implementation plan itself is written to `implementation-plan.md` per the `@create-implementation-plan` skill convention.
+The implementation plan itself is written to `<ws>/implementation-plan.md` per the `@create-implementation-plan` skill convention.

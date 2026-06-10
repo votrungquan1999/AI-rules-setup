@@ -15,6 +15,7 @@ Plan first for medium/large tasks so implementation stays predictable.
 
 ## Workflow
 
+0. **Establish the task workspace (before writing any notes or the plan).** If a caller gave you a working directory (e.g. the orchestrator passes `<ws>` = `./tmp/<identifier>/`), use it. Otherwise ask the user for a **task identifier** — a ticket id (e.g. `JIRA-123`) or any short label; if they have none, derive a short kebab-case slug and **confirm it**. Then `<ws>` = `./tmp/<identifier>/` (create it). Scoping artifacts under `./tmp/<identifier>/` lets multiple planning tasks coexist without overwriting each other. All artifact paths below are relative to `<ws>`.
 1. Research relevant code paths and current patterns.
 2. Ask clarifying questions for gaps.
 3. Define significant design decisions only:
@@ -37,7 +38,7 @@ Plan first for medium/large tasks so implementation stays predictable.
    - ❌ "Add isTrending field to the Market model"
      ✅ "A trader sees trending markets at the top of the list" (client: trader)
 5. Include a test strategy for each step.
-6. Present `implementation-plan.md` (the rich plan document with Technical Design + Behaviors) for review and wait for approval before coding. This document — NOT any derived steps file — is what the user reviews. The steps file (`PLAN_STEPS.md`) is a derived workflow-state artifact that the BDD scenario loop consumes; write it ONLY AFTER the plan is approved, and never ask the user to review it.
+6. Present `<ws>/implementation-plan.md` (the rich plan document with Technical Design + Behaviors) for review and wait for approval before coding. This document — NOT any derived steps file — is what the user reviews. The steps file (`<ws>/PLAN_STEPS.md`) is a derived workflow-state artifact that the BDD scenario loop consumes; write it ONLY AFTER the plan is approved, and never ask the user to review it.
 
 ## Output Shape
 

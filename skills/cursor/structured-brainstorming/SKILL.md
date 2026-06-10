@@ -23,6 +23,7 @@ Use a disciplined brainstorming method that prevents premature implementation.
 
 ## Workflow
 
+0. **Establish the task workspace (before writing any brainstorm notes).** If a caller gave you a working directory (e.g. `<ws>` = `./tmp/<identifier>/`), use it. Otherwise ask the user for a **task identifier** — a ticket id (e.g. `JIRA-123`) or any short label; if they have none, derive a short kebab-case slug from the topic and **confirm it**. Then `<ws>` = `./tmp/<identifier>/` (create it). Write all brainstorm docs (e.g. `<ws>/brainstorm-<topic>.md`) under it so multiple brainstorms run in parallel without colliding.
 1. Write a clear problem statement.
 2. Ask clarifying questions:
    - Scope and out-of-scope

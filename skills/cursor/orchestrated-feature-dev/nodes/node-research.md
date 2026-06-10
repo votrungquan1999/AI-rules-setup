@@ -2,6 +2,8 @@
 
 Gather codebase context and remove ambiguity before planning.
 
+> **Task workspace:** All state files live in the task working directory `<ws>` (`./tmp/<identifier>/`) given in your prompt. Every state-file path below is relative to `<ws>`.
+
 ## Input
 
 - User feature request
@@ -23,7 +25,7 @@ Gather codebase context and remove ambiguity before planning.
 
 ## Output
 
-Write `tmp/orchestrated-feature-dev/RESEARCH_OUTPUT.md`:
+Write `<ws>/RESEARCH_OUTPUT.md`:
 
 ```markdown
 ## Files Read

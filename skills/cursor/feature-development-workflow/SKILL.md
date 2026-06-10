@@ -22,6 +22,15 @@ Build features incrementally with explicit planning and verification.
 
 ## Workflow
 
+### Phase 0: Establish the Task Workspace
+
+**Before writing any notes, plan, or progress file:**
+
+- If a caller gave you a working directory (e.g. the orchestrator passes `<ws>` = `./tmp/<identifier>/`), use it.
+- Otherwise, ask the user for a **task identifier** — a ticket id (e.g. `JIRA-123`) or any short label; if they have none, derive a short kebab-case slug and **confirm it**. Then `<ws>` = `./tmp/<identifier>/` (create it).
+
+`<ws>` is that working directory. Write the plan and progress file (e.g. `<ws>/IMPLEMENTATION_PROGRESS.md`) under it so multiple tasks run in parallel without colliding.
+
 ### Phase 1: Context and Clarification
 
 1. Read relevant code paths and existing patterns.
@@ -54,6 +63,8 @@ After every 2-3 steps:
 - Re-verify before continuing.
 
 ## Suggested Progress Format
+
+Write progress to `<ws>/IMPLEMENTATION_PROGRESS.md`:
 
 ```markdown
 ## Step N: <behavior>

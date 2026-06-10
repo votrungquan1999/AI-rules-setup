@@ -2,11 +2,13 @@
 
 Execute one BDD scenario (test-first) for a single observable behavior.
 
+> **Task workspace:** All state files live in the task working directory `<ws>` (`./tmp/<identifier>/`) given in your prompt. Every state-file path below is relative to `<ws>`.
+
 ## Input
 
-- `tmp/orchestrated-feature-dev/PLAN_STEPS.md`
-- `tmp/orchestrated-feature-dev/IMPLEMENTATION_PROGRESS.md`
-- `tmp/orchestrated-feature-dev/INVESTIGATION_STEP_<N>.md` for current step
+- `<ws>/PLAN_STEPS.md`
+- `<ws>/IMPLEMENTATION_PROGRESS.md`
+- `<ws>/INVESTIGATION_STEP_<N>.md` for current step
 
 ## Workflow
 
@@ -21,8 +23,8 @@ Execute one BDD scenario (test-first) for a single observable behavior.
 
 Update:
 
-- `tmp/orchestrated-feature-dev/PLAN_STEPS.md`
-- `tmp/orchestrated-feature-dev/IMPLEMENTATION_PROGRESS.md`
+- `<ws>/PLAN_STEPS.md`
+- `<ws>/IMPLEMENTATION_PROGRESS.md`
 
 Progress entry format:
 

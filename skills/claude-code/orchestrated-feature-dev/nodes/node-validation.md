@@ -2,18 +2,20 @@
 
 Post-implementation validation of a single plan step. Multiple instances run in parallel — one per step — each with full plan and implementation context.
 
+> **Task workspace:** All state files live in the task working directory `<ws>` (`./tmp/<identifier>/`) given in your prompt. Every state-file path below is relative to `<ws>`.
+
 ## Input
 
-- Read `implementation-plan.md` for the **full plan**
-- Read `PLAN_STEPS.md` for step statuses
-- Read `IMPLEMENTATION_PROGRESS.md` for implementation details across all steps
+- Read `<ws>/implementation-plan.md` for the **full plan**
+- Read `<ws>/PLAN_STEPS.md` for step statuses
+- Read `<ws>/IMPLEMENTATION_PROGRESS.md` for implementation details across all steps
 - You are assigned **Step [N]** — validate this step only, but use the full context to check cross-step consistency
 
 ## Execution
 
 ### 1. Verify Implementation Matches Plan
 
-Read the files changed for your step (listed in `IMPLEMENTATION_PROGRESS.md`):
+Read the files changed for your step (listed in `<ws>/IMPLEMENTATION_PROGRESS.md`):
 - Does the implementation actually deliver the planned behavior?
 - Are there deviations from the plan that weren't documented?
 - Was the technical approach from the plan followed?
@@ -48,7 +50,7 @@ Quick review of the implementation:
 
 ## Output
 
-Write findings to `VALIDATION_STEP_[N].md` in the project root:
+Write findings to `<ws>/VALIDATION_STEP_[N].md`:
 
 ```markdown
 # Validation: Step [N] — [behavior description]

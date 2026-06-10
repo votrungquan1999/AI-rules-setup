@@ -23,6 +23,15 @@ This Skill provides a structured approach for implementing features and tasks in
 
 **Goal:** Break down work into implementable steps with clear acceptance criteria.
 
+**Step 0: Establish the Task Workspace**
+
+**Before writing any notes, the plan, or the progress file**, establish where artifacts go:
+
+- **If a caller gave you a working directory** (e.g. the orchestrator passes `<ws>` = `./tmp/<identifier>/`), use it.
+- **Otherwise**, ask the user for a **task identifier** — a ticket id (e.g. `JIRA-123`) or any short label. If they have none, **derive a short kebab-case slug** from the request and **confirm it**. Then use `<ws>` = `./tmp/<identifier>/` and create that directory.
+
+Throughout this skill, `<ws>` refers to that working directory. Scoping artifacts under `./tmp/<identifier>/` lets multiple tasks run in parallel without their plan/progress files colliding.
+
 **Step 1: Understand the Context**
 
 Before creating your plan, read as many relevant files as possible to understand:
@@ -77,7 +86,7 @@ Create plan based on the gathered information. MUST pause for user review and wa
 ```
 
 **Create Progress File:**
-Create a file (e.g., `IMPLEMENTATION_PROGRESS.md`) to track completed steps. Add steps ONLY as you work on them, not in advance.
+Create the progress file at `<ws>/IMPLEMENTATION_PROGRESS.md` (the task workspace from Step 0) to track completed steps. Add steps ONLY as you work on them, not in advance.
 
 ```markdown
 # Implementation Progress: [Task Name]
