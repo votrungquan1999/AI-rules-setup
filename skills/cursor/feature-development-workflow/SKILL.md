@@ -48,11 +48,12 @@ Build features incrementally with explicit planning and verification.
 For each step:
 
 1. Define behavior scenario(s).
-2. Write or update tests.
-3. Run tests to validate failure/pass states as needed.
-4. Implement minimal code to satisfy behavior.
-5. Re-run tests and quick lint/type checks.
-6. Move to next step only when current step is stable.
+2. Write ONE test at a time.
+3. Scaffold the structure the test touches (route, field, empty handler returning a default) — no behavior logic.
+4. Run the test before writing behavior logic — expect a failure on the behavior assertion. A structural error (404, missing field, import error) is NOT a valid red; fix the scaffolding and re-run. If no meaningful red is possible (the scaffolding IS the implementation), write just enough code to pass first and expect green from the first run — note this explicitly.
+5. Implement minimal code to satisfy behavior.
+6. Re-run tests and quick lint/type checks.
+7. Move to next step only when current step is stable.
 
 ### Phase 4: Quality Gate
 

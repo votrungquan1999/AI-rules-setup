@@ -12,8 +12,9 @@ Structured approach for implementing features using context-first research, plan
 2. **Plan Before Code** - Use `@create-implementation-plan` skill to create a plan before implementation
 3. **One Step at a Time** - Create one step, complete it, evaluate, then create the next step
 4. **BDD by Default (outer loop)** - Frame each step as a user-facing behavior scenario in Given/When/Then. This is the primary framing. Drop to TDD only for the internal logic/algorithms underneath a scenario.
-5. **Test-First (within every scenario)** - Test-first is HOW each BDD scenario runs, not a competing approach. Write the scenario test before implementation; observe red → green within the scenario. BDD is test-first — no conflict.
-6. **Quality Gates** - Run quality checkpoints after every 2-3 completed steps
+5. **Test-First (within every scenario)** - Test-first is HOW each BDD scenario runs, not a competing approach. Write the scenario test before behavior logic; observe a meaningful red → green within the scenario (or green from the start when no real red is possible). BDD is test-first — no conflict.
+6. **Meaningful Red** - A red run only counts when a behavior assertion fails. Structural failures (404 route not registered, missing field/import) validate nothing — scaffold structure before running, and never manufacture a useless red.
+7. **Quality Gates** - Run quality checkpoints after every 2-3 completed steps
 
 ---
 
@@ -85,11 +86,13 @@ Each step is an **observable behavior** — something a user or system can obser
 1. **Define the behavior scenario** in Given/When/Then — the observable, user-facing outcome.
 2. **Clarify if needed** — if the scenario's behavior or edge cases are ambiguous, stop and ask before writing the test.
 3. **Write the scenario test** capturing that Given/When/Then behavior. (For internal logic underneath the scenario, drop to a TDD unit test — still one at a time.)
-4. **🚫 GATE: Run the test** — check `package.json` scripts for existing test commands (e.g., `npm test`). Use the project's defined command. You MUST see the result before writing any implementation.
-   - If it **fails** → proceed to step 5
-   - If it **passes** → behavior is already covered, skip step 5, mark done
-5. **Implement** the minimum code to make the test pass, then **run the test again** to confirm (red → green)
-6. **Mark the step done** and evaluate — decide what the next step should be based on what you learned
+4. **Scaffold structure** — put in place whatever structure the test touches (route, empty handler, field, empty function returning a default) so the run can only fail on the behavior assertion. Scaffolding contains no behavior logic. If the minimal scaffolding already IS the implementation (trivial pass-through, static field), write just enough code to pass first and expect green from the first run — note this explicitly; do NOT manufacture a useless red.
+5. **🚫 GATE: Run the test** — check `package.json` scripts for existing test commands (e.g., `npm test`). Use the project's defined command. You MUST see the result before writing any behavior logic.
+   - If it **fails on the behavior assertion** → real red, proceed to step 6
+   - If it **fails structurally** (404 route not registered, missing field, import error) → that red validates nothing; fix the scaffolding and run again
+   - If it **passes** → behavior is already covered (or the expected green-from-start case), skip step 6, mark done
+6. **Implement** the minimum code to make the test pass, then **run the test again** to confirm (red → green)
+7. **Mark the step done** and evaluate — decide what the next step should be based on what you learned
 
 ### Quality Checkpoints
 
@@ -116,7 +119,7 @@ Before writing any tests, locate the "4 Pillars of Testing" document in the proj
 ### Step 1: High-engagement open markets appear as "TRENDING"
 
 - [x] Write test
-- [x] Run test (Red — fails as expected)
+- [x] Run test (Red — behavior assertion fails)
 - [x] Implement minimum code
 - [x] Run test (Green — passes)
 
@@ -137,8 +140,8 @@ Before writing any tests, locate the "4 Pillars of Testing" document in the proj
 
 ### Step 4: No duplicate markets between trending and regular
 
-- [x] Write test
-- [x] Run test (Red)
+- [x] Write test + scaffold structure
+- [x] Run test (Red — behavior assertion fails)
 - [x] Implement deduplication logic
 - [x] Run test (Green)
 
@@ -163,5 +166,6 @@ Before writing any tests, locate the "4 Pillars of Testing" document in the proj
 - ❌ Creating all steps upfront — evaluate after each step
 - ❌ Skipping quality checkpoints after 2-3 steps
 - ❌ Implementing without a plan (use `@create-implementation-plan` first)
-- ❌ Writing implementation code before running the test
+- ❌ Writing behavior logic before running the test (structural scaffolding is allowed and encouraged)
+- ❌ Treating a structural failure (404, missing route/field/import) as a valid red — it validates nothing
 - ❌ Batching multiple test-write-implement cycles without running tests between them

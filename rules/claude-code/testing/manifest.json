@@ -30,7 +30,7 @@
     "claude-code",
     "multi-language"
   ],
-  "description": "Comprehensive testing guidelines for Claude Code including the 4 Pillars of Good Tests framework and TDD workflow. Covers test quality principles (Reliability, Validity, Sensitivity, Resilience) and test-driven development practices with red-green-refactor cycle, test-first approach, and quality assurance, plus guidance on TDD (inner unit/algorithm loop) vs BDD (outer behavior-level loop) and the shared test-first GATE",
+  "description": "Comprehensive testing guidelines for Claude Code including the 4 Pillars of Good Tests framework and TDD workflow. Covers test quality principles (Reliability, Validity, Sensitivity, Resilience) and test-driven development practices with red-green-refactor cycle, test-first approach with meaningful-red discipline (structural failures like 404/missing-field are not valid reds; green-from-start allowed when no real red is possible), and quality assurance, plus guidance on TDD (inner unit/algorithm loop) vs BDD (outer behavior-level loop) and the shared test-first GATE",
   "version": "1.0.0",
   "lastUpdated": "2025-12-24T00:00:00Z",
   "files": [
@@ -41,7 +41,7 @@
     },
     {
       "path": "tdd-guidelines.md",
-      "description": "Test-Driven Development guidelines with red-green-refactor cycle, test-first approach, quality assurance practices, and TDD-vs-BDD guidance (inner unit loop vs outer behavior loop)",
+      "description": "Test-Driven Development guidelines with red-green-refactor cycle, meaningful-red test-first approach (scaffold structure first; green-from-start when no real red is possible), quality assurance practices, and TDD-vs-BDD guidance (inner unit loop vs outer behavior loop)",
       "required": true
     }
   ],

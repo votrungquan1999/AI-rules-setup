@@ -11,9 +11,10 @@ Structured approach for implementing features using context-first research, plan
 1. **Understand Context First** - Read as many relevant files as possible before planning or writing any code
 2. **Plan Before Code** - Use `@create-implementation-plan` skill to create a plan before implementation
 3. **One Step at a Time** - Create one step, complete it, evaluate, then create the next step
-4. **Test-First** - Every step must have tests written before implementation (red-green-refactor)
-5. **BDD by Default** - Use Given/When/Then scenarios for most feature behavior; TDD only for internal logic
-6. **Quality Gates** - Run quality checkpoints after every 2-3 completed steps
+4. **Test-First** - Every step must have its test written and run before behavior logic (structural scaffolding may come first)
+5. **Meaningful Red** - A red run only counts when a behavior assertion fails; structural failures (404, missing route/field/import) validate nothing — scaffold first, or expect green from the start when no real red is possible
+6. **BDD by Default** - Use Given/When/Then scenarios for most feature behavior; TDD only for internal logic
+7. **Quality Gates** - Run quality checkpoints after every 2-3 completed steps
 
 ---
 
@@ -88,11 +89,13 @@ Each step is an **observable behavior** — something a user or system can obser
 **For each step:**
 
 1. **Write the test** describing the behavior (Given/When/Then)
-2. **🚫 GATE: Run the test** — check `package.json` scripts for existing test commands (e.g., `npm test`). Use the project's defined command. You MUST see the result before writing any implementation.
-   - If it **fails** → proceed to step 3
-   - If it **passes** → behavior is already covered, skip step 3, mark done
-3. **Implement** the minimum code to make the test pass, then **run the test again** to confirm
-4. **Mark the step done** and evaluate — decide what the next step should be based on what you learned
+2. **Scaffold the structure the test touches** (register the route, add the field, create the empty handler returning a default) so the run can only fail on the behavior assertion. Scaffolding contains no behavior logic. If the minimal scaffolding already IS the implementation (trivial pass-through, static field), write just enough code to pass first and expect **green from the first run** — state this explicitly; never manufacture a useless red.
+3. **🚫 GATE: Run the test** — check `package.json` scripts for existing test commands (e.g., `npm test`). Use the project's defined command. You MUST see the result before writing any behavior logic.
+   - If it **fails on the behavior assertion** → real red, proceed to step 4
+   - If it **fails structurally** (404, missing field, import error) → that red validates nothing; fix the scaffolding and run again
+   - If it **passes** → behavior is already covered (or expected green from start), skip step 4, mark done
+4. **Implement** the minimum code to make the test pass, then **run the test again** to confirm
+5. **Mark the step done** and evaluate — decide what the next step should be based on what you learned
 
 ### Quality Checkpoints
 
@@ -119,7 +122,7 @@ Before writing any tests, locate the "4 Pillars of Testing" document in the proj
 ### Step 1: High-engagement open markets appear as "TRENDING"
 
 - [x] Write test
-- [x] Run test (Red — fails as expected)
+- [x] Run test (Red — behavior assertion fails)
 - [x] Implement minimum code
 - [x] Run test (Green — passes)
 
@@ -166,5 +169,6 @@ Before writing any tests, locate the "4 Pillars of Testing" document in the proj
 - ❌ Creating all steps upfront — evaluate after each step
 - ❌ Skipping quality checkpoints after 2-3 steps
 - ❌ Implementing without a plan (use `@create-implementation-plan` first)
-- ❌ Writing implementation code before running the test
+- ❌ Writing behavior logic before running the test (structural scaffolding is allowed and encouraged)
+- ❌ Treating a structural failure (404, missing route/field/import) as a valid red — only a failing behavior assertion validates anything
 - ❌ Batching multiple test-write-implement cycles without running tests between them

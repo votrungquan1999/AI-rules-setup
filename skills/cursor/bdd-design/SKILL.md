@@ -25,10 +25,13 @@ Define behavior first, then implement code that satisfies those behaviors.
    - Assert
 3. Implement one scenario at a time:
    - write one behavior test
-   - run test before implementation
+   - scaffold the structure the test touches (register the route, add the field, empty handler returning a default) — no behavior logic
+   - run test before writing behavior logic — a valid red fails on the behavior assertion; a structural error (404, missing route/field) validates nothing, fix the scaffolding and run again
    - implement minimal code
    - run test again and verify
 4. Repeat for next behavior.
+
+**When no meaningful red is possible** — the minimal scaffolding needed to avoid a structural failure already IS the implementation (e.g., a trivial pass-through, a field that just renders) — write just enough code to pass first and expect **green from the first run**. State this explicitly; never manufacture a useless red.
 
 ## Core Principles
 
@@ -64,5 +67,6 @@ Reframing examples (client in parentheses):
 
 - Does every scenario read in the client's language (no code/internals)? If not, rewrite before implementing.
 - Do not batch multiple behaviors into one step.
-- Do not implement before executing the scenario test.
+- Do not write behavior logic before executing the scenario test (structural scaffolding is allowed and encouraged).
+- Do not treat a structural failure (404, missing route/field) as a valid red.
 - If requirements are unclear, ask first instead of assuming.

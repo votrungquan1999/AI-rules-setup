@@ -157,9 +157,9 @@ Read the node instructions from `nodes/node-bdd-step.md` in this skill's directo
 The node will:
 
 1. Determine the next observable behavior to implement
-2. Write a test for it
-3. Run the test (MUST see result before implementing)
-4. Implement if test failed; skip if test already passes
+2. Write a test for it and scaffold the structure it touches (no behavior logic) so the run can only fail behaviorally
+3. Run the test (MUST see the result before writing behavior logic)
+4. Implement if the test failed on a behavior assertion; fix scaffolding if it failed structurally; skip if it passes (already covered, or expected green from start when no meaningful red is possible)
 5. Write the step result to the `step-result.md` artifact
 
 **After completion**, read `step-result.md` and decide:
