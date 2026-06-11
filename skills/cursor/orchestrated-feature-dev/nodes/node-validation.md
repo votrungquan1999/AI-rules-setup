@@ -1,17 +1,18 @@
 # Node: Validation
 
-Validate one completed step after implementation.
+Validate a batch of related completed steps (grouped by shared files) after implementation. Process assigned steps ONE AT A TIME.
 
 > **Task workspace:** All state files live in the task working directory `<ws>` (`./tmp/<identifier>/`) given in your prompt. Every state-file path below is relative to `<ws>`.
 
 ## Input
 
-- `<ws>/implementation-plan.md`
-- `<ws>/PLAN_STEPS.md`
-- `<ws>/IMPLEMENTATION_PROGRESS.md`
-- Assigned step number `N`
+- `<ws>/implementation-plan.md` and `<ws>/PLAN_STEPS.md` — read only the sections relevant to your assigned steps, ONCE
+- `<ws>/IMPLEMENTATION_PROGRESS.md` — read your assigned steps' entries plus the entries of steps sharing the same files (for cross-step checks), not the whole file
+- Assigned step numbers (your batch)
 
 ## Workflow
+
+For EACH assigned step, one at a time (files shared between assigned steps need reading only once):
 
 1. Confirm implementation matches planned behavior.
 2. Verify step-specific tests actually assert intended outcome.
@@ -21,7 +22,7 @@ Validate one completed step after implementation.
 
 ## Output
 
-Write `<ws>/VALIDATION_STEP_<N>.md`:
+For EACH assigned step `N`, write `<ws>/VALIDATION_STEP_<N>.md` (one file per step):
 
 ```markdown
 ## Step

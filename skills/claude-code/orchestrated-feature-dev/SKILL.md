@@ -21,6 +21,7 @@ This skill acts as an **orchestrator** — it spawns sub-agents for the phases t
 
 The main session:
 - **Spawns sub-agents** for research, planning, investigation (parallel), quality-gate, and validation (parallel) — these benefit from isolated context or parallelism
+- **Batches per-step phases** — for investigation and validation, group **2-4 related steps** (by shared files/module) per sub-agent instead of one sub-agent per step. The sub-agent count scales naturally with plan size — do NOT cram more steps into one agent to keep the count down; too many steps per agent congests its context. Per-step agents waste tokens (each re-reads the same plan and shared files); batching pays that cost once per batch.
 - **Runs the BDD scenario step loop inline** — each step shares heavy context (same plan, same files, same patterns) with the previous one, so isolating each step wastes tokens on re-reading. The investigation phase already produced curated per-step context in `<ws>/INVESTIGATION_STEP_[N].md`.
 - **Reads state files** to make routing decisions and to drive the BDD scenario loop
 - **Presents sub-agent outputs** to the user by reading and relaying their output files
@@ -51,6 +52,8 @@ Agent(
 ```
 
 The sub-agent will execute the node instructions and return a summary. The orchestrator then reads the state files and makes routing decisions.
+
+**Model selection (cost lever):** the Agent tool accepts a per-call `model` parameter (`"haiku" | "sonnet" | "opus"`). Investigation and validation are mostly mechanical read-and-report work — spawn those sub-agents with a smaller model (e.g. `model: "sonnet"`, or `"haiku"` for the summary phase). Keep research, planning, and quality-gate on the session's default model (omit `model`) — they need full judgment. A `CLAUDE_CODE_SUBAGENT_MODEL` env var, if set, overrides all of this.
 
 ## Task Workspace & State Files
 
@@ -158,27 +161,30 @@ Agent(
 
 ---
 
-## Phase 3: Investigation (Parallel)
+## Phase 3: Investigation (Batched Parallel)
 
-After plan approval, spawn **one sub-agent per plan step** in parallel. Each investigates its assigned step in deep detail, with full knowledge of the entire plan.
+After plan approval, every step gets investigated in deep detail — but do **NOT** spawn one sub-agent per step. Each sub-agent pays a fixed token cost to read the plan and the shared files, so per-step agents multiply that cost without adding insight. **Batch the steps:**
 
-**Spawn all investigation sub-agents at once:**
+1. Group the steps into batches of **2-4 related steps** — steps that touch the same files/module go in the same batch, so shared context gets read once per batch instead of once per step.
+2. Spawn **one sub-agent per batch**. The agent count scales naturally with plan size — do NOT pile more steps into one agent to keep the count down: too many steps in one agent congests its context and slows the phase.
 
-For each step N in `<ws>/PLAN_STEPS.md`:
+**Spawn the batch sub-agents in a single message so they run in parallel:**
+
+For each batch:
 ```
 Agent(
-  description: "Investigate step [N]",
+  description: "Investigate steps [N..M]",
+  model: "sonnet",  // mechanical read-and-report work — smaller model reduces cost
   prompt: "Read the instructions in [this skill's directory]/nodes/node-investigation.md
     and execute them. The task working directory is <ws> (./tmp/<identifier>/) — read and
-    write all state files there. You are assigned Step [N]: [behavior description].
+    write all state files there. You are assigned Steps [list]: [behavior descriptions].
     Read <ws>/implementation-plan.md for the full plan context.
     Read <ws>/PLAN_STEPS.md for the step list.
-    Write findings to <ws>/INVESTIGATION_STEP_[N].md.
-    Report back: verdict (can proceed / needs fixes / needs rework) and any blocking issues."
+    Investigate your assigned steps one at a time, writing each step's findings to
+    <ws>/INVESTIGATION_STEP_[N].md (one file per step — Phase 4 consumes them per step).
+    Report back: per-step verdicts (can proceed / needs fixes / needs rework) and any blocking issues."
 )
 ```
-
-**IMPORTANT:** Launch all investigation agents in a single message so they run in parallel.
 
 **After all sub-agents return:**
 
@@ -248,34 +254,35 @@ Stop the implementation loop when:
 
 ---
 
-## Phase 5: Validation (Parallel)
+## Phase 5: Validation (Batched Parallel)
 
-After all implementation steps are complete, spawn **one sub-agent per step** in parallel for independent validation.
+After all implementation steps are complete, validate every step independently — but as in Phase 3, do **NOT** spawn one sub-agent per step. **Batch the steps:** group **2-4 related steps** (by shared files) per validation sub-agent, one sub-agent per batch. The agent count scales with the plan — don't cram more steps into one agent; too many steps per agent congests its context.
 
-**Spawn all validation sub-agents at once:**
+**Spawn the batch sub-agents in a single message so they run in parallel:**
 
-For each completed step N:
+For each batch:
 ```
 Agent(
-  description: "Validate step [N]",
+  description: "Validate steps [N..M]",
+  model: "sonnet",  // mechanical read-and-report work — smaller model reduces cost
   prompt: "Read the instructions in [this skill's directory]/nodes/node-validation.md
     and execute them. The task working directory is <ws> (./tmp/<identifier>/) — read and
-    write all state files there. You are assigned Step [N]: [behavior description].
-    Read <ws>/implementation-plan.md for the full plan.
-    Read <ws>/PLAN_STEPS.md for all step statuses.
-    Read <ws>/IMPLEMENTATION_PROGRESS.md for implementation details across all steps.
-    Write findings to <ws>/VALIDATION_STEP_[N].md.
-    Report back: verdict (valid / valid with caveats / invalid) and any issues found."
+    write all state files there. You are assigned Steps [list]: [behavior descriptions].
+    Read <ws>/implementation-plan.md and <ws>/PLAN_STEPS.md, focusing on the sections
+    relevant to your assigned steps. In <ws>/IMPLEMENTATION_PROGRESS.md, read your steps'
+    entries plus the entries of steps sharing the same files (for cross-step checks) —
+    not the whole file.
+    Validate your assigned steps one at a time, writing each step's findings to
+    <ws>/VALIDATION_STEP_[N].md (one file per step).
+    Report back: per-step verdicts (valid / valid with caveats / invalid) and any issues found."
 )
 ```
-
-**IMPORTANT:** Launch all validation agents in a single message so they run in parallel.
 
 **After all sub-agents return:**
 
 1. Read all `<ws>/VALIDATION_STEP_[N].md` files
 2. Collect all issues found
-3. If any step is invalid → spawn fix sub-agents, then re-validate
+3. If any steps are invalid → spawn ONE fix sub-agent covering all the invalid steps (batch them too), then re-validate only those steps
 4. Present validation results to the user
 
 ---

@@ -47,6 +47,7 @@ Every run is scoped to its task identifier so **multiple tasks run in parallel**
   - quality review
   - validation
   - final summary
+- Batch per-step phases: for investigation and validation, group 2-4 related steps (by shared files/module) per subagent instead of one subagent per step. The subagent count scales naturally with plan size — do NOT cram more steps into one agent to keep the count down; too many steps per agent congests its context. Every extra subagent re-reads the same plan and shared files; batching pays that cost once per batch.
 - Run BDD scenario steps inline for continuity.
 - Route based on state files and gate outcomes.
 - Pass the task workspace path `<ws>` to every subagent it spawns.
@@ -67,5 +68,6 @@ Every run is scoped to its task identifier so **multiple tasks run in parallel**
 - Research and planning must converge before coding.
 - One behavior/test per BDD scenario step.
 - Trigger quality gate every 2-3 completed steps.
-- Run investigation and validation in parallel when steps are independent.
+- Run investigation and validation batches in parallel; each batch agent processes its steps one at a time and still writes one output file per step.
+- If validation finds invalid steps, spawn ONE fix subagent covering all invalid steps (batched), then re-validate only those steps.
 - Stop on blocking uncertainty and request user decision.
