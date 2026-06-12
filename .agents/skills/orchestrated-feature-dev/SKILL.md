@@ -5,17 +5,32 @@ description: N8N-style orchestrated feature development with specialized node sk
 
 # Orchestrated Feature Development
 
-An n8n-style workflow that orchestrates specialized node skills through a structured pipeline with conditional routing and reflection loops.
+An n8n-style workflow that orchestrates specialized node skills through a structured pipeline with conditional routing and reflection loops. The main session is the **orchestrator only** — it manages artifacts and routing, never performs research, implementation, or analysis itself.
 
 ## How This Works
 
 This skill acts as an **orchestrator** — it sequences specialized node skills, passes data between them via artifact files, and makes routing decisions based on results. Each node reads from and writes to the Antigravity artifact directory (`<appDataDir>/brain/<conversation-id>/`).
 
 ```
-[research] → [plan] → [tdd-step] ↔ [quality-gate] → [summary]
-                           ↑              |
-                           └── loop back ──┘
+[research] → [plan] → [investigation] → [bdd-step] ↔ [quality-gate] → [validation] → [summary]
+                            ↑                 ↑              |
+                            fix plan          └── loop back ──┘
 ```
+
+## Orchestrator Rules
+
+The main session MUST:
+- **Only manage artifacts and routing** — never read code, analyze findings, or write implementation
+- **Execute node instructions** for all research, planning, investigation, implementation, and validation work
+- **Read state artifacts** only to make routing decisions (pass/fail, next step, done/not done)
+- **Present node outputs** to the user by reading and relaying their output artifacts
+- **Fix state artifacts** when investigation reveals plan issues (update `plan-steps.md` and `implementation-plan.md`)
+
+The main session MUST NOT:
+- Read source code files directly (outside of node execution)
+- Analyze or summarize research findings in its own words
+- Write any implementation or test code (outside of node execution)
+- Make judgment calls about code quality — delegate to nodes
 
 ## Artifact Convention
 
@@ -24,10 +39,15 @@ All workflow state files are created as Antigravity artifacts in the brain direc
 **Workflow artifacts:**
 
 - `research-output.md` — Research findings
-- `plan-steps.md` — Step list for the TDD loop
+- `plan-steps.md` — Derived workflow state for the BDD loop (step list with affected files and dependencies); NOT presented for user review
+- `implementation-plan.md` — Full implementation plan (Technical Design + Behaviors); this is the document the user reviews
 - `loop-state.json` — Loop counter and metadata
-- `step-result.md` — Latest TDD step result
+- `step-result.md` — Latest BDD scenario step result
 - `quality-result.md` — Latest quality gate result
+- `investigation-step-[N].md` — Per-step investigation findings
+- `investigation-summary.md` — Consolidated investigation results
+- `validation-step-[N].md` — Per-step validation results
+- `validation-summary.md` — Consolidated validation results
 
 ---
 
@@ -51,56 +71,95 @@ Ask about **every dimension you're unsure of**:
 
 ---
 
-## Phase 1: Research Node
+## Phase 1: Research (Convergence Loop)
 
-Read the node instructions from `nodes/node-research.md` in this skill's directory, then execute them.
+Research runs as a loop that **keeps re-running until no code-answerable threads remain**. The orchestrator never reports "more stuff needs checking" to the user — open code-level threads are resolved by another research pass, not by handing them back to the user.
 
-**After completion**, read the `research-output.md` artifact and report:
+**Round 1 — initial research.** Read the node instructions from `nodes/node-research.md` in this skill's directory, then execute them. The node writes `research-output.md`.
 
-- Number of files read
-- Key patterns found
-- Affected areas identified
-- Any open questions or ambiguities found during research
+**After completion**, read `research-output.md` and look at **Follow-up Investigations Needed**.
 
-**Gate:** Ask the user: "Research complete. Read more files, ask clarifying questions, or continue to planning?"
+**Round 2+ — targeted follow-ups (loop).** While that section is non-empty:
+1. Re-run `nodes/node-research.md` focused on the listed follow-up items only, appending findings to `research-output.md`.
+2. Rebuild the "Follow-up Investigations Needed" list from any *new* threads uncovered (drop the resolved ones).
+3. Repeat if the list is still non-empty.
 
-- If "more files" → re-run this phase with expanded scope
-- If "questions" → pause, ask, wait for answers, then continue
-- If "continue" → proceed to Phase 2
-- **CRITICAL:** You MUST stop execution here and wait for the user's response. Do NOT proceed to Phase 2 until the user explicitly says "continue with implementation plan" or "continue".
+**Stop the loop** when "Follow-up Investigations Needed" is empty or after **3 rounds** (safety limit — if still non-empty, note the remaining threads when presenting).
+
+**Then present to the user.** Read the consolidated `research-output.md` and present findings, including only the **Open Questions for the User** (genuine product/requirement decisions).
+
+**Gate:** Ask the user: "Research complete. Continue to planning, or investigate more?"
+- If "more" → start a new follow-up round with the user's expanded scope as a follow-up item
+- **CRITICAL:** You MUST stop and wait for the user's explicit "continue" before proceeding.
 
 ---
 
-## Phase 2: Plan Node
+## Phase 2: Plan
 
 Read the node instructions from `nodes/node-plan.md` in this skill's directory, then execute them.
 
-The plan node will use `@create-implementation-plan` to create the plan, reading research output as additional context.
+The plan node will use `@create-implementation-plan` to create the plan, reading research output as additional context. The step list must include affected files and dependencies per step.
 
-**Gate:** The plan node will request user review. Do NOT proceed until the user approves.
+**Gate:** The plan node will request user review of the **`implementation-plan.md`** document (the rich plan with Technical Design + Behaviors). NEVER present `plan-steps.md` for review — it is derived workflow state for the BDD loop, written only after approval. Do NOT proceed until the user approves.
 
 ---
 
-## Phase 3: Implementation Loop
+## Phase 3: Investigation
 
-This is the core loop — it alternates between TDD steps and quality gates.
+After plan approval, investigate every step in the plan sequentially and in deep detail.
 
 ### Initialize
 
-Set iteration counter: write `{"current_step": 1, "quality_checks": 0, "max_steps": 20}` to the `loop-state.json` artifact.
+Update `loop-state.json`: add `"investigation_step": 1, "investigation_total": [step count]`.
+
+### Execute
+
+Read the node instructions from `nodes/node-investigation.md` in this skill's directory, then execute them.
+
+The investigation node will:
+1. Investigate each step sequentially with full plan context
+2. Check affected files, existing implementations, conflicts, mismatches, dependencies, edge cases
+3. Write per-step findings to `investigation-step-[N].md` artifacts
+4. Write a consolidated `investigation-summary.md` artifact
+
+### After Investigation Completes
+
+1. Read `investigation-summary.md` and all `investigation-step-[N].md` artifacts
+2. Collect all findings: mismatches, conflicts, missing dependencies, already-implemented steps
+3. **Fix the plan** — update `plan-steps.md` and `implementation-plan.md` to address:
+   - Remove steps for behaviors already implemented
+   - Fix file paths, type names, or function references that were wrong
+   - Reorder steps if dependency issues were found
+   - Add missing steps if gaps were identified
+   - Resolve conflicts between steps
+4. **Present to the user:**
+   - What problems were found (grouped by category: already implemented, mismatches, conflicts, missing deps, edge cases)
+   - What fixes were applied to the plan
+   - The updated plan
+5. **Gate:** Wait for user approval of the updated plan before proceeding.
+
+---
+
+## Phase 4: Implementation Loop
+
+This is the core loop — it alternates between BDD scenario steps and quality gates.
+
+### Initialize
+
+Update `loop-state.json`: set `"current_step": 1, "quality_checks": 0, "max_steps": 20`.
 
 ### For Each Step
 
-**3a. TDD Step Node**
+**4a. BDD Scenario Step Node**
 
-Read the node instructions from `nodes/node-tdd-step.md` in this skill's directory, then execute them.
+Read the node instructions from `nodes/node-bdd-step.md` in this skill's directory, then execute them.
 
 The node will:
 
 1. Determine the next observable behavior to implement
-2. Write a test for it and scaffold the structure it touches (no behavior logic)
-3. Run the test (MUST see result before writing behavior logic; only a behavior-assertion failure counts as red)
-4. Implement if the test failed on a behavior assertion; skip if already covered or expected green from start
+2. Write a test for it and scaffold the structure it touches (no behavior logic) so the run can only fail behaviorally
+3. Run the test (MUST see the result before writing behavior logic)
+4. Implement if the test failed on a behavior assertion; fix scaffolding if it failed structurally; skip if it passes (already covered, or expected green from start when no meaningful red is possible)
 5. Write the step result to the `step-result.md` artifact
 
 **After completion**, read `step-result.md` and decide:
@@ -108,7 +167,7 @@ The node will:
 - If step succeeded → increment `current_step` in `loop-state.json`
 - If step had issues → ask user for guidance before continuing
 
-**3b. Quality Gate Check**
+**4b. Quality Gate Check**
 
 Read `loop-state.json`. Every **2-3 completed steps**, trigger the quality gate:
 
@@ -122,7 +181,7 @@ The quality gate will:
 
 **After completion**, read `quality-result.md` and route:
 
-- If `quality: "pass"` → continue to next TDD step
+- If `quality: "pass"` → continue to next BDD scenario step
 - If `quality: "needs-fixes"` → fix issues, then re-run quality gate
 - **Max 2 quality re-checks** per checkpoint to prevent infinite loops
 
@@ -136,7 +195,33 @@ Stop the implementation loop when:
 
 ---
 
-## Phase 4: Summary Node
+## Phase 5: Validation
+
+After all implementation steps are complete, validate every completed step sequentially.
+
+### Initialize
+
+Update `loop-state.json`: add `"validation_step": 1, "validation_total": [completed step count]`.
+
+### Execute
+
+Read the node instructions from `nodes/node-validation.md` in this skill's directory, then execute them.
+
+The validation node will:
+1. Validate each completed step sequentially with full plan and implementation context
+2. Check implementation vs plan, test coverage, cross-step consistency, code quality
+3. Write per-step findings to `validation-step-[N].md` artifacts
+4. Write a consolidated `validation-summary.md` artifact
+
+### After Validation Completes
+
+1. Read `validation-summary.md`
+2. If any step is invalid → fix the issues, then re-validate those steps
+3. Present validation results to the user
+
+---
+
+## Phase 6: Summary
 
 Read the node instructions from `nodes/node-summary.md` in this skill's directory, then execute them.
 
@@ -145,6 +230,7 @@ Present the final summary to the user with:
 - All steps completed
 - Test results
 - Quality gate outcomes
+- Validation results
 - Files changed
 
 ---

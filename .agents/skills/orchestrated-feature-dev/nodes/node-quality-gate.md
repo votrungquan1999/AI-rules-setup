@@ -27,7 +27,7 @@ Focus on:
 - Naming clarity?
 - Unnecessary complexity?
 
-**If `@code-refactoring` reports missing test coverage → skip the refactoring review** rather than blocking. The tests exist from the TDD steps.
+**If `@code-refactoring` reports missing test coverage → skip the refactoring review** rather than blocking. The tests exist from the BDD scenario steps.
 
 ### 3. Apply Fixes
 
