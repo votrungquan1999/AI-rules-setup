@@ -107,7 +107,7 @@ export async function fetchManifestLocal(agent: string, category: string, rootPa
  * @param basePath - Base path for computing relative paths (same as skillDirPath on first call)
  * @returns Array of supporting files with relative paths and content
  */
-async function collectSupportingFiles(
+export async function collectSupportingFiles(
 	skillDirPath: string,
 	basePath: string,
 ): Promise<Array<{ path: string; content: string }>> {

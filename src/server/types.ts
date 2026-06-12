@@ -67,6 +67,15 @@ export interface RuleCategory {
 }
 
 /**
+ * Visibility of a skill — public skills are visible to anyone; private skills require
+ * a matching secret + scope to retrieve.
+ */
+export enum SkillVisibility {
+	Public = "public",
+	Private = "private",
+}
+
+/**
  * Represents a single skill file
  */
 export interface SkillFile {
@@ -75,6 +84,10 @@ export interface SkillFile {
 	content: string;
 	/** Optional supporting files (nodes, scripts, references, etc.) */
 	supportingFiles?: Array<{ path: string; content: string }>;
+	/** Public skills get this injected at read time; private skills carry it from storage. */
+	visibility?: SkillVisibility;
+	/** Free-form scope tags. Required (non-empty) on private skills only. */
+	scopes?: string[];
 }
 
 /**
@@ -194,6 +207,23 @@ export interface QuestionsResponse {
 
 export const QUESTIONS_COLLECTION_NAME = "questions";
 export const SKILLS_COLLECTION_NAME = "skills_data";
+
+export const PRIVATE_SKILLS_COLLECTION_NAME = "private_skills_data";
+
+/**
+ * Database document type for a single stored private skill.
+ * One document per (agent, name) pair so independent uploads do not race.
+ */
+export interface StoredPrivateSkillDocument {
+	agent: string;
+	name: string;
+	description?: string;
+	content: string;
+	supportingFiles?: Array<{ path: string; content: string }>;
+	scopes: string[];
+	createdAt: Date;
+	updatedAt: Date;
+}
 export const PRESETS_COLLECTION_NAME = "presets";
 
 /**
