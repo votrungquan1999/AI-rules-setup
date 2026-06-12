@@ -16,7 +16,7 @@
     "------------ TEST COMMANDS ------------": "",
     "test": "vitest --run",
     "test:watch": "vitest --watch",
-    "test:e2e": "vitest --config vitest.e2e.config.ts",
+    "test:e2e": "vitest --config vitest.e2e.config.ts --run",
     "test:e2e:watch": "vitest --config vitest.e2e.config.ts --watch",
     "------------ LINT COMMANDS ------------": "",
     "lint": "biome check .",
