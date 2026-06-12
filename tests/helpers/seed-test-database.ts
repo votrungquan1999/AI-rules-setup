@@ -5,12 +5,18 @@ import type {
 	Manifest,
 	RulesDataToStore,
 	SkillFile,
+	StoredPrivateSkillDocument,
 	StoredRulesDocument,
 	StoredSkillsDocument,
 	StoredWorkflowsDocument,
 	WorkflowFile,
 } from "../../src/server/types";
-import { RULES_DATA_COLLECTION_NAME, SKILLS_COLLECTION_NAME, WORKFLOWS_COLLECTION_NAME } from "../../src/server/types";
+import {
+	PRIVATE_SKILLS_COLLECTION_NAME,
+	RULES_DATA_COLLECTION_NAME,
+	SKILLS_COLLECTION_NAME,
+	WORKFLOWS_COLLECTION_NAME,
+} from "../../src/server/types";
 import { createStoredRulesDocument } from "../../src/server/utils";
 
 /**
@@ -70,7 +76,12 @@ export async function getTestDatabase(): Promise<Db> {
  * Clean the test database by dropping collections
  */
 async function cleanTestDatabase(db: Db): Promise<void> {
-	const collections = [RULES_DATA_COLLECTION_NAME, SKILLS_COLLECTION_NAME, WORKFLOWS_COLLECTION_NAME];
+	const collections = [
+		RULES_DATA_COLLECTION_NAME,
+		SKILLS_COLLECTION_NAME,
+		WORKFLOWS_COLLECTION_NAME,
+		PRIVATE_SKILLS_COLLECTION_NAME,
+	];
 
 	for (const collectionName of collections) {
 		try {
@@ -112,6 +123,30 @@ export async function storeSkillsInTestDatabase(db: Db, agent: string, skills: S
 	};
 
 	await collection.replaceOne({ agent }, document, { upsert: true });
+}
+
+/**
+ * Store a single private skill directly in the test database
+ */
+export async function storePrivateSkillInTestDatabase(
+	db: Db,
+	agent: string,
+	skill: SkillFile,
+	scopes: string[],
+): Promise<void> {
+	const collection = db.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME);
+	const now = new Date();
+	const document: StoredPrivateSkillDocument = {
+		agent,
+		name: skill.name,
+		content: skill.content,
+		supportingFiles: skill.supportingFiles ?? [],
+		scopes,
+		createdAt: now,
+		updatedAt: now,
+	};
+	if (skill.description !== undefined) document.description = skill.description;
+	await collection.replaceOne({ agent, name: skill.name }, document, { upsert: true });
 }
 
 /**

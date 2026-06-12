@@ -3,7 +3,8 @@ import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as cachePrimer from "../../src/app/api/lib/cache-primer";
 import { fetchAllRulesData } from "../../src/app/api/lib/rules-data-fetcher";
-import { findAllStoredRules } from "../../src/server/rules-repository";
+import { findAllStoredRules, storePrivateSkill } from "../../src/server/rules-repository";
+import { SkillVisibility } from "../../src/server/types";
 import { cleanDatabase, disconnectTestDB, generateTestDatabaseName, withTestDatabase } from "../helpers/database-utils";
 
 // Test fixtures path
@@ -25,7 +26,7 @@ describe("Rules Data Fetcher", () => {
 			expect(cachedBefore).toBeNull();
 
 			// Act: Call fetchAllRulesData (should auto-prime from local filesystem)
-			const data = await fetchAllRulesData(FIXTURE_ROOT);
+			const data = await fetchAllRulesData({ rootPath: FIXTURE_ROOT });
 
 			// Assert: Data should be returned
 			expect(data).not.toBeNull();
@@ -47,10 +48,10 @@ describe("Rules Data Fetcher", () => {
 			const primeCacheSpy = vi.spyOn(cachePrimer, "primeCache");
 
 			// Act: Call fetchAllRulesData twice
-			const firstCallData = await fetchAllRulesData(FIXTURE_ROOT);
+			const firstCallData = await fetchAllRulesData({ rootPath: FIXTURE_ROOT });
 			expect(firstCallData).not.toBeNull();
 
-			const secondCallData = await fetchAllRulesData(FIXTURE_ROOT);
+			const secondCallData = await fetchAllRulesData({ rootPath: FIXTURE_ROOT });
 
 			// Assert: primeCache should be called only ONCE (on first call)
 			expect(primeCacheSpy).toHaveBeenCalledTimes(1);
@@ -71,7 +72,7 @@ describe("Rules Data Fetcher", () => {
 	it("fetchAllRulesData - should load correct files from filesystem", async () => {
 		await withTestDatabase(testDbName, async () => {
 			// Act: Get data from fetchAllRulesData (using test fixtures)
-			const data = await fetchAllRulesData(FIXTURE_ROOT);
+			const data = await fetchAllRulesData({ rootPath: FIXTURE_ROOT });
 
 			// Assert: Should have exactly one agent: "test-agent"
 			expect(Object.keys(data.agents)).toEqual(["test-agent"]);
@@ -110,6 +111,31 @@ describe("Rules Data Fetcher", () => {
 			expect(testAgent.skills![0]!.content).toContain("This is a test skill file.");
 
 			// Cleanup
+			await disconnectTestDB();
+		});
+	});
+
+	it("fetchAllRulesData - default call (no options) never returns private skills, even when private skills exist in the DB", async () => {
+		await withTestDatabase(testDbName, async () => {
+			// Arrange: prime the cache from fixtures so public skills exist, then add a private skill.
+			await fetchAllRulesData({ rootPath: FIXTURE_ROOT });
+			await storePrivateSkill(
+				"test-agent",
+				{ name: "secret-only-for-private-callers", content: "should never reach the web UI" },
+				["work"],
+			);
+
+			// Act: call fetchAllRulesData() with NO options — this mirrors how `/select-rules/page.tsx` uses it.
+			const data = await fetchAllRulesData();
+
+			// Assert: no skill in the payload carries visibility: "private", proving the web UI is safe by default.
+			const allSkills = Object.values(data.agents).flatMap((agent) => agent.skills ?? []);
+			const privateLeak = allSkills.find((s) => s.visibility === SkillVisibility.Private);
+			expect(privateLeak).toBeUndefined();
+			// Positive control: the public test-skill from the fixture is still present.
+			const publicSkill = allSkills.find((s) => s.name === "test-skill");
+			expect(publicSkill).toBeDefined();
+
 			await disconnectTestDB();
 		});
 	});

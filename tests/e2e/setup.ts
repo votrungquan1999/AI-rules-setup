@@ -23,11 +23,13 @@ beforeAll(async () => {
 	const testDbName = "ai-rules-e2e-test";
 	const testPort = generateTestPort();
 	const testApiUrl = `http://localhost:${testPort}`;
+	const testSecret = "test-secret";
 
 	// Set environment variables for both the API server and CLI/test helpers
 	process.env.MONGODB_DB_NAME = testDbName;
 	process.env.PORT = testPort.toString();
 	process.env.AI_RULES_API_URL = testApiUrl;
+	process.env.AI_RULES_SECRET = testSecret;
 
 	// Start API server
 	apiServerProcess = spawn("npm", ["run", "dev:api"], {
@@ -35,6 +37,7 @@ beforeAll(async () => {
 			...process.env,
 			MONGODB_DB_NAME: testDbName,
 			PORT: testPort.toString(),
+			AI_RULES_SECRET: testSecret,
 		},
 		stdio: "ignore",
 		shell: true,
@@ -83,6 +86,7 @@ afterAll(async () => {
 	delete process.env.PORT;
 	delete process.env.AI_RULES_API_URL;
 	delete process.env.MONGODB_DB_NAME;
+	delete process.env.AI_RULES_SECRET;
 }, 10000);
 
 /**
