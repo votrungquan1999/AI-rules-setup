@@ -16,7 +16,7 @@ export async function pullCommand(_options: PullOptions = {}): Promise<void> {
 	console.log(chalk.blue("🔄 Pulling latest AI rules...\n"));
 
 	const config = await loadConfig(process.cwd());
-	const { agent, categories, skills, workflows } = config;
+	const { agent, categories, skills, workflows, scope } = config;
 
 	const hasCategories = categories && categories.length > 0;
 	const hasSkills = skills && skills.length > 0;
@@ -32,7 +32,7 @@ export async function pullCommand(_options: PullOptions = {}): Promise<void> {
 	// Re-install rules from categories
 	if (hasCategories) {
 		console.log(chalk.blue(`📦 Pulling ${categories.length} rule categories...`));
-		const manifests = await fetchManifests(agent);
+		const manifests = await fetchManifests(agent, scope);
 
 		for (const categoryId of categories) {
 			const manifest = manifests.find((m) => m.id === categoryId);
@@ -42,7 +42,7 @@ export async function pullCommand(_options: PullOptions = {}): Promise<void> {
 			}
 
 			for (const file of manifest.files) {
-				const content = await fetchRuleFile(agent, manifest.category, file.path);
+				const content = await fetchRuleFile(agent, manifest.category, file.path, scope);
 				if (!content) {
 					console.error(chalk.red(`  ❌ Failed to fetch: ${file.path}`));
 					continue;
@@ -60,7 +60,7 @@ export async function pullCommand(_options: PullOptions = {}): Promise<void> {
 	// Re-install skills
 	if (hasSkills) {
 		console.log(chalk.blue(`\n🎯 Pulling ${skills.length} skills...`));
-		const allSkills = await fetchSkills(agent);
+		const allSkills = await fetchSkills(agent, scope);
 
 		for (const skillName of skills) {
 			const skill = allSkills.find((s) => s.name === skillName);
@@ -79,7 +79,7 @@ export async function pullCommand(_options: PullOptions = {}): Promise<void> {
 	// Re-install workflows
 	if (hasWorkflows) {
 		console.log(chalk.blue(`\n📋 Pulling ${workflows.length} workflows...`));
-		const allWorkflows = await fetchWorkflows(agent);
+		const allWorkflows = await fetchWorkflows(agent, scope);
 
 		for (const workflowName of workflows) {
 			const workflow = allWorkflows.find((w) => w.name === workflowName);

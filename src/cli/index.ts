@@ -5,6 +5,7 @@ import { Command } from "commander";
 import { addCommand } from "./commands/add";
 import { initCommand } from "./commands/init";
 import { pullCommand } from "./commands/pull";
+import { uploadCommand } from "./commands/upload";
 
 const program = new Command();
 
@@ -120,6 +121,23 @@ program
 			};
 
 			await addCommand(parsedOptions);
+		} catch (error) {
+			console.error(chalk.red(`❌ Error: ${error}`));
+			process.exit(1);
+		}
+	});
+
+program
+	.command("upload <skillPath>")
+	.description("Upload a local skill directory to the API as a private, scoped skill (requires AI_RULES_SECRET)")
+	.requiredOption("--agent <name>", "AI agent name the skill belongs to (e.g., claude-code)")
+	.requiredOption(
+		"--scope <csv>",
+		"Comma-separated list of scope tags (e.g., work,client-x). At least one is required.",
+	)
+	.action(async (skillPath, options) => {
+		try {
+			await uploadCommand({ agent: options.agent, scope: options.scope, skillPath });
 		} catch (error) {
 			console.error(chalk.red(`❌ Error: ${error}`));
 			process.exit(1);

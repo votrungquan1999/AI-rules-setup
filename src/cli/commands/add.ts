@@ -66,7 +66,7 @@ async function addCategories(
 	overwriteStrategy: OverwriteStrategy,
 	config: Config,
 ): Promise<void> {
-	const manifests = await fetchManifests(agent);
+	const manifests = await fetchManifests(agent, config.scope);
 	if (manifests.length === 0) {
 		console.log(chalk.yellow("No rule categories found for this agent"));
 		return;
@@ -85,7 +85,7 @@ async function addCategories(
 		}
 
 		for (const file of manifest.files) {
-			const content = await fetchRuleFile(agent, manifest.category, file.path);
+			const content = await fetchRuleFile(agent, manifest.category, file.path, config.scope);
 			if (!content) {
 				console.error(chalk.red(`❌ Failed to fetch rule file: ${file.path}`));
 				continue;
@@ -128,7 +128,7 @@ async function addSkillsToProject(
 	config: Config,
 ): Promise<void> {
 	console.log(chalk.blue("\n🎯 Checking for available skills..."));
-	const skills = await fetchSkills(agent);
+	const skills = await fetchSkills(agent, config.scope);
 
 	if (skills.length === 0) {
 		console.log(chalk.yellow("No skills found for this agent"));
@@ -186,7 +186,7 @@ async function addWorkflowsToProject(
 	config: Config,
 ): Promise<void> {
 	console.log(chalk.blue("\n🎯 Installing workflows..."));
-	const allWorkflows = await fetchWorkflows(config.agent);
+	const allWorkflows = await fetchWorkflows(config.agent, config.scope);
 
 	if (allWorkflows.length === 0) {
 		console.log(chalk.yellow("No workflows found for this agent"));
