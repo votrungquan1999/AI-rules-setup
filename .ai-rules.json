@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "agent": "antigravity",
+  "agent": "claude-code",
   "categories": [
     "component-architecture",
     "database-patterns",
@@ -23,7 +23,16 @@
     "orchestrated-feature-dev",
     "tdd-design",
     "test-quality-reviewer",
-    "web-search"
+    "web-search",
+    "find-patterns",
+    "root-cause-analysis",
+    "ai-kanban-work-card",
+    "commit-plan",
+    "feature-development-workflow",
+    "repo-knowledge",
+    "review-changes",
+    "structured-brainstorming",
+    "validate-pr-comments"
   ],
   "workflows": [
     "commit-plan",
