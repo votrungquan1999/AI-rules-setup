@@ -11,9 +11,9 @@ Structured approach for implementing features using context-first research, plan
 1. **Understand Context First** - Read as many relevant files as possible before planning or writing any code
 2. **Plan Before Code** - Use `@create-implementation-plan` skill to create a plan before implementation
 3. **One Step at a Time** - Create one step, complete it, evaluate, then create the next step
-4. **Test-First** - Every step must have its test written and run before behavior logic (structural scaffolding may come first)
-5. **Meaningful Red** - A red run only counts when a behavior assertion fails; structural failures (404, missing route/field/import) validate nothing — scaffold first, or expect green from the start when no real red is possible
-6. **BDD by Default** - Use Given/When/Then scenarios for most feature behavior; TDD only for internal logic
+4. **BDD by Default (outer loop)** - Frame each step as a user-facing behavior scenario in Given/When/Then. This is the primary framing. Drop to TDD only for the internal logic/algorithms underneath a scenario.
+5. **Test-First (within every scenario)** - Test-first is HOW each BDD scenario runs, not a competing approach. Write the scenario test before behavior logic; observe a meaningful red → green within the scenario (or green from the start when no real red is possible). BDD is test-first — no conflict.
+6. **Meaningful Red** - A red run only counts when a behavior assertion fails. Structural failures (404 route not registered, missing field/import) validate nothing — scaffold structure before running, and never manufacture a useless red.
 7. **Quality Gates** - Run quality checkpoints after every 2-3 completed steps
 
 ---
@@ -43,13 +43,8 @@ Do not assume implementation details, architectural decisions, technology choice
 
 When researching external libraries or APIs, use `@context7` for documentation queries and `@web-search` for broader research.
 
-**Mandatory Checkpoint:** After reading files, summarize what you found and list any remaining open questions. Ask the user explicitly:
-
-- Are there more files to read?
-- Are there open questions to resolve?
-- Should we continue to planning?
-
-**Do not proceed to Phase 2 until the user explicitly says "continue".**
+**Mandatory Checkpoint:** Report how many files you read and ask the user whether to read more files, ask more questions, or continue.
+**CRITICAL:** You MUST stop execution here and wait for the user's response. Do NOT begin planning or move to Phase 2 until the user explicitly says "continue with implementation plan" or "continue". Answer any user questions about the research during this pause.
 
 ---
 
@@ -86,16 +81,18 @@ Each step is an **observable behavior** — something a user or system can obser
 
 **Create one step at a time.** After completing a step, evaluate what you learned and decide the next step. At most, create two steps upfront only if they are very closely related.
 
-**For each step:**
+**For each step (BDD-first ordering):**
 
-1. **Write the test** describing the behavior (Given/When/Then)
-2. **Scaffold the structure the test touches** (register the route, add the field, create the empty handler returning a default) so the run can only fail on the behavior assertion. Scaffolding contains no behavior logic. If the minimal scaffolding already IS the implementation (trivial pass-through, static field), write just enough code to pass first and expect **green from the first run** — state this explicitly; never manufacture a useless red.
-3. **🚫 GATE: Run the test** — check `package.json` scripts for existing test commands (e.g., `npm test`). Use the project's defined command. You MUST see the result before writing any behavior logic.
-   - If it **fails on the behavior assertion** → real red, proceed to step 4
-   - If it **fails structurally** (404, missing field, import error) → that red validates nothing; fix the scaffolding and run again
-   - If it **passes** → behavior is already covered (or expected green from start), skip step 4, mark done
-4. **Implement** the minimum code to make the test pass, then **run the test again** to confirm
-5. **Mark the step done** and evaluate — decide what the next step should be based on what you learned
+1. **Define the behavior scenario** in Given/When/Then — the observable, user-facing outcome.
+2. **Clarify if needed** — if the scenario's behavior or edge cases are ambiguous, stop and ask before writing the test.
+3. **Write the scenario test** capturing that Given/When/Then behavior. (For internal logic underneath the scenario, drop to a TDD unit test — still one at a time.)
+4. **Scaffold structure** — put in place whatever structure the test touches (route, empty handler, field, empty function returning a default) so the run can only fail on the behavior assertion. Scaffolding contains no behavior logic. If the minimal scaffolding already IS the implementation (trivial pass-through, static field), write just enough code to pass first and expect green from the first run — note this explicitly; do NOT manufacture a useless red.
+5. **🚫 GATE: Run the test** — check `package.json` scripts for existing test commands (e.g., `npm test`). Use the project's defined command. You MUST see the result before writing any behavior logic.
+   - If it **fails on the behavior assertion** → real red, proceed to step 6
+   - If it **fails structurally** (404 route not registered, missing field, import error) → that red validates nothing; fix the scaffolding and run again
+   - If it **passes** → behavior is already covered (or the expected green-from-start case), skip step 6, mark done
+6. **Implement** the minimum code to make the test pass, then **run the test again** to confirm (red → green)
+7. **Mark the step done** and evaluate — decide what the next step should be based on what you learned
 
 ### Quality Checkpoints
 
@@ -143,8 +140,8 @@ Before writing any tests, locate the "4 Pillars of Testing" document in the proj
 
 ### Step 4: No duplicate markets between trending and regular
 
-- [x] Write test
-- [x] Run test (Red)
+- [x] Write test + scaffold structure
+- [x] Run test (Red — behavior assertion fails)
 - [x] Implement deduplication logic
 - [x] Run test (Green)
 
@@ -170,5 +167,5 @@ Before writing any tests, locate the "4 Pillars of Testing" document in the proj
 - ❌ Skipping quality checkpoints after 2-3 steps
 - ❌ Implementing without a plan (use `@create-implementation-plan` first)
 - ❌ Writing behavior logic before running the test (structural scaffolding is allowed and encouraged)
-- ❌ Treating a structural failure (404, missing route/field/import) as a valid red — only a failing behavior assertion validates anything
+- ❌ Treating a structural failure (404, missing route/field/import) as a valid red — it validates nothing
 - ❌ Batching multiple test-write-implement cycles without running tests between them

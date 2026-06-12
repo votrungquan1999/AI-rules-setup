@@ -48,11 +48,12 @@ For each task, Antigravity MUST double-check:
 
 ## Test-First Enforcement
 
+- Test-first applies to BOTH BDD (outer, user-facing behavior) and TDD (inner, internal logic). BDD is also test-first — it does not conflict.
 - NEVER write behavior logic before running the test. Structural scaffolding (route, empty handler, field, empty function returning a default) MUST be in place before the run so the test can only fail behaviorally.
 - A red run only counts when a behavior assertion fails. Structural failures (404 route not registered, missing field/column/import) are NOT valid reds — they validate nothing. Never manufacture one to follow ritual.
 - If no meaningful red is possible (the minimal scaffolding to avoid structural failure already IS the implementation), write just enough code to pass first and expect green from the first run — state this explicitly.
-- ONE test at a time. Run it. See the result. Then decide what comes next.
-- The test run is a GATE — skipping it is a rule violation.
+- ONE at a time — one scenario (BDD) or one test (TDD). Run it. See the result. Then decide what comes next.
+- The test run is a GATE that applies in both modes — skipping it is a rule violation.
 
 ## Planning Mode
 
