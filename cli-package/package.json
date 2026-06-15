@@ -1,6 +1,6 @@
 {
   "name": "@quanvo99/ai-rules",
-  "version": "0.1.11",
+  "version": "0.2.0",
   "description": "CLI tool for managing AI agent rules across projects",
   "main": "dist/index.js",
   "bin": {

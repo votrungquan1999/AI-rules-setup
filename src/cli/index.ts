@@ -14,7 +14,7 @@ program
 	.description(
 		"A command-line tool that helps developers pull curated AI agent rules from a centralized repository into their projects",
 	)
-	.version("0.1.0");
+	.version("0.2.0");
 
 program
 	.command("init")
