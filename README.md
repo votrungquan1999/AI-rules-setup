@@ -71,6 +71,44 @@ ai-rules add --skills test-quality-reviewer --workflows commit-plan
 ai-rules add --categories all --overwrite-strategy force
 ```
 
+### `ai-rules upload`
+
+Publish a local skill directory as a **private, scoped** skill (see [Private Skills](#private-skills)). Requires the `AI_RULES_SECRET` environment variable:
+
+```bash
+AI_RULES_SECRET=… ai-rules upload ./path/to/skill-dir --agent claude-code --scope work
+AI_RULES_SECRET=… ai-rules upload ./my-skill --agent cursor --scope work,client-x
+```
+
+The directory must contain a `SKILL.md`; any other files are uploaded as supporting files. The skill name is the directory's basename, and re-uploading the same `{agent, name}` replaces it.
+
+## Private Skills
+
+Public skills are available to everyone. **Private skills** are stored separately and only returned to callers who present a matching secret **and** scope — so you can keep team- or client-specific skills out of the public catalog while still installing them with the same CLI.
+
+Two pieces of state unlock them, and **both** are required:
+
+- **`AI_RULES_SECRET`** — a shared secret in your environment, sent as the `x-ai-rules-secret` header.
+- **`scope`** — a tag in `.ai-rules.json`, sent as the `x-ai-rules-scope` header.
+
+| Secret | Scope | Result |
+| ------ | ----- | ------ |
+| ✅ | ✅ (matching) | Public **+** scoped private skills |
+| ✅ | — | Public only |
+| — | ✅ | Public only (scope alone unlocks nothing) |
+
+On any auth failure the server **silently** returns the public-only payload — there is no error and no existence leak. So if private skills don't appear after a pull, re-check the secret value and the scope rather than looking for an error.
+
+```bash
+# 1. Make the secret available (keep it out of version control)
+export AI_RULES_SECRET='…'
+
+# 2. Add a scope to .ai-rules.json (see Configuration), then pull
+ai-rules pull   # now fetches public + scoped private skills
+```
+
+> Tip: ask your AI agent to run the **`setup-private-skills`** skill — it walks through the secret, scope, upload, and pull steps for you.
+
 ## Available Content
 
 ### Rule Categories
@@ -79,7 +117,7 @@ Categories include: `typescript`, `react-hooks`, `react-server-components`, `com
 
 ### Skills
 
-Reusable capability packages: TDD, BDD, code refactoring, context7 integration, web search, create-PR, implementation planning, test quality review, and more.
+Reusable capability packages: TDD, BDD, code refactoring, context7 integration, web search, create-PR, implementation planning, test quality review, private-skill setup, and more.
 
 ### Workflows
 
@@ -128,6 +166,16 @@ The CLI creates a `.ai-rules.json` file in your project root:
   "categories": ["typescript", "react-hooks"],
   "skills": ["tdd-design", "bdd-design"],
   "workflows": ["feature-development", "commit-plan"]
+}
+```
+
+The optional **`scope`** field opts the project into [private skills](#private-skills). When set (and paired with `AI_RULES_SECRET`), `pull`/`add` also fetch private skills tagged with that scope:
+
+```json
+{
+  "agent": "claude-code",
+  "scope": "work",
+  "skills": []
 }
 ```
 
