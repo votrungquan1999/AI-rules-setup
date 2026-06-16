@@ -2,9 +2,12 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { type Db, MongoClient } from "mongodb";
 import type {
+	KbStatus,
+	KbType,
 	Manifest,
 	RulesDataToStore,
 	SkillFile,
+	StoredKbDocDocument,
 	StoredPrivateSkillDocument,
 	StoredRulesDocument,
 	StoredSkillsDocument,
@@ -12,6 +15,7 @@ import type {
 	WorkflowFile,
 } from "../../src/server/types";
 import {
+	KB_DOCS_COLLECTION_NAME,
 	PRIVATE_SKILLS_COLLECTION_NAME,
 	RULES_DATA_COLLECTION_NAME,
 	SKILLS_COLLECTION_NAME,
@@ -81,6 +85,7 @@ async function cleanTestDatabase(db: Db): Promise<void> {
 		SKILLS_COLLECTION_NAME,
 		WORKFLOWS_COLLECTION_NAME,
 		PRIVATE_SKILLS_COLLECTION_NAME,
+		KB_DOCS_COLLECTION_NAME,
 	];
 
 	for (const collectionName of collections) {
@@ -147,6 +152,39 @@ export async function storePrivateSkillInTestDatabase(
 	};
 	if (skill.description !== undefined) document.description = skill.description;
 	await collection.replaceOne({ agent, name: skill.name }, document, { upsert: true });
+}
+
+interface SeedKbDoc {
+	type: KbType;
+	status: KbStatus;
+	title: string;
+	body: string;
+	scope: string[];
+	agent?: string;
+}
+
+/**
+ * Store a single knowledge-base document directly in the test database.
+ * Returns the inserted document's `_id` hex string so tests can target it by URL id.
+ * @param db - The test database handle
+ * @param doc - The KB document fields to seed (type, status, title, body, scope, optional agent)
+ * @returns The hex string of the inserted document's MongoDB `_id`
+ */
+export async function storeKbDocInTestDatabase(db: Db, doc: SeedKbDoc): Promise<string> {
+	const collection = db.collection<StoredKbDocDocument>(KB_DOCS_COLLECTION_NAME);
+	const now = new Date();
+	const document: StoredKbDocDocument = {
+		type: doc.type,
+		status: doc.status,
+		title: doc.title,
+		body: doc.body,
+		scope: doc.scope,
+		createdAt: now,
+		updatedAt: now,
+	};
+	if (doc.agent !== undefined) document.agent = doc.agent;
+	const result = await collection.insertOne(document);
+	return result.insertedId.toHexString();
 }
 
 /**

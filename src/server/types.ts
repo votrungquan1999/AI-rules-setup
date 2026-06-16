@@ -224,6 +224,72 @@ export interface StoredPrivateSkillDocument {
 	createdAt: Date;
 	updatedAt: Date;
 }
+export const KB_DOCS_COLLECTION_NAME = "kb_docs";
+
+/**
+ * The kind of knowledge a KB document represents.
+ * - question: a solved question (problem + resolution)
+ * - til: a "today I learned" learning note
+ * - blueprint: a reusable pattern / template
+ * - memory: an always-on, concise project memory
+ */
+export enum KbType {
+	Question = "question",
+	Til = "til",
+	Blueprint = "blueprint",
+	Memory = "memory",
+}
+
+/**
+ * Review lifecycle status of a KB document.
+ * - draft: captured by an agent, awaiting reviewer approval
+ * - canonical: approved, returned to agents searching the knowledge base
+ */
+export enum KbStatus {
+	Draft = "draft",
+	Canonical = "canonical",
+}
+
+/**
+ * Database document type for a single stored knowledge-base document.
+ * Identity is MongoDB's auto-generated `_id` (ObjectId); routes look docs up by its hex string.
+ * Follows the database patterns with Document suffix.
+ */
+export interface StoredKbDocDocument {
+	/** MongoDB ObjectId; absent until inserted. */
+	_id?: unknown;
+	type: KbType;
+	status: KbStatus;
+	title: string;
+	body: string;
+	/** Scope tags this document is visible under. */
+	scope: string[];
+	/** Optional originating agent (e.g. 'claude-code'). */
+	agent?: string;
+	createdAt: Date;
+	updatedAt: Date;
+	/** When a reviewer approved/promoted this document. */
+	reviewedAt?: Date;
+}
+
+/**
+ * Client-facing knowledge-base document returned by repository/route layers.
+ * Separate from `StoredKbDocDocument`: string `id` (from `_id.toHexString()`) and
+ * Date fields serialized to ISO strings for JSON transport.
+ */
+export interface KbDoc {
+	id: string;
+	type: KbType;
+	status: KbStatus;
+	title: string;
+	body: string;
+	scope: string[];
+	agent?: string;
+	createdAt: string;
+	updatedAt: string;
+	reviewedAt?: string;
+}
+
 export const PRESETS_COLLECTION_NAME = "presets";
 
 /**
