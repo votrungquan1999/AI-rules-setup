@@ -6,16 +6,41 @@ const SECRET_HEADER = "x-ai-rules-secret";
 const SCOPE_HEADER = "x-ai-rules-scope";
 
 /**
+ * Builds a stable cache key for a scope list. Sorts a copy and joins with commas so that two
+ * arrays with the same members (in any order) compare equal across CLI calls.
+ * @param scope - Optional list of scope tags
+ * @returns A stable string key (empty string when no scopes)
+ */
+function scopeCacheKey(scope?: string[]): string {
+	if (!scope || scope.length === 0) return "";
+	return [...scope].sort().join(",");
+}
+
+/**
  * Builds auth headers for fetches against /api/rules.
  * Attaches the secret when `AI_RULES_SECRET` is set, and the scope only when both the secret
- * is present AND the caller supplies a scope (scope without secret never unlocks anything).
+ * is present AND the caller supplies a non-empty scope list (scope without secret never unlocks
+ * anything). The scope list is CSV-encoded into the `x-ai-rules-scope` header for the server to split.
+ * @param scope - Optional list of scope tags to forward to the server
+ * @returns Header map with the secret and, when applicable, the CSV-encoded scope
  */
-function buildAuthHeaders(scope?: string): Record<string, string> {
+function buildAuthHeaders(scope?: string[]): Record<string, string> {
 	const secret = process.env.AI_RULES_SECRET;
 	if (!secret) return {};
 	const headers: Record<string, string> = { [SECRET_HEADER]: secret };
-	if (scope) headers[SCOPE_HEADER] = scope;
+	if (scope && scope.length > 0) headers[SCOPE_HEADER] = scope.join(",");
 	return headers;
+}
+
+/**
+ * Client-facing knowledge-base memory as returned by `GET /api/kb/memories`. Only the fields the
+ * CLI needs to materialize the managed memory file are modeled here (a separate, minimal type from
+ * the server's `KbDoc` so the CLI does not depend on server internals).
+ */
+export interface KbMemory {
+	id: string;
+	title: string;
+	body: string;
 }
 
 // Types for API responses
@@ -50,15 +75,20 @@ export interface RulesResponse {
 // returns a different payload (private skills vary), so the cache must invalidate when
 // scope changes within the same CLI invocation.
 let cachedRules: RulesResponse | null = null;
-let cachedScope: string | undefined;
+let cachedScopeKey: string | undefined;
 let cacheTimestamp: number = 0;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 /**
  * Set the cached rules data directly. Used for testing to avoid API calls.
+ * Seeds the scope cache key with the normalized empty-scope key so a subsequent fetch
+ * with no scope (the common test path) registers as a cache hit instead of re-fetching.
+ * @param data - The rules payload to seed the cache with
+ * @param scope - Optional scope list the payload corresponds to; defaults to the no-scope key
  */
-export function setCachedRules(data: RulesResponse): void {
+export function setCachedRules(data: RulesResponse, scope?: string[]): void {
 	cachedRules = data;
+	cachedScopeKey = scopeCacheKey(scope);
 	cacheTimestamp = Date.now();
 }
 
@@ -67,20 +97,21 @@ export function setCachedRules(data: RulesResponse): void {
  */
 export function resetCache(): void {
 	cachedRules = null;
-	cachedScope = undefined;
+	cachedScopeKey = undefined;
 	cacheTimestamp = 0;
 }
 
 /**
  * Fetches rules data from the API with caching keyed by scope.
- * @param scope - Optional project scope tag; included as `x-ai-rules-scope` header when paired with a secret
+ * @param scope - Optional project scope tags; CSV-encoded into the `x-ai-rules-scope` header when paired with a secret
  * @returns Complete rules data from the API
  */
-async function fetchRulesData(scope?: string): Promise<RulesResponse> {
+async function fetchRulesData(scope?: string[]): Promise<RulesResponse> {
 	const now = Date.now();
+	const scopeKey = scopeCacheKey(scope);
 
-	// Return cached data if it's still fresh AND the cached scope matches the requested scope
-	if (cachedRules && cachedScope === scope && now - cacheTimestamp < CACHE_DURATION) {
+	// Return cached data if it's still fresh AND the cached scope key matches the requested scope
+	if (cachedRules && cachedScopeKey === scopeKey && now - cacheTimestamp < CACHE_DURATION) {
 		return cachedRules;
 	}
 
@@ -95,7 +126,7 @@ async function fetchRulesData(scope?: string): Promise<RulesResponse> {
 
 		// Update cache
 		cachedRules = data;
-		cachedScope = scope;
+		cachedScopeKey = scopeKey;
 		cacheTimestamp = now;
 
 		return data;
@@ -108,7 +139,7 @@ async function fetchRulesData(scope?: string): Promise<RulesResponse> {
  * Fetches available AI agents from the API
  * @returns Array of available agent names
  */
-export async function fetchAvailableAgents(scope?: string): Promise<string[]> {
+export async function fetchAvailableAgents(scope?: string[]): Promise<string[]> {
 	try {
 		const data = await fetchRulesData(scope);
 		return Object.keys(data.agents);
@@ -123,7 +154,7 @@ export async function fetchAvailableAgents(scope?: string): Promise<string[]> {
  * @param agent - AI agent name (e.g., 'cursor', 'windsurf')
  * @returns Array of manifest objects
  */
-export async function fetchManifests(agent: string, scope?: string): Promise<Manifest[]> {
+export async function fetchManifests(agent: string, scope?: string[]): Promise<Manifest[]> {
 	try {
 		const data = await fetchRulesData(scope);
 		const agentData = data.agents[agent];
@@ -150,7 +181,7 @@ export async function fetchRuleFile(
 	agent: string,
 	category: string,
 	filename: string,
-	scope?: string,
+	scope?: string[],
 ): Promise<string | null> {
 	try {
 		const data = await fetchRulesData(scope);
@@ -181,7 +212,7 @@ export async function fetchRuleFile(
  */
 export async function fetchSkills(
 	agent: string,
-	scope?: string,
+	scope?: string[],
 ): Promise<Array<{ name: string; content: string; supportingFiles?: Array<{ path: string; content: string }> }>> {
 	try {
 		const data = await fetchRulesData(scope);
@@ -234,11 +265,30 @@ export async function uploadPrivateSkill(
 }
 
 /**
+ * Fetches the workspace's canonical KB memories via `GET /api/kb/memories`. This is a standalone
+ * fetch that BYPASSES the rules cache (memories are a separate endpoint and must always be fresh on
+ * pull). Sends the secret + CSV-encoded scope via `buildAuthHeaders`. Throws on a non-OK response so
+ * the caller can isolate failure (the pull command logs a warning and continues).
+ * @param scopes - The workspace's declared scope tags
+ * @returns The canonical memories for the workspace scope
+ */
+export async function fetchKbMemories(scopes: string[]): Promise<KbMemory[]> {
+	const response = await fetch(`${API_BASE_URL}/api/kb/memories`, { headers: buildAuthHeaders(scopes) });
+	if (!response.ok) {
+		throw new Error(`Failed to fetch KB memories: ${response.status} ${response.statusText}`);
+	}
+	return (await response.json()) as KbMemory[];
+}
+
+/**
  * Fetches all workflows for a specific agent from the API
  * @param agent - AI agent name (e.g., 'antigravity')
  * @returns Array of workflow objects with name and content, or empty array if no workflows
  */
-export async function fetchWorkflows(agent: string, scope?: string): Promise<Array<{ name: string; content: string }>> {
+export async function fetchWorkflows(
+	agent: string,
+	scope?: string[],
+): Promise<Array<{ name: string; content: string }>> {
 	try {
 		const data = await fetchRulesData(scope);
 		const agentData = data.agents[agent];

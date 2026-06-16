@@ -1,27 +1,9 @@
-import { timingSafeEqual } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { type NextRequest, NextResponse } from "next/server";
 import { fetchAllRulesData } from "../lib/rules-data-fetcher";
+import { verifySecret } from "../lib/verify-secret";
 
-const SECRET_HEADER = "x-ai-rules-secret";
 const SCOPE_HEADER = "x-ai-rules-scope";
-
-/**
- * Returns true when the request's secret header matches the server's configured secret.
- * Uses a constant-time compare. Silently returns false on any failure (unconfigured server,
- * missing header, wrong length) so callers see the public payload — wrong secrets must NEVER
- * leak the existence of private skills.
- */
-function isValidSecret(request: NextRequest): boolean {
-	const configured = process.env.AI_RULES_SECRET;
-	if (!configured) return false;
-	const provided = request.headers.get(SECRET_HEADER);
-	if (!provided) return false;
-	const a = Buffer.from(provided);
-	const b = Buffer.from(configured);
-	if (a.length !== b.length) return false;
-	return timingSafeEqual(a, b);
-}
 
 /**
  * GET /api/rules
@@ -36,11 +18,17 @@ function isValidSecret(request: NextRequest): boolean {
 export async function GET(request: NextRequest) {
 	try {
 		console.log("Fetching rules data from MongoDB cache with local filesystem auto-priming");
-		const secretValid = isValidSecret(request);
-		const projectScope = request.headers.get(SCOPE_HEADER)?.trim();
-		const includePrivate = secretValid && Boolean(projectScope);
-		const fetchOptions: { includePrivate: boolean; projectScope?: string } = { includePrivate };
-		if (includePrivate && projectScope) fetchOptions.projectScope = projectScope;
+		// Silent fallback: verifySecret returning false yields the public payload here, never a 401,
+		// so a wrong secret cannot probe for the existence of private skills.
+		const secretValid = verifySecret(request);
+		// The scope header is CSV-encoded by the CLI; split it back into a list of scope tags.
+		const projectScope = (request.headers.get(SCOPE_HEADER) ?? "")
+			.split(",")
+			.map((s) => s.trim())
+			.filter(Boolean);
+		const includePrivate = secretValid && projectScope.length > 0;
+		const fetchOptions: { includePrivate: boolean; projectScope?: string[] } = { includePrivate };
+		if (includePrivate) fetchOptions.projectScope = projectScope;
 		const rulesData = await fetchAllRulesData(fetchOptions);
 
 		revalidatePath("/select-rules");

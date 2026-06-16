@@ -235,7 +235,7 @@ describe("E2E: Private Skills", () => {
 					agent: "claude-code",
 					categories: [],
 					skills: ["work-helper", "feature-development-workflow"],
-					scope: "work",
+					scope: ["work"],
 				};
 				await writeFile(join(projectDir, ".ai-rules.json"), JSON.stringify(config));
 
@@ -345,6 +345,51 @@ describe("E2E: Private Skills", () => {
 		});
 	});
 
+	describe("when a workspace belongs to several scopes", () => {
+		it("should receive every private skill tagged to any of those scopes, and nothing tagged only to an unrelated scope", async () => {
+			// Given three single-scope private skills: two in the workspace's scopes, one outside.
+			const db = await getTestDatabase();
+			await storePrivateSkillInTestDatabase(db, "claude-code", { name: "work-scoped", content: "belongs to work" }, [
+				"work",
+			]);
+			await storePrivateSkillInTestDatabase(
+				db,
+				"claude-code",
+				{ name: "client-scoped", content: "belongs to client-x" },
+				["client-x"],
+			);
+			await storePrivateSkillInTestDatabase(
+				db,
+				"claude-code",
+				{ name: "unrelated-scoped", content: "belongs to other" },
+				["other"],
+			);
+
+			const apiUrl = process.env.AI_RULES_API_URL;
+			if (!apiUrl) throw new Error("AI_RULES_API_URL not set by E2E setup");
+
+			// When fetched from a multi-scope workspace (CSV-encoded "work,client-x" header).
+			const response = await fetch(`${apiUrl}/api/rules`, {
+				headers: {
+					"x-ai-rules-secret": "test-secret",
+					"x-ai-rules-scope": "work,client-x",
+				},
+			});
+
+			// Then both in-scope skills come back...
+			expect(response.ok).toBe(true);
+			const payload = (await response.json()) as RulesApiResponse;
+			const claudeCodeSkills = payload.agents["claude-code"]?.skills ?? [];
+			const workScoped = claudeCodeSkills.find((s) => s.name === "work-scoped");
+			const clientScoped = claudeCodeSkills.find((s) => s.name === "client-scoped");
+			expect(workScoped?.content).toBe("belongs to work");
+			expect(clientScoped?.content).toBe("belongs to client-x");
+
+			// ...and the skill tagged only to an unrelated scope is NOT delivered.
+			expect(claudeCodeSkills.find((s) => s.name === "unrelated-scoped")).toBeUndefined();
+		});
+	});
+
 	describe("when running `add --skills` in a project with a matching scope", () => {
 		it("should install the private skill into the workspace", async () => {
 			// Given a private skill exists for claude-code under scope "work".
@@ -364,24 +409,21 @@ describe("E2E: Private Skills", () => {
 					agent: "claude-code",
 					categories: [],
 					skills: [],
-					scope: "work",
+					scope: ["work"],
 				};
 				await writeFile(join(projectDir, ".ai-rules.json"), JSON.stringify(config));
 
 				// When the developer runs `add --skills add-target-helper --overwrite-strategy force`.
-				const { result } = spawnCLI(
-					["add", "--skills", "add-target-helper", "--overwrite-strategy", "force"],
-					{ cwd: projectDir, timeout: 30000 },
-				);
+				const { result } = spawnCLI(["add", "--skills", "add-target-helper", "--overwrite-strategy", "force"], {
+					cwd: projectDir,
+					timeout: 30000,
+				});
 				const output = await result;
 				expect(output.exitCode, `stdout: ${output.stdout}\nstderr: ${output.stderr}`).toBe(0);
 
 				// Then the private skill is installed on disk with its actual content.
 				expect(await fileExists(projectDir, ".claude/skills/add-target-helper/SKILL.md")).toBe(true);
-				const installed = await readFile(
-					join(projectDir, ".claude/skills/add-target-helper/SKILL.md"),
-					"utf-8",
-				);
+				const installed = await readFile(join(projectDir, ".claude/skills/add-target-helper/SKILL.md"), "utf-8");
 				expect(installed).toBe("---\nname: add-target-helper\n---\n# Add Target");
 			} finally {
 				await cleanupTestProject(projectDir);

@@ -17,14 +17,14 @@ import { createStoredRulesDocument, documentsToRulesData } from "./utils";
 
 interface FindRulesOptions {
 	includePrivate?: boolean;
-	projectScope?: string;
+	projectScope?: string[];
 }
 
 /**
  * Finds all stored rules from the database.
  * Public skills are always returned (tagged `visibility: "public"` at read time).
- * Private skills are merged in only when `includePrivate=true` AND `projectScope` is set —
- * filtered to skills whose `scopes` array contains an exact match for `projectScope`.
+ * Private skills are merged in only when `includePrivate=true` AND a non-empty `projectScope`
+ * list is set — filtered to skills whose `scopes` array intersects any of the project's scopes.
  * @param options - Optional flags controlling private-skill inclusion and scope filtering
  * @returns Complete rules data structure or null if no rules collection rows exist
  */
@@ -52,8 +52,9 @@ export async function findAllStoredRules(options: FindRulesOptions = {}): Promis
 		}
 	}
 
-	// Merge private skills when requested and a project scope is provided.
-	if (options.includePrivate && options.projectScope) {
+	// Merge private skills when requested and a non-empty project scope list is provided.
+	// `Boolean([])` is true, so an explicit length check is required to avoid running a `$in: []` query.
+	if (options.includePrivate && options.projectScope && options.projectScope.length > 0) {
 		const privateSkills = await findAllStoredPrivateSkills(options.projectScope);
 		for (const priv of privateSkills) {
 			const agent = rulesData.agents[priv.agent];
@@ -87,14 +88,27 @@ export async function findAllStoredRules(options: FindRulesOptions = {}): Promis
 }
 
 /**
- * Returns all private skill documents whose `scopes` array contains `projectScope` (exact match).
- * @param projectScope - The project's declared scope tag
+ * Returns all private skill documents whose `scopes` array intersects any of `projectScopes`.
+ * Uses MongoDB `$in` so a workspace belonging to several contexts receives every private skill
+ * tagged to at least one of those contexts.
+ * @param projectScopes - The project's declared scope tags
  * @returns Array of matching private skill documents (empty when none match)
  */
-export async function findAllStoredPrivateSkills(projectScope: string): Promise<StoredPrivateSkillDocument[]> {
+export async function findAllStoredPrivateSkills(projectScopes: string[]): Promise<StoredPrivateSkillDocument[]> {
 	const db = await getDatabase();
 	const collection = db.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME);
-	return collection.find({ scopes: projectScope }).toArray();
+	return collection.find({ scopes: { $in: projectScopes } }).toArray();
+}
+
+/**
+ * Returns ALL private skill documents across every scope (no filter). Used by the reviewer-facing
+ * private-skills page, which must browse the whole catalog rather than a single workspace's scopes.
+ * @returns Array of all private skill documents (empty when none exist)
+ */
+export async function findAllPrivateSkills(): Promise<StoredPrivateSkillDocument[]> {
+	const db = await getDatabase();
+	const collection = db.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME);
+	return collection.find({}).toArray();
 }
 
 /**

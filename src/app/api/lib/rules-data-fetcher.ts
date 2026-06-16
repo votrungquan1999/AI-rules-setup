@@ -5,7 +5,7 @@ import { primeCache } from "./cache-primer";
 interface FetchAllRulesOptions {
 	rootPath?: string;
 	includePrivate?: boolean;
-	projectScope?: string;
+	projectScope?: string[];
 }
 
 /**
@@ -19,7 +19,7 @@ interface FetchAllRulesOptions {
 export async function fetchAllRulesData(options: FetchAllRulesOptions = {}): Promise<RulesData> {
 	console.log("Attempting to fetch rules data from MongoDB...");
 
-	const findOptions: { includePrivate?: boolean; projectScope?: string } = {};
+	const findOptions: { includePrivate?: boolean; projectScope?: string[] } = {};
 	if (options.includePrivate !== undefined) findOptions.includePrivate = options.includePrivate;
 	if (options.projectScope !== undefined) findOptions.projectScope = options.projectScope;
 
