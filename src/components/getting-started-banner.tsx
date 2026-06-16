@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { Check, ChevronDown, Copy, Lightbulb, Sparkles } from "lucide-react";
+import { useState } from "react";
 import { Button } from "src/components/ui/button";
 import {
 	DropdownMenu,
@@ -37,15 +37,10 @@ export function GettingStartedBanner({ manifests }: GettingStartedBannerProps) {
 	const selectedPreset = presets.find((p) => p.id === selectedPresetId);
 
 	return (
-		<div
-			data-testid="getting-started-banner"
-			className="p-6 mb-4 rounded-xl border-2 border-border bg-accent/20"
-		>
+		<div data-testid="getting-started-banner" className="p-6 mb-4 rounded-xl border-2 border-border bg-accent/20">
 			<div className="flex items-center gap-2 mb-4">
 				<Lightbulb className="size-5 text-yellow-500" />
-				<h2 className="text-lg font-semibold text-foreground">
-					Not sure where to start?
-				</h2>
+				<h2 className="text-lg font-semibold text-foreground">Not sure where to start?</h2>
 			</div>
 
 			<div className={`grid ${hasPresets ? "grid-cols-2" : "grid-cols-1"} gap-6`}>
@@ -54,9 +49,7 @@ export function GettingStartedBanner({ manifests }: GettingStartedBannerProps) {
 					<div className="flex flex-col gap-2">
 						<div className="flex items-center gap-2 mb-1">
 							<Sparkles className="size-4 text-primary" />
-							<span className="text-sm font-medium text-foreground">
-								Select a Preset
-							</span>
+							<span className="text-sm font-medium text-foreground">Select a Preset</span>
 						</div>
 						<p className="text-xs text-muted-foreground mb-2">
 							Pick a tech-stack preset to auto-select relevant skills, workflows, and rules.
@@ -95,9 +88,7 @@ export function GettingStartedBanner({ manifests }: GettingStartedBannerProps) {
 											<span className="text-base">{preset.icon}</span>
 											<span className="font-medium text-foreground">{preset.name}</span>
 										</div>
-										<span className="text-xs text-muted-foreground pl-7">
-											{preset.description}
-										</span>
+										<span className="text-xs text-muted-foreground pl-7">{preset.description}</span>
 									</DropdownMenuItem>
 								))}
 							</DropdownMenuContent>
@@ -109,20 +100,13 @@ export function GettingStartedBanner({ manifests }: GettingStartedBannerProps) {
 				<div className="flex flex-col gap-2">
 					<div className="flex items-center gap-2 mb-1">
 						<Copy className="size-4 text-primary" />
-						<span className="text-sm font-medium text-foreground">
-							Ask ChatGPT
-						</span>
+						<span className="text-sm font-medium text-foreground">Ask ChatGPT</span>
 					</div>
 					<p className="text-xs text-muted-foreground mb-2">
 						Copy a prompt and paste it into ChatGPT to get personalized recommendations.
 					</p>
 					<CopyButton value={prompt} asChild>
-						<Button
-							type="button"
-							variant="outline"
-							className="w-full"
-							aria-label="Copy prompt"
-						>
+						<Button type="button" variant="outline" className="w-full" aria-label="Copy prompt">
 							<CopiedContent>
 								<Check className="size-4 mr-2 text-green-600" />
 								Copied!

@@ -302,11 +302,7 @@ export function useHasSelectedAgent(): boolean {
  * Computes command from current state
  * Uses "all" shorthand when all items in a category are selected
  */
-export function useGeneratedCommand(
-	allIds: string[],
-	allSkillNames: string[],
-	allWorkflowNames: string[],
-): string {
+export function useGeneratedCommand(allIds: string[], allSkillNames: string[], allWorkflowNames: string[]): string {
 	const state = useSelectionState();
 
 	// Generate command if rules, skills, or workflows are selected
