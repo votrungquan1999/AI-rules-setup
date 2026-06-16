@@ -1,30 +1,12 @@
-import { timingSafeEqual } from "node:crypto";
 import { type NextRequest, NextResponse } from "next/server";
 import { storePrivateSkill } from "../../../../server/rules-repository";
 import type { SkillFile } from "../../../../server/types";
+import { verifySecret } from "../../lib/verify-secret";
 
 interface UploadRequestBody {
 	agent: string;
 	skill: SkillFile;
 	scopes: string[];
-}
-
-const SECRET_HEADER = "x-ai-rules-secret";
-
-/**
- * Returns true when the request's secret header matches the server's configured secret
- * using a constant-time compare. Returns false when the server is unconfigured or the
- * header is missing/wrong-length.
- */
-function verifySecret(request: NextRequest): boolean {
-	const configured = process.env.AI_RULES_SECRET;
-	if (!configured) return false;
-	const provided = request.headers.get(SECRET_HEADER);
-	if (!provided) return false;
-	const a = Buffer.from(provided);
-	const b = Buffer.from(configured);
-	if (a.length !== b.length) return false;
-	return timingSafeEqual(a, b);
 }
 
 /**
