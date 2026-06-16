@@ -44,8 +44,8 @@ export interface Config {
 	skills?: string[];
 	/** List of installed workflows */
 	workflows?: string[];
-	/** Project scope tag used to filter private skills (e.g., "work", "client-x"). When unset, private skills are never fetched. */
-	scope?: string;
+	/** Project scope tags used to filter private skills (e.g., ["work", "client-x"]). When unset or empty, private skills are never fetched. */
+	scope?: string[];
 }
 
 /**

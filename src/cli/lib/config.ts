@@ -18,6 +18,11 @@ export async function loadConfig(projectRoot: string): Promise<Config> {
 			throw new Error("Invalid config format");
 		}
 
+		// Back-compat: a legacy `scope` stored as a single string is widened to a one-element array.
+		if (typeof config.scope === "string") {
+			config.scope = [config.scope];
+		}
+
 		return config as Config;
 	} catch (_error) {
 		// If config file is missing or malformed, write default config to disk and return it
@@ -34,6 +39,35 @@ export async function loadConfig(projectRoot: string): Promise<Config> {
 		await writeFile(configPath, content, "utf-8");
 
 		return defaultConfig;
+	}
+}
+
+/**
+ * Reads and parses .ai-rules.json WITHOUT ever writing a default. Used by the MCP server, which
+ * runs inside arbitrary projects and must never create a stray config file (unlike `loadConfig`,
+ * which writes a default on a missing/malformed file). Returns null on any error: missing file,
+ * malformed JSON, or invalid shape. Applies the same single-string → one-element-array scope
+ * coercion as `loadConfig` for back-compat.
+ * @param projectRoot - Path to the project root directory
+ * @returns The parsed configuration object, or null when it cannot be read/parsed/validated
+ */
+export async function readConfigOrNull(projectRoot: string): Promise<Config | null> {
+	const configPath = join(projectRoot, ".ai-rules.json");
+	try {
+		const content = await readFile(configPath, "utf-8");
+		const config = JSON.parse(content);
+
+		if (!config.version || !config.agent || !Array.isArray(config.categories)) {
+			return null;
+		}
+
+		if (typeof config.scope === "string") {
+			config.scope = [config.scope];
+		}
+
+		return config as Config;
+	} catch {
+		return null;
 	}
 }
 

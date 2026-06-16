@@ -1,7 +1,7 @@
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { addCategory, addSkill, addWorkflow, loadConfig, saveConfig } from "../../src/cli/lib/config";
+import { addCategory, addSkill, addWorkflow, loadConfig, readConfigOrNull, saveConfig } from "../../src/cli/lib/config";
 import type { Config } from "../../src/cli/lib/types";
 
 describe("Config Manager", () => {
@@ -48,6 +48,24 @@ describe("Config Manager", () => {
 			expect(loadedConfig.categories).toEqual(["typescript", "react"]);
 		});
 
+		it("should coerce a single-string scope into a one-element array for back-compat", async () => {
+			// Given an existing .ai-rules.json that stores scope as a single string (legacy format).
+			const legacyConfig = {
+				version: "1.0.0",
+				agent: "claude-code",
+				categories: [],
+				scope: "work",
+			};
+			const configPath = join(testDir, ".ai-rules.json");
+			await writeFile(configPath, JSON.stringify(legacyConfig, null, 2), "utf-8");
+
+			// When the config is loaded.
+			const loadedConfig = await loadConfig(testDir);
+
+			// Then the scalar scope is widened to a one-element array.
+			expect(loadedConfig.scope).toEqual(["work"]);
+		});
+
 		it("should handle malformed JSON gracefully", async () => {
 			const configPath = join(testDir, ".ai-rules.json");
 			await writeFile(configPath, "invalid json content", "utf-8");
@@ -65,6 +83,53 @@ describe("Config Manager", () => {
 			expect(parsed.version).toBe("1.0.0");
 			expect(parsed.agent).toBe("cursor");
 			expect(parsed.categories).toEqual([]);
+		});
+	});
+
+	describe("readConfigOrNull", () => {
+		it("should return null when no config file exists WITHOUT writing a default to disk", async () => {
+			// Given a project directory with no .ai-rules.json (MCP runs in arbitrary projects).
+			const configPath = join(testDir, ".ai-rules.json");
+
+			// When the non-writing read path is used.
+			const config = await readConfigOrNull(testDir);
+
+			// Then it returns null.
+			expect(config).toBeNull();
+
+			// And — critically — it must NOT have created the file (unlike loadConfig).
+			await expect(access(configPath)).rejects.toThrow();
+		});
+
+		it("should read an existing config and coerce a single-string scope to an array", async () => {
+			// Given a valid legacy config storing scope as a single string.
+			const legacyConfig = {
+				version: "1.0.0",
+				agent: "claude-code",
+				categories: ["typescript"],
+				scope: "work",
+			};
+			await writeFile(join(testDir, ".ai-rules.json"), JSON.stringify(legacyConfig), "utf-8");
+
+			// When read via the non-writing path.
+			const config = await readConfigOrNull(testDir);
+
+			// Then the config is returned with the scalar scope widened to a one-element array.
+			expect(config?.agent).toBe("claude-code");
+			expect(config?.scope).toEqual(["work"]);
+		});
+
+		it("should return null for malformed JSON without overwriting the file", async () => {
+			// Given a malformed config file.
+			const configPath = join(testDir, ".ai-rules.json");
+			await writeFile(configPath, "not valid json", "utf-8");
+
+			// When read via the non-writing path.
+			const config = await readConfigOrNull(testDir);
+
+			// Then it returns null and leaves the malformed file untouched (does NOT rewrite defaults).
+			expect(config).toBeNull();
+			expect(await readFile(configPath, "utf-8")).toBe("not valid json");
 		});
 	});
 
