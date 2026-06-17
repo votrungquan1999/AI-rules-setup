@@ -3,12 +3,12 @@ import { describe, expect, it } from "vitest";
 const SECRET = "test-secret";
 
 /**
- * E2E auth gate tests. The middleware (edge) gates the web pages `/kb/*` and `/private-skills/*`,
+ * E2E auth gate tests. The proxy (edge) gates the web pages `/kb/*` and `/private-skills/*`,
  * redirecting unauthenticated requests to `/login`. The `/api/auth` route (node) verifies the
  * secret and sets the httpOnly `session` cookie. These are HTTP-level (no browser), using `fetch`
  * with redirect handling disabled so we can inspect the redirect Location.
  */
-describe("E2E: Auth gate (middleware + login route)", () => {
+describe("E2E: Auth gate (proxy + login route)", () => {
 	function apiUrl(): string {
 		const url = process.env.AI_RULES_API_URL;
 		if (!url) throw new Error("AI_RULES_API_URL not set by E2E setup");

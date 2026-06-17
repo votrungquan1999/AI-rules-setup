@@ -4,7 +4,7 @@ import { type NextRequest, NextResponse } from "next/server";
 const SESSION_COOKIE = "session";
 
 /**
- * Edge middleware gating the reviewer web pages (`/kb/*`, `/private-skills/*`).
+ * Edge proxy (Next.js, formerly "middleware") gating the reviewer web pages (`/kb/*`, `/private-skills/*`).
  *
  * Runs in the Edge runtime, so it CANNOT use `node:crypto`/`timingSafeEqual`. It reads the
  * `session` cookie and compares it to `AI_RULES_SECRET` with plain string equality (edge-safe).
@@ -16,7 +16,7 @@ const SESSION_COOKIE = "session";
  * @param request - The incoming request
  * @returns A redirect to `/login` when the session is missing/invalid, otherwise `NextResponse.next()`
  */
-export function middleware(request: NextRequest): NextResponse {
+export function proxy(request: NextRequest): NextResponse {
 	const configured = process.env.AI_RULES_SECRET;
 	const session = request.cookies.get(SESSION_COOKIE)?.value;
 

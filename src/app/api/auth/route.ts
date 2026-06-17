@@ -10,7 +10,7 @@ interface AuthBody {
  * POST /api/auth — reviewer login / logout.
  *
  * Login: posts `{ secret }`. The secret is verified with a constant-time compare; on success the
- * server sets an httpOnly `session` cookie whose value IS the secret (the edge middleware compares
+ * server sets an httpOnly `session` cookie whose value IS the secret (the edge proxy compares
  * the cookie to `AI_RULES_SECRET` with plain equality). Wrong/absent secret → 401.
  *
  * Logout: posts `{ action: "logout" }` to clear the session cookie.
