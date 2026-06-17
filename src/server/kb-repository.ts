@@ -115,7 +115,7 @@ export async function insertKbDraft(draft: {
 }): Promise<string> {
 	const collection = await getKbCollection();
 	const now = new Date();
-	const document: StoredKbDocDocument = {
+	const document: Omit<StoredKbDocDocument, "_id"> = {
 		type: draft.type,
 		status: KbStatus.Draft,
 		title: draft.title,

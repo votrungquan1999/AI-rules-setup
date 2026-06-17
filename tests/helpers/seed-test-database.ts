@@ -173,7 +173,7 @@ interface SeedKbDoc {
 export async function storeKbDocInTestDatabase(db: Db, doc: SeedKbDoc): Promise<string> {
 	const collection = db.collection<StoredKbDocDocument>(KB_DOCS_COLLECTION_NAME);
 	const now = new Date();
-	const document: StoredKbDocDocument = {
+	const document: Omit<StoredKbDocDocument, "_id"> = {
 		type: doc.type,
 		status: doc.status,
 		title: doc.title,
