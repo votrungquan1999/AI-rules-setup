@@ -34,6 +34,15 @@ For each task, Antigravity MUST double-check:
 - NEVER use try-catch blocks defensively around every operation.
 - ONLY place try-catch blocks at intentional error boundaries where you want to catch all errors from lower-level code.
 
+## Code Comments
+
+- Write comments to be **skimmed**: short, scannable, and useful at a glance.
+- Explain **WHY**, not WHAT — the code already shows what it does.
+- Prefer one line, one idea. Lead with the key point; keep detail short and after it.
+- NEVER write comments that restate the code or narrate obvious steps.
+- For a complicated function, prefer short comments on each step over one long block at the top — they let a dev follow the logic as they read it.
+- Match the surrounding code's comment density and style.
+
 ## Edit Verification and Retry Logic
 
 - After EVERY file edit operation (using tools like `replace_file_content` or `multi_replace_file_content`), MUST verify that the edit was successful.

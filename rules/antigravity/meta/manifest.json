@@ -14,6 +14,8 @@
     "file-limits",
     "line-limits",
     "error-handling",
+    "code-comments",
+    "comments",
     "scope-management",
     "scope",
     "complexity",
@@ -26,7 +28,7 @@
   ],
   "description": "Meta rules for applying Antigravity agent rules covering file size limits and line count restrictions, scope management and complexity control, error handling patterns, rule application guidelines, code quality standards, validation requirements, and change management strategies for maintainable codebases",
   "version": "1.0.0",
-  "lastUpdated": "2026-02-05T00:00:00Z",
+  "lastUpdated": "2026-06-22T00:00:00Z",
   "activation": {
     "mode": "always"
   },

@@ -13,6 +13,8 @@
     "file-limits",
     "line-limits",
     "error-handling",
+    "code-comments",
+    "comments",
     "scope-management",
     "scope",
     "complexity",
@@ -35,7 +37,7 @@
   ],
   "description": "Meta rules for applying Claude Code rules covering file size limits and line count restrictions, scope management and complexity control, error handling patterns, rule application guidelines, code quality standards, validation requirements, change management strategies for maintainable codebases, planning mode behavior for plan file generation, and feature development workflow with incremental implementation and progress tracking",
   "version": "1.0.0",
-  "lastUpdated": "2025-12-24T00:00:00Z",
+  "lastUpdated": "2026-06-22T00:00:00Z",
   "files": [
     {
       "path": "meta-rules.md",
