@@ -6,9 +6,9 @@ context: fork
 
 # Review Changes
 
-You are the **orchestrator** for an autonomous code review. You run a holistic pass yourself, fan out specialized review lenses as parallel sub-agents, then merge their findings into a single severity-ranked report.
+You are the **orchestrator** for an autonomous code review. You run a holistic pass yourself, fan out specialized review lenses as parallel sub-agents, spawn verifier sub-agents only for the findings a lens flagged as needing a code-level check, then merge the survivors into a single severity-ranked report.
 
-This skill is a lightweight **fan-out → merge** pipeline — NOT a heavy stateful workflow. There are no per-phase user gates; spawn, collect, merge, done.
+This skill is a lightweight **fan-out → verify → merge** pipeline — NOT a heavy stateful workflow. There are no per-phase user gates; spawn, collect, verify, merge, done.
 
 ## Current Changes
 
@@ -28,7 +28,12 @@ Changed files: !`git diff --name-only $(git merge-base HEAD main 2>/dev/null || 
 [tests]                              (parallel sub-agent, sonnet — only if tests changed)
         │  each writes LENS_<name>.md
         ▼
-[merge: confidence-score → filter → dedupe → severity]   (you, inline)
+[gate: which findings need verification?]   (you — only findings the lens flagged "Needs verification")
+        ▼
+[verify finding batches]             (parallel sub-agents — resolve the flagged uncertainty against the real code)
+        │  each writes VERDICT_<batch>.md
+        ▼
+[merge: drop refuted → confidence-score → filter → dedupe → severity]   (you, inline)
         ▼
 ./tmp/review-changes.md
 ```
@@ -40,7 +45,8 @@ The node instructions for each phase live in this skill's `nodes/` directory. Wh
 You (the main session):
 - **Run the holistic phase inline** — it needs the whole picture and produces the shared framing every lens depends on. Keep it on the session's default (strong) model.
 - **Spawn lens sub-agents in parallel** (a single message with multiple `Agent` calls) so they run concurrently.
-- **Merge inline** — collect every `LENS_*.md`, score, filter, dedupe, and write the final report yourself.
+- **Spawn verifier sub-agents** only for findings a lens flagged `Needs verification: yes` — they resolve the flagged uncertainty against the real code. Findings the lens confirmed itself are trusted and skip this step.
+- **Merge inline** — apply the verdicts, then collect every `LENS_*.md`, score, filter, dedupe, and write the final report yourself.
 
 You MUST NOT:
 - Output the raw git diff or command output to the user
@@ -51,6 +57,7 @@ You MUST NOT:
 The `Agent` tool accepts a per-call `model` parameter (`"haiku" | "sonnet" | "opus"`).
 - **correctness, quality, tests** → `model: "sonnet"` — focused, mostly mechanical lens work.
 - **security** → omit `model` (use the session default / strongest available). Cheap security review gives false confidence; this is the one lens not to discount. It also needs to trace data flow *across* files, not just read the diff.
+- **verifiers** → `model: "sonnet"` by default, but **omit `model` for any batch containing a security finding** — verifying a security claim cheaply gives the same false confidence as reviewing it cheaply.
 
 ## Workspace
 
@@ -58,6 +65,7 @@ All intermediates live in `./tmp/review-changes/` (create it; it can be deleted 
 
 - `./tmp/review-changes/HOLISTIC.md` — summary + approach evaluation (written by you in Phase 1)
 - `./tmp/review-changes/LENS_correctness.md`, `LENS_security.md`, `LENS_quality.md`, `LENS_tests.md` — per-lens findings
+- `./tmp/review-changes/VERDICT_<batch>.md` — per-batch verification verdicts (written by verifier sub-agents in Phase 4)
 
 ---
 
@@ -104,11 +112,49 @@ Agent(
 
 ---
 
-## Phase 4: Merge (inline)
+## Phase 4: Verification (parallel sub-agents)
 
-After all lenses return, read every `./tmp/review-changes/LENS_*.md` and produce the final report.
+Lenses are **trusted by default** — a finding is settled unless its author flagged that it rests on something they couldn't confirm. Only those flagged findings get a verification pass; spawn verifier sub-agents to resolve them against the real code.
 
-**4a. Confidence score.** Score each finding 0–100 for how likely it is a real, in-scope issue. Use this rubric:
+**4a. Triage — which findings need verification?**
+
+Read every `./tmp/review-changes/LENS_*.md` and collect the findings. Then decide what to verify:
+
+- **Verify** only findings marked **`Needs verification: yes`** — the lens itself signalled it couldn't confirm them from the diff alone (behavior outside the diff, a caller's actual input, a runtime assumption, a guard that may exist elsewhere).
+- **Trust** every finding marked `Needs verification: no` — carry it straight to the merge. Do NOT spawn a verifier for it.
+- If **no finding is flagged**, skip verification entirely and go to Phase 5.
+
+State which findings you're sending to verification and why before spawning.
+
+**4b. Spawn verifiers (batched, parallel).**
+
+Group findings into batches of **2-4 by shared file/module** so each verifier reads the surrounding code once. Spawn all batches in **a single message** so they run in parallel:
+
+```
+Agent(
+  description: "verify findings [files]",
+  model: "sonnet",   // OMIT for any batch containing a security finding
+  prompt: "Read the instructions in [this skill's directory]/nodes/node-verify.md and execute them.
+    Read ./tmp/review-changes/HOLISTIC.md for shared framing.
+    Verify these findings — resolve each one's flagged uncertainty against the real code: [paste each finding's lens, file:line, severity, description, and its 'Needs verification' note].
+    Write verdicts to ./tmp/review-changes/VERDICT_[batch].md.
+    Report back: counts of CONFIRMED / REFUTED / UNCERTAIN."
+)
+```
+
+---
+
+## Phase 5: Merge (inline)
+
+After the verifiers return, read every `./tmp/review-changes/VERDICT_*.md` and `./tmp/review-changes/LENS_*.md`, then produce the final report.
+
+**5a. Apply verdicts (only for findings that went through verification).**
+- **REFUTED** → drop the finding.
+- **CONFIRMED** → keep it, using the verifier's adjusted severity and evidence.
+- **UNCERTAIN** → keep as a candidate but score it conservatively in 5b; it will usually fall below the filter unless you can independently justify it. Mark it "(unverified)" in the report if it survives.
+- **Trusted findings** (those never flagged for verification) → carry through to scoring as-is.
+
+**5b. Confidence score.** Score each surviving finding 0–100 for how likely it is a real, in-scope issue. Use this rubric:
 
 - **0–25** — false positive under light scrutiny, or a pre-existing issue on lines the diff didn't touch
 - **26–50** — might be real but unverified, or a stylistic nit not called out in project conventions
@@ -116,11 +162,11 @@ After all lenses return, read every `./tmp/review-changes/LENS_*.md` and produce
 - **76–90** — important; double-checked and likely to bite in practice
 - **91–100** — certain; directly confirmed, will happen frequently
 
-**4b. Filter.** Drop everything scoring **< 80**. If nothing remains, say the changes look good. Attach the score to each surfaced finding.
+**5c. Filter.** Drop everything scoring **< 80**. If nothing remains, say the changes look good. Attach the score to each surfaced finding.
 
-**4c. Dedupe.** When two lenses flag the same file + line + root issue, keep one entry at the **highest** severity and note both lenses.
+**5d. Dedupe.** When two lenses flag the same file + line + root issue, keep one entry at the **highest** severity and note both lenses.
 
-**4d. Normalize severity** to MUST FIX / SHOULD FIX / NIT (definitions below).
+**5e. Normalize severity** to MUST FIX / SHOULD FIX / NIT (definitions below).
 
 **False positives to drop (give these to lenses too):**
 - Pre-existing issues, or issues on lines the diff did not modify
@@ -146,9 +192,11 @@ Write the complete review to `./tmp/review-changes.md` before finishing, in this
 ### [Issue Title]
 - **Severity**: MUST FIX / SHOULD FIX / NIT
 - **Confidence**: [80–100]
+- **Verified**: confirmed (went through verification) / trusted (lens confirmed it, no check needed) / unverified (UNCERTAIN after a check)
 - **Lens**: [correctness / security / quality / tests]
 - **Description**: [What's wrong]
-- **Why it matters**: [Impact/risk]
+- **Failure mode**: [Concrete trigger → behavior → harm, OR "No distinct failure mode — <maintainability/readability> concern". Never a vague restatement.]
+- **Why it matters**: [Impact/risk — the magnitude, given the failure mode above]
 - **Suggested fix**: [Concrete, actionable; code snippet only if helpful]
 
 ## Positive Notes
