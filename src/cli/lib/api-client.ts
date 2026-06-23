@@ -280,6 +280,154 @@ export async function fetchKbMemories(scopes: string[]): Promise<KbMemory[]> {
 	return (await response.json()) as KbMemory[];
 }
 
+// --- Knowledge base (KB) operations ---------------------------------------------------------
+// The CLI's `kb` command talks to the same `/api/kb/*` endpoints the (now-removed) MCP server used.
+// These are thin HTTP wrappers; all require AI_RULES_SECRET (buildAuthHeaders attaches it).
+
+const KB_BASE_URL = `${API_BASE_URL}/api/kb`;
+
+/** A single ranked search hit (the canonical doc plus its 0-100 relevance score). */
+export interface KbSearchHit {
+	id: string;
+	type: string;
+	title: string;
+	scope: string[];
+	score: number;
+}
+
+/** A full KB document as returned by get-by-id. */
+export interface KbDocResult {
+	id: string;
+	type: string;
+	status: string;
+	title: string;
+	body: string;
+	scope: string[];
+}
+
+/** Fields for capturing a solved question (the server composes problem/resolution into the body). */
+export interface KbQuestionInput {
+	title: string;
+	problem: string;
+	resolution: string;
+}
+
+/** Fields for capturing a TIL or blueprint (same shape; the endpoint determines the stored type). */
+export interface KbBodyInput {
+	title: string;
+	body: string;
+}
+
+/** Fields for capturing an always-on memory (title optional; derived server-side from the body). */
+export interface KbMemoryInput {
+	body: string;
+	title?: string;
+}
+
+/**
+ * Builds KB auth headers and fails fast when the secret is missing (KB endpoints all require it).
+ * @param scope - Optional scope list to CSV-encode into the scope header
+ * @returns Header map including the secret (and scope when provided)
+ */
+function kbAuthHeaders(scope?: string[]): Record<string, string> {
+	const headers = buildAuthHeaders(scope);
+	if (!headers[SECRET_HEADER]) {
+		throw new Error("AI_RULES_SECRET is not set — required for knowledge base access.");
+	}
+	return headers;
+}
+
+/**
+ * Searches canonical KB docs scoped to the workspace via `GET /api/kb/search`.
+ * @param query - Free-text query (empty returns all in-scope canonical docs)
+ * @param scope - The workspace's scope tags (results are limited to docs sharing a tag)
+ * @param type - Optional type filter (question/til/blueprint/memory)
+ * @returns Ranked hits, most relevant first
+ */
+export async function kbSearch(query: string, scope: string[], type?: string): Promise<KbSearchHit[]> {
+	const url = new URL(`${KB_BASE_URL}/search`);
+	url.searchParams.set("q", query);
+	if (type) url.searchParams.set("type", type);
+	const response = await fetch(url.toString(), { headers: kbAuthHeaders(scope) });
+	if (!response.ok) throw new Error(`KB search failed: ${response.status} ${response.statusText}`);
+	const hits = (await response.json()) as Array<{ doc: KbDocResult; score: number }>;
+	return hits.map((h) => ({ id: h.doc.id, type: h.doc.type, title: h.doc.title, scope: h.doc.scope, score: h.score }));
+}
+
+/**
+ * Fetches a single canonical KB doc by hex id via `GET /api/kb/search?id=<hex>` (scope not consulted).
+ * @param id - The document's hex ObjectId
+ * @returns The document, or null when not found (404)
+ */
+export async function kbGet(id: string): Promise<KbDocResult | null> {
+	const url = new URL(`${KB_BASE_URL}/search`);
+	url.searchParams.set("id", id);
+	const response = await fetch(url.toString(), { headers: kbAuthHeaders() });
+	if (response.status === 404) return null;
+	if (!response.ok) throw new Error(`KB get failed: ${response.status} ${response.statusText}`);
+	return (await response.json()) as KbDocResult;
+}
+
+/**
+ * POSTs a capture body to a `/api/kb/capture/*` route and returns the created draft's id.
+ * @param path - The capture route path segment (e.g. `/capture/til`)
+ * @param body - The JSON request body
+ * @param scope - The workspace's scope tags (required by capture routes)
+ * @returns The created draft's hex id
+ */
+async function kbCapture(path: string, body: unknown, scope: string[]): Promise<string> {
+	const response = await fetch(`${KB_BASE_URL}${path}`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json", ...kbAuthHeaders(scope) },
+		body: JSON.stringify(body),
+	});
+	const data = (await response.json()) as { id?: string; error?: string };
+	if (!response.ok) throw new Error(data.error ?? `KB capture failed: ${response.status} ${response.statusText}`);
+	if (!data.id) throw new Error("KB capture returned no id");
+	return data.id;
+}
+
+/**
+ * Captures a solved question as a draft via `POST /api/kb/capture/question`.
+ * @param input - The question fields (title, problem, resolution)
+ * @param scope - The workspace's scope tags
+ * @returns The created draft's id
+ */
+export async function kbCaptureQuestion(input: KbQuestionInput, scope: string[]): Promise<string> {
+	return kbCapture("/capture/question", input, scope);
+}
+
+/**
+ * Captures a TIL learning as a draft via `POST /api/kb/capture/til`.
+ * @param input - The TIL fields (title, body)
+ * @param scope - The workspace's scope tags
+ * @returns The created draft's id
+ */
+export async function kbCaptureTil(input: KbBodyInput, scope: string[]): Promise<string> {
+	return kbCapture("/capture/til", input, scope);
+}
+
+/**
+ * Captures a reusable blueprint as a draft via `POST /api/kb/capture/blueprint`.
+ * @param input - The blueprint fields (title, body)
+ * @param scope - The workspace's scope tags
+ * @returns The created draft's id
+ */
+export async function kbCaptureBlueprint(input: KbBodyInput, scope: string[]): Promise<string> {
+	return kbCapture("/capture/blueprint", input, scope);
+}
+
+/**
+ * Captures an always-on memory as a draft via `POST /api/kb/capture/memory`. The server rejects
+ * (400) bodies over the conciseness cap (>200 chars or >2 lines).
+ * @param input - The memory fields (body, optional title)
+ * @param scope - The workspace's scope tags
+ * @returns The created draft's id
+ */
+export async function kbCaptureMemory(input: KbMemoryInput, scope: string[]): Promise<string> {
+	return kbCapture("/capture/memory", input, scope);
+}
+
 /**
  * Fetches all workflows for a specific agent from the API
  * @param agent - AI agent name (e.g., 'antigravity')

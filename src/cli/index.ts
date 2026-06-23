@@ -6,6 +6,7 @@ import chalk from "chalk";
 import { Command } from "commander";
 import { addCommand } from "./commands/add";
 import { initCommand } from "./commands/init";
+import { kbCommand } from "./commands/kb";
 import { pullCommand } from "./commands/pull";
 import { syncCommand } from "./commands/sync";
 import { uploadCommand } from "./commands/upload";
@@ -162,6 +163,8 @@ program
 			process.exit(1);
 		}
 	});
+
+program.addCommand(kbCommand);
 
 program
 	.command("help")
