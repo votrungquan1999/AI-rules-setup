@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 
+import { homedir } from "node:os";
+import { join } from "node:path";
 import chalk from "chalk";
 import { Command } from "commander";
 import { addCommand } from "./commands/add";
 import { initCommand } from "./commands/init";
 import { pullCommand } from "./commands/pull";
+import { syncCommand } from "./commands/sync";
 import { uploadCommand } from "./commands/upload";
 
 const program = new Command();
@@ -82,6 +85,22 @@ program
 	.action(async (options) => {
 		try {
 			await pullCommand(options);
+		} catch (error) {
+			console.error(chalk.red(`❌ Error: ${error}`));
+			process.exit(1);
+		}
+	});
+
+program
+	.command("sync")
+	.description("Force-install the full available catalog for a project (or every project under a root with --all)")
+	.option("--all", "Discover and sync every project with an .ai-rules.json under --root")
+	.option("--root <dir>", "Root directory to scan in --all mode", join(homedir(), "Documents", "git-repos"))
+	.action(async (options) => {
+		try {
+			const summary = await syncCommand({ all: options.all, root: options.root });
+			// In bulk mode, a non-zero exit signals that at least one project failed.
+			if (summary && summary.failed > 0) process.exit(1);
 		} catch (error) {
 			console.error(chalk.red(`❌ Error: ${error}`));
 			process.exit(1);
