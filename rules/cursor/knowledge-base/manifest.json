@@ -5,22 +5,21 @@
     "knowledge-base",
     "retrieve",
     "capture",
-    "kb_search",
-    "capture_question",
-    "capture_til",
-    "capture_blueprint",
-    "capture_memory",
+    "kb-search",
+    "kb-get",
+    "kb-capture",
+    "ai-rules-kb",
     "memory",
     "workflow",
     "agent-guidance"
   ],
-  "description": "Always-loaded policy for the shared knowledge base: retrieve relevant canonical knowledge with kb_search before non-trivial work and cite it, capture worthwhile non-trivial knowledge afterward with the matching capture tool (question/til/blueprint), use capture_memory sparingly for tiny always-true project facts, and treat every capture as a draft pending human review rather than canonical knowledge",
+  "description": "Always-loaded policy for the shared knowledge base: retrieve relevant canonical knowledge with the `ai-rules kb search` command before non-trivial work and cite it, capture worthwhile non-trivial knowledge afterward with the matching `ai-rules kb capture` command (question/til/blueprint), use `ai-rules kb capture memory` sparingly for tiny always-true project facts, and treat every capture as a draft pending human review rather than canonical knowledge",
   "version": "1.0.0",
   "lastUpdated": "2026-06-17T00:00:00Z",
   "files": [
     {
       "path": "knowledge-base.mdc",
-      "description": "Concise always-loaded rule: retrieve-first via kb_search and cite, capture-when-worthwhile via capture_question/til/blueprint, memory sparingly for always-true facts, drafts are not canonical",
+      "description": "Concise always-loaded rule: retrieve-first via `ai-rules kb search` and cite, capture-when-worthwhile via `ai-rules kb capture question/til/blueprint`, memory sparingly for always-true facts, drafts are not canonical",
       "required": true
     }
   ],

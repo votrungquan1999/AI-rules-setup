@@ -4,8 +4,8 @@ How to bank knowledge after solving something worth keeping.
 
 ## 1. Dedup-check first
 
-Before drafting anything, `kb_search` for it. If a canonical doc already covers it, don't
-create a near-duplicate — apply and cite the existing one instead. Capture only when the
+Before drafting anything, `ai-rules kb search` for it. If a canonical entry already covers it,
+don't create a near-duplicate — apply and cite the existing one instead. Capture only when the
 knowledge is genuinely new (or meaningfully extends what exists).
 
 ## 2. Is it worth keeping?
@@ -25,17 +25,18 @@ search results. When in doubt, lean toward not capturing.
 See [type-guides.md](./type-guides.md) for the body structure of Question / TIL / Blueprint,
 and [memory-guide.md](./memory-guide.md) for Memory.
 
-| Tool | Args |
+| Command | Inputs |
 |---|---|
-| `capture_question` | `{ title, problem, resolution, agent? }` — server composes the body |
-| `capture_til` | `{ title, body, agent? }` |
-| `capture_blueprint` | `{ title, body, agent? }` |
-| `capture_memory` | `{ body, title?, agent? }` — body ≤ 200 chars AND ≤ 2 lines |
+| `ai-rules kb capture question` | `--title`, `--problem`/`--problem-file`, `--resolution`/`--resolution-file` |
+| `ai-rules kb capture til` | `--title`, body via `--file` / `--body` / stdin |
+| `ai-rules kb capture blueprint` | `--title`, body via `--file` / `--body` / stdin |
+| `ai-rules kb capture memory` | optional `--title`, body via `--file` / `--body` / stdin (≤ 200 chars AND ≤ 2 lines) |
 
-Each returns `{ id }`.
+Each prints the created draft's id. **For multi-line markdown, write the content to a temp file
+and pass `--file` / `--problem-file` / `--resolution-file`** rather than quoting it inline.
 
 ## 4. Draft != canonical
 
-**Every capture is a draft pending human review.** It will NOT appear in `kb_search` or be
-delivered on pull until a reviewer approves it. After capturing, keep working with your own
-knowledge — never assume the captured note is live or authoritative yet.
+**Every capture is a draft pending human review.** It will NOT appear in `ai-rules kb search`
+or be delivered on pull until a reviewer approves it. After capturing, keep working with your
+own knowledge — never assume the captured note is live or authoritative yet.

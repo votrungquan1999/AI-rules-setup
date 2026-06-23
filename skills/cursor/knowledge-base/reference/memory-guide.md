@@ -1,7 +1,7 @@
 # Memory Guide
 
 Memory is the always-on type. Unlike Question / TIL / Blueprint (retrieved on demand via
-`kb_search`), an approved Memory is materialized on `ai-rules pull` into
+`ai-rules kb search`), an approved Memory is materialized on `ai-rules pull` into
 `.claude/rules/kb-memory.md` and **loaded into every session** for the workspace. That means
 it is paid in context on every turn — so the bar is high.
 
@@ -15,14 +15,14 @@ Only a **tiny, always-true project fact** the agent must know without being aske
 
 If it's "look it up when relevant", it's a TIL or Blueprint — not a Memory.
 
-## The caps (enforced by the server)
+## The caps (enforced by the CLI/server)
 
-`capture_memory { body, title?, agent? }` — the server **rejects (400)** a body that is:
+`ai-rules kb capture memory` — the command **rejects (exit non-zero)** a body that is:
 
 - longer than **200 characters**, OR
 - more than **2 lines**.
 
-Keep each memory to 1–2 lines. `title` is optional — when omitted, the server derives it
+Keep each memory to 1–2 lines. `--title` is optional — when omitted, the title is derived
 from the first line.
 
 ## When NOT to use Memory
@@ -34,6 +34,6 @@ from the first line.
 
 ## Remember: still a draft
 
-Like every capture, a `capture_memory` call creates a **draft**. A reviewer must approve it
-before it materializes on pull. Review for Memory is deliberately stricter because it costs
+Like every capture, `ai-rules kb capture memory` creates a **draft**. A reviewer must approve
+it before it materializes on pull. Review for Memory is deliberately stricter because it costs
 context every turn.

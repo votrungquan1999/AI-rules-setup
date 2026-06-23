@@ -1,11 +1,11 @@
 # Type Guides
 
-Body structure for the three retrievable types. Write a clear, searchable `title` for each —
+Body structure for the three retrievable types. Write a clear, searchable `--title` for each —
 it carries the most ranking weight. (Memory is covered in [memory-guide.md](./memory-guide.md).)
 
-## Question — `capture_question { title, problem, resolution }`
+## Question — `ai-rules kb capture question`
 
-For a problem that was solved in a non-obvious way. The server composes the body itself as:
+For a problem that was solved in a non-obvious way. The command composes the body itself as:
 
 ```
 ## Problem
@@ -15,15 +15,16 @@ For a problem that was solved in a non-obvious way. The server composes the body
 {resolution}
 ```
 
-So pass them separately:
+So pass them separately (inline `--problem` / `--resolution`, or `--problem-file` /
+`--resolution-file` for multi-line content):
 - `problem` — the symptom and context: what was observed, the error, the conditions under
   which it happens. Enough that a future searcher recognizes their situation.
 - `resolution` — the fix and **why** it works. Include the concrete change (command, config,
   code) and the root cause, not just "restarted it".
 
-## TIL — `capture_til { title, body }`
+## TIL — `ai-rules kb capture til`
 
-For a surprising fact or gotcha. Keep the `body` short and focused on the single insight:
+For a surprising fact or gotcha. Keep the body short and focused on the single insight:
 
 ```
 {The fact, stated plainly.}
@@ -33,9 +34,9 @@ Why it matters / where it bit: {context}.
 
 Avoid padding — a TIL is one learning, not an essay.
 
-## Blueprint — `capture_blueprint { title, body }`
+## Blueprint — `ai-rules kb capture blueprint`
 
-For a reusable pattern, template, or recipe. Make the `body` something you could follow
+For a reusable pattern, template, or recipe. Make the body something you could follow
 step by step later:
 
 ```
@@ -51,4 +52,5 @@ Example / template:
 Pitfalls: {what to watch out for}.
 ```
 
-The goal is that future-you can apply it without re-deriving it.
+The goal is that future-you can apply it without re-deriving it. Pass these multi-line bodies
+with `--file <path>` (write the markdown to a temp file first) rather than inline.
