@@ -12,7 +12,8 @@
     "url-state-management",
     "brainstorming-patterns",
     "testing-pillars",
-    "testing-guidelines"
+    "testing-guidelines",
+    "knowledge-base"
   ],
   "skills": [
     "bdd-design",
@@ -32,7 +33,9 @@
     "repo-knowledge",
     "review-changes",
     "structured-brainstorming",
-    "validate-pr-comments"
+    "validate-pr-comments",
+    "knowledge-base",
+    "setup-private-skills"
   ],
   "workflows": [
     "commit-plan",
