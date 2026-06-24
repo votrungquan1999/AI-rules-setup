@@ -14,8 +14,8 @@ interface CaptureBlueprintBody {
  * POST /api/kb/capture/blueprint
  *
  * Secret-gated (401) capture of a reusable pattern/blueprint as a draft KB document. Reads the
- * workspace scope from `x-ai-rules-scope` (CSV → `string[]`); 400 when absent. 400 on malformed
- * JSON or empty title/body. Always inserts as a draft.
+ * workspace scope from `x-ai-rules-scope` (CSV → `string[]`); an absent header means an empty
+ * scope, stored as a global draft. 400 on malformed JSON or empty title/body. Always inserts as a draft.
  */
 export async function POST(request: NextRequest) {
 	if (!verifySecret(request)) {
@@ -23,9 +23,6 @@ export async function POST(request: NextRequest) {
 	}
 
 	const scope = parseScopeHeader(request.headers.get("x-ai-rules-scope"));
-	if (scope.length === 0) {
-		return NextResponse.json({ error: "x-ai-rules-scope header is required" }, { status: 400 });
-	}
 
 	let body: CaptureBlueprintBody;
 	try {

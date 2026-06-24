@@ -126,22 +126,28 @@ describe("E2E: kb CLI command", () => {
 	});
 
 	describe("when capturing without a configured scope", () => {
-		it("fails fast with a scope error before hitting the network", async () => {
+		it("succeeds and persists a global (empty-scope) draft", async () => {
 			// Given a workspace whose config declares no scope.
 			const dir = await createTestProject("kb-cli-no-scope");
 			projects.push(dir);
 			await writeConfig(dir, []);
 
-			// When the developer tries to capture.
-			const { result } = spawnCLI(["kb", "capture", "til", "--title", "x", "--body", "y"], {
+			// When the developer captures a TIL.
+			const { result } = spawnCLI(["kb", "capture", "til", "--title", "Global TIL", "--body", "applies everywhere"], {
 				cwd: dir,
 				timeout: 30000,
 			});
-			const { stderr, exitCode } = await result;
+			const { stdout, exitCode } = await result;
 
-			// Then it fails with a clear scope error.
-			expect(exitCode).toBe(1);
-			expect(stderr).toContain("No scope configured");
+			// Then the command reports a captured draft.
+			expect(exitCode).toBe(0);
+			expect(stdout).toContain("Captured draft");
+
+			// And the entry is persisted as a global draft (empty scope).
+			const db = await getTestDatabase();
+			const doc = await db.collection<StoredKbDocDocument>(KB_DOCS_COLLECTION_NAME).findOne({ title: "Global TIL" });
+			expect(doc?.status).toBe(KbStatus.Draft);
+			expect(doc?.scope).toEqual([]);
 		});
 	});
 });

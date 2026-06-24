@@ -1,4 +1,4 @@
-import { type Collection, ObjectId } from "mongodb";
+import { type Collection, type Filter, ObjectId } from "mongodb";
 import { getDatabase } from "./database";
 import { KB_DOCS_COLLECTION_NAME, type KbDoc, KbStatus, KbType, type StoredKbDocDocument } from "./types";
 
@@ -73,17 +73,17 @@ export async function findKbDrafts(options: FindDraftsOptions = {}): Promise<KbD
 }
 
 /**
- * Returns approved (canonical) KB documents whose `scope` intersects any of `scopes`.
- * Drafts are never returned. Guards an empty `scopes` list to `[]` (no scope = no match).
+ * Returns approved (canonical) KB documents that either intersect `scopes` OR are global
+ * (empty stored scope). Global docs surface for every workspace, additively with scoped matches;
+ * an empty `scopes` arg therefore returns global docs only. Drafts are never returned.
  * @param options - Required `scopes` and optional `type` filter
  * @returns Matching canonical documents as client-facing `KbDoc[]`
  */
 export async function findCanonicalKbDocs(options: FindCanonicalOptions): Promise<KbDoc[]> {
-	if (options.scopes.length === 0) return [];
 	const collection = await getKbCollection();
-	const filter: { status: KbStatus; scope: { $in: string[] }; type?: KbType } = {
+	const filter: Filter<StoredKbDocDocument> = {
 		status: KbStatus.Canonical,
-		scope: { $in: options.scopes },
+		$or: [{ scope: { $in: options.scopes } }, { scope: { $size: 0 } }],
 	};
 	if (options.type) filter.type = options.type;
 	const documents = await collection.find(filter).toArray();
@@ -171,37 +171,44 @@ export async function updateKbDoc(id: string, fields: UpdateKbFields): Promise<b
 	return result.matchedCount === 1;
 }
 
-/** Maximum number of memories returned per scope; memories load into every session so the cap keeps context small. */
-const MAX_MEMORIES_PER_SCOPE = 15;
+/** Maximum number of memories returned per scope. Set intentionally huge so nothing is trimmed today; the cap loop is retained as the single tunable control point — lower this if memory context ever grows too large. Global memories count against their own bucket. */
+const MAX_MEMORIES_PER_SCOPE = 1_000_000;
+
+/** Bucket key that global (empty-scope) memories count against, since they have no scope tag of their own. */
+const GLOBAL_MEMORY_BUCKET = "__global__";
 
 /**
- * Returns canonical memory-type documents whose `scope` intersects any of `scopes`, enforcing a
- * per-scope cap of {@link MAX_MEMORIES_PER_SCOPE}. The cap is applied server-side so the CLI
- * never materializes more than the limit per scope. Guards an empty `scopes` list to `[]`.
+ * Returns canonical memory-type documents that either intersect `scopes` OR are global (empty
+ * stored scope), enforcing a per-bucket cap of {@link MAX_MEMORIES_PER_SCOPE}. Global memories
+ * load into every workspace and count against their own {@link GLOBAL_MEMORY_BUCKET}. An empty
+ * `scopes` arg returns global memories only.
  * @param scopes - The workspace's declared scope tags
- * @returns Matching canonical memory documents as client-facing `KbDoc[]`, capped per scope
+ * @returns Matching canonical memory documents as client-facing `KbDoc[]`, capped per bucket
  */
 export async function findCanonicalMemories(scopes: string[]): Promise<KbDoc[]> {
-	if (scopes.length === 0) return [];
 	const collection = await getKbCollection();
 	const documents = await collection
-		.find({ status: KbStatus.Canonical, type: KbType.Memory, scope: { $in: scopes } })
+		.find({
+			status: KbStatus.Canonical,
+			type: KbType.Memory,
+			$or: [{ scope: { $in: scopes } }, { scope: { $size: 0 } }],
+		})
 		.toArray();
 
-	// Enforce the per-scope cap. A memory tagged with several in-scope tags counts toward each of
-	// its scopes; once any of its scopes is full it is dropped. De-dupe by id so a memory matching
-	// multiple scopes is returned at most once.
-	const perScopeCount = new Map<string, number>();
+	// Enforce the per-bucket cap. A memory counts toward each in-scope tag it carries; a global
+	// memory (no scope) counts toward GLOBAL_MEMORY_BUCKET. Once any of a memory's buckets is full
+	// it is dropped. De-dupe by id so a memory matching multiple scopes is returned at most once.
+	const perBucketCount = new Map<string, number>();
 	const selected = new Map<string, KbDoc>();
 	for (const doc of documents) {
-		const matchingScopes = doc.scope.filter((s) => scopes.includes(s));
-		const hasRoom = matchingScopes.some((s) => (perScopeCount.get(s) ?? 0) < MAX_MEMORIES_PER_SCOPE);
+		const buckets = doc.scope.length === 0 ? [GLOBAL_MEMORY_BUCKET] : doc.scope.filter((s) => scopes.includes(s));
+		const hasRoom = buckets.some((b) => (perBucketCount.get(b) ?? 0) < MAX_MEMORIES_PER_SCOPE);
 		if (!hasRoom) continue;
 		const kbDoc = toKbDoc(doc);
 		if (selected.has(kbDoc.id)) continue;
 		selected.set(kbDoc.id, kbDoc);
-		for (const s of matchingScopes) {
-			perScopeCount.set(s, (perScopeCount.get(s) ?? 0) + 1);
+		for (const b of buckets) {
+			perBucketCount.set(b, (perBucketCount.get(b) ?? 0) + 1);
 		}
 	}
 	return [...selected.values()];

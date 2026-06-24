@@ -19,7 +19,8 @@ const MAX_MEMORY_LINES = 2;
  * POST /api/kb/capture/memory
  *
  * Secret-gated (401) capture of an always-on memory as a draft KB document. Reads the workspace
- * scope from `x-ai-rules-scope` (CSV → `string[]`); 400 when absent. Enforces a conciseness cap:
+ * scope from `x-ai-rules-scope` (CSV → `string[]`); an absent header means an empty scope, stored
+ * as a global memory. Enforces a conciseness cap:
  * rejects 400 when the trimmed body exceeds 2 lines OR the body exceeds 200 characters — a memory
  * must be short enough to live in every session. `title` is optional; when absent it is derived
  * from the body's first line. Always inserts as a draft.
@@ -30,9 +31,6 @@ export async function POST(request: NextRequest) {
 	}
 
 	const scope = parseScopeHeader(request.headers.get("x-ai-rules-scope"));
-	if (scope.length === 0) {
-		return NextResponse.json({ error: "x-ai-rules-scope header is required" }, { status: 400 });
-	}
 
 	let body: CaptureMemoryBody;
 	try {

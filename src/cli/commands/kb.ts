@@ -61,16 +61,6 @@ async function resolveBody(body: string | undefined, file: string | undefined): 
 }
 
 /**
- * Guards that the workspace has at least one scope tag (capture endpoints require it).
- * @param scope - The workspace scope list
- */
-function requireScope(scope: string[]): void {
-	if (scope.length === 0) {
-		throw new Error('No scope configured. Add a "scope" array to .ai-rules.json before capturing.');
-	}
-}
-
-/**
  * Prints a captured draft's id and a reminder that it is pending human review.
  * @param id - The created draft's id
  */
@@ -93,7 +83,9 @@ kbCommand
 				return;
 			}
 			for (const hit of hits) {
-				console.log(`${chalk.dim(hit.id)}  ${chalk.cyan(`[${hit.type}]`)}  ${hit.title}  ${chalk.dim(`(${hit.score})`)}`);
+				console.log(
+					`${chalk.dim(hit.id)}  ${chalk.cyan(`[${hit.type}]`)}  ${hit.title}  ${chalk.dim(`(${hit.score})`)}`,
+				);
 			}
 			console.log(chalk.dim(`\nUse "ai-rules kb get <id>" to read the full entry.`));
 		} catch (error) {
@@ -141,7 +133,6 @@ capture
 		}) => {
 			try {
 				const scope = await workspaceScope();
-				requireScope(scope);
 				const problem = await resolveField(options.problem, options.problemFile, "problem");
 				const resolution = await resolveField(options.resolution, options.resolutionFile, "resolution");
 				const id = await kbCaptureQuestion({ title: options.title, problem, resolution }, scope);
@@ -162,7 +153,6 @@ capture
 	.action(async (options: { title: string; body?: string; file?: string }) => {
 		try {
 			const scope = await workspaceScope();
-			requireScope(scope);
 			const body = await resolveBody(options.body, options.file);
 			const id = await kbCaptureTil({ title: options.title, body }, scope);
 			reportCaptured(id);
@@ -181,7 +171,6 @@ capture
 	.action(async (options: { title: string; body?: string; file?: string }) => {
 		try {
 			const scope = await workspaceScope();
-			requireScope(scope);
 			const body = await resolveBody(options.body, options.file);
 			const id = await kbCaptureBlueprint({ title: options.title, body }, scope);
 			reportCaptured(id);
@@ -200,7 +189,6 @@ capture
 	.action(async (options: { title?: string; body?: string; file?: string }) => {
 		try {
 			const scope = await workspaceScope();
-			requireScope(scope);
 			const body = await resolveBody(options.body, options.file);
 			const input = options.title ? { body, title: options.title } : { body };
 			const id = await kbCaptureMemory(input, scope);

@@ -123,23 +123,65 @@ describe("KB Repository", () => {
 		});
 	});
 
-	it("findCanonicalKbDocs - returns [] for an empty scopes list without matching everything", async () => {
+	it("findCanonicalKbDocs - a workspace receives global (empty-scope) docs additively with its own scoped docs", async () => {
 		await withTestDatabase(testDbName, async () => {
-			// Arrange: a canonical doc exists.
+			// Given: a global canonical doc (no scope), a doc in the "work" scope, and one in "other".
 			const db = await getDatabase();
 			await storeKbDocInTestDatabase(db, {
 				type: KbType.Question,
 				status: KbStatus.Canonical,
-				title: "Some canonical",
-				body: "x",
+				title: "Global truth",
+				body: "applies everywhere",
+				scope: [],
+			});
+			await storeKbDocInTestDatabase(db, {
+				type: KbType.Question,
+				status: KbStatus.Canonical,
+				title: "Work scoped",
+				body: "work only",
+				scope: ["work"],
+			});
+			await storeKbDocInTestDatabase(db, {
+				type: KbType.Question,
+				status: KbStatus.Canonical,
+				title: "Other scoped",
+				body: "other only",
+				scope: ["other"],
+			});
+
+			// When: a "work" workspace searches.
+			const docs = await findCanonicalKbDocs({ scopes: ["work"] });
+
+			// Then: the global doc and the "work" doc are both returned; the "other" doc is excluded.
+			const titles = docs.map((d) => d.title).sort();
+			expect(titles).toEqual(["Global truth", "Work scoped"]);
+		});
+	});
+
+	it("findCanonicalKbDocs - a workspace with no scope receives global docs only, never scoped ones", async () => {
+		await withTestDatabase(testDbName, async () => {
+			// Given: a global canonical doc and a scoped canonical doc.
+			const db = await getDatabase();
+			await storeKbDocInTestDatabase(db, {
+				type: KbType.Question,
+				status: KbStatus.Canonical,
+				title: "Global truth",
+				body: "applies everywhere",
+				scope: [],
+			});
+			await storeKbDocInTestDatabase(db, {
+				type: KbType.Question,
+				status: KbStatus.Canonical,
+				title: "Work scoped",
+				body: "work only",
 				scope: ["work"],
 			});
 
-			// Act: search with no scopes.
+			// When: a workspace that declares no scope searches.
 			const docs = await findCanonicalKbDocs({ scopes: [] });
 
-			// Assert: no scope means no match — not "all".
-			expect(docs).toEqual([]);
+			// Then: it receives the global doc only — empty scope means "global", not "all".
+			expect(docs.map((d) => d.title)).toEqual(["Global truth"]);
 		});
 	});
 
@@ -275,11 +317,65 @@ describe("KB Repository", () => {
 		});
 	});
 
-	it("findCanonicalMemories - caps the result at 15 memories per scope", async () => {
+	it("findCanonicalMemories - a global memory loads into a workspace whose tags don't match it", async () => {
 		await withTestDatabase(testDbName, async () => {
-			// Arrange: 16 canonical in-scope memories (one over the cap).
+			// Given: a global memory (no scope) and a memory scoped to "other".
 			const db = await getDatabase();
-			for (let i = 0; i < 16; i++) {
+			await storeKbDocInTestDatabase(db, {
+				type: KbType.Memory,
+				status: KbStatus.Canonical,
+				title: "Global memory",
+				body: "applies everywhere",
+				scope: [],
+			});
+			await storeKbDocInTestDatabase(db, {
+				type: KbType.Memory,
+				status: KbStatus.Canonical,
+				title: "Other memory",
+				body: "other only",
+				scope: ["other"],
+			});
+
+			// When: the "work" workspace loads its memories.
+			const memories = await findCanonicalMemories(["work"]);
+
+			// Then: the global memory is present; the non-matching scoped one is excluded.
+			expect(memories.map((m) => m.title)).toEqual(["Global memory"]);
+		});
+	});
+
+	it("findCanonicalMemories - a workspace with no scope receives global memories only", async () => {
+		await withTestDatabase(testDbName, async () => {
+			// Given: a global memory and a scoped memory.
+			const db = await getDatabase();
+			await storeKbDocInTestDatabase(db, {
+				type: KbType.Memory,
+				status: KbStatus.Canonical,
+				title: "Global memory",
+				body: "applies everywhere",
+				scope: [],
+			});
+			await storeKbDocInTestDatabase(db, {
+				type: KbType.Memory,
+				status: KbStatus.Canonical,
+				title: "Work memory",
+				body: "work only",
+				scope: ["work"],
+			});
+
+			// When: a workspace that declares no scope loads its memories.
+			const memories = await findCanonicalMemories([]);
+
+			// Then: it receives the global memory only.
+			expect(memories.map((m) => m.title)).toEqual(["Global memory"]);
+		});
+	});
+
+	it("findCanonicalMemories - does not trim memories (cap effectively infinite)", async () => {
+		await withTestDatabase(testDbName, async () => {
+			// Arrange: 20 canonical in-scope memories — well past the old 15-cap.
+			const db = await getDatabase();
+			for (let i = 0; i < 20; i++) {
 				await storeKbDocInTestDatabase(db, {
 					type: KbType.Memory,
 					status: KbStatus.Canonical,
@@ -292,8 +388,8 @@ describe("KB Repository", () => {
 			// Act
 			const memories = await findCanonicalMemories(["work"]);
 
-			// Assert: the per-scope cap of 15 is enforced server-side.
-			expect(memories).toHaveLength(15);
+			// Assert: every memory is returned — nothing is trimmed away.
+			expect(memories).toHaveLength(20);
 		});
 	});
 

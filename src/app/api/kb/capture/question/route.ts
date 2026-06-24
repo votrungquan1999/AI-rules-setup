@@ -15,7 +15,8 @@ interface CaptureQuestionBody {
  * POST /api/kb/capture/question
  *
  * Secret-gated (401) capture of a solved question as a draft KB document. Reads the workspace
- * scope from the `x-ai-rules-scope` header (CSV → `string[]`); 400 when the header is absent.
+ * scope from the `x-ai-rules-scope` header (CSV → `string[]`); an absent header means an empty
+ * scope, which is stored as a global (visible to every workspace) draft.
  * Composes `problem` + `resolution` into a single markdown body and always inserts as a draft.
  * 400 on malformed JSON or empty required fields.
  */
@@ -25,9 +26,6 @@ export async function POST(request: NextRequest) {
 	}
 
 	const scope = parseScopeHeader(request.headers.get("x-ai-rules-scope"));
-	if (scope.length === 0) {
-		return NextResponse.json({ error: "x-ai-rules-scope header is required" }, { status: 400 });
-	}
 
 	let body: CaptureQuestionBody;
 	try {

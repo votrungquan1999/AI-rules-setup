@@ -46,7 +46,7 @@ describe("E2E: KB Capture (question/til/blueprint/memory)", () => {
 			expect(stored?.scope).toEqual(["work"]);
 		});
 
-		it("rejects without the secret (401), without a scope header (400), and with empty fields (400)", async () => {
+		it("rejects without the secret (401) and with empty fields (400)", async () => {
 			const noSecret = await fetch(`${apiUrl()}/api/kb/capture/question`, {
 				method: "POST",
 				headers: { "x-ai-rules-scope": "work", "Content-Type": "application/json" },
@@ -54,19 +54,32 @@ describe("E2E: KB Capture (question/til/blueprint/memory)", () => {
 			});
 			expect(noSecret.status).toBe(401);
 
-			const noScope = await fetch(`${apiUrl()}/api/kb/capture/question`, {
-				method: "POST",
-				headers: { "x-ai-rules-secret": SECRET, "Content-Type": "application/json" },
-				body: JSON.stringify({ title: "t", problem: "p", resolution: "r" }),
-			});
-			expect(noScope.status).toBe(400);
-
 			const emptyFields = await fetch(`${apiUrl()}/api/kb/capture/question`, {
 				method: "POST",
 				headers: { "x-ai-rules-secret": SECRET, "x-ai-rules-scope": "work", "Content-Type": "application/json" },
 				body: JSON.stringify({ title: "t", problem: "", resolution: "r" }),
 			});
 			expect(emptyFields.status).toBe(400);
+		});
+
+		it("creates a GLOBAL draft (scope []) when no scope header is provided", async () => {
+			// When a contributor captures without any scope header.
+			const response = await fetch(`${apiUrl()}/api/kb/capture/question`, {
+				method: "POST",
+				headers: { "x-ai-rules-secret": SECRET, "Content-Type": "application/json" },
+				body: JSON.stringify({
+					title: "Global question draft",
+					problem: "p",
+					resolution: "r",
+				}),
+			});
+
+			// Then it is accepted and stored as a global (empty-scope) draft.
+			expect(response.status).toBe(201);
+			const db = await getTestDatabase();
+			const stored = await db.collection("kb_docs").findOne({ title: "Global question draft" });
+			expect(stored?.status).toBe("draft");
+			expect(stored?.scope).toEqual([]);
 		});
 	});
 
