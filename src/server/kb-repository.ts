@@ -15,6 +15,7 @@ interface FindCanonicalOptions {
 interface UpdateKbFields {
 	title?: string;
 	body?: string;
+	scope?: string[];
 }
 
 /** Module-scoped guard so indexes are created at most once per process. */
@@ -184,16 +185,19 @@ export async function rejectKbDoc(id: string): Promise<boolean> {
 }
 
 /**
- * Edits a draft's `title` and/or `body`, keeping its draft status (does NOT auto-approve).
+ * Edits a doc's `title`, `body`, and/or `scope`. Does NOT change its status — so reviewers can
+ * retag a canonical memory (e.g. promote one from a workspace scope to global by passing
+ * `scope: []`) without re-running the approve flow.
  * @param _id - The document's `_id` hex string
- * @param _fields - The fields to update (at least one of title/body)
+ * @param _fields - The fields to update (at least one of title/body/scope)
  * @returns True when a document was updated; false when none matched
  */
 export async function updateKbDoc(id: string, fields: UpdateKbFields): Promise<boolean> {
 	const collection = await getKbCollection();
-	const $set: { title?: string; body?: string; updatedAt: Date } = { updatedAt: new Date() };
+	const $set: { title?: string; body?: string; scope?: string[]; updatedAt: Date } = { updatedAt: new Date() };
 	if (fields.title !== undefined) $set.title = fields.title;
 	if (fields.body !== undefined) $set.body = fields.body;
+	if (fields.scope !== undefined) $set.scope = fields.scope;
 	const result = await collection.updateOne({ _id: new ObjectId(id) }, { $set });
 	return result.matchedCount === 1;
 }

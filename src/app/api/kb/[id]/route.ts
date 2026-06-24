@@ -6,14 +6,16 @@ import { verifySecret } from "../../lib/verify-secret";
 interface PatchRequestBody {
 	title?: string;
 	body?: string;
+	scope?: string[];
 }
 
 /**
  * PATCH /api/kb/[id]
  *
- * Reviewer-only: edits a draft's `title` and/or `body`, keeping it in draft status
- * (does NOT auto-approve). Secret-gated (401). Returns 400 on invalid id or empty body,
- * 404 when no document matched.
+ * Reviewer-only: edits a doc's `title`, `body`, and/or `scope`. Status is preserved — so this
+ * also lets a reviewer retag a canonical memory (e.g. set `scope: []` to make it global)
+ * without re-running approve. Secret-gated (401). Returns 400 on invalid id, empty body, or
+ * a non-array scope; 404 when no document matched.
  */
 export async function PATCH(request: NextRequest, ctx: { params: Promise<{ id: string }> }) {
 	if (!verifySecret(request)) {
@@ -32,13 +34,17 @@ export async function PATCH(request: NextRequest, ctx: { params: Promise<{ id: s
 		return NextResponse.json({ error: "Malformed JSON body" }, { status: 400 });
 	}
 
-	if (body.title === undefined && body.body === undefined) {
-		return NextResponse.json({ error: "At least one of title or body is required" }, { status: 400 });
+	if (body.title === undefined && body.body === undefined && body.scope === undefined) {
+		return NextResponse.json({ error: "At least one of title, body, or scope is required" }, { status: 400 });
+	}
+	if (body.scope !== undefined && !Array.isArray(body.scope)) {
+		return NextResponse.json({ error: "scope must be an array of strings" }, { status: 400 });
 	}
 
 	const fields: PatchRequestBody = {};
 	if (body.title !== undefined) fields.title = body.title;
 	if (body.body !== undefined) fields.body = body.body;
+	if (body.scope !== undefined) fields.scope = body.scope;
 
 	const updated = await updateKbDoc(id, fields);
 	if (!updated) {
