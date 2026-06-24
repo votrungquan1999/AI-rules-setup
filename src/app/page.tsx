@@ -26,6 +26,19 @@ export default function HomePage() {
 					</Link>
 				</div>
 
+				<div className="bg-card border border-border rounded-lg p-6 mb-8">
+					<h2 className="text-2xl font-semibold text-foreground mb-3">📚 Review Knowledge Base Drafts</h2>
+					<p className="text-muted-foreground mb-4">
+						Approve, edit, or reject drafts captured via <code className="text-sm font-mono bg-muted px-1.5 py-0.5 rounded">ai-rules kb capture</code>. Drafts stay invisible to agents until approved.
+					</p>
+					<Link
+						href="/kb/review"
+						className="inline-block px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors"
+					>
+						Open KB Review →
+					</Link>
+				</div>
+
 				<div className="space-y-6">
 					<section>
 						<h2 className="text-2xl font-semibold text-foreground mb-3">API Endpoints</h2>
