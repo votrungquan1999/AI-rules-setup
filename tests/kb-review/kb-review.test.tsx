@@ -41,7 +41,7 @@ describe("KB Review screen", () => {
 
 		expect(screen.getByText("Approve me")).toBeInTheDocument();
 
-		fireEvent.click(screen.getByRole("button", { name: /approve/i }));
+		fireEvent.click(screen.getByRole("button", { name: "Approve" }));
 
 		// The approve endpoint is called for this draft.
 		await waitFor(() =>

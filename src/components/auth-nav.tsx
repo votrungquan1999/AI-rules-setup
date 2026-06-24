@@ -24,7 +24,8 @@ const NAV_ITEMS: NavItem[] = [
  * @param pathname - The current URL pathname
  * @returns The best-matching nav item's href, or null when nothing matches
  */
-function pickActiveHref(pathname: string): string | null {
+function pickActiveHref(pathname: string | null): string | null {
+	if (!pathname) return null;
 	let best: NavItem | null = null;
 	for (const item of NAV_ITEMS) {
 		const matches =
