@@ -1,7 +1,7 @@
 "use client";
 
 import { createReducerContext } from "src/app/hooks/createReducerContext";
-import { type KbReviewAction, KbReviewActionType, type KbReviewState } from "./kb-review.type";
+import { type KbDocDraft, type KbReviewAction, KbReviewActionType, type KbReviewState } from "./kb-review.type";
 
 const initialState: KbReviewState = { drafts: [], showGlobalOnly: false };
 
@@ -78,6 +78,19 @@ export function useKbReviewActions() {
 				body: JSON.stringify({ title, body }),
 			});
 			if (response.ok) dispatch({ type: KbReviewActionType.Edit, id, title, body });
+		},
+		// Single round-trip bulk approve: send every visible draft's id, then remove from the list
+		// only the ids the server reports as actually flipped (drops any that were already canonical).
+		approveAllDrafts: async (drafts: KbDocDraft[]) => {
+			if (drafts.length === 0) return;
+			const response = await fetch(`/api/kb/approve-all`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ ids: drafts.map((d) => d.id) }),
+			});
+			if (!response.ok) return;
+			const { approvedIds } = (await response.json()) as { approvedIds: string[] };
+			for (const id of approvedIds) dispatch({ type: KbReviewActionType.Remove, id });
 		},
 	};
 }

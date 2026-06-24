@@ -34,10 +34,12 @@ import {
 export function KbReviewPageClient() {
 	const drafts = useKbReviewDrafts();
 	const { showGlobalOnly, toggleGlobalFilter } = useKbReviewFilter();
-	const { approveDraft, rejectDraft, editDraft } = useKbReviewActions();
+	const { approveDraft, rejectDraft, editDraft, approveAllDrafts } = useKbReviewActions();
 	const [editing, setEditing] = useState<KbDocDraft | null>(null);
 	const [editTitle, setEditTitle] = useState("");
 	const [editBody, setEditBody] = useState("");
+	const [confirmingApproveAll, setConfirmingApproveAll] = useState(false);
+	const [approvingAll, setApprovingAll] = useState(false);
 	const titleId = useId();
 	const bodyId = useId();
 
@@ -53,14 +55,29 @@ export function KbReviewPageClient() {
 		setEditing(null);
 	}
 
+	async function confirmApproveAll() {
+		setApprovingAll(true);
+		try {
+			await approveAllDrafts(drafts);
+		} finally {
+			setApprovingAll(false);
+			setConfirmingApproveAll(false);
+		}
+	}
+
 	return (
 		<KbReviewLayout>
 			<KbReviewHeader>
 				<h1 className="text-3xl font-bold text-foreground">Review Drafts</h1>
 				<p className="text-muted-foreground">Approve, reject, or edit captured knowledge before it goes live.</p>
-				<Button variant="outline" onClick={toggleGlobalFilter}>
-					{showGlobalOnly ? "Show all" : "Show global only"}
-				</Button>
+				<div className="flex flex-wrap gap-2">
+					<Button variant="outline" onClick={toggleGlobalFilter}>
+						{showGlobalOnly ? "Show all" : "Show global only"}
+					</Button>
+					<Button onClick={() => setConfirmingApproveAll(true)} disabled={drafts.length === 0 || approvingAll}>
+						{approvingAll ? "Approving…" : `Approve all (${drafts.length})`}
+					</Button>
+				</div>
 			</KbReviewHeader>
 
 			{drafts.length === 0 ? (
@@ -90,6 +107,31 @@ export function KbReviewPageClient() {
 					))}
 				</KbReviewList>
 			)}
+
+			<Dialog
+				open={confirmingApproveAll}
+				onOpenChange={(open) => !open && !approvingAll && setConfirmingApproveAll(false)}
+			>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Approve all visible drafts?</DialogTitle>
+						<DialogDescription>
+							{drafts.length === 1
+								? "This will promote 1 draft to canonical."
+								: `This will promote ${drafts.length} drafts to canonical in a single request.`}{" "}
+							Drafts hidden by the current filter are not affected.
+						</DialogDescription>
+					</DialogHeader>
+					<DialogFooter>
+						<Button variant="outline" onClick={() => setConfirmingApproveAll(false)} disabled={approvingAll}>
+							Cancel
+						</Button>
+						<Button onClick={confirmApproveAll} disabled={approvingAll}>
+							{approvingAll ? "Approving…" : "Approve all"}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 
 			<Dialog open={editing !== null} onOpenChange={(open) => !open && setEditing(null)}>
 				<DialogContent>

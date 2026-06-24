@@ -161,6 +161,70 @@ describe("E2E: KB Review (drafts + approve/reject/edit)", () => {
 		});
 	});
 
+	describe("POST /api/kb/approve-all", () => {
+		it("bulk-approves the passed draft ids and ignores already-canonical ones", async () => {
+			// Given two drafts and one canonical doc.
+			const db = await getTestDatabase();
+			const draftA = await storeKbDocInTestDatabase(db, {
+				type: KbType.Question,
+				status: KbStatus.Draft,
+				title: "Bulk A",
+				body: "a",
+				scope: ["work"],
+			});
+			const draftB = await storeKbDocInTestDatabase(db, {
+				type: KbType.Til,
+				status: KbStatus.Draft,
+				title: "Bulk B",
+				body: "b",
+				scope: [],
+			});
+			const canonical = await storeKbDocInTestDatabase(db, {
+				type: KbType.Memory,
+				status: KbStatus.Canonical,
+				title: "Already canonical",
+				body: "c",
+				scope: ["work"],
+			});
+
+			// When the reviewer bulk-approves all three ids (including the already-canonical one).
+			const response = await fetch(`${apiUrl()}/api/kb/approve-all`, {
+				method: "POST",
+				headers: { "x-ai-rules-secret": SECRET, "Content-Type": "application/json" },
+				body: JSON.stringify({ ids: [draftA, draftB, canonical] }),
+			});
+			expect(response.status).toBe(200);
+			const { approvedIds } = (await response.json()) as { approvedIds: string[] };
+
+			// Then only the two drafts are reported as approved, and both are now canonical in the DB.
+			expect(approvedIds).toHaveLength(2);
+			expect(approvedIds).toContain(draftA);
+			expect(approvedIds).toContain(draftB);
+			expect(approvedIds).not.toContain(canonical);
+
+			const storedA = await db.collection("kb_docs").findOne({ _id: ObjectId.createFromHexString(draftA) });
+			const storedB = await db.collection("kb_docs").findOne({ _id: ObjectId.createFromHexString(draftB) });
+			expect(storedA?.status).toBe("canonical");
+			expect(storedB?.status).toBe("canonical");
+		});
+
+		it("rejects without the secret (401) and rejects an empty/malformed ids array (400)", async () => {
+			const noSecret = await fetch(`${apiUrl()}/api/kb/approve-all`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ ids: ["507f1f77bcf86cd799439011"] }),
+			});
+			expect(noSecret.status).toBe(401);
+
+			const empty = await fetch(`${apiUrl()}/api/kb/approve-all`, {
+				method: "POST",
+				headers: { "x-ai-rules-secret": SECRET, "Content-Type": "application/json" },
+				body: JSON.stringify({ ids: [] }),
+			});
+			expect(empty.status).toBe(400);
+		});
+	});
+
 	describe("POST /api/kb/[id]/reject", () => {
 		it("deletes the document; a second reject returns 404", async () => {
 			const db = await getTestDatabase();

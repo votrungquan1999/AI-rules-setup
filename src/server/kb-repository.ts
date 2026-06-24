@@ -146,6 +146,33 @@ export async function approveKbDoc(id: string): Promise<boolean> {
 }
 
 /**
+ * Bulk-promotes the matching draft documents to canonical in a single update. Ids that are
+ * malformed, missing, or already canonical are silently filtered out — only ids that flipped
+ * from draft are returned, so callers can update their list without guessing what happened.
+ * @param ids - Hex `_id` strings to approve (any non-hex value is ignored)
+ * @returns The subset of `ids` that were drafts and have now been promoted to canonical
+ */
+export async function approveKbDocs(ids: string[]): Promise<string[]> {
+	const validIds = ids.filter((id) => ObjectId.isValid(id));
+	if (validIds.length === 0) return [];
+	const collection = await getKbCollection();
+	const objectIds = validIds.map((id) => new ObjectId(id));
+	// Snapshot which of the requested ids are actually drafts BEFORE the bulk update, so the
+	// post-update reply lists the ids that actually flipped — not the ids the caller asked about.
+	const matchingDrafts = await collection
+		.find({ _id: { $in: objectIds }, status: KbStatus.Draft }, { projection: { _id: 1 } })
+		.toArray();
+	if (matchingDrafts.length === 0) return [];
+	const matchingObjectIds = matchingDrafts.map((doc) => doc._id as ObjectId);
+	const now = new Date();
+	await collection.updateMany(
+		{ _id: { $in: matchingObjectIds } },
+		{ $set: { status: KbStatus.Canonical, reviewedAt: now, updatedAt: now } },
+	);
+	return matchingObjectIds.map((oid) => oid.toHexString());
+}
+
+/**
  * Permanently deletes a KB document (reviewer rejection).
  * @param _id - The document's `_id` hex string
  * @returns True when a document was deleted; false when none matched
