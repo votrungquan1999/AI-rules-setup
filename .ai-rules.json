@@ -43,5 +43,8 @@
     "repo-knowledge",
     "review-changes",
     "structured-brainstorming"
+  ],
+  "scope": [
+    "personal"
   ]
 }
