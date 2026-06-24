@@ -9,9 +9,10 @@ const SCOPE_HEADER = "x-ai-rules-scope";
  * GET /api/rules
  *
  * Fetches all available rules from MongoDB cache with local filesystem auto-priming.
- * Includes private skills when BOTH a valid `x-ai-rules-secret` header AND a non-empty
- * `x-ai-rules-scope` header are present. Otherwise returns public-only — silently, on any
- * auth/scope failure, so wrong secrets cannot probe for private skill existence.
+ * Includes private skills when a valid `x-ai-rules-secret` header is present: scoped skills
+ * matching the `x-ai-rules-scope` header plus global (empty-scope) skills. With a valid secret
+ * but no scope header, only global private skills are returned. Returns public-only — silently —
+ * on any auth failure, so wrong secrets cannot probe for private skill existence.
  *
  * @returns JSON response with structured rules data
  */
@@ -26,7 +27,8 @@ export async function GET(request: NextRequest) {
 			.split(",")
 			.map((s) => s.trim())
 			.filter(Boolean);
-		const includePrivate = secretValid && projectScope.length > 0;
+		// A valid secret alone unlocks private skills; an empty scope yields global skills only.
+		const includePrivate = secretValid;
 		const fetchOptions: { includePrivate: boolean; projectScope?: string[] } = { includePrivate };
 		if (includePrivate) fetchOptions.projectScope = projectScope;
 		const rulesData = await fetchAllRulesData(fetchOptions);

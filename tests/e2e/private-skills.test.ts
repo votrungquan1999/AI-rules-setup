@@ -107,8 +107,8 @@ describe("E2E: Private Skills", () => {
 		});
 	});
 
-	describe("when uploading without specifying who the skill is for", () => {
-		it("should reject at the CLI when --scope is omitted", async () => {
+	describe("when uploading without specifying a scope", () => {
+		it("should accept at the CLI and persist a global (empty-scope) skill", async () => {
 			// Given a valid skill directory but no --scope flag.
 			const skillDir = await createSkillDir("scopeless", "---\nname: scopeless\n---\n# x");
 
@@ -116,12 +116,17 @@ describe("E2E: Private Skills", () => {
 			const { result } = spawnCLI(["upload", "--agent", "claude-code", skillDir], { timeout: 30000 });
 			const output = await result;
 
-			// Then the CLI exits non-zero and complains about the missing scope.
-			expect(output.exitCode).not.toBe(0);
-			expect(output.stderr.toLowerCase()).toMatch(/scope/);
+			// Then the CLI exits cleanly and the skill is stored as global.
+			expect(output.exitCode, `stdout: ${output.stdout}\nstderr: ${output.stderr}`).toBe(0);
+			const db = await getTestDatabase();
+			const stored = await db
+				.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME)
+				.findOne({ agent: "claude-code", name: "scopeless" });
+			expect(stored).not.toBeNull();
+			expect(stored?.scopes).toEqual([]);
 		});
 
-		it("should reject at the API when scopes is an empty array", async () => {
+		it("should accept at the API when scopes is an empty array and persist it as global", async () => {
 			// Given the API server is running with the correct secret.
 			const apiUrl = process.env.AI_RULES_API_URL;
 			if (!apiUrl) throw new Error("AI_RULES_API_URL not set by E2E setup");
@@ -135,18 +140,18 @@ describe("E2E: Private Skills", () => {
 				},
 				body: JSON.stringify({
 					agent: "claude-code",
-					skill: { name: "no-scope", content: "should not land" },
+					skill: { name: "no-scope", content: "global skill" },
 					scopes: [],
 				}),
 			});
 
-			// Then the API returns 400 and the skill is not persisted.
-			expect(response.status).toBe(400);
+			// Then the API accepts it and persists a global skill.
+			expect(response.status).toBe(200);
 			const db = await getTestDatabase();
 			const stored = await db
 				.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME)
 				.findOne({ agent: "claude-code", name: "no-scope" });
-			expect(stored).toBeNull();
+			expect(stored?.scopes).toEqual([]);
 		});
 	});
 
@@ -432,12 +437,18 @@ describe("E2E: Private Skills", () => {
 	});
 
 	describe("when the secret is valid but no project scope is configured", () => {
-		it("should return public skills only — a private skill exists but is not surfaced without scope", async () => {
-			// Given a private skill exists.
+		it("should receive global private skills but never scoped ones", async () => {
+			// Given a scoped private skill and a global (empty-scope) private skill.
 			const db = await getTestDatabase();
 			await storePrivateSkillInTestDatabase(db, "claude-code", { name: "no-scope-leak", content: "should not leak" }, [
 				"work",
 			]);
+			await storePrivateSkillInTestDatabase(
+				db,
+				"claude-code",
+				{ name: "global-helper", content: "everyone gets me" },
+				[],
+			);
 
 			const apiUrl = process.env.AI_RULES_API_URL;
 			if (!apiUrl) throw new Error("AI_RULES_API_URL not set by E2E setup");
@@ -447,12 +458,13 @@ describe("E2E: Private Skills", () => {
 				headers: { "x-ai-rules-secret": "test-secret" },
 			});
 
-			// Then the private skill is not in the payload — only public skills are returned.
+			// Then the global skill surfaces as private; the scoped skill stays hidden.
 			expect(response.ok).toBe(true);
 			const payload = (await response.json()) as RulesApiResponse;
 			const allSkills = Object.values(payload.agents).flatMap((a) => a.skills ?? []);
 			expect(allSkills.find((s) => s.name === "no-scope-leak")).toBeUndefined();
-			expect(allSkills.find((s) => s.visibility === "private")).toBeUndefined();
+			const global = allSkills.find((s) => s.name === "global-helper");
+			expect(global?.visibility).toBe("private");
 		});
 	});
 

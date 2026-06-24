@@ -151,9 +151,9 @@ program
 	.command("upload <skillPath>")
 	.description("Upload a local skill directory to the API as a private, scoped skill (requires AI_RULES_SECRET)")
 	.requiredOption("--agent <name>", "AI agent name the skill belongs to (e.g., claude-code)")
-	.requiredOption(
+	.option(
 		"--scope <csv>",
-		"Comma-separated list of scope tags (e.g., work,client-x). At least one is required.",
+		"Comma-separated list of scope tags (e.g., work,client-x). Omit to make the skill global (visible to every workspace).",
 	)
 	.action(async (skillPath, options) => {
 		try {

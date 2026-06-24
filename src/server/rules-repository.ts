@@ -23,8 +23,9 @@ interface FindRulesOptions {
 /**
  * Finds all stored rules from the database.
  * Public skills are always returned (tagged `visibility: "public"` at read time).
- * Private skills are merged in only when `includePrivate=true` AND a non-empty `projectScope`
- * list is set — filtered to skills whose `scopes` array intersects any of the project's scopes.
+ * Private skills are merged in when `includePrivate=true` and a `projectScope` list is provided —
+ * filtered to skills whose `scopes` intersect the project's scopes, plus global (empty-scope)
+ * skills. An empty `projectScope` delivers global skills only.
  * @param options - Optional flags controlling private-skill inclusion and scope filtering
  * @returns Complete rules data structure or null if no rules collection rows exist
  */
@@ -52,9 +53,9 @@ export async function findAllStoredRules(options: FindRulesOptions = {}): Promis
 		}
 	}
 
-	// Merge private skills when requested and a non-empty project scope list is provided.
-	// `Boolean([])` is true, so an explicit length check is required to avoid running a `$in: []` query.
-	if (options.includePrivate && options.projectScope && options.projectScope.length > 0) {
+	// Merge private skills when requested and a project scope list is provided (possibly empty).
+	// An empty scope still runs: `findAllStoredPrivateSkills([])` returns global skills only.
+	if (options.includePrivate && options.projectScope) {
 		const privateSkills = await findAllStoredPrivateSkills(options.projectScope);
 		for (const priv of privateSkills) {
 			const agent = rulesData.agents[priv.agent];
@@ -88,16 +89,16 @@ export async function findAllStoredRules(options: FindRulesOptions = {}): Promis
 }
 
 /**
- * Returns all private skill documents whose `scopes` array intersects any of `projectScopes`.
- * Uses MongoDB `$in` so a workspace belonging to several contexts receives every private skill
- * tagged to at least one of those contexts.
+ * Returns private skill documents that either intersect `projectScopes` OR are global (empty stored
+ * `scopes`). Global skills surface for every workspace, additively with scoped matches; an empty
+ * `projectScopes` arg therefore returns global skills only.
  * @param projectScopes - The project's declared scope tags
  * @returns Array of matching private skill documents (empty when none match)
  */
 export async function findAllStoredPrivateSkills(projectScopes: string[]): Promise<StoredPrivateSkillDocument[]> {
 	const db = await getDatabase();
 	const collection = db.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME);
-	return collection.find({ scopes: { $in: projectScopes } }).toArray();
+	return collection.find({ $or: [{ scopes: { $in: projectScopes } }, { scopes: { $size: 0 } }] }).toArray();
 }
 
 /**
