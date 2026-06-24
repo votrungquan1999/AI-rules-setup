@@ -1,14 +1,17 @@
 "use client";
 
+import { AuthNav } from "src/components/auth-nav";
 import { cn } from "src/lib/utils";
 
 /**
- * Page shell for the review screen — heading area plus the list region.
+ * Page shell for the review screen — heading area plus the list region. Renders the shared
+ * authenticated-page nav at the top so reviewers can jump between authenticated routes.
  * @param children - The page content (header + draft list)
  */
 export function KbReviewLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<main className="min-h-screen bg-background">
+			<AuthNav />
 			<div className="mx-auto max-w-3xl p-8 space-y-6">{children}</div>
 		</main>
 	);

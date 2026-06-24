@@ -1,14 +1,17 @@
 "use client";
 
+import { AuthNav } from "src/components/auth-nav";
 import { cn } from "src/lib/utils";
 
 /**
- * Page shell for the private-skills browse screen.
+ * Page shell for the private-skills browse screen. Renders the shared authenticated-page nav at
+ * the top so reviewers can jump between authenticated routes.
  * @param children - Header plus the skills list
  */
 export function PrivateSkillsLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<main className="min-h-screen bg-background">
+			<AuthNav />
 			<div className="mx-auto max-w-3xl p-8 space-y-6">{children}</div>
 		</main>
 	);
