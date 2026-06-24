@@ -5,7 +5,7 @@ description: Configure private skills so the AI Rules CLI pulls them alongside p
 
 # Set Up Private Skills
 
-Configure a project so the AI Rules CLI (`@quanvo99/ai-rules`) fetches **private, scoped** skills together with the public ones — publish a local skill privately under one or more scopes, or capture the current conversation as a brand-new skill and publish it.
+Configure a project so the AI Rules CLI (`@quanvo99/ai-rules`) fetches **private** skills together with the public ones — publish a local skill privately (global by default, or scoped to one or more projects), or capture the current conversation as a brand-new skill and publish it.
 
 ## When to Use
 
@@ -33,7 +33,7 @@ The practical consequence: **if private skills don't appear, it fails silently**
 
 1. CLI **≥ 0.2.0** for `upload` + scoped `pull` (≥ 0.2.1 for `sync`). Check with `npx @quanvo99/ai-rules --version`.
 2. The `AI_RULES_SECRET` value, obtained from whoever owns the deployment's secret store. **Never commit it.**
-3. A scope tag decided for this project (e.g. `personal`, `work`, `client-x`).
+3. (Optional) A scope tag, only if you want to limit a skill to specific projects (e.g. `personal`, `work`, `client-x`). Omit it for global skills.
 
 ## Steps
 
@@ -51,9 +51,9 @@ export AI_RULES_SECRET='<value-from-secret-store>'
 
 Never print the value into committed files or logs.
 
-### 3. Set the scope in `.ai-rules.json`
+### 3. (Optional) Set a scope in `.ai-rules.json`
 
-Add a `scope` field — an **array** of tags — at the top level:
+Skip this step to work with **global** skills only. To narrow a project to scope-specific skills, add a `scope` field — an **array** of tags — at the top level:
 
 ```json
 {
@@ -87,7 +87,7 @@ AI_RULES_SECRET='<value>' npx @quanvo99/ai-rules upload ./path/to/skill-dir \
 
 ### 5. Pull
 
-With the secret in the environment and `scope` in config, pull brings down public + scoped private skills:
+With the secret in the environment, pull brings down public skills plus your **global** private skills; add `scope` in config to also receive scoped ones:
 
 ```bash
 npx @quanvo99/ai-rules pull
