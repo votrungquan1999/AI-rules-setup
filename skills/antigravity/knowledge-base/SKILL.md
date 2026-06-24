@@ -53,5 +53,6 @@ is live.
 ## Setup
 
 The `ai-rules` CLI must be installed and `AI_RULES_SECRET` set in the environment (optionally
-`AI_RULES_API_URL`). The workspace scope is read from the project's `.ai-rules.json` — captures
-require at least one `scope` tag there.
+`AI_RULES_API_URL`). The workspace scope is read from the project's `.ai-rules.json`. Scope is
+optional: a capture with no `scope` tag becomes a **global** entry (returned in every workspace);
+add `scope` tags to scope the entry to specific workspaces instead.

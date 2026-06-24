@@ -1,6 +1,6 @@
 ---
 name: setup-private-skills
-description: Configure scoped private skills so the AI Rules CLI pulls them alongside public skills, publish a local skill privately under one or more scopes, and capture the current conversation as a new reusable skill. Use when wiring AI_RULES_SECRET + scope, sharing team/client skills, diagnosing missing private skills, or when the user says "set up private skills", "upload a private skill", "record this as a skill", or "capture this conversation as a skill".
+description: Configure private skills so the AI Rules CLI pulls them alongside public skills, publish a local skill privately under one or more scopes (or globally with no scope, visible to every workspace), and capture the current conversation as a new reusable skill. Use when wiring AI_RULES_SECRET + scope, sharing team/client skills, diagnosing missing private skills, or when the user says "set up private skills", "upload a private skill", "record this as a skill", or "capture this conversation as a skill".
 allowed-tools: Read, Bash, Edit, Write
 ---
 
@@ -17,16 +17,16 @@ Configure a project so the AI Rules CLI (`@quanvo99/ai-rules`) fetches **private
 
 ## How It Works (the contract)
 
-Two pieces of state unlock private skills, and **both** are required:
+Two pieces of state govern private skills:
 
-- `AI_RULES_SECRET` — a shared secret in the environment. The CLI sends it as the `x-ai-rules-secret` header.
-- `scope` — a tag (or tags) in `.ai-rules.json`. The CLI sends them as the `x-ai-rules-scope` header.
+- `AI_RULES_SECRET` — a shared secret in the environment. The CLI sends it as the `x-ai-rules-secret` header. **Required** for any private skill.
+- `scope` — a tag (or tags) in `.ai-rules.json`. The CLI sends them as the `x-ai-rules-scope` header. **Optional**: it narrows to scope-specific skills; omitting it still delivers global ones.
 
-The server merges any private skill whose scopes **intersect** the request scopes, marking it `visibility: "private"`; public skills come back regardless. On **any** auth failure the server silently degrades to the public-only payload — there is no error and no "exists" leak. So:
+The server merges any private skill whose scopes **intersect** the request scopes, **plus any global skill** (one uploaded with no scope — global skills are visible to every workspace), marking them `visibility: "private"`; public skills come back regardless. On **any** auth failure the server silently degrades to the public-only payload — there is no error and no "exists" leak. So:
 
-- Secret set, no scope → public skills only.
+- Secret set, no scope → public skills + **global** private skills (those uploaded without a scope).
 - Scope set, no secret → public skills only (scope alone unlocks nothing).
-- Both set and matching → public + scoped private skills.
+- Both set and matching → public + global + scoped private skills.
 
 The practical consequence: **if private skills don't appear, it fails silently** — re-check the secret value and the scope rather than looking for an error message.
 
@@ -64,7 +64,7 @@ Add a `scope` field — an **array** of tags — at the top level:
 }
 ```
 
-A project can carry several scopes (e.g. `["personal", "ai-kanban"]`) and receives any private skill whose scopes intersect. A legacy single string is still accepted and coerced to a one-element array. Without `scope`, private skills are **never** fetched — the most common reason they don't appear.
+A project can carry several scopes (e.g. `["personal", "ai-kanban"]`) and receives any private skill whose scopes intersect, **plus any global skill**. A legacy single string is still accepted and coerced to a one-element array. Scope is **optional**: with a valid secret but no `scope`, you still receive **global** private skills (those uploaded without a scope) — just none of the scope-specific ones.
 
 ### 4. (Optional) Publish a skill privately
 
@@ -84,7 +84,7 @@ AI_RULES_SECRET='<value>' npx @quanvo99/ai-rules upload ./path/to/skill-dir \
   --scope personal          # comma-separated; a skill can carry multiple scopes
 ```
 
-The skill name is the directory's basename. Re-uploading the same `{agent, name}` upserts (replaces) it.
+`--scope` is optional: **omit it entirely to upload a global skill** that every workspace receives (with a valid secret), regardless of its own scope tags. The skill name is the directory's basename. Re-uploading the same `{agent, name}` upserts (replaces) it.
 
 ### 5. Pull
 

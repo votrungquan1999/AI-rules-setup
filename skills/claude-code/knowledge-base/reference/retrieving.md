@@ -10,7 +10,7 @@ might already be settled, a pattern you suspect exists. Skip it only for truly t
 ## Phrasing the search
 
 `ai-rules kb search "<query>" [--type <type>]` ranks canonical entries whose scope intersects
-the workspace.
+the workspace, plus **global** entries (those captured with no scope), which surface in every workspace.
 
 - **Query with the problem's nouns and symptoms**, not a full sentence. Good:
   `ai-rules kb search "flaky e2e mongo connection reset"`. Weak: `"how do I fix my test"`.
