@@ -92,6 +92,18 @@ export async function findCanonicalKbDocs(options: FindCanonicalOptions): Promis
 }
 
 /**
+ * Returns every approved (canonical) KB document, unfiltered by scope. Used by the reviewer's
+ * browse-everything UI; agents must continue to go through `findCanonicalKbDocs(scopes)` so they
+ * only see what their workspace is entitled to.
+ * @returns All canonical documents as client-facing `KbDoc[]`
+ */
+export async function findAllCanonicalKbDocs(): Promise<KbDoc[]> {
+	const collection = await getKbCollection();
+	const documents = await collection.find({ status: KbStatus.Canonical }).toArray();
+	return documents.map(toKbDoc);
+}
+
+/**
  * Fetches a single KB document by its hex `_id` string.
  * @param _id - The document's MongoDB `_id` hex string
  * @returns The client-facing `KbDoc`, or null if not found
