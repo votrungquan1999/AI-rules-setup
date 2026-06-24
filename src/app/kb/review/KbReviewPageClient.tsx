@@ -13,9 +13,18 @@ import {
 import { Input } from "src/components/ui/input";
 import { Label } from "src/components/ui/label";
 import { Textarea } from "src/components/ui/textarea";
-import { useKbReviewActions, useKbReviewDrafts } from "./kb-review.state";
+import { useKbReviewActions, useKbReviewDrafts, useKbReviewFilter } from "./kb-review.state";
 import type { KbDocDraft } from "./kb-review.type";
-import { KbReviewActionsRow, KbReviewCard, KbReviewHeader, KbReviewLayout, KbReviewList } from "./kb-review.ui";
+import {
+	KbGlobalBadge,
+	KbReviewActionsRow,
+	KbReviewCard,
+	KbReviewHeader,
+	KbReviewLayout,
+	KbReviewList,
+	KbScopeRow,
+	KbScopeTag,
+} from "./kb-review.ui";
 
 /**
  * Review screen orchestrator. Lists drafts and wires approve/reject/edit actions to the KB API via
@@ -24,6 +33,7 @@ import { KbReviewActionsRow, KbReviewCard, KbReviewHeader, KbReviewLayout, KbRev
  */
 export function KbReviewPageClient() {
 	const drafts = useKbReviewDrafts();
+	const { showGlobalOnly, toggleGlobalFilter } = useKbReviewFilter();
 	const { approveDraft, rejectDraft, editDraft } = useKbReviewActions();
 	const [editing, setEditing] = useState<KbDocDraft | null>(null);
 	const [editTitle, setEditTitle] = useState("");
@@ -48,6 +58,9 @@ export function KbReviewPageClient() {
 			<KbReviewHeader>
 				<h1 className="text-3xl font-bold text-foreground">Review Drafts</h1>
 				<p className="text-muted-foreground">Approve, reject, or edit captured knowledge before it goes live.</p>
+				<Button variant="outline" onClick={toggleGlobalFilter}>
+					{showGlobalOnly ? "Show all" : "Show global only"}
+				</Button>
 			</KbReviewHeader>
 
 			{drafts.length === 0 ? (
@@ -60,6 +73,9 @@ export function KbReviewPageClient() {
 								<span className="text-xs font-medium uppercase text-muted-foreground">{d.type}</span>
 								<h2 className="font-semibold text-foreground">{d.title}</h2>
 								<p className="whitespace-pre-wrap text-sm text-muted-foreground">{d.body}</p>
+								<KbScopeRow>
+									{d.scope.length === 0 ? <KbGlobalBadge /> : d.scope.map((s) => <KbScopeTag key={s}>{s}</KbScopeTag>)}
+								</KbScopeRow>
 							</div>
 							<KbReviewActionsRow>
 								<Button onClick={() => approveDraft(d.id)}>Approve</Button>

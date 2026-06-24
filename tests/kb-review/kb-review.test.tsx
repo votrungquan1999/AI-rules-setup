@@ -71,6 +71,38 @@ describe("KB Review screen", () => {
 		await waitFor(() => expect(screen.queryByText("Reject me")).not.toBeInTheDocument());
 	});
 
+	it("marks a global draft with a 'Global' badge while a scoped draft shows its scope", () => {
+		renderReview([
+			draft({ id: "507f1f77bcf86cd799439021", title: "Global draft", scope: [] }),
+			draft({ id: "507f1f77bcf86cd799439022", title: "Scoped draft", scope: ["work"] }),
+		]);
+
+		// The global draft carries a single "Global" badge.
+		expect(screen.getAllByText("Global")).toHaveLength(1);
+		// The scoped draft surfaces its scope tag so the two are distinguishable.
+		expect(screen.getByText("work")).toBeInTheDocument();
+	});
+
+	it("narrows the list to global drafts only when the filter is toggled, and restores all when toggled off", () => {
+		renderReview([
+			draft({ id: "507f1f77bcf86cd799439031", title: "Global draft", scope: [] }),
+			draft({ id: "507f1f77bcf86cd799439032", title: "Scoped draft", scope: ["work"] }),
+		]);
+
+		// Both drafts are visible initially.
+		expect(screen.getByText("Global draft")).toBeInTheDocument();
+		expect(screen.getByText("Scoped draft")).toBeInTheDocument();
+
+		// When the reviewer turns on the global-only filter, the scoped draft disappears.
+		fireEvent.click(screen.getByRole("button", { name: /global only/i }));
+		expect(screen.getByText("Global draft")).toBeInTheDocument();
+		expect(screen.queryByText("Scoped draft")).not.toBeInTheDocument();
+
+		// When toggled off again, both drafts are visible.
+		fireEvent.click(screen.getByRole("button", { name: /show all/i }));
+		expect(screen.getByText("Scoped draft")).toBeInTheDocument();
+	});
+
 	it("edits a draft via the dialog: PATCHes title/body and updates the displayed title", async () => {
 		const fetchMock = vi.fn().mockResolvedValue({ ok: true } as Response);
 		vi.stubGlobal("fetch", fetchMock);

@@ -1,8 +1,10 @@
 "use client";
 
-import { usePrivateSkills } from "./private-skills-page.state";
+import { Button } from "src/components/ui/button";
+import { usePrivateSkills, usePrivateSkillsFilter } from "./private-skills-page.state";
 import {
 	PrivateSkillCard,
+	PrivateSkillGlobalBadge,
 	PrivateSkillScopes,
 	PrivateSkillScopeTag,
 	PrivateSkillsHeader,
@@ -16,12 +18,16 @@ import {
  */
 export function PrivateSkillsPageClient() {
 	const skills = usePrivateSkills();
+	const { showGlobalOnly, toggleGlobalFilter } = usePrivateSkillsFilter();
 
 	return (
 		<PrivateSkillsLayout>
 			<PrivateSkillsHeader>
 				<h1 className="text-3xl font-bold text-foreground">Private Skills</h1>
 				<p className="text-muted-foreground">Every private skill across all workspace scopes.</p>
+				<Button variant="outline" onClick={toggleGlobalFilter}>
+					{showGlobalOnly ? "Show all" : "Show global only"}
+				</Button>
 			</PrivateSkillsHeader>
 
 			{skills.length === 0 ? (
@@ -36,9 +42,11 @@ export function PrivateSkillsPageClient() {
 							</div>
 							{skill.description && <p className="text-sm text-muted-foreground">{skill.description}</p>}
 							<PrivateSkillScopes>
-								{skill.scopes.map((scope) => (
-									<PrivateSkillScopeTag key={scope}>{scope}</PrivateSkillScopeTag>
-								))}
+								{skill.scopes.length === 0 ? (
+									<PrivateSkillGlobalBadge />
+								) : (
+									skill.scopes.map((scope) => <PrivateSkillScopeTag key={scope}>{scope}</PrivateSkillScopeTag>)
+								)}
 							</PrivateSkillScopes>
 						</PrivateSkillCard>
 					))}

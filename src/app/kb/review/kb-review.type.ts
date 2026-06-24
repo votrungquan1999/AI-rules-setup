@@ -17,6 +17,7 @@ export interface KbDocDraft {
 export enum KbReviewActionType {
 	Remove = "remove",
 	Edit = "edit",
+	ToggleGlobalFilter = "toggle-global-filter",
 }
 
 /** Removes a draft from the list (after approve or reject resolves). */
@@ -33,9 +34,15 @@ export interface EditDraftAction {
 	body: string;
 }
 
-export type KbReviewAction = RemoveDraftAction | EditDraftAction;
+/** Toggles the "global only" filter on the drafts list. */
+export interface ToggleGlobalFilterAction {
+	type: KbReviewActionType.ToggleGlobalFilter;
+}
 
-/** Review screen state: the list of drafts still awaiting a decision. */
+export type KbReviewAction = RemoveDraftAction | EditDraftAction | ToggleGlobalFilterAction;
+
+/** Review screen state: the drafts awaiting a decision, plus whether the global-only filter is on. */
 export interface KbReviewState {
 	drafts: KbDocDraft[];
+	showGlobalOnly: boolean;
 }

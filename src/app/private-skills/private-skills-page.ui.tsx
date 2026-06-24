@@ -53,3 +53,10 @@ export function PrivateSkillScopes({ children }: { children: React.ReactNode }) 
 export function PrivateSkillScopeTag({ children }: { children: React.ReactNode }) {
 	return <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">{children}</span>;
 }
+
+/** Badge marking a skill as global (no scope) — visually distinct from scope chips so reviewers can tell them apart. */
+export function PrivateSkillGlobalBadge() {
+	return (
+		<span className="rounded-full bg-primary px-2 py-0.5 text-xs font-medium text-primary-foreground">Global</span>
+	);
+}

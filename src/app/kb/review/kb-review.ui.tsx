@@ -45,3 +45,26 @@ export function KbReviewCard({ children }: { children: React.ReactNode }) {
 export function KbReviewActionsRow({ children }: { children: React.ReactNode }) {
 	return <div className="flex gap-2">{children}</div>;
 }
+
+/**
+ * Wrapping row that holds a draft's scope tags or its global badge.
+ * @param children - Scope tags or the global badge
+ */
+export function KbScopeRow({ children }: { children: React.ReactNode }) {
+	return <div className="flex flex-wrap gap-2">{children}</div>;
+}
+
+/**
+ * A single scope tag chip shown on a scoped draft.
+ * @param children - The scope name
+ */
+export function KbScopeTag({ children }: { children: React.ReactNode }) {
+	return (
+		<span className="rounded bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">{children}</span>
+	);
+}
+
+/** Badge marking a draft as global (no scope) — visually distinct from scope tags so reviewers can tell them apart. */
+export function KbGlobalBadge() {
+	return <span className="rounded bg-primary px-2 py-0.5 text-xs font-medium text-primary-foreground">Global</span>;
+}

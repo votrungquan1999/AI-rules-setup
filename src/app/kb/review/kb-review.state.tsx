@@ -3,7 +3,7 @@
 import { createReducerContext } from "src/app/hooks/createReducerContext";
 import { type KbReviewAction, KbReviewActionType, type KbReviewState } from "./kb-review.type";
 
-const initialState: KbReviewState = { drafts: [] };
+const initialState: KbReviewState = { drafts: [], showGlobalOnly: false };
 
 /**
  * Reducer for the review screen. Removes a draft after approve/reject, or replaces its title/body
@@ -15,11 +15,14 @@ const initialState: KbReviewState = { drafts: [] };
 function kbReviewReducer(state: KbReviewState, action: KbReviewAction): KbReviewState {
 	switch (action.type) {
 		case KbReviewActionType.Remove:
-			return { drafts: state.drafts.filter((d) => d.id !== action.id) };
+			return { ...state, drafts: state.drafts.filter((d) => d.id !== action.id) };
 		case KbReviewActionType.Edit:
 			return {
+				...state,
 				drafts: state.drafts.map((d) => (d.id === action.id ? { ...d, title: action.title, body: action.body } : d)),
 			};
+		case KbReviewActionType.ToggleGlobalFilter:
+			return { ...state, showGlobalOnly: !state.showGlobalOnly };
 		default:
 			return state;
 	}
@@ -30,11 +33,26 @@ const [Provider, useRawState, useRawDispatch] = createReducerContext(kbReviewRed
 export const KbReviewProvider = Provider;
 
 /**
- * Exposes the current list of drafts awaiting review.
- * @returns The drafts array
+ * Exposes the list of drafts to display — narrowed to global (empty-scope) drafts when the
+ * global-only filter is on, otherwise the full list.
+ * @returns The (possibly filtered) drafts array
  */
 export function useKbReviewDrafts() {
-	return useRawState().drafts;
+	const state = useRawState();
+	return state.showGlobalOnly ? state.drafts.filter((d) => d.scope.length === 0) : state.drafts;
+}
+
+/**
+ * Exposes the global-only filter state and a toggle for it.
+ * @returns `showGlobalOnly` flag and a `toggleGlobalFilter` callback
+ */
+export function useKbReviewFilter() {
+	const { showGlobalOnly } = useRawState();
+	const dispatch = useRawDispatch();
+	return {
+		showGlobalOnly,
+		toggleGlobalFilter: () => dispatch({ type: KbReviewActionType.ToggleGlobalFilter }),
+	};
 }
 
 /**

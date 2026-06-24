@@ -10,7 +10,20 @@ export interface PrivateSkillDisplay {
 	description?: string;
 }
 
-/** Browse-page state: the full list of private skills to display. */
+/** Browse-page state: the full list of private skills plus whether the global-only filter is on. */
 export interface PrivateSkillsPageState {
 	skills: PrivateSkillDisplay[];
+	showGlobalOnly: boolean;
 }
+
+/** Discriminator for the browse-page reducer actions. */
+export enum PrivateSkillsPageActionType {
+	ToggleGlobalFilter = "toggle-global-filter",
+}
+
+/** Toggles the "global only" filter on the skills list. */
+export interface ToggleGlobalFilterAction {
+	type: PrivateSkillsPageActionType.ToggleGlobalFilter;
+}
+
+export type PrivateSkillsPageAction = ToggleGlobalFilterAction;
