@@ -119,6 +119,31 @@ describe("E2E: KB Review (drafts + approve/reject/edit)", () => {
 			expect(list.find((d) => d.id === id)).toBeUndefined();
 		});
 
+		it("accepts the session cookie in place of the secret header (in-browser reviewer flow)", async () => {
+			// Given a draft.
+			const db = await getTestDatabase();
+			const id = await storeKbDocInTestDatabase(db, {
+				type: KbType.Question,
+				status: KbStatus.Draft,
+				title: "Approve via cookie",
+				body: "b",
+				scope: ["work"],
+			});
+
+			// When the reviewer approves it carrying ONLY the session cookie (no x-ai-rules-secret
+			// header) — this is how the in-browser Approve button POSTs, since the cookie is httpOnly
+			// and the client cannot read it to attach as a header.
+			const response = await fetch(`${apiUrl()}/api/kb/${id}/approve`, {
+				method: "POST",
+				headers: { cookie: `session=${SECRET}` },
+			});
+			expect(response.status).toBe(200);
+
+			// Then the draft is promoted to canonical.
+			const stored = await db.collection("kb_docs").findOne({ title: "Approve via cookie" });
+			expect(stored?.status).toBe("canonical");
+		});
+
 		it("returns 404 when approving a document that is already canonical", async () => {
 			const db = await getTestDatabase();
 			const id = await storeKbDocInTestDatabase(db, {
