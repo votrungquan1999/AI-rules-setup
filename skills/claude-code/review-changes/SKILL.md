@@ -185,7 +185,7 @@ Write the complete review to `./tmp/review-changes.md` before finishing, in this
 ```markdown
 ## Summary
 
-[Brief overview of what changed and overall risk level — from HOLISTIC.md]
+[Brief overview of what changed and overall risk level — from HOLISTIC.md. Include the business impact: what this delivers in business/stakeholder terms, in plain language.]
 
 ## Findings
 

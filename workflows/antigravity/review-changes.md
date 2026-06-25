@@ -41,6 +41,7 @@ Use this workflow when:
    - **What was removed**: Note any deleted functions or features
    - **User flow impact**: How do these changes affect the user experience or application behavior?
    - **Overall purpose**: What problem does this PR solve?
+   - **Business impact**: What does this mean in business/stakeholder terms (value delivered, risk reduced, who it affects)? Plain language, no jargon.
    
    **Example**:
    ```
@@ -49,6 +50,7 @@ Use this workflow when:
    - Removed deprecated `oldAuth()` from `src/auth/legacy.ts`
    - User flow: Users can now log in with Google/GitHub instead of just email/password
    - Purpose: Add OAuth support to improve user onboarding
+   - Business impact: Lower signup friction should improve conversion; fewer password resets reduce support load
    ```
 
 4. **Approach Evaluation** (compare the PR's approach against your mental model):
@@ -113,7 +115,7 @@ Use this workflow when:
    ```markdown
    ## Summary
    
-   [Brief overview of what changed and overall risk level]
+   [Brief overview of what changed and overall risk level. Include the business impact: what this delivers in business/stakeholder terms, in plain language.]
 
    ## Findings
 
