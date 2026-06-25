@@ -5,13 +5,13 @@ description: Retrieve shared knowledge before doing non-trivial work and capture
 
 # Knowledge Base
 
-A shared, scoped knowledge base reached through the `ai-rules kb` CLI command. Use it to avoid
+A shared, scoped knowledge base reached through the `npx @quanvo99/ai-rules@latest kb` CLI command. Use it to avoid
 re-solving solved problems and to bank reusable knowledge for your future self and teammates.
 
 ## The Loop
 
-1. **Retrieve before acting.** Before any non-trivial task, run `ai-rules kb search "<query>"`.
-   If a canonical entry answers the problem, `ai-rules kb get <id>`, apply it, and cite its id.
+1. **Retrieve before acting.** Before any non-trivial task, run `npx @quanvo99/ai-rules@latest kb search "<query>"`.
+   If a canonical entry answers the problem, `npx @quanvo99/ai-rules@latest kb get <id>`, apply it, and cite its id.
 2. **Do the work.**
 3. **Capture when it's worth keeping.** After solving a non-obvious problem, learning a
    surprising fact, or building a reusable pattern, draft a note with the right command.
@@ -21,13 +21,13 @@ re-solving solved problems and to bank reusable knowledge for your future self a
 
 | Type | Command | Use for |
 |---|---|---|
-| Question | `ai-rules kb capture question` | a solved problem (problem + how it was resolved) |
-| TIL | `ai-rules kb capture til` | a surprising fact or learning worth remembering |
-| Blueprint | `ai-rules kb capture blueprint` | a reusable pattern, template, or recipe |
-| Memory | `ai-rules kb capture memory` | a tiny always-true project fact (loaded every session) |
+| Question | `npx @quanvo99/ai-rules@latest kb capture question` | a solved problem (problem + how it was resolved) |
+| TIL | `npx @quanvo99/ai-rules@latest kb capture til` | a surprising fact or learning worth remembering |
+| Blueprint | `npx @quanvo99/ai-rules@latest kb capture blueprint` | a reusable pattern, template, or recipe |
+| Memory | `npx @quanvo99/ai-rules@latest kb capture memory` | a tiny always-true project fact (loaded every session) |
 
 Use **Memory** sparingly — it is paid in context on every turn. It is claude-code only,
-materializes on `ai-rules pull` into `.claude/rules/kb-memory.md`, and the command rejects
+materializes on `npx @quanvo99/ai-rules@latest pull` into `.claude/rules/kb-memory.md`, and the command rejects
 a body over 200 characters or 2 lines.
 
 ## Passing note bodies
@@ -40,7 +40,7 @@ inline `--body` / `--problem` / `--resolution` flags, or pipe via stdin.
 ## Drafts Need Approval
 
 **Every capture creates a DRAFT.** A human reviewer must approve it before it surfaces in
-`ai-rules kb search` or on pull. Never treat what you just captured as canonical or assume it
+`npx @quanvo99/ai-rules@latest kb search` or on pull. Never treat what you just captured as canonical or assume it
 is live.
 
 ## Reference
@@ -52,7 +52,7 @@ is live.
 
 ## Setup
 
-The `ai-rules` CLI must be installed and `AI_RULES_SECRET` set in the environment (optionally
+Invoke the CLI as `npx @quanvo99/ai-rules@latest …` (pins the latest published version, no global install needed). `AI_RULES_SECRET` must be set in the environment (optionally
 `AI_RULES_API_URL`). The workspace scope is read from the project's `.ai-rules.json`. Scope is
 optional: a capture with no `scope` tag becomes a **global** entry (returned in every workspace);
 add `scope` tags to scope the entry to specific workspaces instead.

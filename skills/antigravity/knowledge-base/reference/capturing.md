@@ -4,7 +4,7 @@ How to bank knowledge after solving something worth keeping.
 
 ## 1. Dedup-check first
 
-Before drafting anything, `ai-rules kb search` for it. If a canonical entry already covers it,
+Before drafting anything, `npx @quanvo99/ai-rules@latest kb search` for it. If a canonical entry already covers it,
 don't create a near-duplicate — apply and cite the existing one instead. Capture only when the
 knowledge is genuinely new (or meaningfully extends what exists).
 
@@ -27,16 +27,16 @@ and [memory-guide.md](./memory-guide.md) for Memory.
 
 | Command | Inputs |
 |---|---|
-| `ai-rules kb capture question` | `--title`, `--problem`/`--problem-file`, `--resolution`/`--resolution-file` |
-| `ai-rules kb capture til` | `--title`, body via `--file` / `--body` / stdin |
-| `ai-rules kb capture blueprint` | `--title`, body via `--file` / `--body` / stdin |
-| `ai-rules kb capture memory` | optional `--title`, body via `--file` / `--body` / stdin (≤ 200 chars AND ≤ 2 lines) |
+| `npx @quanvo99/ai-rules@latest kb capture question` | `--title`, `--problem`/`--problem-file`, `--resolution`/`--resolution-file` |
+| `npx @quanvo99/ai-rules@latest kb capture til` | `--title`, body via `--file` / `--body` / stdin |
+| `npx @quanvo99/ai-rules@latest kb capture blueprint` | `--title`, body via `--file` / `--body` / stdin |
+| `npx @quanvo99/ai-rules@latest kb capture memory` | optional `--title`, body via `--file` / `--body` / stdin (≤ 200 chars AND ≤ 2 lines) |
 
 Each prints the created draft's id. **For multi-line markdown, write the content to a temp file
 and pass `--file` / `--problem-file` / `--resolution-file`** rather than quoting it inline.
 
 ## 4. Draft != canonical
 
-**Every capture is a draft pending human review.** It will NOT appear in `ai-rules kb search`
+**Every capture is a draft pending human review.** It will NOT appear in `npx @quanvo99/ai-rules@latest kb search`
 or be delivered on pull until a reviewer approves it. After capturing, keep working with your
 own knowledge — never assume the captured note is live or authoritative yet.

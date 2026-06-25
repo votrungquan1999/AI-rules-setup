@@ -32,7 +32,7 @@ The practical consequence: **if private skills don't appear, it fails silently**
 
 ## Prerequisites
 
-1. CLI **≥ 0.2.0** for `upload` + scoped `pull` (≥ 0.2.1 for `sync`). Check with `npx @quanvo99/ai-rules --version`.
+1. CLI **≥ 0.2.0** for `upload` + scoped `pull` (≥ 0.2.1 for `sync`). Check with `npx @quanvo99/ai-rules@latest --version`.
 2. The `AI_RULES_SECRET` value, obtained from whoever owns the deployment's secret store. **Never commit it.**
 3. (Optional) A scope tag, only if you want to limit a skill to specific projects (e.g. `personal`, `work`, `client-x`). Omit it for global skills.
 
@@ -40,7 +40,7 @@ The practical consequence: **if private skills don't appear, it fails silently**
 
 ### 1. Identify the agent
 
-Read `.ai-rules.json` at the project root and note the `agent` field. Private skills are supported for `claude-code`, `cursor`, and `antigravity`. If there is no `.ai-rules.json`, run `npx @quanvo99/ai-rules init` first and pick the agent.
+Read `.ai-rules.json` at the project root and note the `agent` field. Private skills are supported for `claude-code`, `cursor`, and `antigravity`. If there is no `.ai-rules.json`, run `npx @quanvo99/ai-rules@latest init` first and pick the agent.
 
 ### 2. Make the secret available to the CLI
 
@@ -79,7 +79,7 @@ When the user wants to share a skill privately — either an existing local skil
 **4b. Upload.** The directory must contain a `SKILL.md`; any other files become supporting files.
 
 ```bash
-AI_RULES_SECRET='<value>' npx @quanvo99/ai-rules upload ./path/to/skill-dir \
+AI_RULES_SECRET='<value>' npx @quanvo99/ai-rules@latest upload ./path/to/skill-dir \
   --agent claude-code \
   --scope personal          # comma-separated; a skill can carry multiple scopes
 ```
@@ -91,7 +91,7 @@ AI_RULES_SECRET='<value>' npx @quanvo99/ai-rules upload ./path/to/skill-dir \
 With the secret in the environment, pull brings down public skills plus your **global** private skills; add `scope` in config to also receive scoped ones:
 
 ```bash
-npx @quanvo99/ai-rules pull
+npx @quanvo99/ai-rules@latest pull
 ```
 
 `add` and `sync` thread the configured `scope` the same way — `sync` force-installs the full available catalog, so use it to reconcile a project to everything its scope unlocks.

@@ -9,11 +9,11 @@ might already be settled, a pattern you suspect exists. Skip it only for truly t
 
 ## Phrasing the search
 
-`ai-rules kb search "<query>" [--type <type>]` ranks canonical entries whose scope intersects
-the workspace.
+`npx @quanvo99/ai-rules@latest kb search "<query>" [--type <type>]` ranks canonical entries whose scope intersects
+the workspace, plus **global** entries (those captured with no scope), which surface in every workspace.
 
 - **Query with the problem's nouns and symptoms**, not a full sentence. Good:
-  `ai-rules kb search "flaky e2e mongo connection reset"`. Weak: `"how do I fix my test"`.
+  `npx @quanvo99/ai-rules@latest kb search "flaky e2e mongo connection reset"`. Weak: `"how do I fix my test"`.
 - Search is keyword/relevance ranked — include the specific error text, API name, or
   domain term you actually care about.
 - **Narrow by `--type`** when you know the shape you want:
@@ -24,8 +24,8 @@ the workspace.
 
 ## Reading a hit
 
-`ai-rules kb search` prints ranked hits, one per line, each starting with the entry's id. To
-read the full body, run `ai-rules kb get <id>`.
+`npx @quanvo99/ai-rules@latest kb search` prints ranked hits, one per line, each starting with the entry's id. To
+read the full body, run `npx @quanvo99/ai-rules@latest kb get <id>`.
 
 ## Applying and citing
 

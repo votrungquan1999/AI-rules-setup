@@ -3,7 +3,7 @@
 Body structure for the three retrievable types. Write a clear, searchable `--title` for each —
 it carries the most ranking weight. (Memory is covered in [memory-guide.md](./memory-guide.md).)
 
-## Question — `ai-rules kb capture question`
+## Question — `npx @quanvo99/ai-rules@latest kb capture question`
 
 For a problem that was solved in a non-obvious way. The command composes the body itself as:
 
@@ -22,7 +22,7 @@ So pass them separately (inline `--problem` / `--resolution`, or `--problem-file
 - `resolution` — the fix and **why** it works. Include the concrete change (command, config,
   code) and the root cause, not just "restarted it".
 
-## TIL — `ai-rules kb capture til`
+## TIL — `npx @quanvo99/ai-rules@latest kb capture til`
 
 For a surprising fact or gotcha. Keep the body short and focused on the single insight:
 
@@ -34,7 +34,7 @@ Why it matters / where it bit: {context}.
 
 Avoid padding — a TIL is one learning, not an essay.
 
-## Blueprint — `ai-rules kb capture blueprint`
+## Blueprint — `npx @quanvo99/ai-rules@latest kb capture blueprint`
 
 For a reusable pattern, template, or recipe. Make the body something you could follow
 step by step later:
