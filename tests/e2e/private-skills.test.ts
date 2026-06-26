@@ -107,13 +107,31 @@ describe("E2E: Private Skills", () => {
 		});
 	});
 
-	describe("when uploading without specifying a scope", () => {
-		it("should accept at the CLI and persist a global (empty-scope) skill", async () => {
-			// Given a valid skill directory but no --scope flag.
+	describe("when uploading without an explicit scope or --global", () => {
+		it("should reject at the CLI with a non-zero exit and store nothing", async () => {
+			// Given a valid skill directory but neither --scope nor --global.
 			const skillDir = await createSkillDir("scopeless", "---\nname: scopeless\n---\n# x");
 
-			// When the developer runs `upload --agent claude-code <skillDir>` without --scope.
+			// When the developer runs `upload --agent claude-code <skillDir>` without stating visibility.
 			const { result } = spawnCLI(["upload", "--agent", "claude-code", skillDir], { timeout: 30000 });
+			const output = await result;
+
+			// Then the CLI refuses on the scope rule and persists nothing.
+			expect(output.exitCode, `stdout: ${output.stdout}\nstderr: ${output.stderr}`).toBe(1);
+			expect(output.stderr).toContain("--scope");
+			const db = await getTestDatabase();
+			const stored = await db
+				.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME)
+				.findOne({ agent: "claude-code", name: "scopeless" });
+			expect(stored).toBeNull();
+		});
+
+		it("should accept at the CLI and persist a global (empty-scope) skill when --global is passed", async () => {
+			// Given a valid skill directory and an explicit --global opt-in.
+			const skillDir = await createSkillDir("scopeless-global", "---\nname: scopeless-global\n---\n# x");
+
+			// When the developer runs `upload --agent claude-code <skillDir> --global`.
+			const { result } = spawnCLI(["upload", "--agent", "claude-code", skillDir, "--global"], { timeout: 30000 });
 			const output = await result;
 
 			// Then the CLI exits cleanly and the skill is stored as global.
@@ -121,7 +139,7 @@ describe("E2E: Private Skills", () => {
 			const db = await getTestDatabase();
 			const stored = await db
 				.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME)
-				.findOne({ agent: "claude-code", name: "scopeless" });
+				.findOne({ agent: "claude-code", name: "scopeless-global" });
 			expect(stored).not.toBeNull();
 			expect(stored?.scopes).toEqual([]);
 		});

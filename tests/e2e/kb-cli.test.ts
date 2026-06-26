@@ -88,9 +88,9 @@ describe("E2E: kb CLI command", () => {
 			projects.push(dir);
 			await writeConfig(dir, ["kbcli"]);
 
-			// When the developer captures a TIL.
+			// When the developer captures a TIL with an explicit scope.
 			const { result } = spawnCLI(
-				["kb", "capture", "til", "--title", "Vitest no watch", "--body", "Use vitest run in CI."],
+				["kb", "capture", "til", "--title", "Vitest no watch", "--body", "Use vitest run in CI.", "--scope", "kbcli"],
 				{ cwd: dir, timeout: 30000 },
 			);
 			const { stdout, exitCode } = await result;
@@ -115,9 +115,12 @@ describe("E2E: kb CLI command", () => {
 			projects.push(dir);
 			await writeConfig(dir, ["kbcli"]);
 
-			// When the developer captures a memory body over 200 chars.
+			// When the developer captures a memory body over 200 chars (with an explicit scope so the cap check is what fails).
 			const tooLong = "x".repeat(201);
-			const { result } = spawnCLI(["kb", "capture", "memory", "--body", tooLong], { cwd: dir, timeout: 30000 });
+			const { result } = spawnCLI(["kb", "capture", "memory", "--body", tooLong, "--scope", "kbcli"], {
+				cwd: dir,
+				timeout: 30000,
+			});
 			const { exitCode } = await result;
 
 			// Then the command fails.
@@ -125,18 +128,39 @@ describe("E2E: kb CLI command", () => {
 		});
 	});
 
-	describe("when capturing without a configured scope", () => {
-		it("succeeds and persists a global (empty-scope) draft", async () => {
-			// Given a workspace whose config declares no scope.
+	describe("when capturing without --scope or --global", () => {
+		it("fails with a non-zero exit and stores nothing", async () => {
+			// Given a workspace whose config declares no scope (irrelevant now — capture no longer reads it).
 			const dir = await createTestProject("kb-cli-no-scope");
 			projects.push(dir);
 			await writeConfig(dir, []);
 
-			// When the developer captures a TIL.
-			const { result } = spawnCLI(["kb", "capture", "til", "--title", "Global TIL", "--body", "applies everywhere"], {
+			// When the developer captures a TIL without stating visibility.
+			const { result } = spawnCLI(["kb", "capture", "til", "--title", "Unstated TIL", "--body", "applies everywhere"], {
 				cwd: dir,
 				timeout: 30000,
 			});
+			const { stderr, exitCode } = await result;
+
+			// Then the command refuses on the scope rule and persists nothing.
+			expect(exitCode).toBe(1);
+			expect(stderr).toContain("--scope");
+			const db = await getTestDatabase();
+			const doc = await db.collection<StoredKbDocDocument>(KB_DOCS_COLLECTION_NAME).findOne({ title: "Unstated TIL" });
+			expect(doc).toBeNull();
+		});
+
+		it("succeeds and persists a global (empty-scope) draft when --global is passed", async () => {
+			// Given a workspace whose config declares no scope.
+			const dir = await createTestProject("kb-cli-global");
+			projects.push(dir);
+			await writeConfig(dir, []);
+
+			// When the developer captures a TIL with an explicit --global opt-in.
+			const { result } = spawnCLI(
+				["kb", "capture", "til", "--title", "Global TIL", "--body", "applies everywhere", "--global"],
+				{ cwd: dir, timeout: 30000 },
+			);
 			const { stdout, exitCode } = await result;
 
 			// Then the command reports a captured draft.
