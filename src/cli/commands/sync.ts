@@ -1,4 +1,3 @@
-import { homedir } from "node:os";
 import { join, resolve, sep } from "node:path";
 import chalk from "chalk";
 import type { KbMemory } from "../lib/api-client";
@@ -121,7 +120,7 @@ export interface BulkSyncSummary {
 export interface SyncCommandOptions {
 	/** When true, discover and sync every project under `root` instead of just the cwd. */
 	all?: boolean;
-	/** Root directory to scan in `--all` mode. Defaults to ~/Documents/git-repos. */
+	/** Root directory to scan in `--all` mode. Defaults to the current working directory. */
 	root?: string;
 }
 
@@ -172,7 +171,8 @@ export async function syncCommand(options: SyncCommandOptions = {}): Promise<Bul
 	warnIfSecretMissing();
 
 	if (options.all) {
-		const root = options.root || join(homedir(), "Documents", "git-repos");
+		// Default to the cwd so --all scans the current dir tree; pass --root for a wider sweep.
+		const root = options.root || process.cwd();
 		return runBulkSync(root);
 	}
 

@@ -152,4 +152,26 @@ describe("E2E: Sync Command", () => {
 		// ...and the run reports a success summary.
 		expect(output.stdout).toContain("2 succeeded");
 	});
+
+	it("defaults --all to the current working directory when no --root is given", async () => {
+		// Given a root with a nested project, and the developer standing inside that root.
+		const root = await mkdtemp(join(tmpdir(), "sync-all-cwd-"));
+		tempDirs.push(root);
+		const nested = join(root, "workspace", "project-a");
+		await mkdir(nested, { recursive: true });
+		await writeFile(
+			join(nested, ".ai-rules.json"),
+			JSON.stringify({ version: "0.1.0", agent: "claude-code", categories: [] }),
+		);
+
+		// When `sync --all` runs from that root WITHOUT --root, so cwd is the only scan root.
+		const { result } = spawnCLI(["sync", "--all"], { cwd: root, timeout: 90000 });
+		const output = await result;
+		expect(output.exitCode, `stdout: ${output.stdout}\nstderr: ${output.stderr}`).toBe(0);
+
+		// Then the nested project under cwd is synced — proving discovery rooted at cwd, not a
+		// hardcoded ancestor path (the regression that synced unrelated sibling repos).
+		expect(await fileExists(nested, ".claude/skills/feature-development-workflow/SKILL.md")).toBe(true);
+		expect(output.stdout).toContain("1 succeeded");
+	});
 });

@@ -11,6 +11,7 @@ import {
 } from "../../src/cli/commands/sync";
 import * as apiClient from "../../src/cli/lib/api-client";
 import { resetCache, setCachedRules } from "../../src/cli/lib/api-client";
+import * as discover from "../../src/cli/lib/discover";
 
 /**
  * Seeds the api-client cache with a claude-code agent payload that has one rule category
@@ -452,5 +453,17 @@ describe("Sync Command Integration", () => {
 		expect(summary).toEqual({ succeeded: 1, failed: 0 });
 		expect(warnSpy).toHaveBeenCalledTimes(1);
 		expect(warnSpy.mock.calls[0]?.join(" ") ?? "").toContain("AI_RULES_SECRET");
+	});
+
+	it("scans the current working directory in --all mode when no root is given", async () => {
+		// Given: cwd is a controlled temp dir; discovery is stubbed so no real filesystem is scanned
+		vi.spyOn(process, "cwd").mockReturnValue(testDir);
+		const discoverSpy = vi.spyOn(discover, "discoverConfigDirs").mockResolvedValue([]);
+
+		// When: --all with no explicit root
+		await syncCommand({ all: true });
+
+		// Then: discovery roots at the cwd, not a hardcoded home path
+		expect(discoverSpy).toHaveBeenCalledWith(testDir);
 	});
 });

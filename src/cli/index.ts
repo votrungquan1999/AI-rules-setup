@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-import { homedir } from "node:os";
-import { join } from "node:path";
 import chalk from "chalk";
 import { Command } from "commander";
 import { addCommand } from "./commands/add";
@@ -96,7 +94,7 @@ program
 	.command("sync")
 	.description("Force-install the full available catalog for a project (or every project under a root with --all)")
 	.option("--all", "Discover and sync every project with an .ai-rules.json under --root")
-	.option("--root <dir>", "Root directory to scan in --all mode", join(homedir(), "Documents", "git-repos"))
+	.option("--root <dir>", "Root directory to scan in --all mode (defaults to the current directory)")
 	.action(async (options) => {
 		try {
 			const summary = await syncCommand({ all: options.all, root: options.root });
