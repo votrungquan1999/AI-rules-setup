@@ -10,6 +10,7 @@ import {
 	kbSearch,
 } from "../lib/api-client";
 import { readConfigOrNull } from "../lib/config";
+import { resolveWriteScope } from "../lib/write-scope";
 
 /**
  * Reads the workspace's scope tags from `.ai-rules.json` without ever writing a default file.
@@ -123,6 +124,11 @@ capture
 	.option("--problem-file <path>", "Read the problem statement from a file")
 	.option("--resolution <text>", "The resolution (or use --resolution-file)")
 	.option("--resolution-file <path>", "Read the resolution from a file")
+	.option("--scope <csv>", "Comma-separated scope tags (e.g., work,client-x). Required unless --global is set.")
+	.option(
+		"--global",
+		"Capture as a global entry (empty scope, visible to every workspace). Mutually exclusive with --scope.",
+	)
 	.action(
 		async (options: {
 			title: string;
@@ -130,9 +136,11 @@ capture
 			problemFile?: string;
 			resolution?: string;
 			resolutionFile?: string;
+			scope?: string;
+			global?: boolean;
 		}) => {
 			try {
-				const scope = await workspaceScope();
+				const scope = resolveWriteScope({ scope: options.scope, global: options.global });
 				const problem = await resolveField(options.problem, options.problemFile, "problem");
 				const resolution = await resolveField(options.resolution, options.resolutionFile, "resolution");
 				const id = await kbCaptureQuestion({ title: options.title, problem, resolution }, scope);
@@ -150,9 +158,14 @@ capture
 	.requiredOption("--title <title>", "Short title for the learning")
 	.option("--body <text>", "The note body (or use --file / stdin)")
 	.option("--file <path>", "Read the note body from a file")
-	.action(async (options: { title: string; body?: string; file?: string }) => {
+	.option("--scope <csv>", "Comma-separated scope tags (e.g., work,client-x). Required unless --global is set.")
+	.option(
+		"--global",
+		"Capture as a global entry (empty scope, visible to every workspace). Mutually exclusive with --scope.",
+	)
+	.action(async (options: { title: string; body?: string; file?: string; scope?: string; global?: boolean }) => {
 		try {
-			const scope = await workspaceScope();
+			const scope = resolveWriteScope({ scope: options.scope, global: options.global });
 			const body = await resolveBody(options.body, options.file);
 			const id = await kbCaptureTil({ title: options.title, body }, scope);
 			reportCaptured(id);
@@ -168,9 +181,14 @@ capture
 	.requiredOption("--title <title>", "Short title for the blueprint")
 	.option("--body <text>", "The blueprint body (or use --file / stdin)")
 	.option("--file <path>", "Read the blueprint body from a file")
-	.action(async (options: { title: string; body?: string; file?: string }) => {
+	.option("--scope <csv>", "Comma-separated scope tags (e.g., work,client-x). Required unless --global is set.")
+	.option(
+		"--global",
+		"Capture as a global entry (empty scope, visible to every workspace). Mutually exclusive with --scope.",
+	)
+	.action(async (options: { title: string; body?: string; file?: string; scope?: string; global?: boolean }) => {
 		try {
-			const scope = await workspaceScope();
+			const scope = resolveWriteScope({ scope: options.scope, global: options.global });
 			const body = await resolveBody(options.body, options.file);
 			const id = await kbCaptureBlueprint({ title: options.title, body }, scope);
 			reportCaptured(id);
@@ -186,9 +204,14 @@ capture
 	.option("--title <title>", "Optional title (derived from the first line when omitted)")
 	.option("--body <text>", "The memory body (or use --file / stdin)")
 	.option("--file <path>", "Read the memory body from a file")
-	.action(async (options: { title?: string; body?: string; file?: string }) => {
+	.option("--scope <csv>", "Comma-separated scope tags (e.g., work,client-x). Required unless --global is set.")
+	.option(
+		"--global",
+		"Capture as a global entry (empty scope, visible to every workspace). Mutually exclusive with --scope.",
+	)
+	.action(async (options: { title?: string; body?: string; file?: string; scope?: string; global?: boolean }) => {
 		try {
-			const scope = await workspaceScope();
+			const scope = resolveWriteScope({ scope: options.scope, global: options.global });
 			const body = await resolveBody(options.body, options.file);
 			const input = options.title ? { body, title: options.title } : { body };
 			const id = await kbCaptureMemory(input, scope);

@@ -18,7 +18,7 @@ program
 	.description(
 		"A command-line tool that helps developers pull curated AI agent rules from a centralized repository into their projects",
 	)
-	.version("0.2.2");
+	.version("0.2.4");
 
 program
 	.command("init")
@@ -151,13 +151,14 @@ program
 	.command("upload <skillPath>")
 	.description("Upload a local skill directory to the API as a private, scoped skill (requires AI_RULES_SECRET)")
 	.requiredOption("--agent <name>", "AI agent name the skill belongs to (e.g., claude-code)")
+	.option("--scope <csv>", "Comma-separated list of scope tags (e.g., work,client-x). Required unless --global is set.")
 	.option(
-		"--scope <csv>",
-		"Comma-separated list of scope tags (e.g., work,client-x). Omit to make the skill global (visible to every workspace).",
+		"--global",
+		"Upload as a global skill (empty scope, visible to every workspace). Mutually exclusive with --scope.",
 	)
 	.action(async (skillPath, options) => {
 		try {
-			await uploadCommand({ agent: options.agent, scope: options.scope, skillPath });
+			await uploadCommand({ agent: options.agent, scope: options.scope, global: options.global, skillPath });
 		} catch (error) {
 			console.error(chalk.red(`❌ Error: ${error}`));
 			process.exit(1);
