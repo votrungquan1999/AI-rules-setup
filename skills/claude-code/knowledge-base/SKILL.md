@@ -53,6 +53,4 @@ is live.
 ## Setup
 
 Invoke the CLI as `npx @quanvo99/ai-rules@latest …` (pins the latest published version, no global install needed). `AI_RULES_SECRET` must be set in the environment (optionally
-`AI_RULES_API_URL`). The workspace scope is read from the project's `.ai-rules.json`. Scope is
-optional: a capture with no `scope` tag becomes a **global** entry (returned in every workspace);
-add `scope` tags to scope the entry to specific workspaces instead.
+`AI_RULES_API_URL`). For search and pull, scope is read from the project's `.ai-rules.json` automatically. For **capture**, scope is now explicit and required: pass `--scope <csv>` to tag the entry to specific workspaces, or `--global` to make it a **global entry** (empty scope — visible to every workspace). Omitting both flags on a capture command is an error.

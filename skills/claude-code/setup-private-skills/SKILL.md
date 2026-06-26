@@ -84,7 +84,14 @@ AI_RULES_SECRET='<value>' npx @quanvo99/ai-rules@latest upload ./path/to/skill-d
   --scope personal          # comma-separated; a skill can carry multiple scopes
 ```
 
-`--scope` is optional: **omit it entirely to upload a global skill** that every workspace receives (with a valid secret), regardless of its own scope tags. The skill name is the directory's basename. Re-uploading the same `{agent, name}` upserts (replaces) it.
+```bash
+# Or, to publish globally (visible to every workspace):
+AI_RULES_SECRET='<value>' npx @quanvo99/ai-rules@latest upload ./path/to/skill-dir \
+  --agent claude-code \
+  --global
+```
+
+`--scope` or `--global` is required: pass `--scope personal,work` to tag the skill to specific workspaces, or pass `--global` to make it a **global skill** (empty scope — visible to every workspace). Omitting both flags is now an error. The skill name is the directory's basename. Re-uploading the same `{agent, name}` upserts (replaces) it.
 
 ### 5. Pull
 
