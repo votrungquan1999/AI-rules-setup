@@ -215,6 +215,9 @@ export const PRIVATE_SKILLS_COLLECTION_NAME = "private_skills_data";
  * One document per (agent, name) pair so independent uploads do not race.
  */
 export interface StoredPrivateSkillDocument {
+	/** Permanent stable identity, generated on first insert. Optional so legacy docs (stored before
+	 * ids existed) still type-check until they are back-filled on first listing. */
+	id?: string;
 	agent: string;
 	name: string;
 	description?: string;

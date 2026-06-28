@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+import type { UpdateFilter } from "mongodb";
 import { getDatabase } from "./database";
 import {
 	PRIVATE_SKILLS_COLLECTION_NAME,
@@ -104,12 +106,71 @@ export async function findAllStoredPrivateSkills(projectScopes: string[]): Promi
 /**
  * Returns ALL private skill documents across every scope (no filter). Used by the reviewer-facing
  * private-skills page, which must browse the whole catalog rather than a single workspace's scopes.
- * @returns Array of all private skill documents (empty when none exist)
+ * Skills stored before stable ids existed are back-filled with a permanent id on first listing; the
+ * `{ id: { $exists: false } }` filter makes the write idempotent so concurrent listings cannot
+ * assign two different ids to the same document.
+ * @returns Array of all private skill documents (empty when none exist), each carrying an id
  */
 export async function findAllPrivateSkills(): Promise<StoredPrivateSkillDocument[]> {
 	const db = await getDatabase();
 	const collection = db.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME);
-	return collection.find({}).toArray();
+	const documents = await collection.find({}).toArray();
+
+	for (const doc of documents) {
+		if (doc.id !== undefined) continue;
+		const id = randomUUID();
+		const result = await collection.updateOne(
+			{ agent: doc.agent, name: doc.name, id: { $exists: false } },
+			{ $set: { id } },
+		);
+		if (result.modifiedCount === 1) {
+			// This call won the race and wrote the id.
+			doc.id = id;
+		} else {
+			// A concurrent listing already back-filled it — re-read the persisted id.
+			const existing = await collection.findOne({ agent: doc.agent, name: doc.name });
+			if (existing?.id !== undefined) doc.id = existing.id;
+		}
+	}
+
+	return documents;
+}
+
+interface UpdatePrivateSkillFields {
+	name: string;
+	content: string;
+	description?: string;
+	scopes: string[];
+}
+
+/**
+ * Updates a private skill's editable fields — name, content, description, and scopes — addressed by
+ * its permanent id. Leaves the owning agent, createdAt, and supportingFiles intact. A `description`
+ * of `undefined` clears (unsets) the stored description; a string (even empty) sets it.
+ * @param id - The private skill's permanent id
+ * @param fields - The new name, content, optional description, and scopes
+ * @returns True when a document matched (even if values were unchanged); false when no skill had that id
+ */
+export async function updatePrivateSkill(id: string, fields: UpdatePrivateSkillFields): Promise<boolean> {
+	const db = await getDatabase();
+	const collection = db.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME);
+
+	const $set: Partial<StoredPrivateSkillDocument> = {
+		name: fields.name,
+		content: fields.content,
+		scopes: fields.scopes,
+		updatedAt: new Date(),
+	};
+	const update: UpdateFilter<StoredPrivateSkillDocument> = { $set };
+	if (fields.description === undefined) {
+		// Reviewer cleared the description — remove it from the stored document.
+		update.$unset = { description: "" };
+	} else {
+		$set.description = fields.description;
+	}
+
+	const result = await collection.updateOne({ id }, update);
+	return result.matchedCount === 1;
 }
 
 /**
@@ -162,7 +223,9 @@ export async function storeSkillsData(
 
 /**
  * Upserts a single private skill into the per-skill private_skills_data collection.
- * Keyed by { agent, name } so independent uploads do not race or clobber siblings.
+ * Keyed by { agent, name } so independent uploads do not race or clobber siblings. A permanent
+ * `id` is generated via `$setOnInsert` on first insert only, so re-uploading the same skill keeps
+ * its id stable (which is what makes a later rename safe to address by id).
  * @param agent - Agent name (e.g., 'claude-code')
  * @param skill - The skill payload to persist (name, content, supportingFiles, scopes)
  * @param scopes - Scope tags this private skill is visible under
@@ -187,7 +250,7 @@ export async function storePrivateSkill(agent: string, skill: SkillFile, scopes:
 		{ agent, name: skill.name },
 		{
 			$set,
-			$setOnInsert: { createdAt: now },
+			$setOnInsert: { createdAt: now, id: randomUUID() },
 		},
 		{ upsert: true },
 	);
