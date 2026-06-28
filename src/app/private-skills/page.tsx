@@ -32,11 +32,19 @@ async function PrivateSkillsContent() {
 	}
 
 	const skills = await findAllPrivateSkills();
-	const display: PrivateSkillDisplay[] = skills.map((s) => {
-		const item: PrivateSkillDisplay = { name: s.name, agent: s.agent, scopes: s.scopes };
-		if (s.description !== undefined) item.description = s.description;
-		return item;
-	});
+	const display: PrivateSkillDisplay[] = skills
+		.filter((s): s is typeof s & { id: string } => s.id !== undefined)
+		.map((s) => {
+			const item: PrivateSkillDisplay = {
+				id: s.id,
+				name: s.name,
+				agent: s.agent,
+				content: s.content,
+				scopes: s.scopes,
+			};
+			if (s.description !== undefined) item.description = s.description;
+			return item;
+		});
 
 	return (
 		<PrivateSkillsProvider skills={display}>

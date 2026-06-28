@@ -1,7 +1,10 @@
 "use client";
 
 import { createReducerContext } from "src/app/hooks/createReducerContext";
+import { normalizeScopes } from "src/lib/normalize-scopes";
 import {
+	type EditSkillAction,
+	type PrivateSkillDisplay,
 	type PrivateSkillsPageAction,
 	PrivateSkillsPageActionType,
 	type PrivateSkillsPageState,
@@ -10,8 +13,8 @@ import {
 const initialState: PrivateSkillsPageState = { skills: [], showGlobalOnly: false };
 
 /**
- * Reducer for the private-skills browse page. Toggles the global-only filter; the skill list itself
- * is seeded via the provider's initial props and never mutated.
+ * Reducer for the private-skills browse page. Toggles the global-only filter, or replaces a skill's
+ * editable fields (name/content/description/scopes) in the list after an edit resolves.
  * @param state - Current state
  * @param action - The browse-page action to apply
  * @returns The next state
@@ -20,6 +23,22 @@ function privateSkillsReducer(state: PrivateSkillsPageState, action: PrivateSkil
 	switch (action.type) {
 		case PrivateSkillsPageActionType.ToggleGlobalFilter:
 			return { ...state, showGlobalOnly: !state.showGlobalOnly };
+		case PrivateSkillsPageActionType.EditSkill:
+			return {
+				...state,
+				skills: state.skills.map((skill) => {
+					if (skill.id !== action.id) return skill;
+					const next: PrivateSkillDisplay = {
+						id: skill.id,
+						agent: skill.agent,
+						name: action.name,
+						content: action.content,
+						scopes: action.scopes,
+					};
+					if (action.description !== undefined) next.description = action.description;
+					return next;
+				}),
+			};
 		default:
 			return state;
 	}
@@ -48,5 +67,37 @@ export function usePrivateSkillsFilter() {
 	return {
 		showGlobalOnly,
 		toggleGlobalFilter: () => dispatch({ type: PrivateSkillsPageActionType.ToggleGlobalFilter }),
+	};
+}
+
+/**
+ * Domain actions for the private-skills page. `editSkill` saves a skill's edited fields via the
+ * PATCH endpoint (addressed by id), normalizing scopes and coercing an empty description to
+ * undefined (so it is cleared), then updates the in-memory list on success so the card re-renders.
+ * @returns the `editSkill` action callback
+ */
+export function usePrivateSkillsActions() {
+	const dispatch = useRawDispatch();
+	return {
+		editSkill: async (id: string, name: string, content: string, description: string, scopes: string[]) => {
+			const normalizedScopes = normalizeScopes(scopes);
+			const cleanedDescription = description.trim() === "" ? undefined : description;
+			const response = await fetch(`/api/skills/${id}`, {
+				method: "PATCH",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ name, content, description: cleanedDescription, scopes: normalizedScopes }),
+			});
+			if (response.ok) {
+				const action: EditSkillAction = {
+					type: PrivateSkillsPageActionType.EditSkill,
+					id,
+					name,
+					content,
+					scopes: normalizedScopes,
+				};
+				if (cleanedDescription !== undefined) action.description = cleanedDescription;
+				dispatch(action);
+			}
+		},
 	};
 }

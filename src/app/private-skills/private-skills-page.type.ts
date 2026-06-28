@@ -4,8 +4,12 @@
  * fields the reviewer needs to see. Kept separate from the DB document per database-patterns.
  */
 export interface PrivateSkillDisplay {
+	/** Permanent stable id used to address this skill when editing it. */
+	id: string;
 	name: string;
 	agent: string;
+	/** Full skill body — not shown on the card, but needed to pre-fill the edit dialog. */
+	content: string;
 	scopes: string[];
 	description?: string;
 }
@@ -19,6 +23,7 @@ export interface PrivateSkillsPageState {
 /** Discriminator for the browse-page reducer actions. */
 export enum PrivateSkillsPageActionType {
 	ToggleGlobalFilter = "toggle-global-filter",
+	EditSkill = "edit-skill",
 }
 
 /** Toggles the "global only" filter on the skills list. */
@@ -26,4 +31,14 @@ export interface ToggleGlobalFilterAction {
 	type: PrivateSkillsPageActionType.ToggleGlobalFilter;
 }
 
-export type PrivateSkillsPageAction = ToggleGlobalFilterAction;
+/** Replaces a skill's name/content/description/scopes in the list (after an edit resolves). */
+export interface EditSkillAction {
+	type: PrivateSkillsPageActionType.EditSkill;
+	id: string;
+	name: string;
+	content: string;
+	description?: string;
+	scopes: string[];
+}
+
+export type PrivateSkillsPageAction = ToggleGlobalFilterAction | EditSkillAction;
