@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { KbReviewPageClient } from "src/app/kb/review/KbReviewPageClient";
 import { KbReviewProvider } from "src/app/kb/review/kb-review.state";
 import type { KbDocDraft } from "src/app/kb/review/kb-review.type";
@@ -103,6 +103,80 @@ describe("KB Review screen", () => {
 		expect(screen.getByText("Scoped draft")).toBeInTheDocument();
 	});
 
+	it("lets the reviewer add and remove scope tags as chips while editing a draft", () => {
+		renderReview([draft({ id: "507f1f77bcf86cd799439014", title: "Editable", scope: ["work"] })]);
+
+		fireEvent.click(screen.getByRole("button", { name: /edit/i }));
+
+		const dialog = screen.getByRole("dialog");
+		// The draft's current scope is shown as a chip inside the editor.
+		expect(within(dialog).getByText("work")).toBeInTheDocument();
+
+		// Typing a tag and pressing Enter adds a new chip.
+		const scopeInput = within(dialog).getByLabelText("Scopes") as HTMLInputElement;
+		fireEvent.change(scopeInput, { target: { value: "client-x" } });
+		fireEvent.keyDown(scopeInput, { key: "Enter" });
+		expect(within(dialog).getByText("client-x")).toBeInTheDocument();
+
+		// Clicking × on a chip removes that scope.
+		fireEvent.click(within(dialog).getByRole("button", { name: "Remove work" }));
+		expect(within(dialog).queryByText("work")).not.toBeInTheDocument();
+	});
+
+	it("saves a draft's edited scopes: the PATCH carries the updated scope list", async () => {
+		const fetchMock = vi.fn().mockResolvedValue({ ok: true } as Response);
+		vi.stubGlobal("fetch", fetchMock);
+
+		renderReview([draft({ id: "507f1f77bcf86cd799439015", title: "Retag me", scope: ["work"] })]);
+
+		fireEvent.click(screen.getByRole("button", { name: /edit/i }));
+		const dialog = screen.getByRole("dialog");
+
+		// Reviewer adds a new scope and removes the original.
+		const scopeInput = within(dialog).getByLabelText("Scopes") as HTMLInputElement;
+		fireEvent.change(scopeInput, { target: { value: "client-x" } });
+		fireEvent.keyDown(scopeInput, { key: "Enter" });
+		fireEvent.click(within(dialog).getByRole("button", { name: "Remove work" }));
+
+		fireEvent.click(screen.getByRole("button", { name: /save/i }));
+
+		await waitFor(() =>
+			expect(fetchMock).toHaveBeenCalledWith(
+				"/api/kb/507f1f77bcf86cd799439015",
+				expect.objectContaining({
+					method: "PATCH",
+					body: JSON.stringify({
+						title: "Retag me",
+						body: "## Problem\n...\n\n## Resolution\n...",
+						scope: ["client-x"],
+					}),
+				}),
+			),
+		);
+	});
+
+	it("shows a draft as global immediately after its scopes are cleared and saved", async () => {
+		const fetchMock = vi.fn().mockResolvedValue({ ok: true } as Response);
+		vi.stubGlobal("fetch", fetchMock);
+
+		renderReview([draft({ id: "507f1f77bcf86cd799439016", title: "Make me global", scope: ["work"] })]);
+
+		// The draft starts scoped — no Global badge yet.
+		expect(screen.queryByText("Global")).not.toBeInTheDocument();
+
+		fireEvent.click(screen.getByRole("button", { name: /edit/i }));
+		const dialog = screen.getByRole("dialog");
+		fireEvent.click(within(dialog).getByRole("button", { name: "Remove work" }));
+		fireEvent.click(screen.getByRole("button", { name: /save/i }));
+
+		// After save (no reload) the card shows the Global badge.
+		await waitFor(() => expect(screen.getByText("Global")).toBeInTheDocument());
+
+		// And the now-global draft survives the global-only filter.
+		fireEvent.click(screen.getByRole("button", { name: /global only/i }));
+		expect(screen.getByText("Make me global")).toBeInTheDocument();
+	});
+
 	it("edits a draft via the dialog: PATCHes title/body and updates the displayed title", async () => {
 		const fetchMock = vi.fn().mockResolvedValue({ ok: true } as Response);
 		vi.stubGlobal("fetch", fetchMock);
@@ -120,7 +194,7 @@ describe("KB Review screen", () => {
 				"/api/kb/507f1f77bcf86cd799439013",
 				expect.objectContaining({
 					method: "PATCH",
-					body: JSON.stringify({ title: "New title", body: "## Problem\n...\n\n## Resolution\n..." }),
+					body: JSON.stringify({ title: "New title", body: "## Problem\n...\n\n## Resolution\n...", scope: ["work"] }),
 				}),
 			),
 		);

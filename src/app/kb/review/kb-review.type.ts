@@ -26,12 +26,13 @@ export interface RemoveDraftAction {
 	id: string;
 }
 
-/** Replaces a draft's title/body in the list (after an edit resolves). */
+/** Replaces a draft's title/body/scope in the list (after an edit resolves). */
 export interface EditDraftAction {
 	type: KbReviewActionType.Edit;
 	id: string;
 	title: string;
 	body: string;
+	scope: string[];
 }
 
 /** Toggles the "global only" filter on the drafts list. */

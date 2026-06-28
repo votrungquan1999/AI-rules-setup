@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import { ScopeChipsEditor } from "src/components/scope-chips-editor.ui";
 import { Button } from "src/components/ui/button";
 import {
 	Dialog,
@@ -28,8 +29,9 @@ import {
 
 /**
  * Review screen orchestrator. Lists drafts and wires approve/reject/edit actions to the KB API via
- * domain hooks. The edit flow opens a dialog pre-filled with the draft's title/body; saving calls
- * the PATCH endpoint and keeps the draft (status stays draft) with its new text, then closes.
+ * domain hooks. The edit flow opens a dialog pre-filled with the draft's title/body/scopes; saving
+ * calls the PATCH endpoint and keeps the draft (status stays draft) with its new text and scopes,
+ * then closes.
  */
 export function KbReviewPageClient() {
 	const drafts = useKbReviewDrafts();
@@ -38,6 +40,7 @@ export function KbReviewPageClient() {
 	const [editing, setEditing] = useState<KbDocDraft | null>(null);
 	const [editTitle, setEditTitle] = useState("");
 	const [editBody, setEditBody] = useState("");
+	const [editScopes, setEditScopes] = useState<string[]>([]);
 	const [confirmingApproveAll, setConfirmingApproveAll] = useState(false);
 	const [approvingAll, setApprovingAll] = useState(false);
 	const titleId = useId();
@@ -47,11 +50,12 @@ export function KbReviewPageClient() {
 		setEditing(d);
 		setEditTitle(d.title);
 		setEditBody(d.body);
+		setEditScopes(d.scope);
 	}
 
 	async function saveEdit() {
 		if (!editing) return;
-		await editDraft(editing.id, editTitle, editBody);
+		await editDraft(editing.id, editTitle, editBody, editScopes);
 		setEditing(null);
 	}
 
@@ -148,6 +152,7 @@ export function KbReviewPageClient() {
 							<Label htmlFor={bodyId}>Body</Label>
 							<Textarea id={bodyId} rows={8} value={editBody} onChange={(e) => setEditBody(e.target.value)} />
 						</div>
+						<ScopeChipsEditor label="Scopes" value={editScopes} onChange={setEditScopes} />
 					</div>
 					<DialogFooter>
 						<Button onClick={saveEdit} disabled={editBody.trim().length === 0}>
