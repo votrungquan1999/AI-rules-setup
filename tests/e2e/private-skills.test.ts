@@ -534,4 +534,117 @@ describe("E2E: Private Skills", () => {
 			expect(privateLeak).toBeUndefined();
 		});
 	});
+
+	describe("PATCH /api/skills/[id]", () => {
+		function apiUrl(): string {
+			const url = process.env.AI_RULES_API_URL;
+			if (!url) throw new Error("AI_RULES_API_URL not set by E2E setup");
+			return url;
+		}
+
+		/**
+		 * Uploads a private skill through the public upload route (which assigns a permanent id), then
+		 * reads the stored document back so a test can address it by that id.
+		 * @param name - The skill name to upload
+		 * @returns The stored document, guaranteed to carry an id
+		 */
+		async function uploadAndReadStored(name: string): Promise<StoredPrivateSkillDocument & { id: string }> {
+			const response = await fetch(`${apiUrl()}/api/skills/upload`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json", "x-ai-rules-secret": "test-secret" },
+				body: JSON.stringify({
+					agent: "claude-code",
+					skill: { name, content: "original content", description: "original desc" },
+					scopes: ["work"],
+				}),
+			});
+			expect(response.status).toBe(200);
+			const db = await getTestDatabase();
+			const stored = await db
+				.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME)
+				.findOne({ agent: "claude-code", name });
+			if (!stored?.id) throw new Error("expected uploaded skill to have a permanent id");
+			return stored as StoredPrivateSkillDocument & { id: string };
+		}
+
+		it("rejects a request without the secret with 401 and persists nothing", async () => {
+			const stored = await uploadAndReadStored("patch-no-secret");
+			const response = await fetch(`${apiUrl()}/api/skills/${stored.id}`, {
+				method: "PATCH",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ name: "hacked", content: "x", scopes: [] }),
+			});
+			expect(response.status).toBe(401);
+
+			// And the skill is unchanged.
+			const db = await getTestDatabase();
+			const after = await db
+				.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME)
+				.findOne({ id: stored.id });
+			expect(after?.name).toBe("patch-no-secret");
+		});
+
+		it("returns 400 when name or content is missing", async () => {
+			const stored = await uploadAndReadStored("patch-bad-body");
+			const response = await fetch(`${apiUrl()}/api/skills/${stored.id}`, {
+				method: "PATCH",
+				headers: { "Content-Type": "application/json", "x-ai-rules-secret": "test-secret" },
+				body: JSON.stringify({ scopes: [] }),
+			});
+			expect(response.status).toBe(400);
+		});
+
+		it("returns 404 when no skill has that id", async () => {
+			const response = await fetch(`${apiUrl()}/api/skills/no-such-id`, {
+				method: "PATCH",
+				headers: { "Content-Type": "application/json", "x-ai-rules-secret": "test-secret" },
+				body: JSON.stringify({ name: "x", content: "y", scopes: [] }),
+			});
+			expect(response.status).toBe(404);
+		});
+
+		it("persists an edited name, content, description, and scopes by id", async () => {
+			const stored = await uploadAndReadStored("patch-full");
+			const response = await fetch(`${apiUrl()}/api/skills/${stored.id}`, {
+				method: "PATCH",
+				headers: { "Content-Type": "application/json", "x-ai-rules-secret": "test-secret" },
+				body: JSON.stringify({
+					name: "patch-full-renamed",
+					content: "new content",
+					description: "new desc",
+					scopes: ["client-x", "team"],
+				}),
+			});
+			expect(response.status).toBe(200);
+
+			const db = await getTestDatabase();
+			const after = await db
+				.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME)
+				.findOne({ id: stored.id });
+			expect(after?.name).toBe("patch-full-renamed");
+			expect(after?.content).toBe("new content");
+			expect(after?.description).toBe("new desc");
+			expect(after?.scopes).toEqual(["client-x", "team"]);
+			// The owning agent is left intact.
+			expect(after?.agent).toBe("claude-code");
+		});
+
+		it("clears the description when the PATCH omits it", async () => {
+			const stored = await uploadAndReadStored("patch-clear-desc");
+			expect(stored.description).toBe("original desc");
+
+			const response = await fetch(`${apiUrl()}/api/skills/${stored.id}`, {
+				method: "PATCH",
+				headers: { "Content-Type": "application/json", "x-ai-rules-secret": "test-secret" },
+				body: JSON.stringify({ name: "patch-clear-desc", content: "original content", scopes: ["work"] }),
+			});
+			expect(response.status).toBe(200);
+
+			const db = await getTestDatabase();
+			const after = await db
+				.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME)
+				.findOne({ id: stored.id });
+			expect(after?.description).toBeUndefined();
+		});
+	});
 });

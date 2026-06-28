@@ -1,8 +1,8 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { PrivateSkillsPageClient } from "src/app/private-skills/PrivateSkillsPageClient";
 import { PrivateSkillsProvider } from "src/app/private-skills/private-skills-page.state";
 import type { PrivateSkillDisplay } from "src/app/private-skills/private-skills-page.type";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 /**
  * Component test for the reviewer private-skills browse page (jsdom). Asserts the list shows each
@@ -17,9 +17,20 @@ function renderPage(skills: PrivateSkillDisplay[]) {
 }
 
 describe("Private Skills browse page", () => {
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
 	it("renders each skill's name, agent, scopes, and description", () => {
 		renderPage([
-			{ name: "deploy-helper", agent: "claude-code", scopes: ["work", "client-x"], description: "Helps deploy" },
+			{
+				id: "skill-1",
+				name: "deploy-helper",
+				agent: "claude-code",
+				content: "deploy body",
+				scopes: ["work", "client-x"],
+				description: "Helps deploy",
+			},
 		]);
 
 		expect(screen.getByText("deploy-helper")).toBeInTheDocument();
@@ -29,10 +40,90 @@ describe("Private Skills browse page", () => {
 		expect(screen.getByText("client-x")).toBeInTheDocument();
 	});
 
+	it("opens an editor pre-filled with the skill's title, content, description, and scopes", () => {
+		renderPage([
+			{
+				id: "skill-1",
+				name: "deploy-helper",
+				agent: "claude-code",
+				content: "deploy body",
+				scopes: ["work"],
+				description: "Helps deploy",
+			},
+		]);
+
+		fireEvent.click(screen.getByRole("button", { name: /edit/i }));
+
+		const dialog = screen.getByRole("dialog");
+		expect(within(dialog).getByLabelText("Title")).toHaveValue("deploy-helper");
+		expect(within(dialog).getByLabelText("Content")).toHaveValue("deploy body");
+		expect(within(dialog).getByLabelText("Description")).toHaveValue("Helps deploy");
+		expect(within(dialog).getByText("work")).toBeInTheDocument();
+	});
+
+	it("reflects a skill's new title, description, and scopes on the card immediately after saving", async () => {
+		const fetchMock = vi.fn().mockResolvedValue({ ok: true } as Response);
+		vi.stubGlobal("fetch", fetchMock);
+
+		renderPage([
+			{
+				id: "skill-1",
+				name: "old-name",
+				agent: "claude-code",
+				content: "body",
+				scopes: ["work"],
+				description: "old desc",
+			},
+		]);
+
+		fireEvent.click(screen.getByRole("button", { name: /edit/i }));
+		const dialog = screen.getByRole("dialog");
+
+		fireEvent.change(within(dialog).getByLabelText("Title"), { target: { value: "new-name" } });
+		fireEvent.change(within(dialog).getByLabelText("Description"), { target: { value: "new desc" } });
+		const scopeInput = within(dialog).getByLabelText("Scopes");
+		fireEvent.change(scopeInput, { target: { value: "client-x" } });
+		fireEvent.keyDown(scopeInput, { key: "Enter" });
+		fireEvent.click(within(dialog).getByRole("button", { name: "Remove work" }));
+
+		fireEvent.click(screen.getByRole("button", { name: /save/i }));
+
+		// The PATCH carries the edited fields with normalized scopes, addressed by id.
+		await waitFor(() =>
+			expect(fetchMock).toHaveBeenCalledWith(
+				"/api/skills/skill-1",
+				expect.objectContaining({
+					method: "PATCH",
+					body: JSON.stringify({ name: "new-name", content: "body", description: "new desc", scopes: ["client-x"] }),
+				}),
+			),
+		);
+
+		// And the card reflects the new title, description, and scope immediately — no reload.
+		await waitFor(() => expect(screen.getByText("new-name")).toBeInTheDocument());
+		expect(screen.getByText("new desc")).toBeInTheDocument();
+		expect(screen.getByText("client-x")).toBeInTheDocument();
+		expect(screen.queryByText("old-name")).not.toBeInTheDocument();
+	});
+
 	it("marks a global skill with a 'Global' badge while a scoped skill shows its scope", () => {
 		renderPage([
-			{ name: "global-skill", agent: "claude-code", scopes: [], description: "Everyone" },
-			{ name: "scoped-skill", agent: "cursor", scopes: ["work"], description: "Team only" },
+			{
+				id: "skill-global",
+				name: "global-skill",
+				agent: "claude-code",
+				content: "g",
+				scopes: [],
+				description: "Everyone",
+			},
+			{
+				id: "skill-scoped",
+				name: "scoped-skill",
+				agent: "cursor",
+				content: "s",
+				scopes: ["work"],
+				description: "Team only",
+			},
 		]);
 
 		// The global skill carries a single "Global" badge.
@@ -43,8 +134,22 @@ describe("Private Skills browse page", () => {
 
 	it("narrows the list to global skills only when filtered, and restores all when toggled off", () => {
 		renderPage([
-			{ name: "global-skill", agent: "claude-code", scopes: [], description: "Everyone" },
-			{ name: "scoped-skill", agent: "cursor", scopes: ["work"], description: "Team only" },
+			{
+				id: "skill-global",
+				name: "global-skill",
+				agent: "claude-code",
+				content: "g",
+				scopes: [],
+				description: "Everyone",
+			},
+			{
+				id: "skill-scoped",
+				name: "scoped-skill",
+				agent: "cursor",
+				content: "s",
+				scopes: ["work"],
+				description: "Team only",
+			},
 		]);
 
 		// Both skills are visible initially.
