@@ -1,6 +1,6 @@
 ---
 paths: ['**/*.tsx', '**/*.jsx']
-description: 'Claude Code React composition: server component composition patterns and examples'
+description: Component composition patterns and examples
 ---
 
 # React Server Components Composition Patterns

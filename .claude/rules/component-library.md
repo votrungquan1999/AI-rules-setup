@@ -1,6 +1,6 @@
 ---
 paths: ['**/*.tsx', '**/*.jsx', '**/*.css']
-description: 'Claude Code component library: shadcn/ui usage and best practices'
+description: shadcn/ui usage and component library best practices
 ---
 
 # Component Library

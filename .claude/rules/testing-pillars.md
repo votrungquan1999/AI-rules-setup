@@ -1,6 +1,5 @@
 ---
-paths: ['**/*.test.ts', '**/*.test.tsx', '**/*.spec.ts', '**/*.spec.tsx']
-description: 'Claude Code testing: The 4 Pillars of Good Tests framework (Reliability, Validity, Sensitivity, Resilience)'
+description: 'The 4 Pillars of Good Tests framework'
 ---
 
 # The 4 Pillars of Good Tests

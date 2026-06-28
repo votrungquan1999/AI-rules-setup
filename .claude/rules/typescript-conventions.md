@@ -1,6 +1,6 @@
 ---
 paths: ['**/*.ts', '**/*.tsx']
-description: 'Claude Code TypeScript conventions: interfaces, JSDoc, enums, and type patterns'
+description: Core TypeScript conventions for interfaces, JSDoc, and enums
 ---
 
 # TypeScript Conventions

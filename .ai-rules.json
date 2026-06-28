@@ -2,47 +2,25 @@
   "version": "1.0.0",
   "agent": "claude-code",
   "categories": [
+    "brainstorming-patterns",
     "component-architecture",
     "database-patterns",
     "meta-rules",
     "react-hooks",
     "react-server-components",
     "styling-tailwind",
-    "typescript-conventions",
-    "url-state-management",
-    "brainstorming-patterns",
     "testing-pillars",
-    "testing-guidelines",
-    "knowledge-base"
-  ],
-  "skills": [
-    "bdd-design",
-    "code-refactoring",
-    "context7",
-    "create-implementation-plan",
-    "create-pr",
-    "orchestrated-feature-dev",
-    "tdd-design",
-    "test-quality-reviewer",
-    "web-search",
-    "find-patterns",
-    "root-cause-analysis",
-    "ai-kanban-work-card",
-    "commit-plan",
-    "feature-development-workflow",
-    "repo-knowledge",
-    "review-changes",
-    "structured-brainstorming",
-    "validate-pr-comments",
-    "knowledge-base",
-    "setup-private-skills"
+    "typescript-conventions",
+    "url-state-management"
   ],
   "workflows": [
-    "commit-plan",
-    "feature-development",
-    "repo-knowledge",
-    "review-changes",
-    "structured-brainstorming"
+    "deploy-to-production",
+    "setup-ci-cd"
+  ],
+  "skills": [
+    "feature-development-workflow",
+    "structured-brainstorming",
+    "test-quality-reviewer"
   ],
   "scope": [
     "personal"

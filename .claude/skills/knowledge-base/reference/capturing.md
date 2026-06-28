@@ -27,10 +27,12 @@ and [memory-guide.md](./memory-guide.md) for Memory.
 
 | Command | Inputs |
 |---|---|
-| `npx @quanvo99/ai-rules@latest kb capture question` | `--title`, `--problem`/`--problem-file`, `--resolution`/`--resolution-file` |
-| `npx @quanvo99/ai-rules@latest kb capture til` | `--title`, body via `--file` / `--body` / stdin |
-| `npx @quanvo99/ai-rules@latest kb capture blueprint` | `--title`, body via `--file` / `--body` / stdin |
-| `npx @quanvo99/ai-rules@latest kb capture memory` | optional `--title`, body via `--file` / `--body` / stdin (≤ 200 chars AND ≤ 2 lines) |
+| `npx @quanvo99/ai-rules@latest kb capture question` | `--scope <csv>` or `--global` (required); `--title`, `--problem`/`--problem-file`, `--resolution`/`--resolution-file` |
+| `npx @quanvo99/ai-rules@latest kb capture til` | `--scope <csv>` or `--global` (required); `--title`, body via `--file` / `--body` / stdin |
+| `npx @quanvo99/ai-rules@latest kb capture blueprint` | `--scope <csv>` or `--global` (required); `--title`, body via `--file` / `--body` / stdin |
+| `npx @quanvo99/ai-rules@latest kb capture memory` | `--scope <csv>` or `--global` (required); optional `--title`, body via `--file` / `--body` / stdin (≤ 200 chars AND ≤ 2 lines) |
+
+`--global` means empty scope — the entry is visible to every workspace. `--scope work,client-x` tags the entry to those workspaces only. Omitting both flags is an error.
 
 Each prints the created draft's id. **For multi-line markdown, write the content to a temp file
 and pass `--file` / `--problem-file` / `--resolution-file`** rather than quoting it inline.

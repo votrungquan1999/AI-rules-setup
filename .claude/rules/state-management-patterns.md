@@ -1,6 +1,6 @@
 ---
 paths: ['**/*.tsx', '**/*.jsx']
-description: 'Claude Code state management: patterns for context usage and state files'
+description: 'State management patterns and context usage'
 ---
 
 # State Management Patterns

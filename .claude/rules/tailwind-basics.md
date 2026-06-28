@@ -1,6 +1,6 @@
 ---
 paths: ['**/*.tsx', '**/*.jsx', '**/*.css']
-description: 'Claude Code Tailwind CSS: core usage patterns, size utilities, positioning, and color tokens'
+description: Core Tailwind CSS usage patterns and utilities
 ---
 
 # Tailwind CSS Basics

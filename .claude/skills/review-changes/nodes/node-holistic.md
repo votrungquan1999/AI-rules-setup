@@ -33,6 +33,7 @@ A high-level functional summary (not line-by-line):
 - **Removed** — deleted functions/features
 - **User-flow impact** — how behavior/UX changes
 - **Overall purpose** — what problem this solves
+- **Business impact** — what this means in business/stakeholder terms (value delivered, risk reduced, who it affects) — plain language, no jargon
 
 ### 5. Approach evaluation
 
@@ -68,6 +69,7 @@ Write `./tmp/review-changes/HOLISTIC.md`:
 - Removed: ...
 - User-flow impact: ...
 - Overall purpose: ...
+- Business impact: ...
 
 ## Approach Evaluation
 [Root cause vs symptom, layer, alternatives, complexity, trade-offs, verdict]

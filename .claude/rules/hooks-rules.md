@@ -1,6 +1,6 @@
 ---
 paths: ['**/*.tsx', '**/*.jsx', '**/*.ts', '**/*.js']
-description: 'Claude Code React hooks: usage rules and performance guidelines'
+description: React hooks usage rules and performance guidelines
 ---
 
 # React Hooks Rules
