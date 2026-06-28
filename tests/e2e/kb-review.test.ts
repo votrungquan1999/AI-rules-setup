@@ -274,6 +274,76 @@ describe("E2E: KB Review (drafts + approve/reject/edit)", () => {
 			expect(stored?.status).toBe("draft");
 		});
 
+		it("persists an edited scope, and emptying the scope makes the doc global", async () => {
+			// Given a draft scoped to ["work"].
+			const db = await getTestDatabase();
+			const id = await storeKbDocInTestDatabase(db, {
+				type: KbType.Question,
+				status: KbStatus.Draft,
+				title: "Scoped",
+				body: "b",
+				scope: ["work"],
+			});
+
+			// When the reviewer retags it to ["client-x", "team"].
+			const retag = await fetch(`${apiUrl()}/api/kb/${id}`, {
+				method: "PATCH",
+				headers: { "x-ai-rules-secret": SECRET, "Content-Type": "application/json" },
+				body: JSON.stringify({ scope: ["client-x", "team"] }),
+			});
+			expect(retag.status).toBe(200);
+
+			// Then the new scope is persisted.
+			const afterRetag = await db.collection("kb_docs").findOne({ _id: ObjectId.createFromHexString(id) });
+			expect(afterRetag?.scope).toEqual(["client-x", "team"]);
+
+			// And when the reviewer empties the scope, the doc becomes global (empty-scope).
+			const makeGlobal = await fetch(`${apiUrl()}/api/kb/${id}`, {
+				method: "PATCH",
+				headers: { "x-ai-rules-secret": SECRET, "Content-Type": "application/json" },
+				body: JSON.stringify({ scope: [] }),
+			});
+			expect(makeGlobal.status).toBe(200);
+			const afterGlobal = await db.collection("kb_docs").findOne({ _id: ObjectId.createFromHexString(id) });
+			expect(afterGlobal?.scope).toEqual([]);
+		});
+
+		it("edits a canonical entry while keeping it canonical so agents continue to receive it", async () => {
+			// Given an APPROVED (canonical) entry scoped to ["work"].
+			const db = await getTestDatabase();
+			const id = await storeKbDocInTestDatabase(db, {
+				type: KbType.Question,
+				status: KbStatus.Canonical,
+				title: "Canon old",
+				body: "old body",
+				scope: ["work"],
+			});
+
+			// When a reviewer edits its title, body, and scope.
+			const response = await fetch(`${apiUrl()}/api/kb/${id}`, {
+				method: "PATCH",
+				headers: { "x-ai-rules-secret": SECRET, "Content-Type": "application/json" },
+				body: JSON.stringify({ title: "Canon new", body: "new body", scope: ["work", "team"] }),
+			});
+			expect(response.status).toBe(200);
+
+			// Then the stored entry has the new fields AND is still canonical (status preserved).
+			const stored = await db.collection("kb_docs").findOne({ _id: ObjectId.createFromHexString(id) });
+			expect(stored?.title).toBe("Canon new");
+			expect(stored?.body).toBe("new body");
+			expect(stored?.scope).toEqual(["work", "team"]);
+			expect(stored?.status).toBe("canonical");
+
+			// And the agent-facing search endpoint still serves it with the new title and canonical status.
+			const served = await fetch(`${apiUrl()}/api/kb/search?id=${id}`, {
+				headers: { "x-ai-rules-secret": SECRET },
+			});
+			expect(served.status).toBe(200);
+			const doc = (await served.json()) as KbDocResponse;
+			expect(doc.title).toBe("Canon new");
+			expect(doc.status).toBe("canonical");
+		});
+
 		it("returns 400 when the body has neither title nor body", async () => {
 			const db = await getTestDatabase();
 			const id = await storeKbDocInTestDatabase(db, {
