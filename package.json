@@ -23,6 +23,8 @@
     "lint:fix": "biome check --write .",
     "------------ QUESTION GENERATION ------------": "",
     "generate-questions": "tsx src/cli/commands/generate-questions.ts",
+    "------------ MIGRATIONS ------------": "",
+    "migrate:private-skill-ids": "tsx scripts/migrations/add-private-skill-ids.ts",
     "------------ PUBLISH COMMANDS ------------": "",
     "build:cli": "tsc -p tsconfig.cli.json",
     "publish:cli": "cd cli-package && npm publish --access public",
