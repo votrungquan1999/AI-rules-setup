@@ -10,11 +10,12 @@ import {
 	type PrivateSkillsPageState,
 } from "./private-skills-page.type";
 
-const initialState: PrivateSkillsPageState = { skills: [], showGlobalOnly: false };
+const initialState: PrivateSkillsPageState = { skills: [], showGlobalOnly: false, savePending: false };
 
 /**
- * Reducer for the private-skills browse page. Toggles the global-only filter, or replaces a skill's
- * editable fields (name/content/description/scopes) in the list after an edit resolves.
+ * Reducer for the private-skills browse page. Toggles the global-only filter, replaces a skill's
+ * editable fields (name/content/description/scopes) in the list after an edit resolves, or flags
+ * whether a save is in flight.
  * @param state - Current state
  * @param action - The browse-page action to apply
  * @returns The next state
@@ -39,6 +40,8 @@ function privateSkillsReducer(state: PrivateSkillsPageState, action: PrivateSkil
 					return next;
 				}),
 			};
+		case PrivateSkillsPageActionType.SetSavePending:
+			return { ...state, savePending: action.pending };
 		default:
 			return state;
 	}
@@ -71,9 +74,19 @@ export function usePrivateSkillsFilter() {
 }
 
 /**
+ * Exposes whether the edit-dialog Save request is currently in flight, so the Save button can show a
+ * pending state without the component reading raw state directly.
+ * @returns `true` while a save is in flight, otherwise `false`
+ */
+export function usePrivateSkillsSavePending() {
+	return useRawState().savePending;
+}
+
+/**
  * Domain actions for the private-skills page. `editSkill` saves a skill's edited fields via the
  * PATCH endpoint (addressed by id), normalizing scopes and coercing an empty description to
- * undefined (so it is cleared), then updates the in-memory list on success so the card re-renders.
+ * undefined (so it is cleared), then updates the in-memory list on success so the card re-renders. It
+ * brackets the request with a save-pending flag (set before, cleared in `finally`) for the Save button.
  * @returns the `editSkill` action callback
  */
 export function usePrivateSkillsActions() {
@@ -82,21 +95,26 @@ export function usePrivateSkillsActions() {
 		editSkill: async (id: string, name: string, content: string, description: string, scopes: string[]) => {
 			const normalizedScopes = normalizeScopes(scopes);
 			const cleanedDescription = description.trim() === "" ? undefined : description;
-			const response = await fetch(`/api/skills/${id}`, {
-				method: "PATCH",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ name, content, description: cleanedDescription, scopes: normalizedScopes }),
-			});
-			if (response.ok) {
-				const action: EditSkillAction = {
-					type: PrivateSkillsPageActionType.EditSkill,
-					id,
-					name,
-					content,
-					scopes: normalizedScopes,
-				};
-				if (cleanedDescription !== undefined) action.description = cleanedDescription;
-				dispatch(action);
+			dispatch({ type: PrivateSkillsPageActionType.SetSavePending, pending: true });
+			try {
+				const response = await fetch(`/api/skills/${id}`, {
+					method: "PATCH",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ name, content, description: cleanedDescription, scopes: normalizedScopes }),
+				});
+				if (response.ok) {
+					const action: EditSkillAction = {
+						type: PrivateSkillsPageActionType.EditSkill,
+						id,
+						name,
+						content,
+						scopes: normalizedScopes,
+					};
+					if (cleanedDescription !== undefined) action.description = cleanedDescription;
+					dispatch(action);
+				}
+			} finally {
+				dispatch({ type: PrivateSkillsPageActionType.SetSavePending, pending: false });
 			}
 		},
 	};

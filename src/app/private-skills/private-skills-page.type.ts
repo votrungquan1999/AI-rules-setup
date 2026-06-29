@@ -14,16 +14,21 @@ export interface PrivateSkillDisplay {
 	description?: string;
 }
 
-/** Browse-page state: the full list of private skills plus whether the global-only filter is on. */
+/**
+ * Browse-page state: the full list of private skills, whether the global-only filter is on, and
+ * whether the edit-dialog Save request is currently in flight.
+ */
 export interface PrivateSkillsPageState {
 	skills: PrivateSkillDisplay[];
 	showGlobalOnly: boolean;
+	savePending: boolean;
 }
 
 /** Discriminator for the browse-page reducer actions. */
 export enum PrivateSkillsPageActionType {
 	ToggleGlobalFilter = "toggle-global-filter",
 	EditSkill = "edit-skill",
+	SetSavePending = "set-save-pending",
 }
 
 /** Toggles the "global only" filter on the skills list. */
@@ -41,4 +46,10 @@ export interface EditSkillAction {
 	scopes: string[];
 }
 
-export type PrivateSkillsPageAction = ToggleGlobalFilterAction | EditSkillAction;
+/** Sets whether the edit-dialog Save request is currently in flight. */
+export interface SetSavePendingAction {
+	type: PrivateSkillsPageActionType.SetSavePending;
+	pending: boolean;
+}
+
+export type PrivateSkillsPageAction = ToggleGlobalFilterAction | EditSkillAction | SetSavePendingAction;

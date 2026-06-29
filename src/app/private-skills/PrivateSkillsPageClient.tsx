@@ -13,8 +13,14 @@ import {
 } from "src/components/ui/dialog";
 import { Input } from "src/components/ui/input";
 import { Label } from "src/components/ui/label";
+import { PendingButton } from "src/components/ui/pending-button";
 import { Textarea } from "src/components/ui/textarea";
-import { usePrivateSkills, usePrivateSkillsActions, usePrivateSkillsFilter } from "./private-skills-page.state";
+import {
+	usePrivateSkills,
+	usePrivateSkillsActions,
+	usePrivateSkillsFilter,
+	usePrivateSkillsSavePending,
+} from "./private-skills-page.state";
 import type { PrivateSkillDisplay } from "./private-skills-page.type";
 import {
 	PrivateSkillCard,
@@ -22,7 +28,6 @@ import {
 	PrivateSkillScopes,
 	PrivateSkillScopeTag,
 	PrivateSkillsHeader,
-	PrivateSkillsLayout,
 	PrivateSkillsList,
 } from "./private-skills-page.ui";
 
@@ -35,6 +40,7 @@ export function PrivateSkillsPageClient() {
 	const skills = usePrivateSkills();
 	const { showGlobalOnly, toggleGlobalFilter } = usePrivateSkillsFilter();
 	const { editSkill } = usePrivateSkillsActions();
+	const savePending = usePrivateSkillsSavePending();
 	const [editingId, setEditingId] = useState<string | null>(null);
 	const [editName, setEditName] = useState("");
 	const [editContent, setEditContent] = useState("");
@@ -59,7 +65,7 @@ export function PrivateSkillsPageClient() {
 	}
 
 	return (
-		<PrivateSkillsLayout>
+		<div className="space-y-6">
 			<PrivateSkillsHeader>
 				<h1 className="text-3xl font-bold text-foreground">Private Skills</h1>
 				<p className="text-muted-foreground">Every private skill across all workspace scopes.</p>
@@ -116,12 +122,16 @@ export function PrivateSkillsPageClient() {
 						<ScopeChipsEditor label="Scopes" value={editScopes} onChange={setEditScopes} />
 					</div>
 					<DialogFooter>
-						<Button onClick={saveEdit} disabled={editName.trim().length === 0 || editContent.trim().length === 0}>
+						<PendingButton
+							pending={savePending}
+							onClick={saveEdit}
+							disabled={editName.trim().length === 0 || editContent.trim().length === 0}
+						>
 							Save
-						</Button>
+						</PendingButton>
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
-		</PrivateSkillsLayout>
+		</div>
 	);
 }

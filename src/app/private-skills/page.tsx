@@ -4,19 +4,24 @@ import { Suspense } from "react";
 import { SESSION_COOKIE, verifySessionSecret } from "src/app/api/lib/session";
 import { findAllPrivateSkills } from "src/server/rules-repository";
 import { PrivateSkillsPageClient } from "./PrivateSkillsPageClient";
+import { PrivateSkillsSkeleton } from "./private-skills.skeleton";
 import { PrivateSkillsProvider } from "./private-skills-page.state";
 import type { PrivateSkillDisplay } from "./private-skills-page.type";
+import { PrivateSkillsLayout } from "./private-skills-page.ui";
 
 /**
- * Private-skills browse page (server component). The per-request content (session cookie + live
- * private-skill data) is rendered inside a `<Suspense>` boundary, which is how Next's
- * `cacheComponents` requires uncached dynamic data to be accessed.
+ * Private-skills browse page (server component). The static shell (`PrivateSkillsLayout` → nav +
+ * container) renders immediately, while the per-request content (session cookie + live private-skill
+ * data) streams inside a `<Suspense>` that shows `PrivateSkillsSkeleton` until it resolves. Reading
+ * `cookies()` inside the boundary satisfies Next's `cacheComponents` requirement.
  */
 export default function PrivateSkillsPage() {
 	return (
-		<Suspense fallback={null}>
-			<PrivateSkillsContent />
-		</Suspense>
+		<PrivateSkillsLayout>
+			<Suspense fallback={<PrivateSkillsSkeleton />}>
+				<PrivateSkillsContent />
+			</Suspense>
+		</PrivateSkillsLayout>
 	);
 }
 
