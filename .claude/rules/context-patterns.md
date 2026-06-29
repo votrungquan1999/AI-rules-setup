@@ -1,6 +1,6 @@
 ---
 paths: ['**/*.tsx', '**/*.jsx', '**/*.ts', '**/*.js']
-description: Context patterns and state management best practices
+description: 'Claude Code React context: patterns and state management best practices'
 ---
 
 # React Context Patterns

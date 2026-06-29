@@ -1,6 +1,6 @@
 ---
 paths: ['**/*.ts', '**/*.tsx']
-description: Import and export patterns and organization rules
+description: 'Claude Code TypeScript imports/exports: patterns and organization rules'
 ---
 
 # TypeScript Imports and Exports

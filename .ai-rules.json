@@ -5,22 +5,38 @@
     "brainstorming-patterns",
     "component-architecture",
     "database-patterns",
+    "knowledge-base",
     "meta-rules",
     "react-hooks",
     "react-server-components",
     "styling-tailwind",
-    "testing-pillars",
+    "testing-guidelines",
     "typescript-conventions",
     "url-state-management"
   ],
-  "workflows": [
-    "deploy-to-production",
-    "setup-ci-cd"
-  ],
+  "workflows": [],
   "skills": [
+    "ai-kanban-work-card",
+    "bdd-design",
+    "code-refactoring",
+    "commit-plan",
+    "context7",
+    "create-implementation-plan",
+    "create-pr",
     "feature-development-workflow",
+    "find-patterns",
+    "knowledge-base",
+    "orchestrated-feature-dev",
+    "repo-knowledge",
+    "review-changes",
+    "root-cause-analysis",
+    "setup-private-skills",
     "structured-brainstorming",
-    "test-quality-reviewer"
+    "tdd-design",
+    "test-quality-reviewer",
+    "validate-pr-comments",
+    "web-search",
+    "pr-comment-triage"
   ],
   "scope": [
     "personal"
