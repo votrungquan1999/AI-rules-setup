@@ -1,9 +1,9 @@
 "use client";
 
 import { useId, useState } from "react";
-import { Button } from "src/components/ui/button";
 import { Input } from "src/components/ui/input";
 import { Label } from "src/components/ui/label";
+import { PendingButton } from "src/components/ui/pending-button";
 
 /**
  * Reviewer login form. Posts the entered secret to `/api/auth`; on success the server sets the
@@ -49,9 +49,9 @@ export function LoginForm() {
 				/>
 			</div>
 			{error && <p className="text-sm text-destructive">{error}</p>}
-			<Button type="submit" disabled={submitting || secret.length === 0} className="w-full">
-				{submitting ? "Signing in…" : "Sign in"}
-			</Button>
+			<PendingButton type="submit" pending={submitting} disabled={secret.length === 0} className="w-full">
+				Sign in
+			</PendingButton>
 		</form>
 	);
 }
