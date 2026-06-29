@@ -160,12 +160,14 @@ The node will:
 2. Write a test for it and scaffold the structure it touches (no behavior logic) so the run can only fail behaviorally
 3. Run the test (MUST see the result before writing behavior logic)
 4. Implement if the test failed on a behavior assertion; fix scaffolding if it failed structurally; skip if it passes (already covered, or expected green from start when no meaningful red is possible)
-5. Write the step result to the `step-result.md` artifact
+5. Escalate to the user if NO meaningful test can be written or set up (meaningful-test gate) — skip only on explicit approval, recording the reason, and still implement the behavior
+6. Write the step result to the `step-result.md` artifact
 
 **After completion**, read `step-result.md` and decide:
 
 - If step succeeded → increment `current_step` in `loop-state.json`
-- If step had issues → ask user for guidance before continuing
+- If the step hit the **meaningful-test gate** (no meaningful test possible) → STOP and ask the user to skip the test for that behavior, defer it, or make it testable; only skip on explicit approval, record the reason, then continue
+- If step had other issues → ask user for guidance before continuing
 
 **4b. Quality Gate Check**
 
@@ -209,7 +211,7 @@ Read the node instructions from `nodes/node-validation.md` in this skill's direc
 
 The validation node will:
 1. Validate each completed step sequentially with full plan and implementation context
-2. Check implementation vs plan, test coverage, cross-step consistency, code quality
+2. Check implementation vs plan, test coverage & meaningfulness (4 Pillars), cross-step consistency, code quality
 3. Write per-step findings to `validation-step-[N].md` artifacts
 4. Write a consolidated `validation-summary.md` artifact
 

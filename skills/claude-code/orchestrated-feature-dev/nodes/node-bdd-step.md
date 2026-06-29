@@ -44,6 +44,20 @@ Put in place whatever structure the test touches — register the route, add the
 
 **If no meaningful red is possible** (the minimal scaffolding to avoid a structural failure already IS the implementation — e.g., a trivial pass-through or a field that just renders), write just enough code to pass first and expect **green from the first run**. Record `green from start (no meaningful red possible)` in the Output.
 
+### 2d. 🚫 GATE: Meaningful Test Possible? (escalate if not)
+
+Before running, confirm a **meaningful** test can actually be written AND set up for this behavior. A meaningful test (per the 4 Pillars) has a **valid, sensitive assertion** — it would fail if the behavior were wrong — and its preconditions/fixtures/environment can be set up reliably.
+
+This is NOT the same as "no meaningful red" (2c): there, a real, asserting test exists and simply passes from the first run. Here, you **cannot construct a meaningful test at all** — e.g., no way to assert the real outcome, output is non-deterministic and can't be made stable, or the behavior depends on an external system/environment you can't mock, seed, or stand up.
+
+When you hit this, do NOT write a hollow test (one that asserts nothing real or passes regardless) just to satisfy the ritual, and do NOT silently skip it. Instead **STOP and escalate to the user**:
+
+- State the behavior, what you tried, and exactly what blocks a meaningful assertion or test setup.
+- Ask the user to decide: **skip the test** for this behavior (still implement it), **defer** the behavior, or **provide a way to make it testable** (a fixture, seam, or mock).
+- Only skip when the user **explicitly approves**.
+
+If the user approves a skip: proceed to implement the behavior (step 4), then record it as `test skipped (no meaningful test possible — user approved: [reason])` in the Output. If the user makes it testable, return to step 2 and write the test.
+
 ### 3. 🚫 GATE: Run the Test
 
 **Before running**, check `package.json` for the project's existing test command (e.g., `npm test`, `npm run test:unit`). Use that command instead of hardcoding `npx vitest run`. Pass the specific test file path to scope the run.
@@ -72,7 +86,7 @@ Only if there's an obvious improvement. Keep it small. Run tests again.
 ## Output
 
 Update `<ws>/PLAN_STEPS.md`:
-- Change the completed step's status to `done` (or `done (already covered)`)
+- Change the completed step's status to `done` (or `done (already covered)`, or `done (test skipped — no meaningful test possible, user approved)`)
 
 Update `<ws>/IMPLEMENTATION_PROGRESS.md` with the step result:
 
@@ -80,7 +94,7 @@ Update `<ws>/IMPLEMENTATION_PROGRESS.md` with the step result:
 ### Step [number]: [behavior]
 
 **Status:** ✅ Done
-**Test Result:** red → green | green from start (no meaningful red possible) | already covered
+**Test Result:** red → green | green from start (no meaningful red possible) | test skipped (no meaningful test possible — user approved: [reason]) | already covered
 
 **Files Changed:**
 - [file1]: [what changed]

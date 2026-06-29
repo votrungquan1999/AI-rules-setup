@@ -15,7 +15,7 @@ Validate a batch of related completed steps (grouped by shared files) after impl
 For EACH assigned step, one at a time (files shared between assigned steps need reading only once):
 
 1. Confirm implementation matches planned behavior.
-2. Verify step-specific tests actually assert intended outcome.
+2. Verify test coverage AND meaningfulness: coverage is good (happy path + relevant edge/error cases tested, note anything untested), and each test is meaningful (4 Pillars — valid + sensitive assertion that fails if behavior is wrong; reject hollow/tautological/over-mocked tests). If the step is marked `test skipped (no meaningful test possible — user approved)`, confirm it was approved and record the behavior as untested rather than flagging a gap to fix.
 3. Check cross-step consistency for shared files.
 4. Run step-relevant tests.
 5. Classify result.
@@ -27,7 +27,7 @@ For EACH assigned step `N`, write `<ws>/VALIDATION_STEP_<N>.md` (one file per st
 ```markdown
 ## Step
 ## Plan Match: yes | partial | no
-## Test Quality and Coverage
+## Test Quality and Coverage: coverage adequate (yes | partial — what's untested); tests meaningful (yes | no — 4 Pillars); or "test skipped (user approved): reason"
 ## Cross-Step Conflicts
 ## Issues Found
 ## Verdict: valid | valid-with-caveats | invalid

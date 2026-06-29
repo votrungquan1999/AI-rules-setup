@@ -222,7 +222,8 @@ Do NOT spawn a sub-agent for BDD scenario steps. The main session executes them 
 
 After each step:
 - If step succeeded → continue to the next pending step (or quality gate)
-- If step had issues → ask user for guidance before continuing
+- If the step hit the **meaningful-test gate** (node-bdd-step.md step 2d — no meaningful test can be written or set up) → STOP and ask the user whether to skip the test for that behavior, defer it, or make it testable. Only skip on explicit approval; record the skip and its reason, then continue.
+- If step had other issues → ask user for guidance before continuing
 
 **Why inline:** consecutive BDD scenario steps usually touch the same module and reuse the same imports, types, and helpers. A fresh sub-agent per step would re-read those files every time. Running inline keeps that context warm.
 

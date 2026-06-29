@@ -23,7 +23,9 @@ Read the `research-output.md` artifact from the brain directory for context abou
      - ❌ `Migrate listTasks onto findManyZ and assert parsed shape and order` → ✅ `A user sees their tasks listed in the expected order` (client: end-user)
      - ❌ `Running the linter reports no violations on a clean repo` → ✅ `Code that doesn't meet the team's quality bar is caught automatically before it can merge` (client: the team)
 
-4. **Write the step list** to the workflow state artifact for the BDD scenario loop to consume — but only AFTER plan approval (see Output).
+4. **Flag testability up front.** For each behavior, sanity-check that a *meaningful* test could plausibly be written and set up (a valid, sensitive assertion + reachable fixtures/environment). If a behavior has **no foreseeable meaningful test** — non-deterministic output, an external system that can't be mocked/seeded, no available harness — mark the step `Testability: uncertain (reason)` so the BDD loop escalates to the user at implementation time instead of writing a hollow test. Do not design test cases now (test scenarios are written per-step) — only flag the risk.
+
+5. **Write the step list** to the workflow state artifact for the BDD scenario loop to consume — but only AFTER plan approval (see Output).
 
 **What the user reviews:** The review (requested via `@create-implementation-plan`) is performed on the **`implementation-plan.md`** document — the rich plan with **Technical Design** + **Behaviors**. NEVER present `plan-steps.md` for review.
 
@@ -38,11 +40,13 @@ After the plan is approved, write the step list to the `plan-steps.md` artifact.
 - Status: pending
 - Affected files: [file1, file2, ...]
 - Dependencies: none | [step numbers this depends on]
+- Testability: standard | uncertain (reason — escalate to user before writing the test)
 
 ## Step 2: [Observable behavior]
 - Status: pending
 - Affected files: [file1, file3, ...]
 - Dependencies: none | Step 1
+- Testability: standard | uncertain (reason — escalate to user before writing the test)
 
 ## Step 3: [Observable behavior]
 - Status: pending
@@ -63,5 +67,6 @@ After the plan is approved, write the step list to the `plan-steps.md` artifact.
 Each step MUST include:
 - **Affected files** — every file that will be created, modified, or read during implementation
 - **Dependencies** — which other steps must complete first (or "none")
+- **Testability** — `standard`, or `uncertain (reason)` when no meaningful test is foreseeable (signals the BDD loop to escalate to the user)
 
 The implementation plan itself remains in the brain artifact directory per the `@create-implementation-plan` skill convention.

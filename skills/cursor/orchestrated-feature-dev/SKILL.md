@@ -67,6 +67,7 @@ Every run is scoped to its task identifier so **multiple tasks run in parallel**
 
 - Research and planning must converge before coding.
 - One behavior/test per BDD scenario step.
+- If a step hits the meaningful-test gate (no meaningful test can be written or set up), STOP and ask the user to skip the test, defer the behavior, or make it testable. Skip only on explicit approval; record the skip reason and still implement the behavior.
 - Trigger quality gate every 2-3 completed steps.
 - Run investigation and validation batches in parallel; each batch agent processes its steps one at a time and still writes one output file per step.
 - If validation finds invalid steps, spawn ONE fix subagent covering all invalid steps (batched), then re-validate only those steps.

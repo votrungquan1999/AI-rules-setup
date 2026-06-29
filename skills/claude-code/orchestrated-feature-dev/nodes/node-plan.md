@@ -26,7 +26,9 @@ Read the `<ws>/RESEARCH_OUTPUT.md` file for context about the codebase.
      - ❌ `Migrate listTasks onto findManyZ and assert parsed shape and order`
      - ❌ `Running the linter reports no violations on a clean repo`
 
-4. **Write the step list** to the workflow state file for the BDD scenario loop to consume.
+4. **Flag testability up front.** For each behavior, sanity-check that a *meaningful* test could plausibly be written and set up for it (a valid, sensitive assertion + reachable fixtures/environment). If a behavior looks like it has **no meaningful way to be tested** — non-deterministic output, an external system that can't be mocked/seeded, no available harness — do NOT silently plan around it. Mark the step `Testability: uncertain (reason)` so the BDD loop escalates to the user at implementation time instead of writing a hollow test. Do not invent test cases now (test scenarios are designed per-step during implementation) — only flag the risk.
+
+5. **Write the step list** to the workflow state file for the BDD scenario loop to consume.
 
 ## Output
 
@@ -39,11 +41,13 @@ After the plan is approved, write the step list to `<ws>/PLAN_STEPS.md`. This fi
 - Status: pending
 - Affected files: [file1, file2, ...]
 - Dependencies: none | [step numbers this depends on]
+- Testability: standard | uncertain (reason — escalate to user before writing the test)
 
 ## Step 2: [Observable behavior]
 - Status: pending
 - Affected files: [file1, file3, ...]
 - Dependencies: none | Step 1
+- Testability: standard | uncertain (reason — escalate to user before writing the test)
 
 ## Step 3: [Observable behavior]
 - Status: pending
@@ -64,5 +68,6 @@ After the plan is approved, write the step list to `<ws>/PLAN_STEPS.md`. This fi
 Each step MUST include:
 - **Affected files** — every file that will be created, modified, or read during implementation
 - **Dependencies** — which other steps must complete first (or "none")
+- **Testability** — `standard`, or `uncertain (reason)` when no meaningful test is foreseeable (signals the BDD loop to escalate to the user)
 
 The implementation plan itself is written to `<ws>/implementation-plan.md` per the `@create-implementation-plan` skill convention.

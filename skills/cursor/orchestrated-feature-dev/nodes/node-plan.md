@@ -12,7 +12,7 @@ Create an execution-ready implementation plan from research findings.
 
 1. Convert research into significant design decisions.
 2. Define behavior-based step list (not code tasks). First name the client/stakeholder; write each behavior in their language and value; reject implementation mechanics (schemas, fields, error codes, function/method/class names, the linter, CI, HTTP status). Litmus test: would the stakeholder recognize this as something they asked for and care about? If it mentions code/internals, it FAILS — rewrite. (Escape hatch: only when the user explicitly states the client is a developer or internal/consuming system may you use developer terms.)
-3. Include dependencies and likely touched files per step.
+3. Include dependencies and likely touched files per step. Also flag testability: if a behavior has no foreseeable meaningful test (non-deterministic output, unmockable external system, no harness), mark the step `Testability: uncertain (reason)` so the BDD loop escalates to the user instead of writing a hollow test. Don't design test cases now — only flag the risk.
 4. Add quality checkpoint markers every 2-3 steps.
 5. Present for user approval before implementation. Run the review via @create-implementation-plan on `<ws>/implementation-plan.md` (the rich plan with Technical Design + Behaviors) — this document, NOT `<ws>/PLAN_STEPS.md`, is what the user reviews.
 
@@ -41,4 +41,5 @@ Write:
 - Status: pending
 - Depends on: none
 - Likely files: ...
+- Testability: standard | uncertain (reason — escalate to user before writing the test)
 ```
