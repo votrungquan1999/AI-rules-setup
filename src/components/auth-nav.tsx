@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { NavLinkContent } from "src/components/nav-link";
 import { cn } from "src/lib/utils";
 
 interface NavItem {
@@ -60,7 +61,7 @@ export function AuthNav() {
 									: "text-muted-foreground hover:bg-muted hover:text-foreground",
 							)}
 						>
-							{item.label}
+							<NavLinkContent>{item.label}</NavLinkContent>
 						</Link>
 					);
 				})}
