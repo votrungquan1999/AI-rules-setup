@@ -4,19 +4,24 @@ import { Suspense } from "react";
 import { SESSION_COOKIE, verifySessionSecret } from "src/app/api/lib/session";
 import { findKbDrafts } from "src/server/kb-repository";
 import { KbReviewPageClient } from "./KbReviewPageClient";
+import { KbReviewSkeleton } from "./kb-review.skeleton";
 import { KbReviewProvider } from "./kb-review.state";
 import type { KbDocDraft } from "./kb-review.type";
+import { KbReviewLayout } from "./kb-review.ui";
 
 /**
- * KB review page (server component). The per-request content (session cookie + live draft data) is
- * rendered inside a `<Suspense>` boundary, which is how Next's `cacheComponents` requires uncached
- * dynamic data to be accessed (route-segment `dynamic = "force-dynamic"` is incompatible with it).
+ * KB review page (server component). The static shell (`KbReviewLayout` → nav + container) renders
+ * immediately, while the per-request content (session cookie + live draft data) streams inside a
+ * `<Suspense>` that shows `KbReviewSkeleton` until it resolves. Reading `cookies()` inside the
+ * boundary satisfies Next's `cacheComponents` requirement while keeping the shell prerendered.
  */
 export default function KbReviewPage() {
 	return (
-		<Suspense fallback={null}>
-			<KbReviewContent />
-		</Suspense>
+		<KbReviewLayout>
+			<Suspense fallback={<KbReviewSkeleton />}>
+				<KbReviewContent />
+			</Suspense>
+		</KbReviewLayout>
 	);
 }
 

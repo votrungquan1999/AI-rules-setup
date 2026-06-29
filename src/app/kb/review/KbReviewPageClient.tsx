@@ -13,15 +13,15 @@ import {
 } from "src/components/ui/dialog";
 import { Input } from "src/components/ui/input";
 import { Label } from "src/components/ui/label";
+import { PendingButton } from "src/components/ui/pending-button";
 import { Textarea } from "src/components/ui/textarea";
-import { useKbReviewActions, useKbReviewDrafts, useKbReviewFilter } from "./kb-review.state";
+import { useKbReviewActions, useKbReviewDrafts, useKbReviewFilter, useKbReviewPendingDraftId } from "./kb-review.state";
 import type { KbDocDraft } from "./kb-review.type";
 import {
 	KbGlobalBadge,
 	KbReviewActionsRow,
 	KbReviewCard,
 	KbReviewHeader,
-	KbReviewLayout,
 	KbReviewList,
 	KbScopeRow,
 	KbScopeTag,
@@ -37,12 +37,14 @@ export function KbReviewPageClient() {
 	const drafts = useKbReviewDrafts();
 	const { showGlobalOnly, toggleGlobalFilter } = useKbReviewFilter();
 	const { approveDraft, rejectDraft, editDraft, approveAllDrafts } = useKbReviewActions();
+	const pendingDraftId = useKbReviewPendingDraftId();
 	const [editing, setEditing] = useState<KbDocDraft | null>(null);
 	const [editTitle, setEditTitle] = useState("");
 	const [editBody, setEditBody] = useState("");
 	const [editScopes, setEditScopes] = useState<string[]>([]);
 	const [confirmingApproveAll, setConfirmingApproveAll] = useState(false);
 	const [approvingAll, setApprovingAll] = useState(false);
+	const [savePending, setSavePending] = useState(false);
 	const titleId = useId();
 	const bodyId = useId();
 
@@ -55,8 +57,14 @@ export function KbReviewPageClient() {
 
 	async function saveEdit() {
 		if (!editing) return;
-		await editDraft(editing.id, editTitle, editBody, editScopes);
-		setEditing(null);
+		setSavePending(true);
+		try {
+			const saved = await editDraft(editing.id, editTitle, editBody, editScopes);
+			// Keep the dialog open on failure so the reviewer can retry without losing their edits.
+			if (saved) setEditing(null);
+		} finally {
+			setSavePending(false);
+		}
 	}
 
 	async function confirmApproveAll() {
@@ -70,7 +78,7 @@ export function KbReviewPageClient() {
 	}
 
 	return (
-		<KbReviewLayout>
+		<div className="space-y-6">
 			<KbReviewHeader>
 				<h1 className="text-3xl font-bold text-foreground">Review Drafts</h1>
 				<p className="text-muted-foreground">Approve, reject, or edit captured knowledge before it goes live.</p>
@@ -78,9 +86,13 @@ export function KbReviewPageClient() {
 					<Button variant="outline" onClick={toggleGlobalFilter}>
 						{showGlobalOnly ? "Show all" : "Show global only"}
 					</Button>
-					<Button onClick={() => setConfirmingApproveAll(true)} disabled={drafts.length === 0 || approvingAll}>
-						{approvingAll ? "Approving…" : `Approve all (${drafts.length})`}
-					</Button>
+					<PendingButton
+						onClick={() => setConfirmingApproveAll(true)}
+						pending={approvingAll}
+						disabled={drafts.length === 0}
+					>
+						{`Approve all (${drafts.length})`}
+					</PendingButton>
 				</div>
 			</KbReviewHeader>
 
@@ -99,13 +111,19 @@ export function KbReviewPageClient() {
 								</KbScopeRow>
 							</div>
 							<KbReviewActionsRow>
-								<Button onClick={() => approveDraft(d.id)}>Approve</Button>
+								<PendingButton pending={pendingDraftId === d.id} onClick={() => approveDraft(d.id)}>
+									Approve
+								</PendingButton>
 								<Button variant="outline" onClick={() => openEdit(d)}>
 									Edit
 								</Button>
-								<Button variant="destructive" onClick={() => rejectDraft(d.id)}>
+								<PendingButton
+									variant="destructive"
+									pending={pendingDraftId === d.id}
+									onClick={() => rejectDraft(d.id)}
+								>
 									Reject
-								</Button>
+								</PendingButton>
 							</KbReviewActionsRow>
 						</KbReviewCard>
 					))}
@@ -130,9 +148,9 @@ export function KbReviewPageClient() {
 						<Button variant="outline" onClick={() => setConfirmingApproveAll(false)} disabled={approvingAll}>
 							Cancel
 						</Button>
-						<Button onClick={confirmApproveAll} disabled={approvingAll}>
-							{approvingAll ? "Approving…" : "Approve all"}
-						</Button>
+						<PendingButton onClick={confirmApproveAll} pending={approvingAll}>
+							Approve all
+						</PendingButton>
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
@@ -155,12 +173,12 @@ export function KbReviewPageClient() {
 						<ScopeChipsEditor label="Scopes" value={editScopes} onChange={setEditScopes} />
 					</div>
 					<DialogFooter>
-						<Button onClick={saveEdit} disabled={editBody.trim().length === 0}>
+						<PendingButton pending={savePending} onClick={saveEdit} disabled={editBody.trim().length === 0}>
 							Save
-						</Button>
+						</PendingButton>
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
-		</KbReviewLayout>
+		</div>
 	);
 }

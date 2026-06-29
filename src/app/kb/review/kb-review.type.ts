@@ -18,6 +18,7 @@ export enum KbReviewActionType {
 	Remove = "remove",
 	Edit = "edit",
 	ToggleGlobalFilter = "toggle-global-filter",
+	SetPendingDraft = "set-pending-draft",
 }
 
 /** Removes a draft from the list (after approve or reject resolves). */
@@ -40,10 +41,20 @@ export interface ToggleGlobalFilterAction {
 	type: KbReviewActionType.ToggleGlobalFilter;
 }
 
-export type KbReviewAction = RemoveDraftAction | EditDraftAction | ToggleGlobalFilterAction;
+/** Marks a draft as having an approve/reject request in flight (`id`), or clears it (`null`). */
+export interface SetPendingDraftAction {
+	type: KbReviewActionType.SetPendingDraft;
+	id: string | null;
+}
 
-/** Review screen state: the drafts awaiting a decision, plus whether the global-only filter is on. */
+export type KbReviewAction = RemoveDraftAction | EditDraftAction | ToggleGlobalFilterAction | SetPendingDraftAction;
+
+/**
+ * Review screen state: the drafts awaiting a decision, whether the global-only filter is on, and the
+ * id of the draft whose approve/reject request is currently in flight (`null` when none).
+ */
 export interface KbReviewState {
 	drafts: KbDocDraft[];
 	showGlobalOnly: boolean;
+	pendingDraftId: string | null;
 }

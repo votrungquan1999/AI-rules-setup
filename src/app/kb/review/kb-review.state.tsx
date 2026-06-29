@@ -4,11 +4,13 @@ import { createReducerContext } from "src/app/hooks/createReducerContext";
 import { normalizeScopes } from "src/lib/normalize-scopes";
 import { type KbDocDraft, type KbReviewAction, KbReviewActionType, type KbReviewState } from "./kb-review.type";
 
-const initialState: KbReviewState = { drafts: [], showGlobalOnly: false };
+const initialState: KbReviewState = { drafts: [], showGlobalOnly: false, pendingDraftId: null };
 
 /**
- * Reducer for the review screen. Removes a draft after approve/reject, or replaces its
- * title/body/scope after an edit. All transitions are applied AFTER the corresponding API call resolves.
+ * Reducer for the review screen. Removes a draft after approve/reject, replaces its
+ * title/body/scope after an edit, toggles the global filter, or sets/clears which draft has an
+ * approve/reject request in flight. Remove/Edit are applied AFTER the corresponding API call
+ * resolves; SetPendingDraft brackets the in-flight request (set before, cleared after).
  * @param state - Current review state
  * @param action - The review action to apply
  * @returns The next review state
@@ -26,6 +28,8 @@ function kbReviewReducer(state: KbReviewState, action: KbReviewAction): KbReview
 			};
 		case KbReviewActionType.ToggleGlobalFilter:
 			return { ...state, showGlobalOnly: !state.showGlobalOnly };
+		case KbReviewActionType.SetPendingDraft:
+			return { ...state, pendingDraftId: action.id };
 		default:
 			return state;
 	}
@@ -46,6 +50,15 @@ export function useKbReviewDrafts() {
 }
 
 /**
+ * Exposes the id of the draft whose approve/reject request is currently in flight (or `null`).
+ * Lets the review screen mark that draft's actions pending without reading raw state directly.
+ * @returns The pending draft id, or `null` when no approve/reject is in flight
+ */
+export function useKbReviewPendingDraftId() {
+	return useRawState().pendingDraftId;
+}
+
+/**
  * Exposes the global-only filter state and a toggle for it.
  * @returns `showGlobalOnly` flag and a `toggleGlobalFilter` callback
  */
@@ -61,20 +74,31 @@ export function useKbReviewFilter() {
 /**
  * Domain actions for the review screen. Each performs the API round-trip, then updates the list on
  * success: approve/reject remove the draft, edit replaces its title/body/scope (status stays draft).
+ * `editDraft` returns whether the save succeeded so the caller can keep the edit dialog open on failure.
  * @returns approve/reject/edit action callbacks
  */
 export function useKbReviewActions() {
 	const dispatch = useRawDispatch();
 	return {
 		approveDraft: async (id: string) => {
-			const response = await fetch(`/api/kb/${id}/approve`, { method: "POST" });
-			if (response.ok) dispatch({ type: KbReviewActionType.Remove, id });
+			dispatch({ type: KbReviewActionType.SetPendingDraft, id });
+			try {
+				const response = await fetch(`/api/kb/${id}/approve`, { method: "POST" });
+				if (response.ok) dispatch({ type: KbReviewActionType.Remove, id });
+			} finally {
+				dispatch({ type: KbReviewActionType.SetPendingDraft, id: null });
+			}
 		},
 		rejectDraft: async (id: string) => {
-			const response = await fetch(`/api/kb/${id}/reject`, { method: "POST" });
-			if (response.ok) dispatch({ type: KbReviewActionType.Remove, id });
+			dispatch({ type: KbReviewActionType.SetPendingDraft, id });
+			try {
+				const response = await fetch(`/api/kb/${id}/reject`, { method: "POST" });
+				if (response.ok) dispatch({ type: KbReviewActionType.Remove, id });
+			} finally {
+				dispatch({ type: KbReviewActionType.SetPendingDraft, id: null });
+			}
 		},
-		editDraft: async (id: string, title: string, body: string, scope: string[]) => {
+		editDraft: async (id: string, title: string, body: string, scope: string[]): Promise<boolean> => {
 			const normalizedScope = normalizeScopes(scope);
 			const response = await fetch(`/api/kb/${id}`, {
 				method: "PATCH",
@@ -82,6 +106,7 @@ export function useKbReviewActions() {
 				body: JSON.stringify({ title, body, scope: normalizedScope }),
 			});
 			if (response.ok) dispatch({ type: KbReviewActionType.Edit, id, title, body, scope: normalizedScope });
+			return response.ok;
 		},
 		// Single round-trip bulk approve: send every visible draft's id, then remove from the list
 		// only the ids the server reports as actually flipped (drops any that were already canonical).
