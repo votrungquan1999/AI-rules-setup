@@ -83,6 +83,33 @@ describe("KB browse screen", () => {
 		await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
 	});
 
+	it("disables Save while the edit is saving, then closes the dialog when it succeeds", async () => {
+		// Given a save request that stays pending until we resolve it
+		let resolveSave: (response: Response) => void = () => {};
+		const fetchMock = vi.fn(
+			() =>
+				new Promise<Response>((res) => {
+					resolveSave = res;
+				}),
+		);
+		vi.stubGlobal("fetch", fetchMock);
+
+		renderBrowse([canonicalEntry({ id: "507f1f77bcf86cd799439011", title: "Edit me" })]);
+		fireEvent.click(screen.getByRole("button", { name: /edit/i }));
+
+		// When the reviewer saves (request in flight)
+		fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: /save/i }));
+
+		// Then Save is disabled while pending
+		await waitFor(() =>
+			expect(within(screen.getByRole("dialog")).getByRole("button", { name: /save/i })).toBeDisabled(),
+		);
+
+		// When the save succeeds, the dialog closes
+		resolveSave({ ok: true } as Response);
+		await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+	});
+
 	it("shows the Global badge immediately after a reviewer clears an approved entry's scope", async () => {
 		const fetchMock = vi.fn().mockResolvedValue({ ok: true } as Response);
 		vi.stubGlobal("fetch", fetchMock);

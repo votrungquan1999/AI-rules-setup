@@ -4,12 +4,12 @@ import { createReducerContext } from "src/app/hooks/createReducerContext";
 import { normalizeScopes } from "src/lib/normalize-scopes";
 import { type KbBrowseAction, KbBrowseActionType, type KbBrowseState } from "./kb-browse.type";
 
-const initialState: KbBrowseState = { entries: [], editingId: null };
+const initialState: KbBrowseState = { entries: [], editingId: null, savePending: false };
 
 /**
- * Reducer for the canonical KB browse screen. Opens/closes the edit dialog, or replaces an entry's
- * title/body/scope after an edit resolves. The Edit transition never touches `status` — an edited
- * approved entry stays canonical.
+ * Reducer for the canonical KB browse screen. Opens/closes the edit dialog, replaces an entry's
+ * title/body/scope after an edit resolves, or flags whether a save is in flight. The Edit transition
+ * never touches `status` — an edited approved entry stays canonical.
  * @param state - Current browse state
  * @param action - The browse action to apply
  * @returns The next browse state
@@ -25,6 +25,8 @@ function kbBrowseReducer(state: KbBrowseState, action: KbBrowseAction): KbBrowse
 					e.id === action.id ? { ...e, title: action.title, body: action.body, scope: action.scope } : e,
 				),
 			};
+		case KbBrowseActionType.SetSavePending:
+			return { ...state, savePending: action.pending };
 		default:
 			return state;
 	}
@@ -58,9 +60,19 @@ export function useKbBrowseEditDialog() {
 }
 
 /**
+ * Exposes whether the edit-dialog Save request is currently in flight, so the Save button can show a
+ * pending state without the component reading raw state directly.
+ * @returns `true` while a save is in flight, otherwise `false`
+ */
+export function useKbBrowseSavePending() {
+	return useRawState().savePending;
+}
+
+/**
  * Domain actions for the browse screen. `editEntry` saves a canonical entry's edited title/body/scope
  * via the PATCH endpoint (which preserves status), normalizing scopes first; on success it updates
- * the in-memory list and closes the dialog so the card reflects the change immediately, no reload.
+ * the in-memory list and closes the dialog so the card reflects the change immediately, no reload. It
+ * brackets the request with a save-pending flag (set before, cleared in `finally`) for the Save button.
  * @returns the `editEntry` action callback
  */
 export function useKbBrowseActions() {
@@ -68,14 +80,19 @@ export function useKbBrowseActions() {
 	return {
 		editEntry: async (id: string, title: string, body: string, scope: string[]) => {
 			const normalizedScope = normalizeScopes(scope);
-			const response = await fetch(`/api/kb/${id}`, {
-				method: "PATCH",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ title, body, scope: normalizedScope }),
-			});
-			if (response.ok) {
-				dispatch({ type: KbBrowseActionType.Edit, id, title, body, scope: normalizedScope });
-				dispatch({ type: KbBrowseActionType.SetEditing, id: null });
+			dispatch({ type: KbBrowseActionType.SetSavePending, pending: true });
+			try {
+				const response = await fetch(`/api/kb/${id}`, {
+					method: "PATCH",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ title, body, scope: normalizedScope }),
+				});
+				if (response.ok) {
+					dispatch({ type: KbBrowseActionType.Edit, id, title, body, scope: normalizedScope });
+					dispatch({ type: KbBrowseActionType.SetEditing, id: null });
+				}
+			} finally {
+				dispatch({ type: KbBrowseActionType.SetSavePending, pending: false });
 			}
 		},
 	};

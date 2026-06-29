@@ -4,6 +4,7 @@ import type { KbDoc } from "src/server/types";
 export enum KbBrowseActionType {
 	Edit = "edit",
 	SetEditing = "set-editing",
+	SetSavePending = "set-save-pending",
 }
 
 /**
@@ -24,10 +25,20 @@ export interface SetEditingAction {
 	id: string | null;
 }
 
-export type KbBrowseAction = EditEntryAction | SetEditingAction;
+/** Sets whether the edit-dialog Save request is currently in flight. */
+export interface SetSavePendingAction {
+	type: KbBrowseActionType.SetSavePending;
+	pending: boolean;
+}
 
-/** Browse screen state: the canonical entries on display, plus which one's editor is open. */
+export type KbBrowseAction = EditEntryAction | SetEditingAction | SetSavePendingAction;
+
+/**
+ * Browse screen state: the canonical entries on display, which one's editor is open, and whether the
+ * edit-dialog Save request is currently in flight.
+ */
 export interface KbBrowseState {
 	entries: KbDoc[];
 	editingId: string | null;
+	savePending: boolean;
 }

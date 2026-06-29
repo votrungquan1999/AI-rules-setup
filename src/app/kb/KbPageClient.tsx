@@ -13,15 +13,20 @@ import {
 } from "src/components/ui/dialog";
 import { Input } from "src/components/ui/input";
 import { Label } from "src/components/ui/label";
+import { PendingButton } from "src/components/ui/pending-button";
 import { Textarea } from "src/components/ui/textarea";
 import type { KbDoc } from "src/server/types";
-import { useKbBrowseActions, useKbBrowseEditDialog, useKbBrowseEntries } from "./kb-browse.state";
+import {
+	useKbBrowseActions,
+	useKbBrowseEditDialog,
+	useKbBrowseEntries,
+	useKbBrowseSavePending,
+} from "./kb-browse.state";
 import {
 	KbListCard,
 	KbListContainer,
 	KbListGlobalBadge,
 	KbListHeader,
-	KbListLayout,
 	KbListScopeRow,
 	KbListScopeTag,
 } from "./kb-list.ui";
@@ -35,6 +40,7 @@ export function KbPageClient() {
 	const entries = useKbBrowseEntries();
 	const { editingEntry, openEdit, closeEdit } = useKbBrowseEditDialog();
 	const { editEntry } = useKbBrowseActions();
+	const savePending = useKbBrowseSavePending();
 	const [editTitle, setEditTitle] = useState("");
 	const [editBody, setEditBody] = useState("");
 	const [editScopes, setEditScopes] = useState<string[]>([]);
@@ -54,7 +60,7 @@ export function KbPageClient() {
 	}
 
 	return (
-		<KbListLayout>
+		<div className="space-y-6">
 			<KbListHeader>
 				<h1 className="text-3xl font-bold text-foreground">Knowledge Base</h1>
 				<p className="text-muted-foreground">
@@ -108,12 +114,12 @@ export function KbPageClient() {
 						<ScopeChipsEditor label="Scopes" value={editScopes} onChange={setEditScopes} />
 					</div>
 					<DialogFooter>
-						<Button onClick={saveEdit} disabled={editBody.trim().length === 0}>
+						<PendingButton pending={savePending} onClick={saveEdit} disabled={editBody.trim().length === 0}>
 							Save
-						</Button>
+						</PendingButton>
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
-		</KbListLayout>
+		</div>
 	);
 }

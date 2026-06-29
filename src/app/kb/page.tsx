@@ -5,17 +5,22 @@ import { SESSION_COOKIE, verifySessionSecret } from "src/app/api/lib/session";
 import { findAllCanonicalKbDocs } from "src/server/kb-repository";
 import { KbPageClient } from "./KbPageClient";
 import { KbBrowseProvider } from "./kb-browse.state";
+import { KbListSkeleton } from "./kb-list.skeleton";
+import { KbListLayout } from "./kb-list.ui";
 
 /**
- * KB list page (server component). The per-request content (session cookie + canonical docs) is
- * rendered inside a `<Suspense>` boundary, matching `/kb/review`'s structure for Next's
- * `cacheComponents` compatibility.
+ * KB list page (server component). The static shell (`KbListLayout` → nav + container) renders
+ * immediately, while the per-request content (session cookie + canonical docs) streams inside a
+ * `<Suspense>` that shows `KbListSkeleton` until it resolves. Reading `cookies()` inside the
+ * boundary satisfies Next's `cacheComponents` requirement while keeping the shell prerendered.
  */
 export default function KbListPage() {
 	return (
-		<Suspense fallback={null}>
-			<KbListContent />
-		</Suspense>
+		<KbListLayout>
+			<Suspense fallback={<KbListSkeleton />}>
+				<KbListContent />
+			</Suspense>
+		</KbListLayout>
 	);
 }
 
