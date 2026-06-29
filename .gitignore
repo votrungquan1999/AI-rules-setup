@@ -107,3 +107,8 @@ Thumbs.db
 test-projects/
 
 test-dir/
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/tests/pw/.auth/
