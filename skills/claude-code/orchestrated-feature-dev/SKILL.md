@@ -26,6 +26,14 @@ The main session:
 - **Reads state files** to make routing decisions and to drive the BDD scenario loop
 - **Presents sub-agent outputs** to the user by reading and relaying their output files
 - **Fixes state files** when investigation reveals plan issues (update `<ws>/PLAN_STEPS.md` and `<ws>/implementation-plan.md`)
+- **Logs decisions** — whenever any phase, or the orchestrator itself (e.g. when fixing the plan after investigation, or picking a routing option), faces **2+ defensible options and commits to one**, append an entry to `<ws>/DECISIONS.md`. This includes choices resolved by escalating to the user — record what they picked. Do NOT log forced moves where only one option was ever viable. Entry format:
+
+  ```markdown
+  ## [phase or step] — [short title of the choice]
+  - **Decided:** [the option chosen]
+  - **Alternatives:** [the option(s) not taken]
+  - **Why:** [one-line rationale; note "user chose" when escalated]
+  ```
 
 The main session MUST NOT:
 - Perform research, planning, investigation, validation, or quality review itself — always delegate to sub-agents for those
@@ -74,6 +82,7 @@ State files inside the workspace:
 - `<ws>/IMPLEMENTATION_PROGRESS.md` — Progress tracking with test results (written by BDD scenario step node)
 - `<ws>/INVESTIGATION_STEP_[N].md` — Per-step investigation findings (written by investigation nodes)
 - `<ws>/VALIDATION_STEP_[N].md` — Per-step validation results (written by validation nodes)
+- `<ws>/DECISIONS.md` — Running decision log: every point where **2+ viable options existed and one was chosen** (appended by any phase that makes such a choice; read and reported by the summary node)
 
 The whole `./tmp/` directory should be in `.gitignore`; the per-task folder can be deleted once the task is done.
 
@@ -297,9 +306,9 @@ Agent(
   description: "Final summary",
   prompt: "Read the instructions in [this skill's directory]/nodes/node-summary.md
     and execute them. The task working directory is <ws> (./tmp/<identifier>/) — read state
-    files there. Read <ws>/RESEARCH_OUTPUT.md, <ws>/PLAN_STEPS.md, and
-    <ws>/IMPLEMENTATION_PROGRESS.md. Run the full test suite and linting.
-    Report back: complete summary with steps, quality gates, test results, files changed."
+    files there. Read <ws>/RESEARCH_OUTPUT.md, <ws>/PLAN_STEPS.md,
+    <ws>/IMPLEMENTATION_PROGRESS.md, and <ws>/DECISIONS.md (if present). Run the full test suite and linting.
+    Report back: complete summary with steps, quality gates, test results, files changed, and key decisions."
 )
 ```
 

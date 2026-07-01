@@ -103,3 +103,5 @@ Update `<ws>/IMPLEMENTATION_PROGRESS.md` with the step result:
 **Regressions:** none | [list]
 **Notes:** [anything worth mentioning]
 ```
+
+**Log any decision.** If this step involved a choice between **2+ viable implementation approaches** and you committed to one — including an approved test-skip at the 2d gate (skip vs defer vs make-testable) — append an entry to `<ws>/DECISIONS.md` (create it if absent): the option chosen, the alternative(s), and a one-line why (note "user chose" when it came from an escalation). The summary phase reports these.

@@ -109,4 +109,6 @@ Write to the `step-result.md` artifact:
 ## Notes: [anything worth mentioning]
 ```
 
+**Log any decision.** If this step involved a choice between **2+ viable implementation approaches** and you committed to one — including an approved test-skip at the meaningful-test gate (skip vs defer vs make-testable) — append an entry to the `decisions.md` artifact (create it if absent): option chosen, alternative(s), one-line why (note "user chose" when escalated). The summary phase reports these.
+
 Update `loop-state.json` artifact: increment `current_step`.

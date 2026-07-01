@@ -37,3 +37,5 @@ Progress entry format:
 - Files changed:
 - Regressions: none | ...
 ```
+
+If this step involved a choice between 2+ viable implementation approaches — including an approved test-skip at the meaningful-test gate (skip vs defer vs make-testable) — append an entry to `<ws>/DECISIONS.md` (create if absent): option chosen, alternative(s), one-line why (note "user chose" when escalated). The summary phase reports these.

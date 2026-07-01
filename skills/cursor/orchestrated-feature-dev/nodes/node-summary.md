@@ -12,13 +12,15 @@ Produce final delivery summary after validation.
 - `<ws>/IMPLEMENTATION_PROGRESS.md`
 - `<ws>/QUALITY_RESULT.md` (if present)
 - `<ws>/VALIDATION_STEP_<N>.md` files
+- `<ws>/DECISIONS.md` (if present — the decision log)
 
 ## Workflow
 
 1. Count completed versus planned steps.
 2. Summarize quality gate and validation outcomes.
 3. Aggregate changed files and test outcomes.
-4. Note residual risks and follow-up actions.
+4. Summarize the decision log: each point where 2+ viable options existed and one was chosen.
+5. Note residual risks and follow-up actions.
 
 ## Output
 
@@ -28,6 +30,8 @@ Create `<ws>/FINAL_SUMMARY.md`:
 ## Feature Outcome
 ## Steps Completed
 ## Quality and Validation Results
+## Key Decisions
+[each 2+-option choice and the picked option; omit only if the decision log is empty]
 ## Files Changed
 ## Test/Lint Status
 ## Risks / Follow-ups

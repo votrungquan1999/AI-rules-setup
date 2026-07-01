@@ -13,7 +13,7 @@ Read the `research-output.md` artifact from the brain directory for context abou
 2. **Use `@create-implementation-plan`** to create the plan. When the skill asks you to research, point it to the research output artifact instead of re-reading the codebase — the research is already done.
 
 3. **Ensure the plan has the two key sections:**
-   - **Technical Design**: Only significant decisions (new fields, API changes, strategy choices). Skip anything obvious.
+   - **Technical Design**: Only significant decisions (new fields, API changes, strategy choices). Skip anything obvious. **For each significant decision where 2+ viable options existed and you picked one, append an entry to the `decisions.md` artifact** (create it if absent): chosen option, alternative(s) rejected, one-line why — the summary phase reports these.
    - **Behaviors to Implement**: Observable behaviors as BDD scenario steps — not code tasks. First name the client/stakeholder; write each behavior in their language and value; reject implementation mechanics (schemas, fields, tables, queries, error codes, function/class names, the linter, CI). By DEFAULT the client is a business/end-user; only phrase in developer terms if the user explicitly says the client is a developer or internal/consuming system.
      - **Litmus test:** read it aloud to the stakeholder — if it mentions code or internals, it FAILS; rewrite it.
      - ✅ `User sees trending markets at the top`

@@ -25,6 +25,7 @@ The main session MUST:
 - **Read state artifacts** only to make routing decisions (pass/fail, next step, done/not done)
 - **Present node outputs** to the user by reading and relaying their output artifacts
 - **Fix state artifacts** when investigation reveals plan issues (update `plan-steps.md` and `implementation-plan.md`)
+- **Log decisions** — whenever any node, or the orchestrator itself (e.g. fixing the plan after investigation, or a routing choice), faces **2+ defensible options and commits to one** (including choices resolved by asking the user), append an entry to `decisions.md`: chosen option, alternative(s), one-line why. Skip forced moves where only one option was viable.
 
 The main session MUST NOT:
 - Read source code files directly (outside of node execution)
@@ -48,6 +49,7 @@ All workflow state files are created as Antigravity artifacts in the brain direc
 - `investigation-summary.md` — Consolidated investigation results
 - `validation-step-[N].md` — Per-step validation results
 - `validation-summary.md` — Consolidated validation results
+- `decisions.md` — Running decision log: every point where 2+ viable options existed and one was chosen; read and reported by the summary node
 
 ---
 
@@ -234,6 +236,7 @@ Present the final summary to the user with:
 - Quality gate outcomes
 - Validation results
 - Files changed
+- Key decisions (from `decisions.md` — each 2+-option choice and the option picked)
 
 ---
 

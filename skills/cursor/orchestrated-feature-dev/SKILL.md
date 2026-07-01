@@ -35,6 +35,7 @@ Every run is scoped to its task identifier so **multiple tasks run in parallel**
 - `<ws>/IMPLEMENTATION_PROGRESS.md`
 - `<ws>/INVESTIGATION_STEP_<N>.md`
 - `<ws>/VALIDATION_STEP_<N>.md`
+- `<ws>/DECISIONS.md` — running decision log: every point where 2+ viable options existed and one was chosen; read and reported by the summary node
 
 `./tmp/` should be in `.gitignore`; delete `<ws>` once the feature is merged.
 
@@ -51,6 +52,7 @@ Every run is scoped to its task identifier so **multiple tasks run in parallel**
 - Run BDD scenario steps inline for continuity.
 - Route based on state files and gate outcomes.
 - Pass the task workspace path `<ws>` to every subagent it spawns.
+- Log decisions: whenever any phase, or the orchestrator itself (e.g. fixing the plan after investigation, or a routing choice), faces 2+ defensible options and commits to one — including choices resolved by asking the user — append an entry to `<ws>/DECISIONS.md` (chosen option, alternative(s), one-line why). Skip forced moves where only one option was viable.
 - Pause for user approval at plan gates. The review artifact is `<ws>/implementation-plan.md` (Technical Design + Behaviors) — never present `<ws>/PLAN_STEPS.md`, which is derived loop state written only after the plan is approved.
 
 ## Phase Entry Points
