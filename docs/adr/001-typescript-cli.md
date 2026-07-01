@@ -70,7 +70,7 @@ We will use **TypeScript** as the primary language with **Commander.js** as the 
 ### Positive
 
 - Fast development and iteration
-- Easy NPM publishing with `npx ai-rules`
+- Easy NPM publishing with `npx @quanvo99/ai-rules@latest`
 - Type safety reduces bugs
 - Familiar tooling for JavaScript developers
 - Easy to find contributors

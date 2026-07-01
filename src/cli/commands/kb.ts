@@ -88,7 +88,7 @@ kbCommand
 					`${chalk.dim(hit.id)}  ${chalk.cyan(`[${hit.type}]`)}  ${hit.title}  ${chalk.dim(`(${hit.score})`)}`,
 				);
 			}
-			console.log(chalk.dim(`\nUse "ai-rules kb get <id>" to read the full entry.`));
+			console.log(chalk.dim(`\nUse "npx @quanvo99/ai-rules@latest kb get <id>" to read the full entry.`));
 		} catch (error) {
 			console.error(chalk.red(`❌ ${error instanceof Error ? error.message : error}`));
 			process.exit(1);

@@ -27,7 +27,11 @@ export async function addCommand(options: AddOptions): Promise<void> {
 	// Check that .ai-rules.json exists (add command requires prior init)
 	const configPath = join(process.cwd(), ".ai-rules.json");
 	if (!existsSync(configPath)) {
-		console.error(chalk.red("❌ No .ai-rules.json found. Run 'ai-rules init' first to initialize your project."));
+		console.error(
+			chalk.red(
+				"❌ No .ai-rules.json found. Run 'npx @quanvo99/ai-rules@latest init' first to initialize your project.",
+			),
+		);
 		process.exit(1);
 	}
 
@@ -35,7 +39,9 @@ export async function addCommand(options: AddOptions): Promise<void> {
 
 	const agent = config.agent;
 	if (!agent) {
-		console.error(chalk.red("❌ No agent configured in .ai-rules.json. Run 'ai-rules init' first."));
+		console.error(
+			chalk.red("❌ No agent configured in .ai-rules.json. Run 'npx @quanvo99/ai-rules@latest init' first."),
+		);
 		process.exit(1);
 	}
 

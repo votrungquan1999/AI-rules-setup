@@ -28,13 +28,13 @@ How can we programmatically generate context-appropriate questions to identify a
 
 **Current User Flow:**
 
-1. Developer runs `ai-rules init`
+1. Developer runs `npx @quanvo99/ai-rules@latest init`
 2. Manually selects relevant rule categories from a list
 3. Rules are installed based on selection
 
 **Desired User Flow:**
 
-1. Developer runs `ai-rules init`
+1. Developer runs `npx @quanvo99/ai-rules@latest init`
 2. Tool automatically detects project techstack (or asks minimal questions)
 3. Tool recommends specific rules based on detected technologies
 4. Developer confirms or refines recommendations

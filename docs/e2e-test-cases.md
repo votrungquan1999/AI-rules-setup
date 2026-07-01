@@ -26,7 +26,7 @@ End-to-end test cases for the AI Rules Setup web UI, organized as user flow scen
 6. User checks a skill checkbox (e.g., `tdd-design`) — sidebar shows the skill under "Skills" heading, selected count is 1
 7. User switches to Workflows tab and checks a workflow — sidebar adds it under "Workflows" heading, count is 2
 8. User switches to Rules tab and checks a rule — sidebar adds it under "Rules" heading, count is 3
-9. Sidebar "Generated Command" section shows a valid `npx ai-rules init --agent antigravity ...` command with all selected items
+9. Sidebar "Generated Command" section shows a valid `npx @quanvo99/ai-rules@latest init --agent antigravity ...` command with all selected items
 10. User clicks the copy button on the command — command is copied to clipboard
 
 ---

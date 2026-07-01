@@ -34,50 +34,50 @@ AI Rules CLI solves the problem of scattered, hard-to-find AI agent rule files a
 
 ## Commands
 
-### `ai-rules init`
+### `npx @quanvo99/ai-rules@latest init`
 
 Interactive setup wizard — or use flags for non-interactive mode:
 
 ```bash
 # Interactive (prompts for everything)
-ai-rules init
+npx @quanvo99/ai-rules@latest init
 
 # Non-interactive with specific selections
-ai-rules init --agent cursor --categories typescript,react-hooks --overwrite-strategy force
+npx @quanvo99/ai-rules@latest init --agent cursor --categories typescript,react-hooks --overwrite-strategy force
 
 # With skills and workflows
-ai-rules init --agent antigravity --categories all --skills tdd-design,bdd-design --workflows feature-development
+npx @quanvo99/ai-rules@latest init --agent antigravity --categories all --skills tdd-design,bdd-design --workflows feature-development
 
 # Skip certain content types
-ai-rules init --agent cursor --no-skills --no-workflows
+npx @quanvo99/ai-rules@latest init --agent cursor --no-skills --no-workflows
 ```
 
-### `ai-rules pull`
+### `npx @quanvo99/ai-rules@latest pull`
 
 Re-install all content tracked in `.ai-rules.json` with latest versions:
 
 ```bash
-ai-rules pull
-ai-rules pull --overwrite-strategy skip
+npx @quanvo99/ai-rules@latest pull
+npx @quanvo99/ai-rules@latest pull --overwrite-strategy skip
 ```
 
-### `ai-rules add`
+### `npx @quanvo99/ai-rules@latest add`
 
 Add content to an already-initialized project:
 
 ```bash
-ai-rules add --categories testing,database
-ai-rules add --skills test-quality-reviewer --workflows commit-plan
-ai-rules add --categories all --overwrite-strategy force
+npx @quanvo99/ai-rules@latest add --categories testing,database
+npx @quanvo99/ai-rules@latest add --skills test-quality-reviewer --workflows commit-plan
+npx @quanvo99/ai-rules@latest add --categories all --overwrite-strategy force
 ```
 
-### `ai-rules upload`
+### `npx @quanvo99/ai-rules@latest upload`
 
 Publish a local skill directory as a **private, scoped** skill (see [Private Skills](#private-skills)). Requires the `AI_RULES_SECRET` environment variable:
 
 ```bash
-AI_RULES_SECRET=… ai-rules upload ./path/to/skill-dir --agent claude-code --scope work
-AI_RULES_SECRET=… ai-rules upload ./my-skill --agent cursor --scope work,client-x
+AI_RULES_SECRET=… npx @quanvo99/ai-rules@latest upload ./path/to/skill-dir --agent claude-code --scope work
+AI_RULES_SECRET=… npx @quanvo99/ai-rules@latest upload ./my-skill --agent cursor --scope work,client-x
 ```
 
 The directory must contain a `SKILL.md`; any other files are uploaded as supporting files. The skill name is the directory's basename, and re-uploading the same `{agent, name}` replaces it.
@@ -104,7 +104,7 @@ On any auth failure the server **silently** returns the public-only payload — 
 export AI_RULES_SECRET='…'
 
 # 2. Add a scope to .ai-rules.json (see Configuration), then pull
-ai-rules pull   # now fetches public + scoped private skills
+npx @quanvo99/ai-rules@latest pull   # now fetches public + scoped private skills
 ```
 
 > Tip: ask your AI agent to run the **`setup-private-skills`** skill — it walks through the secret, scope, upload, and pull steps for you.

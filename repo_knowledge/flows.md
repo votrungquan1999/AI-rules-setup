@@ -10,7 +10,7 @@ This document describes the critical flows through the system.
 
 ```mermaid
 flowchart TD
-    Start([ai-rules init]) --> A{--agent flag?}
+    Start([npx @quanvo99/ai-rules@latest init]) --> A{--agent flag?}
     A -->|Yes| B[Use specified agent]
     A -->|No| C[Fetch available agents → prompt selection]
     B --> D{--no-categories?}

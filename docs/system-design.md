@@ -118,7 +118,7 @@ sequenceDiagram
     participant G as GitHub
     participant F as File System
 
-    U->>C: ai-rules init
+    U->>C: npx @quanvo99/ai-rules@latest init
     C->>U: Select AI agent
     U->>C: cursor
     C->>U: Select categories
@@ -143,7 +143,7 @@ sequenceDiagram
     participant G as GitHub
     participant F as File System
 
-    U->>C: ai-rules update
+    U->>C: npx @quanvo99/ai-rules@latest update
     C->>F: Load config
     F->>C: Return installed rules
     C->>G: Fetch latest manifests

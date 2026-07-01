@@ -30,8 +30,10 @@ export default function HomePage() {
 					<h2 className="text-2xl font-semibold text-foreground mb-3">📚 Review Knowledge Base Drafts</h2>
 					<p className="text-muted-foreground mb-4">
 						Approve, edit, or reject drafts captured via{" "}
-						<code className="text-sm font-mono bg-muted px-1.5 py-0.5 rounded">ai-rules kb capture</code>. Drafts stay
-						invisible to agents until approved.
+						<code className="text-sm font-mono bg-muted px-1.5 py-0.5 rounded">
+							npx @quanvo99/ai-rules@latest kb capture
+						</code>
+						. Drafts stay invisible to agents until approved.
 					</p>
 					<Link
 						href="/kb/review"
@@ -59,12 +61,15 @@ export default function HomePage() {
 						<div className="bg-card border border-border rounded-lg p-4 space-y-3">
 							<div>
 								<h3 className="font-semibold text-foreground mb-1">Interactive Mode</h3>
-								<code className="text-sm font-mono bg-muted px-2 py-1 rounded block">ai-rules init</code>
+								<code className="text-sm font-mono bg-muted px-2 py-1 rounded block">
+									npx @quanvo99/ai-rules@latest init
+								</code>
 							</div>
 							<div>
 								<h3 className="font-semibold text-foreground mb-1">Non-Interactive Mode</h3>
 								<code className="text-sm font-mono bg-muted px-2 py-1 rounded block">
-									ai-rules init --agent cursor --categories typescript,react-hooks --overwrite-strategy force
+									npx @quanvo99/ai-rules@latest init --agent cursor --categories typescript,react-hooks
+									--overwrite-strategy force
 								</code>
 							</div>
 						</div>

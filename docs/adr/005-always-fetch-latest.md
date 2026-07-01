@@ -91,7 +91,7 @@ async function fetchRuleFile(agent: string, category: string): Promise<string> {
 ### Update Command
 
 ```bash
-ai-rules update  # Always fetches latest
+npx @quanvo99/ai-rules@latest update  # Always fetches latest
 ```
 
 ## Consequences
@@ -119,8 +119,8 @@ ai-rules update  # Always fetches latest
 Add version pinning as an advanced feature:
 
 ```bash
-ai-rules update --pin-to-commit abc123
-ai-rules update --pin-to-tag v1.2.3
+npx @quanvo99/ai-rules@latest update --pin-to-commit abc123
+npx @quanvo99/ai-rules@latest update --pin-to-tag v1.2.3
 ```
 
 ### Iteration 4+: Local Caching
@@ -128,8 +128,8 @@ ai-rules update --pin-to-tag v1.2.3
 Add local caching for performance:
 
 ```bash
-ai-rules update --use-cache
-ai-rules cache clear
+npx @quanvo99/ai-rules@latest update --use-cache
+npx @quanvo99/ai-rules@latest cache clear
 ```
 
 ### Iteration 4+: Lockfiles
