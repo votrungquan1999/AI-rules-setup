@@ -48,3 +48,11 @@ Code/test comments must be skimmable (typically one line, WHY-focused). Never in
 ## 2+ defensible behaviors → stop and ask the user
 
 When a code path has 2+ defensible behaviors (lossy vs preserve, gate vs skip, fail-closed vs fail-open), stop and ask the user — overrides 'don't stop for review'.
+
+## "could/can you" = a request → act. "could/can we" = a question → answer and recommend, do not act yet.
+
+"could/can you" = a request → act. "could/can we" = a question → answer and recommend, do not act yet.
+
+## On substantive multi-step work, run ai-kanban-track-session: open an in_progress card (tags=.ai-rules.json scope, +sessionId), append progress, set need_review when done. Skip trivial tasks.
+
+On substantive multi-step work, run ai-kanban-track-session: open an in_progress card (tags=.ai-rules.json scope, +sessionId), append progress, set need_review when done. Skip trivial tasks.
