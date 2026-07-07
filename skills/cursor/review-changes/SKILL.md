@@ -42,33 +42,27 @@ Intermediates live in `./tmp/review-changes/`; the final report is `./tmp/review
 - `nodes/node-lens-correctness.md`, `node-lens-quality.md`, `node-lens-security.md`, `node-lens-tests.md`
 - `nodes/node-verify.md` — verify flagged findings
 
-## Step 0 — Resolve the target repo and diff base (do this first, yourself)
+## Step 0 — Work in the right repo, against a fresh base
 
-Nothing runs on load — you run the git commands, in the right repo, before Phase 1. Two traps:
+Do this before Phase 1. Two traps:
 
-- **Wrong directory.** The launch dir is often a *parent* of the repo under review (e.g. you're in `~/git-repos/personal` but the conversation is about `quant-trading/`). Never assume the pwd is the repo.
-- **Stale base.** The local `main`/`master` ref is usually behind the remote, so diffing against it shows already-merged commits as "changes."
+- **Wrong directory.** The repo under review is often not the current dir — you might be in `~/git-repos/personal` while the conversation is about `quant-trading/`. Infer the repo from the conversation (what's named, the files discussed, the IDE selection) and work from inside it. If the current dir isn't a git repo and the target is unclear, ask.
+- **Base.** If the user named a base to diff against (a branch, tag, or PR target), use it. Otherwise use the repo's default branch — fresh: the local `main`/`master` is usually behind the remote, so fetch first and base off the remote-tracking ref:
+  ```bash
+  git fetch --quiet origin
+  BASE=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null \
+    || for b in origin/main origin/master origin/develop; do \
+         git rev-parse --verify --quiet "$b" >/dev/null && echo "$b" && break; done)
+  ```
+  Fall back to `HEAD~1` only when there's no base branch at all (say so).
 
-1. **Pick the target repo `$REPO`.** Infer it from the conversation — repo named in the request, files under discussion, IDE selection — not just the pwd. Verify: `git -C "$REPO" rev-parse --show-toplevel`. If the pwd isn't a git repo and no target is clear, ask which repo to review.
-2. **Run every git command with `git -C "$REPO" …`** — never rely on the working directory.
-3. **Fetch, then take a fresh base.** Auto-fetch so the base isn't stale, prefer remote-tracking refs over local:
-   ```bash
-   git -C "$REPO" fetch --quiet origin
-   BASE=$(git -C "$REPO" symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null \
-     || for b in origin/main origin/master origin/develop; do \
-          git -C "$REPO" rev-parse --verify --quiet "$b" >/dev/null && echo "$b" && break; done)
-   MERGE_BASE=$(git -C "$REPO" merge-base HEAD "$BASE")
-   ```
-   Fall back to `HEAD~1` only when there is no base branch at all (say so).
-4. **Scope the diff to what the user asked for.** Reviewing a branch/PR → committed changes since the base (`git -C "$REPO" diff "$MERGE_BASE"`); reviewing current/uncommitted work → also include `git -C "$REPO" status --short`; ambiguous → default to committed-since-base and note what you covered.
-
-Pass `$REPO` and `$BASE` to every lens and verifier subagent so they run against the same repo and base.
+Scope to what the user asked: branch/PR review → committed changes since `$BASE`; uncommitted work → also `git status --short`; ambiguous → default to committed-since-base. Tell each lens/verifier subagent which repo dir and base to use.
 
 ## Phases
 
-1. **Holistic (inline).** Run `node-holistic.md` against `$REPO`/`$BASE` from Step 0: eligibility (empty/trivial diff -> say so and stop, or do a single inline pass and skip the fan-out), changes summary, approach evaluation. Write `HOLISTIC.md`. **Gate:** if eligibility stops the review, stop.
+1. **Holistic (inline).** Run `node-holistic.md` from inside the repo, against `$BASE` from Step 0: eligibility (empty/trivial diff -> say so and stop, or do a single inline pass and skip the fan-out), changes summary, approach evaluation. Write `HOLISTIC.md`. **Gate:** if eligibility stops the review, stop.
 2. **Lens gate.** Always run correctness, quality, security; run tests only if the diff adds/modifies test files. State which lenses and why before spawning.
-3. **Lenses (parallel subagents).** Each reads its node file + `lens-common.md` + `HOLISTIC.md`, sees the changes via `git -C "$REPO" diff "$BASE"`, reviews ONLY the diff, writes `LENS_<name>.md`, and reports finding count + highest severity.
+3. **Lenses (parallel subagents).** Each reads its node file + `lens-common.md` + `HOLISTIC.md`, sees the changes via `git diff "$BASE"` from inside the repo, reviews ONLY the diff, writes `LENS_<name>.md`, and reports finding count + highest severity.
 4. **Verification (parallel subagents).** Lenses are **trusted by default**. Verify only findings marked `Needs verification: yes` — the lens flagged something it couldn't confirm from the diff alone (behavior outside the diff, a caller's actual input, a runtime assumption, a guard that may exist elsewhere). Batch 2-4 flagged findings by shared file; each verifier resolves the flagged uncertainty against the real code and writes `VERDICT_<batch>.md`. Skip the phase entirely if nothing is flagged.
 5. **Merge (inline).** Apply verdicts — REFUTED -> drop; CONFIRMED -> keep with the verifier's adjusted severity; UNCERTAIN -> score conservatively (usually falls below the filter); trusted (never-flagged) findings -> carry through as-is. Then score each survivor 0-100 for "real, in-scope issue", **drop everything < 80**, dedupe by file+line (keep highest severity), normalize severity. Write `./tmp/review-changes.md`. If nothing survives, say the changes look good.
 

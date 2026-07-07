@@ -8,13 +8,9 @@ allowed-tools: Read, Bash, Write
 
 Create a well-structured commit plan by analyzing current git changes and grouping them into semantic commits with detailed descriptions.
 
-## Step 0 — Resolve the target repo (do this first, yourself)
+## Step 0 — Work in the right repo
 
-Nothing runs on load — **you** run the git commands, in the right repo. The launch dir is often a *parent* of the repo being committed (e.g. you're in `~/git-repos/personal` but the work is in `quant-trading/`), so never assume the pwd is the repo.
-
-1. **Pick `$REPO`.** Infer the repo under discussion from the conversation, the files being changed, or the IDE selection — not just the pwd. Verify it: `git -C "$REPO" rev-parse --show-toplevel`. Ask if it's unclear.
-2. **Inspect the working tree** with `git -C "$REPO" status --short` and `git -C "$REPO" diff --stat`.
-3. **Run every later git command with the same `-C "$REPO"`** — diffs, `add`, `commit`.
+The repo being committed is often not the current dir — you might be in `~/git-repos/personal` while the work is in `quant-trading/`. Infer the repo from the conversation and the files being changed, and work from inside it; ask if the target repo is unclear. Then inspect the working tree with `git status --short` and `git diff --stat`.
 
 ## When to Use
 
@@ -24,7 +20,7 @@ Nothing runs on load — **you** run the git commands, in the right repo. The la
 
 ## Steps
 
-1. **Understand Key Changes**: For important modified files, run `git -C "$REPO" diff --no-ext-diff <file>` to see actual changes
+1. **Understand Key Changes**: For important modified files, run `git diff --no-ext-diff <file>` to see actual changes
    - Focus on files central to understanding the scope of work
    - Read 2-3 key files to understand the nature of changes
 
@@ -55,7 +51,7 @@ Nothing runs on load — **you** run the git commands, in the right repo. The la
 
 6. **Execute**: After approval, for each commit run:
    ```bash
-   git -C "$REPO" add <file1> <file2> ... && git -C "$REPO" commit -m "<title>
+   git add <file1> <file2> ... && git commit -m "<title>
 
    <description paragraph>
 

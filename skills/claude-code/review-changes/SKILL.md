@@ -10,30 +10,21 @@ You are the **orchestrator** for an autonomous code review. You run a holistic p
 
 This skill is a lightweight **fan-out → verify → merge** pipeline — NOT a heavy stateful workflow. There are no per-phase user gates; spawn, collect, verify, merge, done.
 
-## Step 0 — Resolve the target repo and diff base (do this first, yourself)
+## Step 0 — Work in the right repo, against a fresh base
 
-Nothing runs on load — **you** run the git commands, in the right repo, before anything else. Two traps to avoid:
+Do this before anything else. Two traps:
 
-- **Wrong directory.** The launch dir is often a *parent* of the repo under review (e.g. you're in `~/git-repos/personal` but the conversation is about `quant-trading/`). Never assume the pwd is the repo.
-- **Stale base.** The local `main`/`master` ref is usually behind the remote, so diffing against it shows already-merged commits as "changes."
+- **Wrong directory.** The repo under review is often not the current dir — you might be in `~/git-repos/personal` while the conversation is about `quant-trading/`. Infer the repo from the conversation (what's named, the files discussed, the IDE selection) and work from inside it. If the current dir isn't a git repo and the target is unclear, ask.
+- **Base.** If the user named a base to diff against (a branch, tag, or PR target), use it. Otherwise use the repo's default branch — fresh: the local `main`/`master` is usually behind the remote, so fetch first and base off the remote-tracking ref:
+  ```bash
+  git fetch --quiet origin
+  BASE=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null \
+    || for b in origin/main origin/master origin/develop; do \
+         git rev-parse --verify --quiet "$b" >/dev/null && echo "$b" && break; done)
+  ```
+  Fall back to `HEAD~1` only when there's no base branch at all (say so).
 
-1. **Pick the target repo `$REPO`.** Infer it from the conversation — the repo named in the request, the files under discussion, the IDE selection — not just the pwd. Verify it: `git -C "$REPO" rev-parse --show-toplevel`. If the pwd isn't a git repo and no target is clear, ask which repo to review.
-2. **Run every git command with `git -C "$REPO" …`** — never rely on the working directory.
-3. **Fetch, then take a fresh base.** Auto-fetch so the base isn't stale, then prefer remote-tracking refs over local:
-   ```bash
-   git -C "$REPO" fetch --quiet origin
-   BASE=$(git -C "$REPO" symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null \
-     || for b in origin/main origin/master origin/develop; do \
-          git -C "$REPO" rev-parse --verify --quiet "$b" >/dev/null && echo "$b" && break; done)
-   MERGE_BASE=$(git -C "$REPO" merge-base HEAD "$BASE")
-   ```
-   Fall back to `HEAD~1` only when there is no base branch at all (say so).
-4. **Scope the diff to what the user asked for.**
-   - Reviewing a branch/PR → committed changes since the base: `git -C "$REPO" diff --name-only "$MERGE_BASE"`.
-   - Reviewing current/uncommitted work → also include `git -C "$REPO" status --short` (staged, unstaged, untracked).
-   - Ambiguous → default to committed-since-base and note what you covered.
-
-Pass `$REPO` and `$BASE` to every lens and verifier subagent so they all run against the same repo and base.
+Scope to what the user asked: branch/PR review → committed changes since `$BASE`; uncommitted work → also `git status --short`; ambiguous → default to committed-since-base. Tell each lens/verifier subagent which repo dir and base to use.
 
 ## Pipeline
 
@@ -112,8 +103,8 @@ Agent(
   model: "sonnet",   // OMIT for the security lens
   prompt: "Read the instructions in [this skill's directory]/nodes/node-lens-[name].md
     and the shared rules in [this skill's directory]/nodes/lens-common.md, then execute them.
-    The changes are in repo [$REPO from Step 0] diffed against [$BASE from Step 0]: run
-    `git -C \"$REPO\" diff \"$BASE\"` to see them, and read any surrounding code from $REPO.
+    The changes are in [the repo dir resolved in Step 0], diffed against [$BASE]: work from
+    inside that repo, run `git diff \"$BASE\"` to see them, and read surrounding code there.
     Read ./tmp/review-changes/HOLISTIC.md for shared framing (intended approach, constraints, root cause).
     Review ONLY the changes in the current diff. Write findings to ./tmp/review-changes/LENS_[name].md.
     Report back: number of findings and the highest severity."
@@ -145,7 +136,7 @@ Agent(
   description: "verify findings [files]",
   model: "sonnet",   // OMIT for any batch containing a security finding
   prompt: "Read the instructions in [this skill's directory]/nodes/node-verify.md and execute them.
-    Resolve findings against repo [$REPO from Step 0] (diffed against [$BASE]); use `git -C \"$REPO\" …` for any git.
+    Resolve findings from inside [the repo dir from Step 0] (base [$BASE]) — run any git there.
     Read ./tmp/review-changes/HOLISTIC.md for shared framing.
     Verify these findings — resolve each one's flagged uncertainty against the real code: [paste each finding's lens, file:line, severity, description, and its 'Needs verification' note].
     Write verdicts to ./tmp/review-changes/VERDICT_[batch].md.
