@@ -15,10 +15,11 @@ Create a clean, reviewable commit plan from the current git state before any com
 
 ## Workflow
 
+0. **Resolve the target repo `$REPO` first (yourself, no commands on load).** The launch dir is often a *parent* of the repo being committed (e.g. you're in `~/git-repos/personal` but the work is in `quant-trading/`) — infer the repo from the conversation/files, not the pwd. Verify: `git -C "$REPO" rev-parse --show-toplevel`; ask if unclear. Run every later git command with `-C "$REPO"`.
 1. Inspect current state:
-   - `git status --short`
-   - `git diff --stat`
-   - `git log --oneline -10`
+   - `git -C "$REPO" status --short`
+   - `git -C "$REPO" diff --stat`
+   - `git -C "$REPO" log --oneline -10`
 2. Read key changed files to understand intent, not just filenames.
 3. Group changes into logical commits:
    - `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `style`
