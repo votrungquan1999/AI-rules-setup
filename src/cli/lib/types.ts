@@ -44,6 +44,8 @@ export interface Config {
 	skills?: string[];
 	/** List of installed workflows */
 	workflows?: string[];
+	/** List of installed hooks */
+	hooks?: string[];
 	/** Project scope tags used to filter private skills (e.g., ["work", "client-x"]). When unset or empty, private skills are never fetched. */
 	scope?: string[];
 }
@@ -124,6 +126,10 @@ export interface InitOptions {
 	noSkills?: boolean;
 	/** Skip workflow installation entirely */
 	noWorkflows?: boolean;
+	/** Specific hooks to install */
+	hooks?: string[];
+	/** Skip hook installation entirely */
+	noHooks?: boolean;
 	/** Overwrite strategy for file conflicts (prompt, force, skip) */
 	overwriteStrategy?: OverwriteStrategy;
 }
@@ -138,6 +144,8 @@ export interface AddOptions {
 	skills?: string[];
 	/** Specific workflows to add */
 	workflows?: string[];
+	/** Specific hooks to add */
+	hooks?: string[];
 	/** Overwrite strategy for file conflicts (prompt, force, skip) */
 	overwriteStrategy?: OverwriteStrategy;
 }

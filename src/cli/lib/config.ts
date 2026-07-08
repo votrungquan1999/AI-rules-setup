@@ -147,3 +147,23 @@ export function addWorkflow(config: Config, workflow: string): Config {
 		workflows: [...currentWorkflows, workflow],
 	};
 }
+
+/**
+ * Adds a hook to the configuration
+ * @param config - Current configuration object
+ * @param hook - Hook name to add
+ * @returns Updated configuration object
+ */
+export function addHook(config: Config, hook: string): Config {
+	const currentHooks = config.hooks || [];
+
+	// Check if hook already exists
+	if (currentHooks.includes(hook)) {
+		return config;
+	}
+
+	return {
+		...config,
+		hooks: [...currentHooks, hook],
+	};
+}

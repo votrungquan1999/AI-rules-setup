@@ -67,6 +67,12 @@ export interface RulesResponse {
 				name: string;
 				content: string;
 			}>;
+			/** Optional hooks (currently only for Claude Code) */
+			hooks?: Array<{
+				name: string;
+				content: string;
+				supportingFiles?: Array<{ path: string; content: string }>;
+			}>;
 		};
 	};
 }
@@ -448,6 +454,31 @@ export async function fetchWorkflows(
 		return agentData.workflows;
 	} catch (error) {
 		console.error(`Error fetching workflows for agent ${agent}:`, error);
+		return [];
+	}
+}
+
+/**
+ * Fetches hooks for a given agent from the API, using the shared cached rules payload.
+ * @param agent - AI agent name (e.g., 'claude-code')
+ * @param scope - Optional project scope tags; forwarded to the shared cache key
+ * @returns Array of hook objects (empty when the agent has none or the fetch fails)
+ */
+export async function fetchHooks(
+	agent: string,
+	scope?: string[],
+): Promise<Array<{ name: string; content: string; supportingFiles?: Array<{ path: string; content: string }> }>> {
+	try {
+		const data = await fetchRulesData(scope);
+		const agentData = data.agents[agent];
+
+		if (!agentData || !agentData.hooks) {
+			return [];
+		}
+
+		return agentData.hooks;
+	} catch (error) {
+		console.error(`Error fetching hooks for agent ${agent}:`, error);
 		return [];
 	}
 }
