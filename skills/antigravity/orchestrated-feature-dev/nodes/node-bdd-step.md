@@ -1,10 +1,12 @@
 # Node: BDD Scenario Step
 
-Execute one BDD scenario (test-first) for a single observable behavior.
+Execute BDD scenarios (test-first), one observable behavior at a time.
+
+> **You run as a batch execution.** Your assignment is a batch of related steps (as many as possible, capped at 4). Work them one at a time — this node describes one step. You **cannot talk to the user**: wherever this node says "escalate," it means **BUBBLE UP** — stop, write your progress to `step-result.md` + `plan-steps.md`, and return control to the orchestrator with the gate details. The orchestrator escalates to the user and re-dispatches you to resume. Never guess past a gate.
 
 ## Input
 
-Read the `plan-steps.md` artifact to find the next `pending` step.
+Work through the steps assigned in your batch, one at a time, in `plan-steps.md` order. For each, treat the first `pending` assigned step as your current target.
 Read the `loop-state.json` artifact for the current step counter.
 
 ## Execution
@@ -49,13 +51,15 @@ Before running, confirm a **meaningful** test can actually be written AND set up
 
 This is NOT the same as "no meaningful red" (2c): there, a real, asserting test exists and simply passes from the first run. Here, you **cannot construct a meaningful test at all** — e.g., no way to assert the real outcome, output is non-deterministic and can't be made stable, or the behavior depends on an external system/environment you can't mock, seed, or stand up.
 
-When you hit this, do NOT write a hollow test (one that asserts nothing real or passes regardless) just to satisfy the ritual, and do NOT silently skip it. Instead **STOP and escalate to the user**:
+When you hit this, do NOT write a hollow test (one that asserts nothing real or passes regardless) just to satisfy the ritual, and do NOT silently skip it. Instead **BUBBLE UP** (stop and return control to the orchestrator, which escalates to the user):
 
-- State the behavior, what you tried, and exactly what blocks a meaningful assertion or test setup.
-- Ask the user to decide: **skip the test** for this behavior (still implement it), **defer** the behavior, or **provide a way to make it testable** (a fixture, seam, or mock).
-- Only skip when the user **explicitly approves**.
+- Report the behavior, what you tried, and exactly what blocks a meaningful assertion or test setup.
+- The options the orchestrator will offer the user: **skip the test** for this behavior (still implement it), **defer** the behavior, or **provide a way to make it testable** (a fixture, seam, or mock).
+- Do not proceed on this step until the orchestrator re-dispatches you with the decision.
 
-If the user approves a skip: proceed to implement the behavior (step 4), then record it as `test skipped (no meaningful test possible — user approved: [reason])` in the Output. If the user makes it testable, return to step 2 and write the test.
+When re-dispatched: if the decision is skip, implement the behavior (step 4) then record it as `test skipped (no meaningful test possible — user approved: [reason])` in the Output; if it was made testable, return to step 2 and write the test.
+
+**Other bubble-up triggers (same protocol):** 2+ defensible implementation behaviors for the step, or an unexpected failure you cannot resolve with minimum code. Stop, write progress, return control.
 
 ### 3. 🚫 GATE: Run the Test
 

@@ -4,6 +4,8 @@ Execute one BDD scenario (test-first) for a single observable behavior.
 
 > **Task workspace:** All state files live in the task working directory `<ws>` (`./tmp/<identifier>/`) given in your prompt. Every state-file path below is relative to `<ws>`.
 
+> **You run inside a batch subagent.** Your prompt assigns a batch of related steps; do them one at a time (this node = one step). You cannot talk to the user — so wherever this node says "escalate," it means **BUBBLE UP**: stop, write your progress, and return control to the orchestrator with the gate details. The orchestrator escalates to the user and re-spawns you to resume. Never guess past a gate.
+
 ## Input
 
 - `<ws>/PLAN_STEPS.md`
@@ -15,11 +17,13 @@ Execute one BDD scenario (test-first) for a single observable behavior.
 1. Select first `pending` step.
 2. Write exactly one behavior test.
 3. Scaffold the structure the test touches (register the route, add the field, empty handler returning a default) — no behavior logic. If the minimal scaffolding already IS the implementation (no meaningful red possible), write just enough code to pass first and expect green from the first run; record it as such.
-4. **Meaningful-test gate.** Confirm a meaningful test (valid + sensitive assertion, reachable fixtures/environment) can actually be written and set up. This differs from "no meaningful red" (a real test exists, just passes immediately). If NO meaningful test is possible (non-deterministic output, unmockable external system, no harness), do NOT write a hollow test or silently skip — STOP and ask the user to skip the test for this behavior, defer it, or make it testable. Skip ONLY on explicit approval; if skipped, still implement the behavior and record the reason. If made testable, return to step 2.
+4. **Meaningful-test gate.** Confirm a meaningful test (valid + sensitive assertion, reachable fixtures/environment) can actually be written and set up. This differs from "no meaningful red" (a real test exists, just passes immediately). If NO meaningful test is possible (non-deterministic output, unmockable external system, no harness), do NOT write a hollow test or silently skip — **BUBBLE UP**: stop, write progress, return control with the behavior, what you tried, and exactly what blocks a meaningful assertion or setup. The orchestrator offers the user skip / defer / make-testable and re-spawns you with the decision. On skip: implement the behavior (step 6) and record `test skipped (no meaningful test possible — user approved: reason)`. On make-testable: return to step 2.
 5. Run test before writing behavior logic. A structural failure (404, missing field, import error) is NOT a valid red — fix the scaffolding and run again.
 6. If failing on the behavior assertion, implement minimal code to pass.
 7. Re-run test and related nearby tests.
 8. Mark step status and progress updates.
+
+**Other bubble-up triggers (same protocol):** 2+ defensible implementation behaviors for the step, or an unexpected failure you cannot resolve with minimum code. Stop, write progress, return control — the orchestrator escalates and re-spawns you with the decision.
 
 ## Output
 

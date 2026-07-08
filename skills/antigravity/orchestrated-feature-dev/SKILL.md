@@ -1,6 +1,6 @@
 ---
 name: orchestrated-feature-dev
-description: N8N-style orchestrated feature development with specialized node skills, conditional routing, and quality gate loops. Use when asked for "orchestrated development", "structured feature build", or "deep feature workflow".
+description: N8N-style orchestrated feature development with specialized node skills, conditional routing, and quality gate loops. Covers research, planning, investigation, an implementation-blind behavior-risk catalog, batched BDD, and conformance + adversarial verification. Use when asked for "orchestrated development", "structured feature build", or "deep feature workflow". Not for quick edits — the gated pipeline is overkill there.
 ---
 
 # Orchestrated Feature Development
@@ -11,20 +11,18 @@ An n8n-style workflow that orchestrates specialized node skills through a struct
 
 This skill acts as an **orchestrator** — it sequences specialized node skills, passes data between them via artifact files, and makes routing decisions based on results. Each node reads from and writes to the Antigravity artifact directory (`<appDataDir>/brain/<conversation-id>/`).
 
-```
-[research] → [plan] → [investigation] → [bdd-step] ↔ [quality-gate] → [validation] → [summary]
-                            ↑                 ↑              |
-                            fix plan          └── loop back ──┘
-```
+Pipeline: research → plan → (investigation + behavior-risk catalog) → BDD batches ↔ quality gate → (conformance + adversarial verification) → summary.
 
 ## Orchestrator Rules
 
 The main session MUST:
 - **Only manage artifacts and routing** — never read code, analyze findings, or write implementation
-- **Execute node instructions** for all research, planning, investigation, implementation, and validation work
+- **Execute node instructions** for all research, planning, investigation, cataloguing, implementation, and verification work
+- **Batch to the cap.** For the BDD phase (and the adversarial verification pass), a node execution takes **as many related steps as possible, capped at 4** (grouped by shared files/module) — one execution amortizes the shared-context read across its steps, but past ~4 the context congests and quality drops.
 - **Read state artifacts** only to make routing decisions (pass/fail, next step, done/not done)
-- **Present node outputs** to the user by reading and relaying their output artifacts
+- **Present node outputs** to the user by reading and relaying their output artifacts. Nodes never talk to the user — they write artifacts and return control; the orchestrator owns every user-facing escalation.
 - **Fix state artifacts** when investigation reveals plan issues (update `plan-steps.md` and `implementation-plan.md`)
+- **Freeze `behavior-risks.md`** once Phase 3b writes it — the adversarial pass checks the built code against it, so it must never be edited to match what was built.
 - **Log decisions** — whenever any node, or the orchestrator itself (e.g. fixing the plan after investigation, or a routing choice), faces **2+ defensible options and commits to one** (including choices resolved by asking the user), append an entry to `decisions.md`: chosen option, alternative(s), one-line why. Skip forced moves where only one option was viable.
 
 The main session MUST NOT:
@@ -42,13 +40,15 @@ All workflow state files are created as Antigravity artifacts in the brain direc
 - `research-output.md` — Research findings
 - `plan-steps.md` — Derived workflow state for the BDD loop (step list with affected files and dependencies); NOT presented for user review
 - `implementation-plan.md` — Full implementation plan (Technical Design + Behaviors); this is the document the user reviews
+- `behavior-risks.md` — Implementation-blind behavior-risk catalog (Phase 3b); **frozen** once written
 - `loop-state.json` — Loop counter and metadata
-- `step-result.md` — Latest BDD scenario step result
+- `step-result.md` — Latest BDD batch/step result and red/green trail
 - `quality-result.md` — Latest quality gate result
 - `investigation-step-[N].md` — Per-step investigation findings
 - `investigation-summary.md` — Consolidated investigation results
-- `validation-step-[N].md` — Per-step validation results
-- `validation-summary.md` — Consolidated validation results
+- `validation-step-[N].md` — Per-step conformance validation results (5a)
+- `validation-summary.md` — Consolidated conformance results (5a)
+- `adversarial-revalidation.md` — Adversarial revalidation findings against the frozen catalog (5b)
 - `decisions.md` — Running decision log: every point where 2+ viable options existed and one was chosen; read and reported by the summary node
 
 ---
@@ -116,112 +116,84 @@ Update `loop-state.json`: add `"investigation_step": 1, "investigation_total": [
 
 ### Execute
 
-Read the node instructions from `nodes/node-investigation.md` in this skill's directory, then execute them.
-
-The investigation node will:
-1. Investigate each step sequentially with full plan context
-2. Check affected files, existing implementations, conflicts, mismatches, dependencies, edge cases
-3. Write per-step findings to `investigation-step-[N].md` artifacts
-4. Write a consolidated `investigation-summary.md` artifact
+Read the node instructions from `nodes/node-investigation.md` in this skill's directory, then execute them. The node investigates each step, writes per-step `investigation-step-[N].md` artifacts, and a consolidated `investigation-summary.md`.
 
 ### After Investigation Completes
 
 1. Read `investigation-summary.md` and all `investigation-step-[N].md` artifacts
 2. Collect all findings: mismatches, conflicts, missing dependencies, already-implemented steps
-3. **Fix the plan** — update `plan-steps.md` and `implementation-plan.md` to address:
-   - Remove steps for behaviors already implemented
-   - Fix file paths, type names, or function references that were wrong
-   - Reorder steps if dependency issues were found
-   - Add missing steps if gaps were identified
-   - Resolve conflicts between steps
-4. **Present to the user:**
-   - What problems were found (grouped by category: already implemented, mismatches, conflicts, missing deps, edge cases)
-   - What fixes were applied to the plan
-   - The updated plan
+3. **Fix the plan** — update `plan-steps.md` and `implementation-plan.md`: remove already-implemented steps, fix wrong file paths/type/function references, reorder for dependency issues, add missing steps, resolve conflicts between steps
+4. **Present to the user:** problems found (grouped by category), fixes applied, and the updated plan
 5. **Gate:** Wait for user approval of the updated plan before proceeding.
+
+---
+
+## Phase 3b: Behavior-Risk Catalog (implementation-blind, alongside Phase 3)
+
+Runs in the same pre-implementation window as investigation (do it right after dispatching Phase 3, either order — both must finish before Phase 4).
+
+Read the node instructions from `nodes/node-behavior-risk.md` in this skill's directory, then execute them. The node catalogs edge-case **behaviors** from the requirement + existing system only — **never** the new implementation (it does not exist yet, and that timing is exactly the debiasing mechanism: a catalog derived from the implementation only rediscovers the edge cases the implementation already anticipated). It writes `behavior-risks.md`.
+
+### After the Catalog Completes
+
+1. **Escalate requirement-silent entries now** — each is a 2+ defensible-behaviors product decision, cheaper to resolve before implementation than after. Present them to the user. Fold each resolution into `implementation-plan.md` (+ a `plan-steps.md` step if it adds behavior); log to `decisions.md`.
+2. **Freeze the catalog** — requirement-implied entries become the Phase 5b checks; `behavior-risks.md` is now immutable and must not be revised in any later phase.
+
+**Gate:** if there were silent entries, wait for the user's decisions before Phase 4.
 
 ---
 
 ## Phase 4: Implementation Loop
 
-This is the core loop — it alternates between BDD scenario steps and quality gates.
+The core loop — batched BDD executions alternate with quality gates.
 
 ### Initialize
 
 Update `loop-state.json`: set `"current_step": 1, "quality_checks": 0, "max_steps": 20`.
 
-### For Each Step
+### 4a. BDD Batch Execution
 
-**4a. BDD Scenario Step Node**
+Read the node instructions from `nodes/node-bdd-step.md` in this skill's directory, then execute them for a **batch** of related steps (as many as possible, capped at 4, grouped by shared files/module — same grouping rationale as the Orchestrator Rules). The batch runs autonomously, one-test-at-a-time, with meaningful-red discipline, and has a **bubble-up contract**: it cannot talk to the user, so on any gate it stops, writes progress to `step-result.md` + `plan-steps.md`, and returns control here.
 
-Read the node instructions from `nodes/node-bdd-step.md` in this skill's directory, then execute them.
+Route on its return (read `step-result.md`):
 
-The node will:
+- **Batch done, no gate** → run the quality gate (4b), then dispatch the next batch.
+- **Stopped at a gate** (no meaningful test possible / 2+ defensible implementation behaviors / unresolved failure) → escalate to the user, log the resolution to `decisions.md`, then re-dispatch the node to resume that batch with the decision baked in. For a meaningful-test gate, the options are: skip the test (still implement), defer the behavior, or make it testable (fixture/seam/mock) — only skip on explicit approval, and record the reason.
 
-1. Determine the next observable behavior to implement
-2. Write a test for it and scaffold the structure it touches (no behavior logic) so the run can only fail behaviorally
-3. Run the test (MUST see the result before writing behavior logic)
-4. Implement if the test failed on a behavior assertion; fix scaffolding if it failed structurally; skip if it passes (already covered, or expected green from start when no meaningful red is possible)
-5. Escalate to the user if NO meaningful test can be written or set up (meaningful-test gate) — skip only on explicit approval, recording the reason, and still implement the behavior
-6. Write the step result to the `step-result.md` artifact
+**Verify discipline** via the red/green trail in `step-result.md` and `plan-steps.md`, not a prose summary.
 
-**After completion**, read `step-result.md` and decide:
+### 4b. Quality Gate Check
 
-- If step succeeded → increment `current_step` in `loop-state.json`
-- If the step hit the **meaningful-test gate** (no meaningful test possible) → STOP and ask the user to skip the test for that behavior, defer it, or make it testable; only skip on explicit approval, record the reason, then continue
-- If step had other issues → ask user for guidance before continuing
+Read `loop-state.json`. Every **2-3 completed steps**, read the node instructions from `nodes/node-quality-gate.md` and execute them. It runs `@test-quality-reviewer` and `@code-refactoring` on recent work and writes `quality-result.md`. Route:
 
-**4b. Quality Gate Check**
-
-Read `loop-state.json`. Every **2-3 completed steps**, trigger the quality gate:
-
-Read the node instructions from `nodes/node-quality-gate.md` in this skill's directory, then execute them.
-
-The quality gate will:
-
-1. Run `@test-quality-reviewer` on recent tests
-2. Run `@code-refactoring` review on recent implementation
-3. Write findings to the `quality-result.md` artifact
-
-**After completion**, read `quality-result.md` and route:
-
-- If `quality: "pass"` → continue to next BDD scenario step
-- If `quality: "needs-fixes"` → fix issues, then re-run quality gate
-- **Max 2 quality re-checks** per checkpoint to prevent infinite loops
+- `quality: "pass"` → dispatch the next BDD batch
+- `quality: "needs-fixes"` → fix issues, then re-run the quality gate (**max 2** re-checks per checkpoint)
 
 ### Loop Termination
 
-Stop the implementation loop when:
-
-- All planned behaviors are implemented (check against the plan)
-- User explicitly says "stop" or "done"
-- `current_step` exceeds `max_steps` (safety limit)
+Stop when: all planned behaviors are implemented (check against the plan), the user says "stop"/"done", or `current_step` exceeds `max_steps`.
 
 ---
 
-## Phase 5: Validation
+## Phase 5: Verification
 
-After all implementation steps are complete, validate every completed step sequentially.
+After implementation, verify along two independent axes. Both run in this pre-summary window.
 
-### Initialize
+### 5a. Conformance Validation — "did each step match the plan?"
 
 Update `loop-state.json`: add `"validation_step": 1, "validation_total": [completed step count]`.
 
-### Execute
+Read the node instructions from `nodes/node-validation.md` in this skill's directory, then execute them. The node validates each completed step against the plan (implementation match, test coverage & meaningfulness per the 4 Pillars, cross-step consistency, code quality), writing per-step `validation-step-[N].md` and a consolidated `validation-summary.md`.
 
-Read the node instructions from `nodes/node-validation.md` in this skill's directory, then execute them.
+**On return:** read `validation-summary.md`; if any step is invalid → fix the issues, then re-validate only those steps.
 
-The validation node will:
-1. Validate each completed step sequentially with full plan and implementation context
-2. Check implementation vs plan, test coverage & meaningfulness (4 Pillars), cross-step consistency, code quality
-3. Write per-step findings to `validation-step-[N].md` artifacts
-4. Write a consolidated `validation-summary.md` artifact
+### 5b. Adversarial Revalidation — "does the code survive the frozen catalog?"
 
-### After Validation Completes
+Read the node instructions from `nodes/node-adversarial-revalidation.md` in this skill's directory, then execute them per risk-group (related catalog entries together, capped at 4). It takes the frozen `behavior-risks.md` as ground truth for expected behavior on paths the plan never specified, probes the real implementation, and writes findings to `adversarial-revalidation.md`. It does NOT fix anything.
 
-1. Read `validation-summary.md`
-2. If any step is invalid → fix the issues, then re-validate those steps
-3. Present validation results to the user
+**On return — report + triage.** Present each `breaks` / `silent-misbehavior` finding with severity; the user decides per finding: **new step** (→ back to Phase 4) or **accepted / out-of-scope**. There is no auto-loop back into implementation. Log each decision to `decisions.md`.
+
+**Then present combined 5a + 5b results.**
 
 ---
 
@@ -234,7 +206,7 @@ Present the final summary to the user with:
 - All steps completed
 - Test results
 - Quality gate outcomes
-- Validation results
+- Conformance + adversarial verification results
 - Files changed
 - Key decisions (from `decisions.md` — each 2+-option choice and the option picked)
 

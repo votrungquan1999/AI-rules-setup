@@ -1,18 +1,15 @@
 ---
 name: orchestrated-feature-dev
-description: Orchestrate end-to-end feature delivery with phased subagent execution, parallel investigation/validation, BDD scenario loops, and quality gates. Use for complex multi-step feature work.
+description: Orchestrate end-to-end feature delivery with phased subagent execution — research, plan, parallel investigation + implementation-blind behavior-risk catalog, batched BDD, and conformance + adversarial verification — under quality gates and human-approval loops. Use for large or high-stakes multi-step feature work; overkill for quick edits.
 ---
 
 # Orchestrated Feature Development
 
-Structured pipeline for large feature delivery using parallelizable phases and explicit quality gates.
+Structured pipeline for large feature delivery using parallelizable phases and explicit quality gates. The orchestrator delegates every working phase to a subagent (it does none of the work itself), passes data through state files under `<ws>`, and routes on what each subagent returns.
 
 ## Pipeline
 
-```text
-[research] -> [plan] -> [investigation parallel] -> [bdd loop] <-> [quality gate]
-                                          -> [validation parallel] -> [summary]
-```
+research → plan → (investigation ∥ behavior-risk catalog) → BDD-batch ↔ quality-gate → (conformance ∥ adversarial verification) → summary
 
 ## Phase 0: Establish Task Workspace
 
@@ -32,45 +29,47 @@ Every run is scoped to its task identifier so **multiple tasks run in parallel**
 - `<ws>/RESEARCH_OUTPUT.md`
 - `<ws>/PLAN_STEPS.md` — derived workflow state for the BDD loop; NOT presented for user review
 - `<ws>/implementation-plan.md` — the rich plan document (Technical Design + Behaviors) the user reviews
-- `<ws>/IMPLEMENTATION_PROGRESS.md`
 - `<ws>/INVESTIGATION_STEP_<N>.md`
-- `<ws>/VALIDATION_STEP_<N>.md`
+- `<ws>/BEHAVIOR_RISKS.md` — implementation-blind behavior-risk catalog (Phase 3b); **frozen** once written
+- `<ws>/IMPLEMENTATION_PROGRESS.md`
+- `<ws>/VALIDATION_STEP_<N>.md` — conformance results (5a)
+- `<ws>/ADVERSARIAL_REVALIDATION.md` — adversarial findings against the frozen catalog (5b)
 - `<ws>/DECISIONS.md` — running decision log: every point where 2+ viable options existed and one was chosen; read and reported by the summary node
 
 `./tmp/` should be in `.gitignore`; delete `<ws>` once the feature is merged.
 
 ## Orchestrator Responsibilities
 
-- Delegate isolation-heavy phases to subagents:
-  - research
-  - planning
-  - investigation
-  - quality review
-  - validation
-  - final summary
-- Batch per-step phases: for investigation and validation, group 2-4 related steps (by shared files/module) per subagent instead of one subagent per step. The subagent count scales naturally with plan size — do NOT cram more steps into one agent to keep the count down; too many steps per agent congests its context. Every extra subagent re-reads the same plan and shared files; batching pays that cost once per batch.
-- Run BDD scenario steps inline for continuity.
-- Route based on state files and gate outcomes.
+- Delegate every working phase to a subagent — research, planning, investigation, behavior-risk catalog, BDD, quality review, conformance validation, adversarial revalidation, final summary. The orchestrator only routes; it never does the work itself.
+- **Batch to the cap.** For investigation, BDD, and both verification passes, put **as many related steps as possible into one subagent, capped at 4** (grouped by shared files/module) — one agent amortizes the shared-context read across its steps, but past ~4 its context congests and quality drops. Spawn a phase's batches in a single message so they run in parallel.
+- Route based on state files and gate outcomes; relay subagent outputs rather than re-analyzing them.
+- **Freeze `BEHAVIOR_RISKS.md`** once Phase 3b writes it — the adversarial pass checks against it, so never edit it to match what was built; that is what keeps 5b an honest test.
 - Pass the task workspace path `<ws>` to every subagent it spawns.
-- Log decisions: whenever any phase, or the orchestrator itself (e.g. fixing the plan after investigation, or a routing choice), faces 2+ defensible options and commits to one — including choices resolved by asking the user — append an entry to `<ws>/DECISIONS.md` (chosen option, alternative(s), one-line why). Skip forced moves where only one option was viable.
+- Log decisions: whenever any phase, or the orchestrator itself (e.g. fixing the plan after investigation, resolving a silent catalog entry, a routing choice), faces 2+ defensible options and commits to one — including choices resolved by asking the user — append an entry to `<ws>/DECISIONS.md` (chosen option, alternative(s), one-line why). Skip forced moves where only one option was viable.
 - Pause for user approval at plan gates. The review artifact is `<ws>/implementation-plan.md` (Technical Design + Behaviors) — never present `<ws>/PLAN_STEPS.md`, which is derived loop state written only after the plan is approved.
+
+Spawn prompts stay minimal — the node file carries the instructions: "Read `nodes/node-X.md` and execute it for [assignment]. Task working directory is `<ws>`. Report back: [what the orchestrator needs to route]."
 
 ## Phase Entry Points
 
 - `nodes/node-research.md`
 - `nodes/node-plan.md`
 - `nodes/node-investigation.md`
+- `nodes/node-behavior-risk.md`
 - `nodes/node-bdd-step.md`
 - `nodes/node-quality-gate.md`
-- `nodes/node-validation.md`
+- `nodes/node-validation.md` — conformance (5a)
+- `nodes/node-adversarial-revalidation.md` — adversarial (5b)
 - `nodes/node-summary.md`
 
 ## Execution Rules
 
 - Research and planning must converge before coding.
+- **Behavior-risk catalog (Phase 3b)** runs parallel with investigation (spawn it in the same message). It is implementation-blind — cataloguing edge-case behaviors from the requirement + existing system only. On return: escalate every **requirement-silent** entry to the user as a product decision (2+ defensible behaviors) **before** implementation, fold each resolution into `implementation-plan.md` (+ a `PLAN_STEPS.md` step if it adds behavior) and `DECISIONS.md`, then **freeze** the catalog — requirement-implied entries become the Phase 5b checks.
 - One behavior/test per BDD scenario step.
-- If a step hits the meaningful-test gate (no meaningful test can be written or set up), STOP and ask the user to skip the test, defer the behavior, or make it testable. Skip only on explicit approval; record the skip reason and still implement the behavior.
-- Trigger quality gate every 2-3 completed steps.
-- Run investigation and validation batches in parallel; each batch agent processes its steps one at a time and still writes one output file per step.
-- If validation finds invalid steps, spawn ONE fix subagent covering all invalid steps (batched), then re-validate only those steps.
+- **BDD runs as batched subagents, NOT inline** (same grouping/cap as investigation). Each batch runs autonomously with one-test-at-a-time meaningful-red discipline, but a batch subagent cannot talk to the user — so on any gate (no meaningful test possible / 2+ defensible behaviors / unresolved failure) it **BUBBLES UP**: stops, writes progress, returns control. The orchestrator escalates to the user, logs to `DECISIONS.md`, then spawns a **fresh** subagent to resume that batch with the decision baked in. Verify discipline via the red/green trail in `IMPLEMENTATION_PROGRESS.md`, not the prose summary.
+- Trigger quality gate every 2-3 completed steps; `needs-fixes` → fix subagent, re-check (max 2 per checkpoint).
+- **Verification (Phase 5)** splits into two parallel passes, spawned together:
+  - **5a Conformance Validation** ("did each step match the plan?") — `node-validation.md` per step-batch, one output file per step. Invalid steps → ONE fix subagent covering all, then re-validate only those.
+  - **5b Adversarial Revalidation** ("does the code survive the frozen catalog?") — `node-adversarial-revalidation.md` per risk-group. On return, **report + triage with the user**: each break/silent-misbehavior is either a **new step** (→ back to BDD) or **accepted/out-of-scope**. No auto-loop into implementation; log each to `DECISIONS.md`.
 - Stop on blocking uncertainty and request user decision.
