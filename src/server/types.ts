@@ -100,6 +100,18 @@ export interface WorkflowFile {
 }
 
 /**
+ * Represents a single hook file. Entry file is a `hook.json` manifest (metadata +
+ * the Claude Code settings fragment); the executable script ships as a supporting file.
+ */
+export interface HookFile {
+	name: string;
+	description?: string;
+	content: string;
+	/** Optional supporting files (the executable script, docs, etc.) */
+	supportingFiles?: Array<{ path: string; content: string }>;
+}
+
+/**
  * Represents an agent with all its categories and optional skills
  */
 export interface RuleAgent {
@@ -110,6 +122,8 @@ export interface RuleAgent {
 	skills?: SkillFile[];
 	/** Optional workflows */
 	workflows?: WorkflowFile[];
+	/** Optional hooks (currently only for Claude Code) */
+	hooks?: HookFile[];
 }
 
 /**
@@ -166,6 +180,21 @@ export interface StoredWorkflowsDocument {
 }
 
 export const WORKFLOWS_COLLECTION_NAME = "workflows";
+
+/**
+ * Database document type for stored hooks
+ * Follows the database patterns with Document suffix
+ */
+export interface StoredHooksDocument {
+	agent: string;
+	hooks: HookFile[];
+	githubCommitSha: string;
+	lastFetched: Date;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+export const HOOKS_COLLECTION_NAME = "hooks_data";
 
 /**
  * Question document type for individual MongoDB documents
