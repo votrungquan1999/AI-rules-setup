@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
 	discoverAgentsLocal,
 	discoverCategoriesLocal,
+	discoverHooksLocal,
 	discoverSkillsLocal,
 	discoverWorkflowsLocal,
 	extractDescription,
@@ -186,6 +187,32 @@ describe("Local Fetcher", () => {
 		const testWorkflow = workflows.find((w) => w.name === "test-workflow");
 		expect(testWorkflow).toBeDefined();
 		expect(testWorkflow?.description).toBe("Test workflow");
+	});
+
+	it("discoverHooksLocal - should discover hooks with their supporting script for a given agent", async () => {
+		// Act
+		const hooks = await discoverHooksLocal("test-agent", FIXTURE_ROOT);
+
+		// Assert
+		const testHook = hooks.find((h) => h.name === "test-hook");
+		expect(testHook).toBeDefined();
+		expect(testHook?.description).toBe("Test hook for unit testing");
+		expect(testHook?.content).toContain('"script": "script.mjs"');
+
+		const scriptFile = testHook?.supportingFiles?.find((f) => f.path === "script.mjs");
+		expect(scriptFile).toBeDefined();
+		expect(scriptFile?.content).toContain('console.log("test hook")');
+	});
+
+	it("fetchAllRulesDataLocal - should attach discovered hooks onto the agent", async () => {
+		// Act
+		const data = await fetchAllRulesDataLocal(FIXTURE_ROOT);
+
+		// Assert
+		const testAgent = data.agents["test-agent"];
+		expect(testAgent).toHaveProperty("hooks");
+		const hookNames = testAgent?.hooks?.map((h) => h.name);
+		expect(hookNames).toContain("test-hook");
 	});
 
 	it("fetchAllRulesDataLocal - should aggregate all rules data from local filesystem", async () => {

@@ -1,6 +1,6 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { GitHubFile, Manifest, RulesData, SkillFile, WorkflowFile } from "../../../server/types";
+import type { GitHubFile, HookFile, Manifest, RulesData, SkillFile, WorkflowFile } from "../../../server/types";
 
 /**
  * Extracts the description from YAML frontmatter (between --- and ---)
@@ -102,24 +102,26 @@ export async function fetchManifestLocal(agent: string, category: string, rootPa
 }
 
 /**
- * Recursively collects all non-SKILL.md files in a skill directory
- * @param skillDirPath - Absolute path to the skill directory
- * @param basePath - Base path for computing relative paths (same as skillDirPath on first call)
+ * Recursively collects all files in a directory except the entry file
+ * @param dirPath - Absolute path to the directory
+ * @param basePath - Base path for computing relative paths (same as dirPath on first call)
+ * @param entryFileName - Name of the entry file to exclude (defaults to SKILL.md)
  * @returns Array of supporting files with relative paths and content
  */
 export async function collectSupportingFiles(
-	skillDirPath: string,
+	dirPath: string,
 	basePath: string,
+	entryFileName = "SKILL.md",
 ): Promise<Array<{ path: string; content: string }>> {
 	const supportingFiles: Array<{ path: string; content: string }> = [];
-	const entries = await readdir(skillDirPath, { withFileTypes: true });
+	const entries = await readdir(dirPath, { withFileTypes: true });
 
 	for (const entry of entries) {
-		const fullPath = join(skillDirPath, entry.name);
+		const fullPath = join(dirPath, entry.name);
 		if (entry.isDirectory()) {
-			const nested = await collectSupportingFiles(fullPath, basePath);
+			const nested = await collectSupportingFiles(fullPath, basePath, entryFileName);
 			supportingFiles.push(...nested);
-		} else if (entry.isFile() && entry.name !== "SKILL.md") {
+		} else if (entry.isFile() && entry.name !== entryFileName) {
 			const relativePath = fullPath.slice(basePath.length + 1); // +1 for trailing /
 			const content = await readFile(fullPath, "utf-8");
 			supportingFiles.push({ path: relativePath, content });
@@ -253,6 +255,70 @@ export async function discoverWorkflowsLocal(agent: string, rootPath?: string): 
 }
 
 /**
+ * Discovers all available hooks for a given agent from hooks/{agent}/
+ * Hooks follow the subdirectory format: hooks/{agent}/{hook-name}/hook.json
+ * Supporting files (the executable script, docs, etc.) are also collected.
+ * @param agent - AI agent name (e.g., 'claude-code')
+ * @param rootPath - Optional root directory (defaults to process.cwd())
+ * @returns Array of hook objects with name, content, and optional supportingFiles
+ */
+export async function discoverHooksLocal(agent: string, rootPath?: string): Promise<HookFile[]> {
+	try {
+		const root = rootPath || process.cwd();
+		const hooksPath = join(root, `hooks/${agent}`);
+
+		try {
+			await readdir(hooksPath);
+		} catch (_error) {
+			// Hooks directory doesn't exist for this agent - this is normal
+			return [];
+		}
+
+		const entries = await fetchDirectoryContentsLocal(`hooks/${agent}`, rootPath);
+
+		// Filter for directories only (each hook is a subdirectory containing hook.json)
+		const hookDirs = entries.filter((entry) => entry.type === "dir");
+
+		const hooks: HookFile[] = [];
+
+		for (const dir of hookDirs) {
+			try {
+				const content = await fetchFileContentLocal(`hooks/${agent}/${dir.name}/hook.json`, rootPath);
+				const hookDirFullPath = join(root, `hooks/${agent}/${dir.name}`);
+
+				// Collect supporting files (the script, docs, etc.)
+				const supportingFiles = await collectSupportingFiles(hookDirFullPath, hookDirFullPath, "hook.json");
+
+				const manifest = JSON.parse(content) as { description?: string };
+
+				const hook: HookFile = {
+					name: dir.name,
+					content,
+				};
+
+				if (manifest.description) {
+					hook.description = manifest.description;
+				}
+
+				if (supportingFiles.length > 0) {
+					hook.supportingFiles = supportingFiles;
+				}
+
+				hooks.push(hook);
+			} catch (error) {
+				// hook.json not found in this directory - skip silently
+				console.warn(`No hook.json found in hooks/${agent}/${dir.name}:`, error);
+			}
+		}
+
+		return hooks;
+	} catch (error) {
+		console.warn(`Failed to discover hooks for ${agent}:`, error);
+		return [];
+	}
+}
+
+/**
  * Fetches all rule files for a specific agent and category
  * @param agent - AI agent name
  * @param category - Category name
@@ -326,6 +392,12 @@ export async function fetchAllRulesDataLocal(rootPath?: string): Promise<RulesDa
 		const workflows = await discoverWorkflowsLocal(agentName, rootPath);
 		if (workflows.length > 0) {
 			result.agents[agentName].workflows = workflows;
+		}
+
+		// Fetch hooks for this agent
+		const hooks = await discoverHooksLocal(agentName, rootPath);
+		if (hooks.length > 0) {
+			result.agents[agentName].hooks = hooks;
 		}
 	}
 

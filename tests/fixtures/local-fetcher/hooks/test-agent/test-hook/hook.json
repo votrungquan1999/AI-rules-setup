@@ -1,0 +1,19 @@
+{
+  "description": "Test hook for unit testing",
+  "event": "UserPromptSubmit",
+  "script": "script.mjs",
+  "settingsFragment": {
+    "hooks": {
+      "UserPromptSubmit": [
+        {
+          "hooks": [
+            {
+              "type": "command",
+              "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/test-hook/script.mjs"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
