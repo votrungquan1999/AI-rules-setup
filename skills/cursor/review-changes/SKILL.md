@@ -16,12 +16,12 @@ Orchestrate a code review as a lightweight **fan-out -> verify -> merge** pipeli
    -> [gate: which findings flagged "Needs verification"?]
    -> [verify flagged findings]                       (parallel subagents)
    -> [merge: apply verdicts -> confidence-score -> filter -> dedupe -> severity]   (inline)
-   -> ./tmp/review-changes.md
+   -> <ws>/review-changes.md
 ```
 
 ## Workspace
 
-Intermediates live in `./tmp/review-changes/`; the final report is `./tmp/review-changes.md` (one level up, a stable path for the caller).
+Establish a task identifier first — the branch name under review, the PR/MR number, or a short slug you derive and confirm. Set `<ws>` = `./tmp/<identifier>/`; **before creating it, check whether it already holds artifacts from unrelated work — if so, STOP and ask the user** rather than overwriting another review. Intermediates live in `<ws>/review-changes/`; the final report is `<ws>/review-changes.md` (one level up, a stable path for the caller). The `./tmp/review-changes/…` paths below are shorthand for `<ws>/review-changes/…` — pass the resolved `<ws>` into every sub-agent prompt.
 
 - `HOLISTIC.md` — summary + approach evaluation (you, Phase 1; shared with every lens)
 - `LENS_<name>.md` — per-lens findings
@@ -64,7 +64,7 @@ Scope to what the user asked: branch/PR review → committed changes since `$BAS
 2. **Lens gate.** Always run correctness, quality, security; run tests only if the diff adds/modifies test files. State which lenses and why before spawning.
 3. **Lenses (parallel subagents).** Each reads its node file + `lens-common.md` + `HOLISTIC.md`, sees the changes via `git diff "$BASE"` from inside the repo, reviews ONLY the diff, writes `LENS_<name>.md`, and reports finding count + highest severity.
 4. **Verification (parallel subagents).** Lenses are **trusted by default**. Verify only findings marked `Needs verification: yes` — the lens flagged something it couldn't confirm from the diff alone (behavior outside the diff, a caller's actual input, a runtime assumption, a guard that may exist elsewhere). Batch 2-4 flagged findings by shared file; each verifier resolves the flagged uncertainty against the real code and writes `VERDICT_<batch>.md`. Skip the phase entirely if nothing is flagged.
-5. **Merge (inline).** Apply verdicts — REFUTED -> drop; CONFIRMED -> keep with the verifier's adjusted severity; UNCERTAIN -> score conservatively (usually falls below the filter); trusted (never-flagged) findings -> carry through as-is. Then score each survivor 0-100 for "real, in-scope issue", **drop everything < 80**, dedupe by file+line (keep highest severity), normalize severity. Write `./tmp/review-changes.md`. If nothing survives, say the changes look good.
+5. **Merge (inline).** Apply verdicts — REFUTED -> drop; CONFIRMED -> keep with the verifier's adjusted severity; UNCERTAIN -> score conservatively (usually falls below the filter); trusted (never-flagged) findings -> carry through as-is. Then score each survivor 0-100 for "real, in-scope issue", **drop everything < 80**, dedupe by file+line (keep highest severity), normalize severity. Write `<ws>/review-changes.md`. If nothing survives, say the changes look good.
 
 ## Report Format
 

@@ -25,28 +25,17 @@
     "planning-mode",
     "planning",
     "plan.md",
-    "feature-development",
-    "workflow",
-    "implementation",
-    "incremental",
     "test-driven",
     "tdd",
-    "progress-tracking",
-    "acceptance-criteria",
     "claude-code"
   ],
-  "description": "Meta rules for applying Claude Code rules covering file size limits and line count restrictions, scope management and complexity control, error handling patterns, rule application guidelines, code quality standards, validation requirements, change management strategies for maintainable codebases, planning mode behavior for plan file generation, and feature development workflow with incremental implementation and progress tracking",
+  "description": "Meta rules for applying Claude Code rules covering file size limits and line count restrictions, scope management and complexity control, error handling patterns, rule application guidelines, code quality standards, validation requirements, change management strategies for maintainable codebases, planning mode behavior for plan file generation, and mode-aware test-first enforcement",
   "version": "1.0.0",
   "lastUpdated": "2026-06-22T00:00:00Z",
   "files": [
     {
       "path": "meta-rules.md",
       "description": "Meta rules for rule application and code quality, including mode-aware test-first enforcement (the test-run GATE and one-at-a-time discipline apply to both BDD scenarios and TDD unit tests)",
-      "required": true
-    },
-    {
-      "path": "feature-development-guide.md",
-      "description": "Step-by-step feature development workflow with planning, incremental implementation, test-driven approach, and progress tracking",
       "required": true
     }
   ],

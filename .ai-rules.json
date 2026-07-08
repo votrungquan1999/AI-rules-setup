@@ -2,7 +2,6 @@
   "version": "1.0.0",
   "agent": "claude-code",
   "categories": [
-    "brainstorming-patterns",
     "component-architecture",
     "database-patterns",
     "knowledge-base",
@@ -38,6 +37,9 @@
     "validate-pr-comments",
     "web-search",
     "pr-comment-triage"
+  ],
+  "hooks": [
+    "kanban-track"
   ],
   "scope": [
     "personal"

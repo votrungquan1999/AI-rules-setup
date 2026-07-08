@@ -15,7 +15,7 @@ Plan first for medium/large tasks so implementation stays predictable.
 
 ## Workflow
 
-0. **Establish the task workspace (before writing any notes or the plan).** If a caller gave you a working directory (e.g. the orchestrator passes `<ws>` = `./tmp/<identifier>/`), use it. Otherwise ask the user for a **task identifier** — a ticket id (e.g. `JIRA-123`) or any short label; if they have none, derive a short kebab-case slug and **confirm it**. Then `<ws>` = `./tmp/<identifier>/` (create it). Scoping artifacts under `./tmp/<identifier>/` lets multiple planning tasks coexist without overwriting each other. All artifact paths below are relative to `<ws>`.
+0. **Establish the task workspace (before writing any notes or the plan).** If a caller gave you a working directory (e.g. the orchestrator passes `<ws>` = `./tmp/<identifier>/`), use it. Otherwise ask the user for a **task identifier** — a ticket id (e.g. `JIRA-123`) or any short label; if they have none, derive a short kebab-case slug and **confirm it**. Then `<ws>` = `./tmp/<identifier>/` (create it). Scoping artifacts under `./tmp/<identifier>/` lets multiple planning tasks coexist without overwriting each other. All artifact paths below are relative to `<ws>`. **Before creating `<ws>` or writing, check whether it already holds artifacts from unrelated work — if so, STOP and ask the user how to proceed; never overwrite another task's artifacts.**
 1. Research relevant code paths and current patterns.
 2. Ask clarifying questions for gaps.
 3. Define significant design decisions only:

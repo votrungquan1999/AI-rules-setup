@@ -29,7 +29,7 @@ Build features incrementally with explicit planning and verification.
 - If a caller gave you a working directory (e.g. the orchestrator passes `<ws>` = `./tmp/<identifier>/`), use it.
 - Otherwise, ask the user for a **task identifier** — a ticket id (e.g. `JIRA-123`) or any short label; if they have none, derive a short kebab-case slug and **confirm it**. Then `<ws>` = `./tmp/<identifier>/` (create it).
 
-`<ws>` is that working directory. Write the plan and progress file (e.g. `<ws>/IMPLEMENTATION_PROGRESS.md`) under it so multiple tasks run in parallel without colliding.
+`<ws>` is that working directory. Write the plan and progress file (e.g. `<ws>/IMPLEMENTATION_PROGRESS.md`) under it so multiple tasks run in parallel without colliding. **Before creating `<ws>` or writing, check whether it already holds artifacts from unrelated work — if so, STOP and ask the user how to proceed; never overwrite another task's artifacts.**
 
 ### Phase 1: Context and Clarification
 

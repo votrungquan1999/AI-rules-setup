@@ -17,7 +17,7 @@ research → plan → (investigation ∥ behavior-risk catalog) → BDD-batch �
 
 1. Ask the user for a **task identifier** — a ticket id (e.g. `JIRA-123`, `LINEAR-456`) or any short label for this work.
 2. If the user has none, **derive a short kebab-case slug** from the feature request (e.g. `add-trending-markets`) and **confirm it** before proceeding.
-3. Create the working directory `./tmp/<identifier>/`.
+3. Create the working directory `./tmp/<identifier>/`. **First check whether it already holds artifacts from unrelated work — if so, STOP and ask the user** rather than overwriting another task's run.
 4. From here on, `<ws>` = `./tmp/<identifier>/`. Use it as the prefix for every state file, and **include this path in every subagent prompt** ("The task working directory is `<ws>` — read and write all state files there.").
 
 **Gate:** Do NOT start research until the identifier is set, confirmed, and the directory exists.

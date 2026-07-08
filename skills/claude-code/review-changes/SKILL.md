@@ -35,7 +35,7 @@ Order and who-runs-each — the single source of truth for the *flow*. Models ar
 3. **lenses** — parallel subagents
 4. **gate** — which findings are flagged `Needs verification: yes`?
 5. **verify** flagged findings — parallel subagents
-6. **merge** — you, inline → `./tmp/review-changes.md`
+6. **merge** — you, inline → `<ws>/review-changes.md`
 
 Each phase's instructions live in this skill's `nodes/` directory; point every lens/verifier subagent at its matching node file.
 
@@ -60,11 +60,13 @@ The `Agent` tool accepts a per-call `model` parameter (`"haiku" | "sonnet" | "op
 
 ## Workspace
 
-All intermediates live in `./tmp/review-changes/` (create it; it can be deleted after). The final report is written to `./tmp/review-changes.md` (one level up) so the caller and user have a stable path.
+**Establish a task identifier first** — the branch name under review, the PR/MR number, or a short slug you derive and confirm. Set `<ws>` = `./tmp/<identifier>/`. **Before creating it, check whether `<ws>` already holds artifacts from unrelated work — if so, STOP and ask the user** rather than overwriting another review. Scoping under `<ws>` keeps concurrent reviews of different branches from clobbering each other.
 
-- `./tmp/review-changes/HOLISTIC.md` — summary + approach evaluation (written by you in Phase 1)
-- `./tmp/review-changes/LENS_correctness.md`, `LENS_security.md`, `LENS_quality.md`, `LENS_tests.md` — per-lens findings
-- `./tmp/review-changes/VERDICT_<batch>.md` — per-batch verification verdicts (written by verifier sub-agents in Phase 4)
+All intermediates live in `<ws>/review-changes/` (create it; it can be deleted after). The final report is written to `<ws>/review-changes.md` (one level up) so the caller and user have a stable path. **The `./tmp/review-changes/…` paths in the phases and node files below are shorthand for `<ws>/review-changes/…` — pass the resolved `<ws>` into every sub-agent prompt so they write under it.**
+
+- `<ws>/review-changes/HOLISTIC.md` — summary + approach evaluation (written by you in Phase 1)
+- `<ws>/review-changes/LENS_correctness.md`, `LENS_security.md`, `LENS_quality.md`, `LENS_tests.md` — per-lens findings
+- `<ws>/review-changes/VERDICT_<batch>.md` — per-batch verification verdicts (written by verifier sub-agents in Phase 4)
 
 ---
 
@@ -182,7 +184,7 @@ Do NOT run the build or typecheck — that is CI's job.
 
 ## Output Report
 
-Write the complete review to `./tmp/review-changes.md` before finishing, in this format:
+Write the complete review to `<ws>/review-changes.md` before finishing, in this format:
 
 ```markdown
 ## Summary
