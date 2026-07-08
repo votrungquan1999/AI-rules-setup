@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import chalk from "chalk";
 import { Command } from "commander";
 import { addCommand } from "./commands/add";
@@ -9,6 +11,24 @@ import { pullCommand } from "./commands/pull";
 import { syncCommand } from "./commands/sync";
 import { uploadCommand } from "./commands/upload";
 
+/**
+ * Reads the CLI version from its own package.json. Resolves in both the compiled dist
+ * (`../../package.json`) and the dev entry (`../../cli-package/package.json`); the name check
+ * ensures the monorepo's root package.json is never mistaken for the published CLI's.
+ * @returns The `@quanvo99/ai-rules` package version, or "0.0.0" if it can't be read
+ */
+function getCliVersion(): string {
+	for (const rel of ["../../package.json", "../../cli-package/package.json"]) {
+		try {
+			const pkg = JSON.parse(readFileSync(join(__dirname, rel), "utf8"));
+			if (pkg.name === "@quanvo99/ai-rules") return pkg.version;
+		} catch {
+			// try the next candidate path
+		}
+	}
+	return "0.0.0";
+}
+
 const program = new Command();
 
 program
@@ -16,7 +36,7 @@ program
 	.description(
 		"A command-line tool that helps developers pull curated AI agent rules from a centralized repository into their projects",
 	)
-	.version("0.2.4");
+	.version(getCliVersion());
 
 program
 	.command("init")
@@ -28,6 +48,8 @@ program
 	.option("--no-workflows", "Skip workflow installation entirely")
 	.option("--skills <list>", "Comma-separated list of skill IDs to install")
 	.option("--no-skills", "Skip skill installation entirely")
+	.option("--hooks <list>", "Comma-separated list of hook IDs to install")
+	.option("--no-hooks", "Skip hook installation entirely")
 	.option(
 		"--overwrite-strategy <strategy>",
 		"Conflict resolution strategy: prompt (ask), force (overwrite), or skip (keep existing)",
@@ -53,9 +75,15 @@ program
 						? options.skills.split(",").map((s: string) => s.trim())
 						: undefined
 					: undefined,
+				hooks: options.hooks
+					? typeof options.hooks === "string"
+						? options.hooks.split(",").map((h: string) => h.trim())
+						: undefined
+					: undefined,
 				noCategories: options.categories === false,
 				noSkills: options.skills === false,
 				noWorkflows: options.workflows === false,
+				noHooks: options.hooks === false,
 				overwriteStrategy: options.overwriteStrategy,
 			};
 
@@ -108,10 +136,11 @@ program
 
 program
 	.command("add")
-	.description("Add categories, skills, or workflows to an existing project")
+	.description("Add categories, skills, workflows, or hooks to an existing project")
 	.option("--categories <list>", "Comma-separated list of category IDs to add (use 'all' for all)")
 	.option("--skills <list>", "Comma-separated list of skill IDs to add (use 'all' for all)")
 	.option("--workflows <list>", "Comma-separated list of workflow IDs to add (use 'all' for all)")
+	.option("--hooks <list>", "Comma-separated list of hook IDs to add (use 'all' for all)")
 	.option(
 		"--overwrite-strategy <strategy>",
 		"Conflict resolution strategy: prompt (ask), force (overwrite), or skip (keep existing)",
@@ -133,6 +162,11 @@ program
 				workflows: options.workflows
 					? typeof options.workflows === "string"
 						? options.workflows.split(",").map((w: string) => w.trim())
+						: undefined
+					: undefined,
+				hooks: options.hooks
+					? typeof options.hooks === "string"
+						? options.hooks.split(",").map((h: string) => h.trim())
 						: undefined
 					: undefined,
 				overwriteStrategy: options.overwriteStrategy,

@@ -1,7 +1,15 @@
 import { access, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { addCategory, addSkill, addWorkflow, loadConfig, readConfigOrNull, saveConfig } from "../../src/cli/lib/config";
+import {
+	addCategory,
+	addHook,
+	addSkill,
+	addWorkflow,
+	loadConfig,
+	readConfigOrNull,
+	saveConfig,
+} from "../../src/cli/lib/config";
 import type { Config } from "../../src/cli/lib/types";
 
 describe("Config Manager", () => {
@@ -276,6 +284,24 @@ describe("Config Manager", () => {
 			// Then
 			expect(updatedConfig.workflows).toHaveLength(1);
 			expect(updatedConfig.workflows?.[0]).toBe("feature-development");
+		});
+	});
+
+	describe("addHook", () => {
+		it("should add hook to config", () => {
+			// Given
+			const config: Config = {
+				version: "1.0.0",
+				agent: "claude-code",
+				categories: [],
+			};
+
+			// When
+			const updatedConfig = addHook(config, "kanban-track");
+
+			// Then
+			expect(updatedConfig.hooks).toHaveLength(1);
+			expect(updatedConfig.hooks?.[0]).toBe("kanban-track");
 		});
 	});
 

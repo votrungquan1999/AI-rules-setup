@@ -241,3 +241,46 @@ export async function promptWorkflowSelection(workflows: Array<{ name: string; c
 
 	return selectedWorkflows.filter((w: string) => w !== ALL_OPTION);
 }
+
+/**
+ * Prompts user to select hooks to install
+ * @param hooks - Array of available hooks with name and content
+ * @returns Array of selected hook names (can be empty)
+ */
+export async function promptHookSelection(hooks: Array<{ name: string; content: string }>): Promise<string[]> {
+	if (hooks.length === 0) {
+		return [];
+	}
+
+	const ALL_OPTION = "__ALL__";
+
+	const choices = [
+		{
+			name: chalk.bold.green("🪝 Select All"),
+			value: ALL_OPTION,
+			short: "All",
+		},
+		...hooks.map((hook) => ({
+			name: chalk.cyan.bold(hook.name),
+			value: hook.name,
+			short: hook.name,
+		})),
+	];
+
+	const { selectedHooks } = await inquirer.prompt([
+		{
+			type: "checkbox",
+			name: "selectedHooks",
+			message: "Select hooks to install:\n(↑↓ to move, Space to select, Enter to confirm)",
+			choices,
+			pageSize: 10,
+		},
+	]);
+
+	// Handle "Select All" option
+	if (selectedHooks.includes(ALL_OPTION)) {
+		return hooks.map((h) => h.name);
+	}
+
+	return selectedHooks.filter((h: string) => h !== ALL_OPTION);
+}

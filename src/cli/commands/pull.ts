@@ -2,8 +2,9 @@ import { join } from "node:path";
 import chalk from "chalk";
 import type { KbMemory } from "../lib/api-client";
 import { fetchKbMemories, fetchManifests, fetchRuleFile, fetchSkills, fetchWorkflows } from "../lib/api-client";
-import { loadConfig } from "../lib/config";
+import { loadConfig, saveConfig } from "../lib/config";
 import { applyNamingConvention, applySkillNamingConvention, writeRuleFile } from "../lib/files";
+import { installHooks } from "../lib/hooks-install";
 import { AIAgent, type OverwriteStrategy } from "../lib/types";
 
 interface PullOptions {
@@ -56,14 +57,15 @@ async function materializeMemories(agent: string, scope: string[] | undefined): 
 export async function pullCommand(_options: PullOptions = {}): Promise<void> {
 	console.log(chalk.blue("🔄 Pulling latest AI rules...\n"));
 
-	const config = await loadConfig(process.cwd());
-	const { agent, categories, skills, workflows, scope } = config;
+	let config = await loadConfig(process.cwd());
+	const { agent, categories, skills, workflows, hooks, scope } = config;
 
 	const hasCategories = categories && categories.length > 0;
 	const hasSkills = skills && skills.length > 0;
 	const hasWorkflows = workflows && workflows.length > 0;
+	const hasHooks = hooks && hooks.length > 0;
 
-	if (!hasCategories && !hasSkills && !hasWorkflows) {
+	if (!hasCategories && !hasSkills && !hasWorkflows && !hasHooks) {
 		console.log(chalk.yellow("⚠️  Nothing configured to pull."));
 		// Even with nothing else configured, a claude-code workspace with a scope still gets its
 		// always-on knowledge-base memories materialized.
@@ -137,6 +139,16 @@ export async function pullCommand(_options: PullOptions = {}): Promise<void> {
 			console.log(chalk.green(`  ✓ ${targetPath}`));
 			totalInstalled++;
 		}
+	}
+
+	// Re-install hooks (already recorded in config.hooks from a prior install)
+	if (hasHooks) {
+		console.log(chalk.blue(`\n🪝 Pulling ${hooks.length} hooks...`));
+		const { config: updatedConfig, installed } = await installHooks(hooks, agent, scope, config, process.cwd());
+		config = updatedConfig;
+		console.log(chalk.green(`  ✓ Re-installed ${installed.length} hooks`));
+		totalInstalled += installed.length;
+		await saveConfig(process.cwd(), config);
 	}
 
 	// Materialize the workspace's always-on knowledge-base memories (claude-code + scope only).

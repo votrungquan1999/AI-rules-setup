@@ -1,6 +1,13 @@
 import { join } from "node:path";
 import chalk from "chalk";
-import { fetchAvailableAgents, fetchManifests, fetchRuleFile, fetchSkills, fetchWorkflows } from "../lib/api-client";
+import {
+	fetchAvailableAgents,
+	fetchHooks,
+	fetchManifests,
+	fetchRuleFile,
+	fetchSkills,
+	fetchWorkflows,
+} from "../lib/api-client";
 import { addCategory, addSkill, addWorkflow, loadConfig, saveConfig } from "../lib/config";
 import {
 	applyNamingConvention,
@@ -9,10 +16,12 @@ import {
 	detectConflict,
 	writeRuleFile,
 } from "../lib/files";
+import { installHooks } from "../lib/hooks-install";
 import {
 	promptAgentSelection,
 	promptCategorySelection,
 	promptConflictResolution,
+	promptHookSelection,
 	promptSkillSelection,
 	promptWorkflowSelection,
 } from "../lib/prompts";
@@ -362,6 +371,51 @@ export async function initCommand(options: InitOptions = {}): Promise<void> {
 					await installWorkflows(selectedWorkflows, selectedAgent, overwriteStrategy, config);
 				} else {
 					console.log(chalk.yellow("No workflows selected."));
+				}
+			}
+		}
+
+		// Install hooks: skip if --no-hooks, else use CLI flag or interactive prompt
+		if (options.noHooks) {
+			console.log(chalk.yellow("\n⏭️  Skipping hooks (--no-hooks)"));
+		} else if (options.hooks && options.hooks.length > 0) {
+			console.log(chalk.blue("\n🪝 Checking for available hooks..."));
+			const allHooks = await fetchHooks(selectedAgent);
+
+			// Handle "all" keyword or filter to only selected hook names
+			const selectedHookNames = options.hooks.includes("all") ? allHooks.map((h) => h.name) : options.hooks;
+
+			const { config: configWithHooks, installed } = await installHooks(
+				selectedHookNames,
+				selectedAgent,
+				config.scope,
+				config,
+				process.cwd(),
+			);
+			config = configWithHooks;
+			if (installed.length > 0) {
+				console.log(chalk.green(`✓ Installed ${installed.length} hooks: ${installed.join(", ")}`));
+			} else {
+				console.log(chalk.yellow("No matching hooks found"));
+			}
+		} else if (process.stdin.isTTY) {
+			// Interactive mode: fetch and prompt (only when TTY is available)
+			const allHooks = await fetchHooks(selectedAgent);
+			if (allHooks.length > 0) {
+				console.log(chalk.blue("\n🪝 Hooks available for this agent:"));
+				const selectedHookNames = await promptHookSelection(allHooks);
+				if (selectedHookNames.length > 0) {
+					const { config: configWithHooks, installed } = await installHooks(
+						selectedHookNames,
+						selectedAgent,
+						config.scope,
+						config,
+						process.cwd(),
+					);
+					config = configWithHooks;
+					console.log(chalk.green(`✓ Installed ${installed.length} hooks: ${installed.join(", ")}`));
+				} else {
+					console.log(chalk.yellow("No hooks selected."));
 				}
 			}
 		}

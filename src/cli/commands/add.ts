@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import chalk from "chalk";
-import { fetchManifests, fetchRuleFile, fetchSkills, fetchWorkflows } from "../lib/api-client";
+import { fetchHooks, fetchManifests, fetchRuleFile, fetchSkills, fetchWorkflows } from "../lib/api-client";
 import { addCategory, addSkill, addWorkflow, loadConfig, saveConfig } from "../lib/config";
 import {
 	applyNamingConvention,
@@ -10,17 +10,18 @@ import {
 	detectConflict,
 	writeRuleFile,
 } from "../lib/files";
+import { installHooks } from "../lib/hooks-install";
 import { promptConflictResolution } from "../lib/prompts";
 import type { AddOptions, AIAgent, Config, OverwriteStrategy } from "../lib/types";
 
 /**
- * Add categories, skills, or workflows to an existing project.
+ * Add categories, skills, workflows, or hooks to an existing project.
  * Reads the agent from the existing .ai-rules.json config.
  */
 export async function addCommand(options: AddOptions): Promise<void> {
-	const hasContent = options.categories || options.skills || options.workflows;
+	const hasContent = options.categories || options.skills || options.workflows || options.hooks;
 	if (!hasContent) {
-		console.error(chalk.red("❌ Please specify at least one of --categories, --skills, or --workflows"));
+		console.error(chalk.red("❌ Please specify at least one of --categories, --skills, --workflows, or --hooks"));
 		process.exit(1);
 	}
 
@@ -59,6 +60,10 @@ export async function addCommand(options: AddOptions): Promise<void> {
 
 	if (options.workflows && options.workflows.length > 0) {
 		await addWorkflowsToProject(options.workflows, overwriteStrategy, config);
+	}
+
+	if (options.hooks && options.hooks.length > 0) {
+		await addHooksToProject(options.hooks, agent, config);
 	}
 
 	// Save updated config
@@ -235,4 +240,28 @@ async function addWorkflowsToProject(
 	}
 
 	console.log(chalk.green(`\n🎉 Successfully added ${installedCount} workflows`));
+}
+
+async function addHooksToProject(hookNames: string[], agent: string, config: Config): Promise<void> {
+	console.log(chalk.blue("\n🪝 Checking for available hooks..."));
+	const catalog = await fetchHooks(agent, config.scope);
+
+	if (catalog.length === 0) {
+		console.log(chalk.yellow("No hooks found for this agent"));
+		return;
+	}
+
+	// Resolve "all" keyword
+	const selectedHookNames = hookNames.includes("all") ? catalog.map((h) => h.name) : hookNames;
+
+	const { config: updatedConfig, installed } = await installHooks(
+		selectedHookNames,
+		agent,
+		config.scope,
+		config,
+		process.cwd(),
+	);
+	Object.assign(config, updatedConfig);
+
+	console.log(chalk.green(`\n🎉 Successfully added ${installed.length} hooks`));
 }
