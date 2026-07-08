@@ -1,0 +1,19 @@
+{
+  "description": "Auto-tracks the current session on the AI-Kanban board: reminds the model which card is active and best-effort POSTs each prompt as a progress note.",
+  "event": "UserPromptSubmit",
+  "script": "kanban-track.mjs",
+  "settingsFragment": {
+    "hooks": {
+      "UserPromptSubmit": [
+        {
+          "hooks": [
+            {
+              "type": "command",
+              "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/kanban-track/kanban-track.mjs"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
