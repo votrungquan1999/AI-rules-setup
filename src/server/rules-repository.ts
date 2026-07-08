@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { UpdateFilter } from "mongodb";
 import { getDatabase } from "./database";
 import {
+	HOOKS_COLLECTION_NAME,
 	PRIVATE_SKILLS_COLLECTION_NAME,
 	RULES_DATA_COLLECTION_NAME,
 	type RulesData,
@@ -9,6 +10,7 @@ import {
 	SKILLS_COLLECTION_NAME,
 	type SkillFile,
 	SkillVisibility,
+	type StoredHooksDocument,
 	type StoredPrivateSkillDocument,
 	type StoredRulesDocument,
 	type StoredSkillsDocument,
@@ -84,6 +86,18 @@ export async function findAllStoredRules(options: FindRulesOptions = {}): Promis
 		const agent = rulesData.agents[workflowsDoc.agent];
 		if (agent) {
 			agent.workflows = workflowsDoc.workflows;
+		}
+	}
+
+	// Also fetch hooks for each agent that has hooks stored. Public/unscoped for now (DECISIONS.md) —
+	// merged unconditionally, same as workflows, not gated behind includePrivate/projectScope.
+	const hooksCollection = db.collection<StoredHooksDocument>(HOOKS_COLLECTION_NAME);
+	const hooksDocuments = await hooksCollection.find({}).toArray();
+
+	for (const hooksDoc of hooksDocuments) {
+		const agent = rulesData.agents[hooksDoc.agent];
+		if (agent) {
+			agent.hooks = hooksDoc.hooks;
 		}
 	}
 

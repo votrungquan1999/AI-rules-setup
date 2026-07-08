@@ -1,10 +1,17 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { getDatabase } from "../../../server/database";
+import { storeHooksData } from "../../../server/hooks-repository";
 import { storePresetsData } from "../../../server/presets-repository";
 import { findAllStoredRules, storeRulesData, storeSkillsData } from "../../../server/rules-repository";
 import type { Manifest, Preset } from "../../../server/types";
-import { PRESETS_COLLECTION_NAME, RULES_DATA_COLLECTION_NAME, SKILLS_COLLECTION_NAME } from "../../../server/types";
+import {
+	HOOKS_COLLECTION_NAME,
+	PRESETS_COLLECTION_NAME,
+	RULES_DATA_COLLECTION_NAME,
+	SKILLS_COLLECTION_NAME,
+	WORKFLOWS_COLLECTION_NAME,
+} from "../../../server/types";
 import { storeWorkflowsData } from "../../../server/workflows-repository";
 import { fetchAllRulesDataLocal } from "./local-fetcher";
 
@@ -46,6 +53,11 @@ export async function primeCache(rootPath?: string): Promise<void> {
 		if (agent.workflows && agent.workflows.length > 0) {
 			await storeWorkflowsData(agentName, agent.workflows, "local");
 		}
+
+		// Store hooks if present
+		if (agent.hooks && agent.hooks.length > 0) {
+			await storeHooksData(agentName, agent.hooks, "local");
+		}
 	}
 
 	// Store presets from JSON files
@@ -77,11 +89,13 @@ export async function isCachePopulated(): Promise<boolean> {
 export async function clearCache(): Promise<void> {
 	const db = await getDatabase();
 
-	// Drop both collections in parallel (Promise.allSettled ensures both execute even if one fails)
+	// Drop all collections in parallel (Promise.allSettled ensures each runs even if others fail)
 	await Promise.allSettled([
 		db.collection(RULES_DATA_COLLECTION_NAME).drop(),
 		db.collection(SKILLS_COLLECTION_NAME).drop(),
 		db.collection(PRESETS_COLLECTION_NAME).drop(),
+		db.collection(WORKFLOWS_COLLECTION_NAME).drop(),
+		db.collection(HOOKS_COLLECTION_NAME).drop(),
 	]);
 
 	console.log("✅ Cache cleared successfully");
