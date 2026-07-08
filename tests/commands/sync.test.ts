@@ -466,4 +466,108 @@ describe("Sync Command Integration", () => {
 		// Then: discovery roots at the cwd, not a hardcoded home path
 		expect(discoverSpy).toHaveBeenCalledWith(testDir);
 	});
+
+	describe("hooks", () => {
+		const hookManifest = {
+			description: "test hook",
+			event: "UserPromptSubmit",
+			script: "kanban-track.mjs",
+			settingsFragment: {
+				hooks: {
+					UserPromptSubmit: [
+						{ hooks: [{ type: "command", command: 'node ".claude/hooks/kanban-track/kanban-track.mjs"' }] },
+					],
+				},
+			},
+		};
+
+		it("installs a hook from the fetched catalog: writes the script, registers settings.json, records config.hooks", async () => {
+			// Given: a claude-code project and a catalog offering one hook
+			const config = { version: "1.0.0", agent: "claude-code", categories: [] };
+			await writeFile(join(testDir, ".ai-rules.json"), JSON.stringify(config, null, 2));
+			setCachedRules({
+				agents: {
+					"claude-code": {
+						categories: {},
+						hooks: [
+							{
+								name: "kanban-track",
+								content: JSON.stringify(hookManifest),
+								supportingFiles: [{ path: "kanban-track.mjs", content: "console.log('hook')" }],
+							},
+						],
+					},
+				},
+			});
+
+			// When
+			await syncOneProject(testDir);
+
+			// Then: script written, settings.json registered, config records the hook
+			const script = await readFile(join(testDir, ".claude/hooks/kanban-track/kanban-track.mjs"), "utf-8");
+			expect(script).toBe("console.log('hook')");
+
+			const settings = JSON.parse(await readFile(join(testDir, ".claude/settings.json"), "utf-8"));
+			expect(settings.hooks.UserPromptSubmit).toHaveLength(1);
+
+			const written = JSON.parse(await readFile(join(testDir, ".ai-rules.json"), "utf-8"));
+			expect(written.hooks).toContain("kanban-track");
+		});
+
+		it("prunes an ai-rules-managed hook that dropped out of the fetched catalog, leaving a hand-written hook untouched", async () => {
+			// Given: a project with a prior sync's managed hook (settings entry + sidecar + script) and
+			// a developer's own hand-written hook registered alongside it
+			const config = { version: "1.0.0", agent: "claude-code", categories: [], hooks: ["kanban-track"] };
+			await writeFile(join(testDir, ".ai-rules.json"), JSON.stringify(config, null, 2));
+			await mkdir(join(testDir, ".claude"), { recursive: true });
+			await writeFile(
+				join(testDir, ".claude", "settings.json"),
+				JSON.stringify({
+					hooks: {
+						UserPromptSubmit: [
+							{ hooks: [{ type: "command", command: "echo hand-written" }] },
+							{ hooks: [{ type: "command", command: 'node ".claude/hooks/kanban-track/kanban-track.mjs"' }] },
+						],
+					},
+				}),
+			);
+			await mkdir(join(testDir, ".claude/hooks/kanban-track"), { recursive: true });
+			await writeFile(join(testDir, ".claude/hooks/kanban-track/kanban-track.mjs"), "console.log('hook')");
+			await writeFile(
+				join(testDir, ".claude", ".ai-rules-managed.json"),
+				JSON.stringify({
+					version: 1,
+					managedHooks: {
+						"kanban-track": {
+							event: "UserPromptSubmit",
+							command: 'node ".claude/hooks/kanban-track/kanban-track.mjs"',
+							scriptPath: ".claude/hooks/kanban-track/kanban-track.mjs",
+						},
+					},
+				}),
+			);
+
+			// The catalog no longer offers "kanban-track" — it dropped out
+			setCachedRules({ agents: { "claude-code": { categories: {}, hooks: [] } } });
+
+			// When
+			await syncOneProject(testDir);
+
+			// Then: the managed entry + script are gone, the hand-written one survives
+			const settings = JSON.parse(await readFile(join(testDir, ".claude/settings.json"), "utf-8"));
+			const commands = settings.hooks.UserPromptSubmit.flatMap((g: { hooks: Array<{ command: string }> }) =>
+				g.hooks.map((h) => h.command),
+			);
+			expect(commands).toEqual(["echo hand-written"]);
+
+			await expect(readFile(join(testDir, ".claude/hooks/kanban-track/kanban-track.mjs"), "utf-8")).rejects.toThrow();
+
+			const managedSidecar = JSON.parse(await readFile(join(testDir, ".claude", ".ai-rules-managed.json"), "utf-8"));
+			expect(managedSidecar.managedHooks["kanban-track"]).toBeUndefined();
+
+			// And: the pruned hook is no longer recorded in .ai-rules.json
+			const written = JSON.parse(await readFile(join(testDir, ".ai-rules.json"), "utf-8"));
+			expect(written.hooks ?? []).not.toContain("kanban-track");
+		});
+	});
 });

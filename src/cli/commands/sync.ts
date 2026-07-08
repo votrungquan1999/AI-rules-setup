@@ -1,15 +1,26 @@
-import { join, resolve, sep } from "node:path";
+import { join } from "node:path";
 import chalk from "chalk";
 import type { KbMemory } from "../lib/api-client";
-import { fetchKbMemories, fetchManifests, fetchRuleFile, fetchSkills, fetchWorkflows } from "../lib/api-client";
+import {
+	fetchHooks,
+	fetchKbMemories,
+	fetchManifests,
+	fetchRuleFile,
+	fetchSkills,
+	fetchWorkflows,
+} from "../lib/api-client";
 import { readConfigOrNull, saveConfig } from "../lib/config";
 import { discoverConfigDirs } from "../lib/discover";
 import {
 	applyNamingConvention,
 	applySkillFileNamingConvention,
 	applySkillNamingConvention,
+	pruneManagedHook,
+	readManagedHooks,
+	resolveWithinDir,
 	writeRuleFile,
 } from "../lib/files";
+import { installHooks } from "../lib/hooks-install";
 import { AIAgent, type Config } from "../lib/types";
 
 /**
@@ -19,21 +30,10 @@ import { AIAgent, type Config } from "../lib/types";
 const SKILL_AGENTS = new Set<string>([AIAgent.CURSOR, AIAgent.CLAUDE_CODE, AIAgent.ANTIGRAVITY]);
 
 /**
- * Resolves `targetPath` under `targetDir` and guarantees the result stays inside `targetDir`.
- * Catalog-controlled names (skill name, supporting-file path, workflow name) flow into write
- * paths, so a poisoned `../`-bearing value could otherwise escape the project. Throws on escape.
- * @param targetDir - Absolute path to the project directory
- * @param targetPath - Project-relative path derived from catalog data
- * @returns The absolute write path, guaranteed to be within `targetDir`
+ * Agents whose hooks can be materialized on disk. `applyHookNamingConvention` throws for any other
+ * agent (belt-and-suspenders alongside `installHooks`'s own internal gate), matching `SKILL_AGENTS`.
  */
-function resolveWithinDir(targetDir: string, targetPath: string): string {
-	const base = resolve(targetDir);
-	const full = resolve(base, targetPath);
-	if (full !== base && !full.startsWith(base + sep)) {
-		throw new Error(`Refusing to write outside the project directory: ${targetPath}`);
-	}
-	return full;
-}
+const HOOK_AGENTS = new Set<string>([AIAgent.CLAUDE_CODE]);
 
 /** Module-level guard so the missing-secret warning fires at most once per process. */
 let secretWarned = false;
@@ -235,6 +235,27 @@ export async function syncOneProject(targetDir: string): Promise<SyncResult> {
 		installedWorkflows.push(workflow.name);
 	}
 
+	// Hooks: install every catalog hook, then prune any previously ai-rules-managed hook that has
+	// dropped out of THIS fetch's catalog (settings.json entry + script dir), never touching a
+	// hand-written entry — matched via the sidecar's own recorded command, not pattern-matching.
+	const supportsHooks = HOOK_AGENTS.has(agent);
+	let installedHooks: string[] = [];
+	if (supportsHooks) {
+		const priorManaged = await readManagedHooks(targetDir);
+		const catalog = await fetchHooks(agent, scope);
+		const catalogNames = catalog.map((h) => h.name);
+
+		const result = await installHooks(catalogNames, agent, scope, config, targetDir);
+		installedHooks = result.installed;
+
+		const catalogNameSet = new Set(catalogNames);
+		for (const [hookName, entry] of Object.entries(priorManaged)) {
+			if (!catalogNameSet.has(hookName)) {
+				await pruneManagedHook(targetDir, hookName, entry);
+			}
+		}
+	}
+
 	// Rewrite the config to exactly the installed set, preserving version/agent/scope. The skills
 	// key is omitted entirely for agents without a skill convention.
 	const newConfig: Config = {
@@ -244,11 +265,17 @@ export async function syncOneProject(targetDir: string): Promise<SyncResult> {
 		workflows: installedWorkflows,
 	};
 	if (supportsSkills) newConfig.skills = installedSkills;
+	// Unlike skills/workflows (always set once the agent supports them), an empty hooks array is
+	// omitted entirely — the catalog may simply have no hooks yet, and a noisy `hooks: []` on every
+	// synced config isn't useful signal.
+	if (supportsHooks && installedHooks.length > 0) newConfig.hooks = installedHooks;
 	if (scope) newConfig.scope = scope;
 	await saveConfig(targetDir, newConfig);
 
 	// Materialize always-on KB memories (claude-code + scope only); failure is isolated.
 	await materializeMemories(agent, scope, targetDir);
 
-	return { installed: installedCategories.length + installedSkills.length + installedWorkflows.length };
+	return {
+		installed: installedCategories.length + installedSkills.length + installedWorkflows.length + installedHooks.length,
+	};
 }
