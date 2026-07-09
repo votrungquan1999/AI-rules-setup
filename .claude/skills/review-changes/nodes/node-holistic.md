@@ -6,7 +6,7 @@ Run by the orchestrator inline, on the strong model. Produces the shared framing
 
 ### 1. Execute git diff
 
-Compare the feature branch against the default branch (`main` / `master` / `develop`); fall back to `HEAD~1`.
+Work from inside the repo the orchestrator resolved in Step 0 (the repo the conversation is about, not the launch pwd), against the fresh `$BASE` it fetched (not a stale local `main`). Run `git diff "$BASE"` (fall back to `HEAD~1` only if no base branch exists).
 - **Do NOT output the raw diff to the user.**
 
 ### 2. Eligibility check (gate)

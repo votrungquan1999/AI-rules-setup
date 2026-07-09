@@ -8,10 +8,9 @@ allowed-tools: Read, Bash, Write
 
 Create a well-structured commit plan by analyzing current git changes and grouping them into semantic commits with detailed descriptions.
 
-## Current Changes
+## Step 0 — Work in the right repo
 
-!`git status --short`
-!`git diff --stat`
+The repo being committed is often not the current dir — you might be in `~/git-repos/personal` while the work is in `quant-trading/`. Infer the repo from the conversation and the files being changed, and work from inside it; ask if the target repo is unclear. Then inspect the working tree with `git status --short` and `git diff --stat`.
 
 ## When to Use
 

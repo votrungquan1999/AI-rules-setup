@@ -10,35 +10,34 @@ You are the **orchestrator** for an autonomous code review. You run a holistic p
 
 This skill is a lightweight **fan-out → verify → merge** pipeline — NOT a heavy stateful workflow. There are no per-phase user gates; spawn, collect, verify, merge, done.
 
-## Current Changes
+## Step 0 — Work in the right repo, against a fresh base
 
-Branch: !`git branch --show-current`
-Changed files: !`git diff --name-only $(git merge-base HEAD main 2>/dev/null || git merge-base HEAD master 2>/dev/null) 2>/dev/null || git diff --name-only HEAD~1`
+Do this before anything else. Two traps:
 
-## How This Works
+- **Wrong directory.** The repo under review is often not the current dir — you might be in `~/git-repos/personal` while the conversation is about `quant-trading/`. Infer the repo from the conversation (what's named, the files discussed, the IDE selection) and work from inside it. If the current dir isn't a git repo and the target is unclear, ask.
+- **Base.** If the user named a base to diff against (a branch, tag, or PR target), use it. Otherwise use the repo's default branch — fresh: the local `main`/`master` is usually behind the remote, so fetch first and base off the remote-tracking ref:
+  ```bash
+  git fetch --quiet origin
+  BASE=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null \
+    || for b in origin/main origin/master origin/develop; do \
+         git rev-parse --verify --quiet "$b" >/dev/null && echo "$b" && break; done)
+  ```
+  Fall back to `HEAD~1` only when there's no base branch at all (say so).
 
-```
-[holistic: eligibility + summary + approach-eval]   (you, strong model, inline)
-        │  writes HOLISTIC.md (shared framing for every lens)
-        ▼
-[gate: which lenses apply?]   (by what the diff touches)
-        ▼
-[correctness] [quality]              (parallel sub-agents, sonnet)
-[security]                           (parallel sub-agent, default/strong model — reads beyond the diff)
-[tests]                              (parallel sub-agent, sonnet — only if tests changed)
-        │  each writes LENS_<name>.md
-        ▼
-[gate: which findings need verification?]   (you — only findings the lens flagged "Needs verification")
-        ▼
-[verify finding batches]             (parallel sub-agents — resolve the flagged uncertainty against the real code)
-        │  each writes VERDICT_<batch>.md
-        ▼
-[merge: drop refuted → confidence-score → filter → dedupe → severity]   (you, inline)
-        ▼
-./tmp/review-changes.md
-```
+Scope to what the user asked: branch/PR review → committed changes since `$BASE`; uncommitted work → also `git status --short`; ambiguous → default to committed-since-base. Tell each lens/verifier subagent which repo dir and base to use.
 
-The node instructions for each phase live in this skill's `nodes/` directory. When spawning a lens sub-agent, point it at the matching node file.
+## Pipeline
+
+Order and who-runs-each — the single source of truth for the *flow*. Models are defined in **Model Selection**, artifact paths in **Workspace**, and per-phase detail in the `nodes/` files; this map does not restate them.
+
+1. **holistic** — you, inline
+2. **gate** — which lenses apply? (by what the diff touches)
+3. **lenses** — parallel subagents
+4. **gate** — which findings are flagged `Needs verification: yes`?
+5. **verify** flagged findings — parallel subagents
+6. **merge** — you, inline → `./tmp/review-changes.md`
+
+Each phase's instructions live in this skill's `nodes/` directory; point every lens/verifier subagent at its matching node file.
 
 ## Orchestrator Rules
 
@@ -104,6 +103,8 @@ Agent(
   model: "sonnet",   // OMIT for the security lens
   prompt: "Read the instructions in [this skill's directory]/nodes/node-lens-[name].md
     and the shared rules in [this skill's directory]/nodes/lens-common.md, then execute them.
+    The changes are in [the repo dir resolved in Step 0], diffed against [$BASE]: work from
+    inside that repo, run `git diff \"$BASE\"` to see them, and read surrounding code there.
     Read ./tmp/review-changes/HOLISTIC.md for shared framing (intended approach, constraints, root cause).
     Review ONLY the changes in the current diff. Write findings to ./tmp/review-changes/LENS_[name].md.
     Report back: number of findings and the highest severity."
@@ -135,6 +136,7 @@ Agent(
   description: "verify findings [files]",
   model: "sonnet",   // OMIT for any batch containing a security finding
   prompt: "Read the instructions in [this skill's directory]/nodes/node-verify.md and execute them.
+    Resolve findings from inside [the repo dir from Step 0] (base [$BASE]) — run any git there.
     Read ./tmp/review-changes/HOLISTIC.md for shared framing.
     Verify these findings — resolve each one's flagged uncertainty against the real code: [paste each finding's lens, file:line, severity, description, and its 'Needs verification' note].
     Write verdicts to ./tmp/review-changes/VERDICT_[batch].md.

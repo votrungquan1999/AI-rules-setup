@@ -56,3 +56,7 @@ When a code path has 2+ defensible behaviors (lossy vs preserve, gate vs skip, f
 ## On substantive multi-step work, run ai-kanban-track-session: open an in_progress card (tags=.ai-rules.json scope, +sessionId), append progress, set need_review when done. Skip trivial tasks.
 
 On substantive multi-step work, run ai-kanban-track-session: open an in_progress card (tags=.ai-rules.json scope, +sessionId), append progress, set need_review when done. Skip trivial tasks.
+
+## User says 'won't fix' / 'fixed' / 'invalid' (or similar short phrase) → post that exact phrase verbatim as the comment body. No lead-in, no rationale. Explain only if asked.
+
+User says 'won't fix' / 'fixed' / 'invalid' (or similar short phrase) → post that exact phrase verbatim as the comment body. No lead-in, no rationale. Explain only if asked.
