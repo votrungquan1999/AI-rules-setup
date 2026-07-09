@@ -23,4 +23,3 @@ If the `set_status` call fails, report it and stop — don't loop. Tracking is a
 
 - Don't move the card to a terminal/done status yourself — review is a human step.
 - Don't delete or archive the card.
-- Don't remove any git worktree you created — leave the workspace in place for the reviewer.

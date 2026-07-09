@@ -1,11 +1,11 @@
 # Step 1: Open the Card
 
-Create the card that tracks this session's work, announce it, and rename the session to match.
+Create the card that tracks this work and announce it.
 
 ## Gather the inputs
 
-1. **Tags** — read `.ai-rules.json` at the repo root and take its `scope` array as the tags. If the file or the `scope` key is absent, ask the user which tags to use and proceed with their answer.
-2. **Session id** — read `$CLAUDE_CODE_SESSION_ID` from the shell. A real Claude Code session always has this set, and `create_card` **requires a non-empty value**. If it is somehow missing, **tell the user and stop** — do not pass a blank string (the tool will reject it), and do not create an untracked card behind their back.
+1. **Tags** — if you're working in a repo with an `.ai-rules.json` at its root, its `scope` array is a good default for tags. If that's not available (no such file, no `scope` key, or you're not operating in a repo at all), **ask the user** which tags to use and proceed with their answer.
+2. **Session id** — optional. If you're running as a session that has an id (e.g. a Claude Code session's `$CLAUDE_CODE_SESSION_ID`), include it — `create_card` accepts it as a bonus reference. If there is no session id (a different kind of agent, or a human), omit the field entirely; do not stop or ask the user for one.
 3. **Task name** — infer a short title from the work (a few words, imperative — e.g. "Add staled-card auto-park").
 
 ## Action
@@ -16,8 +16,8 @@ Call the dispatch tool:
 create_card({
   title: <task name>,
   description: <one-sentence summary of the goal, optional>,
-  tags: <scope array from .ai-rules.json>,
-  sessionId: <$CLAUDE_CODE_SESSION_ID>,
+  tags: <the tags gathered above>,
+  sessionId: <session id, only if one exists — omit the key otherwise>,
 })
 ```
 
@@ -26,16 +26,6 @@ The card is created **directly in `in_progress`** — there is no separate claim
 ## Announce it
 
 Tell the user in **one line**, e.g. `Tracking this as card #N.` Then continue the actual work. Don't over-explain.
-
-## Rename the session (best-effort)
-
-Rename the session so it's findable later, matching the task name:
-
-```
-/rename <task name>
-```
-
-If that command isn't supported by this Claude Code build (it does nothing or errors), don't retry — instead tell the user the inferred name and ask them to rename the session manually, e.g. *"Couldn't rename automatically — you may want to rename this session to 'Add staled-card auto-park'."* Then continue.
 
 ## Interpret the result
 
