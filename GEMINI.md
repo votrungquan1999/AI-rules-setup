@@ -167,6 +167,6 @@ See `.env.example` for required environment variables:
 - `/docs/adr/` - Architecture Decision Records
 - `/docs/roadmap.md` - Project roadmap
 - `/docs/manifest-schema.md` - Manifest JSON schema
-- `/rules/README.md` - Rule file guidelines
+- `/rules/TAG_GUIDELINES.md` - Rule category tagging guidelines
 
 

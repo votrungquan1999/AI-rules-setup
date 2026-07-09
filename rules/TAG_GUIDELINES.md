@@ -85,10 +85,11 @@ Use for code quality and development process, including but not limited to:
 {
   "tags": [
     "react", // Technology
+    "react-19", // Version (if applicable)
     "patterns", // Generic category
     "server-components", // Feature
     "nextjs", // Technology
-    "nextjs-13", // Version (if applicable)
+    "nextjs-15", // Version (if applicable)
     "composition-pattern", // Pattern
     "client-server-separation" // Feature
   ]

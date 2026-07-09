@@ -185,7 +185,7 @@ The optional **`scope`** field opts the project into [private skills](#private-s
 - [System Design](./docs/system-design.md) — Detailed architecture
 - [ADRs](./docs/adr/) — Architecture Decision Records
 - [Manifest Schema](./docs/manifest-schema.md) — Rule manifest format
-- [Rules README](./rules/README.md) — How to write rules
+- [Tag Guidelines](./rules/TAG_GUIDELINES.md) — How to tag rule categories
 
 ## License
 
