@@ -5,19 +5,16 @@ description: Senior-level diff review via parallel review-lens subagents with a 
 
 # Review Changes
 
-Orchestrate a code review as a lightweight **fan-out -> verify -> merge** pipeline: run a holistic pass inline, fan out review lenses as parallel subagents, verify only the findings a lens flagged, then merge into one severity-ranked report. No per-phase user gates — spawn, collect, verify, merge, done.
+Orchestrate a code review as a lightweight **fan-out → verify → merge** pipeline (see Pipeline below). No per-phase user gates — spawn, collect, verify, merge, done.
 
 ## Pipeline
 
-```text
-[holistic: eligibility + summary + approach-eval]   (inline, strong model)
-   -> [gate: which lenses apply?]
-   -> [correctness] [quality] [security] [tests]     (parallel subagents)
-   -> [gate: which findings flagged "Needs verification"?]
-   -> [verify flagged findings]                       (parallel subagents)
-   -> [merge: apply verdicts -> confidence-score -> filter -> dedupe -> severity]   (inline)
-   -> <ws>/review-changes.md
-```
+1. **holistic** — inline, strong model: eligibility + summary + approach-eval
+2. **gate** — which lenses apply? (by what the diff touches)
+3. **lenses** — correctness / quality / security / tests, parallel subagents
+4. **gate** — which findings are flagged `Needs verification: yes`?
+5. **verify** flagged findings — parallel subagents
+6. **merge** — inline: apply verdicts → confidence-score → filter → dedupe → severity → `<ws>/review-changes.md`
 
 ## Workspace
 
@@ -44,19 +41,32 @@ Establish a task identifier first — the branch name under review, the PR/MR nu
 
 ## Step 0 — Work in the right repo, against a fresh base
 
-Do this before Phase 1. Two traps:
+Do this before Phase 1.
 
-- **Wrong directory.** The repo under review is often not the current dir — you might be in `~/git-repos/personal` while the conversation is about `quant-trading/`. Infer the repo from the conversation (what's named, the files discussed, the IDE selection) and work from inside it. If the current dir isn't a git repo and the target is unclear, ask.
-- **Base.** If the user named a base to diff against (a branch, tag, or PR target), use it. Otherwise use the repo's default branch — fresh: the local `main`/`master` is usually behind the remote, so fetch first and base off the remote-tracking ref:
-  ```bash
-  git fetch --quiet origin
-  BASE=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null \
-    || for b in origin/main origin/master origin/develop; do \
-         git rev-parse --verify --quiet "$b" >/dev/null && echo "$b" && break; done)
-  ```
-  Fall back to `HEAD~1` only when there's no base branch at all (say so).
+**PR/MR link or number → review it in a dedicated worktree.** Never review a PR in the user's working tree — check the branch out in its own worktree so their current state is untouched. Detect the platform from the remote (`github.com` → `gh`, `gitlab` → `glab`), read the PR's head and base branches, then create the worktree the first time or refresh it from remote if it already exists:
 
-Scope to what the user asked: branch/PR review → committed changes since `$BASE`; uncommitted work → also `git status --short`; ambiguous → default to committed-since-base. Tell each lens/verifier subagent which repo dir and base to use.
+```bash
+# Run from inside the target repo. Read the PR's head + base branch:
+gh pr view <num> --json headRefName,baseRefName,headRefOid   # glab mr view <iid> --output json
+REPO=$(basename "$(git rev-parse --show-toplevel)"); WT="../${REPO}-pr-<num>"
+
+if [ -d "$WT" ]; then                        # exists → refresh target + base from remote
+  git -C "$WT" fetch origin <head> <base>
+  git -C "$WT" pull --rebase origin <head>   # rebase local onto latest remote head
+else                                         # first time → create at the PR head
+  git fetch origin <head> <base>
+  git worktree add "$WT" "origin/<head>"
+fi
+```
+
+Rebase conflict on refresh is rare — if `pull --rebase` reports one, STOP and ask the user; do not resolve it yourself. Set `BASE=origin/<base>`, run every phase from inside `$WT`, resolve `<ws>` under `$WT`, and leave the worktree in place — surface its path in the report so the user can `git worktree remove "$WT"` later. The PR resolved both repo and base, so skip the two traps below.
+
+**Otherwise — a local branch or uncommitted work — infer repo and base:**
+
+- **Repo.** Often not the current dir (you might be in `~/git-repos/personal` while the conversation is about `quant-trading/`). Infer it from the conversation (files named, IDE selection) and work from inside it. If the current dir isn't a git repo and the target is unclear, ask.
+- **Base.** Use the base the user named (branch/tag/PR target); else `git fetch origin` and diff against the remote default branch (`origin/HEAD`, falling back to `origin/main`/`master`) — the local ref is usually stale. Fall back to `HEAD~1` only when there's no base branch at all (say so).
+
+Scope: branch/PR → committed since `$BASE`; uncommitted → also `git status --short`; ambiguous → committed-since-base. Tell each subagent the repo dir and base.
 
 ## Phases
 

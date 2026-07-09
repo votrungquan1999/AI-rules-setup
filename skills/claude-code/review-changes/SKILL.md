@@ -8,27 +8,42 @@ context: fork
 
 You are the **orchestrator** for an autonomous code review. You run a holistic pass yourself, fan out specialized review lenses as parallel sub-agents, spawn verifier sub-agents only for the findings a lens flagged as needing a code-level check, then merge the survivors into a single severity-ranked report.
 
-This skill is a lightweight **fan-out → verify → merge** pipeline — NOT a heavy stateful workflow. There are no per-phase user gates; spawn, collect, verify, merge, done.
+This is a lightweight **fan-out → verify → merge** pipeline, not a stateful workflow: no per-phase user gates — spawn, collect, verify, merge, done.
 
 ## Step 0 — Work in the right repo, against a fresh base
 
-Do this before anything else. Two traps:
+Do this before anything else.
 
-- **Wrong directory.** The repo under review is often not the current dir — you might be in `~/git-repos/personal` while the conversation is about `quant-trading/`. Infer the repo from the conversation (what's named, the files discussed, the IDE selection) and work from inside it. If the current dir isn't a git repo and the target is unclear, ask.
-- **Base.** If the user named a base to diff against (a branch, tag, or PR target), use it. Otherwise use the repo's default branch — fresh: the local `main`/`master` is usually behind the remote, so fetch first and base off the remote-tracking ref:
-  ```bash
-  git fetch --quiet origin
-  BASE=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null \
-    || for b in origin/main origin/master origin/develop; do \
-         git rev-parse --verify --quiet "$b" >/dev/null && echo "$b" && break; done)
-  ```
-  Fall back to `HEAD~1` only when there's no base branch at all (say so).
+**PR/MR link or number → review it in a dedicated worktree.** Never review a PR in the user's working tree — check the branch out in its own worktree so their current state is untouched. Detect the platform from the remote (`github.com` → `gh`, `gitlab` → `glab`), read the PR's head and base branches, then create the worktree the first time or refresh it from remote if it already exists:
 
-Scope to what the user asked: branch/PR review → committed changes since `$BASE`; uncommitted work → also `git status --short`; ambiguous → default to committed-since-base. Tell each lens/verifier subagent which repo dir and base to use.
+```bash
+# Run from inside the target repo. Read the PR's head + base branch:
+gh pr view <num> --json headRefName,baseRefName,headRefOid   # glab mr view <iid> --output json
+REPO=$(basename "$(git rev-parse --show-toplevel)"); WT="../${REPO}-pr-<num>"
+
+if [ -d "$WT" ]; then                        # exists → refresh target + base from remote
+  git -C "$WT" fetch origin <head> <base>
+  git -C "$WT" pull --rebase origin <head>   # rebase local onto latest remote head
+else                                         # first time → create at the PR head
+  git fetch origin <head> <base>
+  git worktree add "$WT" "origin/<head>"
+fi
+```
+
+- **Rebase conflict on refresh is rare — if `pull --rebase` reports a conflict, STOP and ask the user; do not resolve it yourself.**
+- Set `BASE=origin/<base>`, run **every** phase from inside `$WT`, and resolve `<ws>` under `$WT`. The PR resolved both repo and base, so skip the two traps below.
+- Leave the worktree in place after the review; surface its path in the report so the user can `git worktree remove "$WT"` later.
+
+**Otherwise — a local branch or uncommitted work — infer repo and base:**
+
+- **Repo.** Often not the current dir (you might be in `~/git-repos/personal` while the conversation is about `quant-trading/`). Infer it from the conversation (files named, IDE selection) and work from inside it. If the current dir isn't a git repo and the target is unclear, ask.
+- **Base.** Use the base the user named (branch/tag/PR target); else `git fetch origin` and diff against the remote default branch (`origin/HEAD`, falling back to `origin/main`/`master`) — the local ref is usually stale. Fall back to `HEAD~1` only when there's no base branch at all (say so).
+
+Scope: branch/PR → committed since `$BASE`; uncommitted → also `git status --short`; ambiguous → committed-since-base. Tell each subagent the repo dir and base.
 
 ## Pipeline
 
-Order and who-runs-each — the single source of truth for the *flow*. Models are defined in **Model Selection**, artifact paths in **Workspace**, and per-phase detail in the `nodes/` files; this map does not restate them.
+Order and who-runs-each — the source of truth for the *flow*. Models live in **Model Selection**, paths in **Workspace**, per-phase detail in the `nodes/` files; point every lens/verifier subagent at its matching node file.
 
 1. **holistic** — you, inline
 2. **gate** — which lenses apply? (by what the diff touches)
@@ -36,8 +51,6 @@ Order and who-runs-each — the single source of truth for the *flow*. Models ar
 4. **gate** — which findings are flagged `Needs verification: yes`?
 5. **verify** flagged findings — parallel subagents
 6. **merge** — you, inline → `<ws>/review-changes.md`
-
-Each phase's instructions live in this skill's `nodes/` directory; point every lens/verifier subagent at its matching node file.
 
 ## Orchestrator Rules
 

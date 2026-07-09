@@ -7,7 +7,7 @@ Rules every review lens follows. Your specific focus is in your own `node-lens-*
 - Review **ONLY the code shown in the current diff**. Do not comment on unchanged code or pre-existing issues on lines the diff didn't touch.
 - Read `./tmp/review-changes/HOLISTIC.md` first for shared framing: the intended approach, constraints, and the root cause being solved. Judge the change against that intent.
 - Assume intent is correct unless there is clear risk. Prefer concrete, actionable suggestions and explain the "why".
-- Judging the diff sometimes depends on code **outside** it — a callee, a caller, a type, a config, a runtime assumption — that you haven't read. When that happens, **note what needs further research** (name the specific thing and where to look) and mark the finding `Needs verification: yes` (see below). Do NOT guess and do NOT stay silent — surfacing the open thread lets the orchestrator chase it down with a verifier.
+- Judging the diff sometimes depends on code **outside** it — a callee, a caller, a type, a config, a runtime assumption — that you haven't read. Don't guess and don't stay silent: mark the finding `Needs verification: yes` and name what to check (see [Flag findings that need a code-level check](#flag-findings-that-need-a-code-level-check) below).
 
 ## What NOT to flag (false positives)
 
