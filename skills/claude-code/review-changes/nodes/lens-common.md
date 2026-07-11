@@ -58,4 +58,4 @@ Write findings to the `./tmp/review-changes/LENS_<name>.md` path named in your p
 [Anything good worth calling out, or "no issues found in this lens"]
 ```
 
-If you find no issues, write the file with an empty Findings section and say so explicitly. Then report back to the orchestrator: number of findings and the highest severity.
+If you find no issues, write the file with an empty Findings section and say so explicitly. Then report back to the orchestrator: number of findings, the highest severity, and — for every finding you marked `Needs verification: yes` — a one-line entry (lens, `file:line`, severity, and what to check) so the orchestrator can route it to a verifier without re-reading this file.

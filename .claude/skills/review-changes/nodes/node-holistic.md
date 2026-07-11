@@ -1,6 +1,6 @@
 # Node: Holistic
 
-Run by the orchestrator inline, on the strong model. Produces the shared framing every lens depends on. Covers eligibility, the changes summary, and the approach evaluation (steps 1–4 of a classic senior review).
+You are the **holistic sub-agent**, spawned first on the strong model. You produce the shared framing every lens depends on. Covers eligibility, the changes summary, and the approach evaluation (steps 1–4 of a classic senior review). The repo dir, `$BASE`, and `<ws>` are in your prompt.
 
 ## Execution
 
@@ -11,16 +11,15 @@ Work from inside the repo the orchestrator resolved in Step 0 (the repo the conv
 
 ### 2. Eligibility check (gate)
 
-Stop early — do not fan out — when the review adds no value:
-- **No changes** → state that clearly and stop.
-- **Trivial diff** (a handful of lines, generated files, pure formatting, version bumps) → do a single inline review and skip the lens fan-out. Note that you took the fast path.
-
-Only proceed to the lens fan-out when the diff is **non-trivial** (real logic, multiple files, or anything touching data/auth/security).
+Decide whether the fan-out adds value, and report your verdict back to the orchestrator:
+- **No changes** → verdict `stop`. Report it back; write nothing else.
+- **Trivial diff** (a handful of lines, generated files, pure formatting, version bumps) → verdict `single-inline-pass`. Review it yourself in one pass and write the **final report** directly to `<ws>/review-changes.md` (format below), then report the verdict back. Skip the lens fan-out.
+- **Non-trivial** (real logic, multiple files, or anything touching data/auth/security) → verdict `proceed-with-fan-out`. Write `HOLISTIC.md` (below); the orchestrator takes it from there.
 
 ### 3. Understand the problem
 
 Before judging the code:
-- Read the PR/commit description, linked issues, or ask the user for context.
+- Read the PR/commit description and linked issues for context (you're a sub-agent — you can't ask the user; infer from the repo, the diff, and `HOLISTIC.md`'s inputs).
 - Identify the **root cause** being solved — not just the symptom.
 - Note the **constraints** (backward compatibility, performance, existing patterns).
 - Form your own mental model: "If I were solving this from scratch, how would I approach it?"
@@ -77,3 +76,5 @@ Write `./tmp/review-changes/HOLISTIC.md`:
 ## Overall Risk Level
 [low | medium | high] — [one line]
 ```
+
+Then report back to the orchestrator: your **eligibility verdict** (`proceed-with-fan-out` | `single-inline-pass` | `stop`) and a one-paragraph summary. For `single-inline-pass`, note that you already wrote `<ws>/review-changes.md`.
