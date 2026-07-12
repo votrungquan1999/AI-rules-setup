@@ -23,6 +23,20 @@ create_card({
 
 The card is created **directly in `in_progress`** — there is no separate claim step. The tool returns the created card, including its number (`#N`) and id; keep the id for the rest of the session.
 
+## Write the session pointer
+
+If a session id was gathered above, write it right after `create_card` succeeds so downstream hooks/skills (e.g. the `kanban-track` hook, decision-mirroring) can resolve the active card for this session:
+
+```
+~/.claude/kanban-session-state/<sessionId>.json
+```
+
+```json
+{ "cardId": "<created card id>", "cardNumber": <created card number>, "summary": "<task name>" }
+```
+
+Best-effort — a failed write must not block card creation; note it and move on. No session id → skip this step entirely.
+
 ## Announce it
 
 Tell the user in **one line**, e.g. `Tracking this as card #N.` Then continue the actual work. Don't over-explain.

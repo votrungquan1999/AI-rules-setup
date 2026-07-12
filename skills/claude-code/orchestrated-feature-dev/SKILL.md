@@ -16,6 +16,7 @@ Pipeline: research → plan → (investigation ∥ behavior-risk catalog) → BD
 - **Route on returns.** Read state files to make decisions and relay sub-agent outputs to the user. Do not re-analyze findings in your own words.
 - **Freeze `BEHAVIOR_RISKS.md`** once Phase 3b writes it — the adversarial phase checks against it; never edit it to match what was built.
 - **Log decisions.** Whenever any phase or the orchestrator faces **2+ viable options and picks one** (including choices the user resolved), append to `<ws>/DECISIONS.md`: chosen option, alternative(s), one-line why. Skip forced moves.
+- **Mirror decisions to the card (best-effort).** The `DECISIONS.md` write *is* the trigger: every time you add a NEW entry, also mirror *that entry* to the AI-Kanban card so the "why" outlives `<ws>` — `append_decision(cardId, { decision, why? })`. Resolve `cardId` from the session pointer `~/.claude/kanban-session-state/$CLAUDE_CODE_SESSION_ID.json` (`cardId` field); if the file/field is absent (no card tracked this session), **skip the mirror silently**. If the new entry **supersedes** a specific earlier decision, call `mark_decision_outdated(cardId, index)` on the older entry **first**, then `append_decision` for the replacement — so a mid-way failure never leaves two contradictory *active* entries. Resolve `index` by re-reading `get_card_context(cardId)` and matching the older entry's **text** (not a remembered position); skip the mark if you can't locate it unambiguously. Mirror only newly-added entries, never re-send the whole file. Every call is non-blocking — on failure, note it and keep working.
 
 **Spawn pattern** — keep the prompt minimal; the node carries the instructions:
 
@@ -45,13 +46,17 @@ Every run is scoped to a **task identifier** (a ticket id, or a confirmed kebab-
 - `BEHAVIOR_RISKS.md` — implementation-blind behavior-risk catalog (Phase 3b); **frozen** after
 - `IMPLEMENTATION_PROGRESS.md` — per-step results + red/green audit trail
 - `VALIDATION_STEP_[N].md` — conformance results (5a); `ADVERSARIAL_REVALIDATION.md` — adversarial findings (5b)
-- `DECISIONS.md` — running decision log
+- `DECISIONS.md` — running decision log (each new entry is also mirrored to the AI-Kanban card — see **Mirror decisions to the card**)
 
 ---
 
 ## Phase 0: Establish Workspace
 
 Ask for a task identifier (or derive a kebab-case slug from the request and confirm it). Create `./tmp/<identifier>/`. **Gate:** do not proceed until it exists. **Before creating it, check whether `./tmp/<identifier>/` already holds artifacts from unrelated work — if so, STOP and ask the user** rather than overwriting another task's run.
+
+The identifier doubles as the `<slug>` for the feature's living spec (`docs/features/<slug>/spec.md`, written at Phase 6). If a spec already exists for this `<slug>`, skim it first as recall context — this run **updates** that same living spec rather than starting fresh.
+
+**Drop the spec-reminder sentinel (best-effort).** Write `{ slug, specPath: "docs/features/<slug>/spec.md" }` to `~/.claude/spec-reminder-state/$CLAUDE_CODE_SESSION_ID.json`. This is what the `spec-reminder` Stop hook reads to nudge if code changes this session but the living spec doesn't. Skip silently if `$CLAUDE_CODE_SESSION_ID` is unset.
 
 ## Phase 1: Research (convergence loop)
 
@@ -75,7 +80,7 @@ Spawn `node-investigation.md`, one sub-agent per batch (batch to the cap), each 
 
 Spawn `node-behavior-risk.md` (may go in the same message as the investigation batches). It catalogs edge-case **behaviors** from the requirement + existing system only — **never** the new implementation — into `BEHAVIOR_RISKS.md`. On return:
 
-1. **Escalate requirement-silent entries now** — each is a 2+ defensible-behaviors product decision, cheaper to resolve before implementation. Fold each resolution into `implementation-plan.md` (+ a `PLAN_STEPS.md` step if it adds behavior); log to `DECISIONS.md`.
+1. **Escalate requirement-silent entries now** — each is a 2+ defensible-behaviors product decision, cheaper to resolve before implementation. Fold each resolution into `implementation-plan.md` (+ a `PLAN_STEPS.md` step if it adds behavior); log to `DECISIONS.md` (and mirror it to the card).
 2. **Freeze the catalog** — requirement-implied entries become the Phase 5b checks; `BEHAVIOR_RISKS.md` is now immutable.
 
 **Gate:** if there were silent entries, wait for the user's decisions.
@@ -86,7 +91,7 @@ Batched BDD sub-agents alternate with quality gates.
 
 **4a. BDD batch** — spawn `node-bdd-step.md` per batch (batch to the cap; same grouping as investigation). It runs its steps one-test-at-a-time with meaningful-red discipline and **bubbles up** on any gate. Route on its return:
 - **Done, no gate** → quality gate (4b), then next batch.
-- **Stopped at a gate** (untestable behavior / 2+ defensible behaviors / unresolved failure) → escalate to the user, log to `DECISIONS.md`, then spawn a **new** sub-agent to resume that batch with the decision baked in.
+- **Stopped at a gate** (untestable behavior / 2+ defensible behaviors / unresolved failure) → escalate to the user, log to `DECISIONS.md` (and mirror it to the card), then spawn a **new** sub-agent to resume that batch with the decision baked in.
 
 Verify discipline via the red/green trail in `IMPLEMENTATION_PROGRESS.md`, not the prose summary.
 
@@ -104,7 +109,7 @@ Two independent axes, spawned together so all run in parallel:
 
 On return:
 - **Conformance (5a):** invalid steps → one fix sub-agent for all of them, then re-validate only those.
-- **Adversarial (5b): report + triage.** Present each break/silent-misbehavior with severity; the user decides **new step** (→ Phase 4) or **accepted/out-of-scope**. No auto-loop; log each to `DECISIONS.md`.
+- **Adversarial (5b): report + triage.** Present each break/silent-misbehavior with severity; the user decides **new step** (→ Phase 4) or **accepted/out-of-scope**. No auto-loop; log each to `DECISIONS.md` (and mirror each to the card).
 
 Present combined results.
 

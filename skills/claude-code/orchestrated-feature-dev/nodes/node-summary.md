@@ -11,6 +11,7 @@ Read all workflow state files:
 - `<ws>/PLAN_STEPS.md`
 - `<ws>/IMPLEMENTATION_PROGRESS.md`
 - `<ws>/DECISIONS.md` (if present — the decision log)
+- `docs/features/<slug>/spec.md` in the target repo (if it already exists — the living spec you will update below, not overwrite)
 
 ## Execution
 
@@ -56,6 +57,16 @@ Present to the user:
 ## Notes
 - [Any caveats, follow-ups, or things to watch out for]
 ```
+
+## Durable Write: Living Spec
+
+Before cleanup, write/update the feature's living spec so the "what" and "why" survive `<ws>` deletion.
+
+- **Path:** `docs/features/<slug>/spec.md` in the **repo being worked on** (the consuming repo, not the skill repo), where `<slug>` is the Phase-0 task identifier passed in your prompt.
+- **Contents:** what the feature does, its behaviors/ACs, and pointers to key files + PRs — drawn from `PLAN_STEPS.md`, `IMPLEMENTATION_PROGRESS.md`, and `DECISIONS.md`.
+- **Reflect the FINAL state, not an early snapshot.** Re-read the final diff of the whole run and confirm the spec matches the *latest* behavior — not just that you touched it once. If the spec was written early and later steps changed behavior (new ACs, changed edge-case handling, dropped/added behavior), fold those in now. A spec that's present but stale relative to the last changes is the failure the `spec-reminder` hook can't catch — it only sees "touched," not "current." That judgment is yours here.
+- **Update-in-place, don't blind-overwrite:** first search `docs/features/*/` for an existing spec for this feature. If one matches the `<slug>`, update it; only create a new folder when none matches — a wrong or new slug for the same feature silently forks the spec into two files.
+- **No slug?** If this run has no Phase-0 identifier, derive a slug from the git branch or ask the operator; if none can be established, **skip the spec write** (don't guess a slug).
 
 ## Cleanup
 

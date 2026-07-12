@@ -1,0 +1,19 @@
+{
+  "description": "Non-blocking Stop-hook nudge: reminds the model to update the living spec when a feature-dev session changed code but left docs/features/<slug>/spec.md untouched.",
+  "event": "Stop",
+  "script": "spec-reminder.mjs",
+  "settingsFragment": {
+    "hooks": {
+      "Stop": [
+        {
+          "hooks": [
+            {
+              "type": "command",
+              "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/spec-reminder/spec-reminder.mjs"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

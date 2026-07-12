@@ -28,7 +28,7 @@ You decide silently. Do **not** ask the user "should I track this?" — either t
 
 Each step has its own instruction file in this skill's `steps/` directory — read and follow it:
 
-1. **Open the card** — `steps/1-open-card.md`: gather tags (+ session id if one exists), infer a name, `create_card(...)` (it starts directly `in_progress`), and announce it in one line.
+1. **Open the card** — `steps/1-open-card.md`: gather tags (+ session id if one exists), infer a name, `create_card(...)` (it starts directly `in_progress`), write the `~/.claude/kanban-session-state/<sessionId>.json` pointer (best-effort, only when a session id exists), and announce it in one line.
 2. **Track progress** — `steps/2-track-progress.md`: as the work reaches meaningful checkpoints, `append_progress(<id>, <note>)` with one concise note each. Don't narrate every keystroke.
 3. **Hand off** — `steps/3-hand-off.md`: when the work is done (or you're parking it), `set_status(<id>, "need_review")`.
 

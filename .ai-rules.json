@@ -23,7 +23,7 @@
     "context7",
     "create-implementation-plan",
     "create-pr",
-    "feature-development-workflow",
+    "feature-dev-lite",
     "find-patterns",
     "knowledge-base",
     "orchestrated-feature-dev",
@@ -36,10 +36,12 @@
     "test-quality-reviewer",
     "validate-pr-comments",
     "web-search",
-    "pr-comment-triage"
+    "pr-comment-triage",
+    "recall"
   ],
   "hooks": [
-    "kanban-track"
+    "kanban-track",
+    "spec-reminder"
   ],
   "scope": [
     "personal"
