@@ -51,7 +51,7 @@ Every run is scoped to a **task identifier** (a ticket id, or a confirmed kebab-
 
 ## Phase 0: Establish Workspace
 
-Ask for a task identifier (or derive a kebab-case slug from the request and confirm it). Create `./tmp/<identifier>/`. **Gate:** do not proceed until it exists.
+Ask for a task identifier (or derive a kebab-case slug from the request and confirm it). Create `./tmp/<identifier>/`. **Gate:** do not proceed until it exists. **Before creating it, check whether `./tmp/<identifier>/` already holds artifacts from unrelated work — if so, STOP and ask the user** rather than overwriting another task's run.
 
 ## Phase 1: Research (convergence loop)
 
