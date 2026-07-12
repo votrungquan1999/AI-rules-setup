@@ -62,7 +62,7 @@ Maps from current assets:
 - `commit-plan`
 - `review-changes`
 - `test-quality-reviewer`
-- `feature-development-workflow`
+- `feature-dev-lite`
 
 ### 2) MCP templates
 

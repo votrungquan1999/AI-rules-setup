@@ -15,7 +15,7 @@ description: Inventory and migration map from Claude Code + Antigravity assets t
 
 - Skills include all core engineering skills above plus:
   - `commit-plan`
-  - `feature-development-workflow`
+  - `feature-dev-lite`
   - `repo-knowledge`
   - `review-changes`
   - `structured-brainstorming`
@@ -53,7 +53,7 @@ Created under `skills/cursor/` (full Claude/Antigravity parity set):
 - `context7`
 - `create-implementation-plan`
 - `create-pr`
-- `feature-development-workflow`
+- `feature-dev-lite`
 - `find-patterns`
 - `orchestrated-feature-dev` (+ `nodes/` templates)
 - `repo-knowledge`

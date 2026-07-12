@@ -18,7 +18,7 @@ describe("E2E: Init Command - 'all' keyword for Skills and Workflows", () => {
 	});
 
 	it("should install all available skills when --skills all is used", async () => {
-		// claude-code has 3 skills: feature-development-workflow, structured-brainstorming, test-quality-reviewer
+		// claude-code has 3 skills: feature-dev-lite, structured-brainstorming, test-quality-reviewer
 		const { result } = spawnCLI(
 			[
 				"init",
@@ -42,7 +42,7 @@ describe("E2E: Init Command - 'all' keyword for Skills and Workflows", () => {
 		const skillsDir = path.join(testProjectPath, ".claude", "skills");
 		const installedSkills = await fs.readdir(skillsDir);
 		expect(installedSkills).toHaveLength(3);
-		expect(installedSkills).toContain("feature-development-workflow");
+		expect(installedSkills).toContain("feature-dev-lite");
 		expect(installedSkills).toContain("structured-brainstorming");
 		expect(installedSkills).toContain("test-quality-reviewer");
 
@@ -50,7 +50,7 @@ describe("E2E: Init Command - 'all' keyword for Skills and Workflows", () => {
 		const configPath = path.join(testProjectPath, ".ai-rules.json");
 		const config = JSON.parse(await fs.readFile(configPath, "utf-8"));
 		expect(config.skills).toHaveLength(3);
-		expect(config.skills).toContain("feature-development-workflow");
+		expect(config.skills).toContain("feature-dev-lite");
 		expect(config.skills).toContain("structured-brainstorming");
 		expect(config.skills).toContain("test-quality-reviewer");
 	});

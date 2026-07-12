@@ -29,7 +29,7 @@ describe("E2E: Claude Code Installation Tests", () => {
 	 * Expected skill names that should be installed for Claude Code
 	 */
 	const EXPECTED_SKILLS = [
-		"feature-development-workflow",
+		"feature-dev-lite",
 		"structured-brainstorming",
 		"test-quality-reviewer",
 	] as const;
@@ -100,7 +100,7 @@ describe("E2E: Claude Code Installation Tests", () => {
 				"--categories",
 				"meta-rules",
 				"--skills",
-				"feature-development-workflow,structured-brainstorming,test-quality-reviewer",
+				"feature-dev-lite,structured-brainstorming,test-quality-reviewer",
 			],
 			{
 				cwd: testProjectDir,
@@ -156,7 +156,7 @@ describe("E2E: Claude Code Installation Tests", () => {
 				"--categories",
 				"meta-rules",
 				"--skills",
-				"feature-development-workflow,structured-brainstorming,test-quality-reviewer",
+				"feature-dev-lite,structured-brainstorming,test-quality-reviewer",
 			],
 			{
 				cwd: testProjectDir,
@@ -221,7 +221,7 @@ describe("E2E: Claude Code Installation Tests", () => {
 				"--categories",
 				"meta-rules",
 				"--skills",
-				"feature-development-workflow,structured-brainstorming,test-quality-reviewer",
+				"feature-dev-lite,structured-brainstorming,test-quality-reviewer",
 			],
 			{
 				cwd: testProjectDir,
@@ -278,7 +278,7 @@ describe("E2E: Claude Code Installation Tests", () => {
 				"--categories",
 				"meta-rules",
 				"--skills",
-				"feature-development-workflow,structured-brainstorming,test-quality-reviewer",
+				"feature-dev-lite,structured-brainstorming,test-quality-reviewer",
 			],
 			{
 				cwd: testProjectDir,

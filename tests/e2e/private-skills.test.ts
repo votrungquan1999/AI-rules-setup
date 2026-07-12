@@ -257,7 +257,7 @@ describe("E2E: Private Skills", () => {
 					version: "0.1.0",
 					agent: "claude-code",
 					categories: [],
-					skills: ["work-helper", "feature-development-workflow"],
+					skills: ["work-helper", "feature-dev-lite"],
 					scope: ["work"],
 				};
 				await writeFile(join(projectDir, ".ai-rules.json"), JSON.stringify(config));
@@ -270,7 +270,7 @@ describe("E2E: Private Skills", () => {
 
 				// Then both the private and the public skill files are installed.
 				expect(await fileExists(projectDir, ".claude/skills/work-helper/SKILL.md")).toBe(true);
-				expect(await fileExists(projectDir, ".claude/skills/feature-development-workflow/SKILL.md")).toBe(true);
+				expect(await fileExists(projectDir, ".claude/skills/feature-dev-lite/SKILL.md")).toBe(true);
 
 				// And the private skill file actually contains the private content from MongoDB
 				// (not a leftover or a public skill that happens to share the name).

@@ -1,9 +1,9 @@
 ---
-name: feature-development-workflow
-description: Execute feature delivery with context gathering, plan-first development, test-first implementation, and quality gates. Use for medium/large features or multi-file tasks.
+name: feature-dev-lite
+description: Single-session feature delivery — context gathering, plan-first development, test-first implementation, and quality gates. Use for small-to-medium features or multi-file tasks you're building solo in one pass.
 ---
 
-# Feature Development Workflow
+# Feature Dev Lite
 
 Build features incrementally with explicit planning and verification.
 

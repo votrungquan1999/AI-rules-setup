@@ -69,10 +69,10 @@ describe("E2E: Init Command - Skills Installation", () => {
 		let installedSkills = await fs.readdir(skillsDir);
 		expect(installedSkills).toHaveLength(1);
 		expect(installedSkills).toContain("test-quality-reviewer");
-		expect(installedSkills).not.toContain("feature-development-workflow");
+		expect(installedSkills).not.toContain("feature-dev-lite");
 		expect(installedSkills).not.toContain("structured-brainstorming");
 
-		// Step 2: Install 2 DIFFERENT skills (feature-development-workflow, structured-brainstorming)
+		// Step 2: Install 2 DIFFERENT skills (feature-dev-lite, structured-brainstorming)
 		// This proves the CLI installs ONLY what's specified, not all available skills
 		const { result: result2 } = spawnCLI(
 			[
@@ -82,7 +82,7 @@ describe("E2E: Init Command - Skills Installation", () => {
 				"--categories",
 				"all",
 				"--skills",
-				"feature-development-workflow,test-quality-reviewer",
+				"feature-dev-lite,test-quality-reviewer",
 				"--overwrite-strategy",
 				"force",
 			],
@@ -98,16 +98,16 @@ describe("E2E: Init Command - Skills Installation", () => {
 		// Verify: Exactly 2 skills installed (the 2 we specified)
 		installedSkills = await fs.readdir(skillsDir);
 		expect(installedSkills).toHaveLength(2);
-		expect(installedSkills).toContain("feature-development-workflow");
+		expect(installedSkills).toContain("feature-dev-lite");
 		expect(installedSkills).toContain("test-quality-reviewer");
 
 		// Verify: test-quality-reviewer is NOT installed (even though it's available for claude-code)
 		expect(installedSkills).not.toContain("structured-brainstorming");
 
 		// Verify: Skill files have correct content
-		const featureDevSkillPath = path.join(skillsDir, "feature-development-workflow", "SKILL.md");
+		const featureDevSkillPath = path.join(skillsDir, "feature-dev-lite", "SKILL.md");
 		const featureDevContent = await fs.readFile(featureDevSkillPath, "utf-8");
-		expect(featureDevContent).toContain("Feature Development Workflow");
+		expect(featureDevContent).toContain("Feature Dev Lite");
 
 		const brainstormSkillPath = path.join(skillsDir, "test-quality-reviewer", "SKILL.md");
 		const brainstormContent = await fs.readFile(brainstormSkillPath, "utf-8");
@@ -124,7 +124,7 @@ describe("E2E: Init Command - Skills Installation", () => {
 				"--categories",
 				"all",
 				"--skills",
-				"test-quality-reviewer,nonexistent-skill,feature-development-workflow",
+				"test-quality-reviewer,nonexistent-skill,feature-dev-lite",
 			],
 			{
 				cwd: testProjectPath,
@@ -149,7 +149,7 @@ describe("E2E: Init Command - Skills Installation", () => {
 		// Should have 2 valid skills installed
 		expect(installedSkills).toHaveLength(2);
 		expect(installedSkills).toContain("test-quality-reviewer");
-		expect(installedSkills).toContain("feature-development-workflow");
+		expect(installedSkills).toContain("feature-dev-lite");
 		expect(installedSkills).not.toContain("nonexistent-skill");
 	});
 

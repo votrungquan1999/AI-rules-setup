@@ -41,13 +41,13 @@ describe("E2E: Sync Command", () => {
 			// Then a file from every catalog kind is materialized on disk, even though the config
 			// listed none of them.
 			expect(await fileExists(projectDir, ".claude/rules/typescript-conventions.md")).toBe(true);
-			expect(await fileExists(projectDir, ".claude/skills/feature-development-workflow/SKILL.md")).toBe(true);
+			expect(await fileExists(projectDir, ".claude/skills/feature-dev-lite/SKILL.md")).toBe(true);
 			expect(await fileExists(projectDir, ".agents/workflows/deploy-to-production.md")).toBe(true);
 
 			// And the config is rewritten to record what was installed.
 			const written = JSON.parse(await readFile(join(projectDir, ".ai-rules.json"), "utf-8"));
 			expect(written.categories).toContain("typescript-conventions");
-			expect(written.skills).toContain("feature-development-workflow");
+			expect(written.skills).toContain("feature-dev-lite");
 			expect(written.workflows).toContain("deploy-to-production");
 		} finally {
 			await cleanupTestProject(projectDir);
@@ -115,7 +115,7 @@ describe("E2E: Sync Command", () => {
 			expect(written.skills).not.toContain("work-only");
 
 			// ...while the public catalog still installs normally.
-			expect(await fileExists(projectDir, ".claude/skills/feature-development-workflow/SKILL.md")).toBe(true);
+			expect(await fileExists(projectDir, ".claude/skills/feature-dev-lite/SKILL.md")).toBe(true);
 		} finally {
 			await cleanupTestProject(projectDir);
 		}
@@ -143,11 +143,11 @@ describe("E2E: Sync Command", () => {
 		expect(output.exitCode, `stdout: ${output.stdout}\nstderr: ${output.stderr}`).toBe(0);
 
 		// Then both real projects receive the catalog...
-		expect(await fileExists(projectA, ".claude/skills/feature-development-workflow/SKILL.md")).toBe(true);
-		expect(await fileExists(projectB, ".claude/skills/feature-development-workflow/SKILL.md")).toBe(true);
+		expect(await fileExists(projectA, ".claude/skills/feature-dev-lite/SKILL.md")).toBe(true);
+		expect(await fileExists(projectB, ".claude/skills/feature-dev-lite/SKILL.md")).toBe(true);
 
 		// ...the node_modules decoy is never touched...
-		expect(await fileExists(decoy, ".claude/skills/feature-development-workflow/SKILL.md")).toBe(false);
+		expect(await fileExists(decoy, ".claude/skills/feature-dev-lite/SKILL.md")).toBe(false);
 
 		// ...and the run reports a success summary.
 		expect(output.stdout).toContain("2 succeeded");
@@ -171,7 +171,7 @@ describe("E2E: Sync Command", () => {
 
 		// Then the nested project under cwd is synced — proving discovery rooted at cwd, not a
 		// hardcoded ancestor path (the regression that synced unrelated sibling repos).
-		expect(await fileExists(nested, ".claude/skills/feature-development-workflow/SKILL.md")).toBe(true);
+		expect(await fileExists(nested, ".claude/skills/feature-dev-lite/SKILL.md")).toBe(true);
 		expect(output.stdout).toContain("1 succeeded");
 	});
 });
