@@ -1,5 +1,6 @@
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { ObjectId } from "mongodb";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { KB_DOCS_COLLECTION_NAME, KbStatus, KbType, type StoredKbDocDocument } from "../../src/server/types";
 import { spawnCLI } from "../helpers/cli-utils";
@@ -172,6 +173,220 @@ describe("E2E: kb CLI command", () => {
 			const doc = await db.collection<StoredKbDocDocument>(KB_DOCS_COLLECTION_NAME).findOne({ title: "Global TIL" });
 			expect(doc?.status).toBe(KbStatus.Draft);
 			expect(doc?.scope).toEqual([]);
+		});
+	});
+
+	describe("when updating an entry", () => {
+		it("updates only the title via --title, leaving the body intact", async () => {
+			// Given a canonical TIL seeded in the database.
+			const db = await getTestDatabase();
+			const id = await storeKbDocInTestDatabase(db, {
+				type: KbType.Til,
+				status: KbStatus.Canonical,
+				title: "Original title",
+				body: "Original body content.",
+				scope: ["kbcli"],
+			});
+
+			// When the developer updates only the title.
+			const { result } = spawnCLI(["kb", "update", id, "--title", "Renamed title"], { timeout: 30000 });
+			const output = await result;
+
+			// Then the CLI exits cleanly and the body is preserved.
+			expect(output.exitCode, `stdout: ${output.stdout}\nstderr: ${output.stderr}`).toBe(0);
+			const after = await db.collection<StoredKbDocDocument>(KB_DOCS_COLLECTION_NAME).findOne({
+				_id: new ObjectId(id),
+			});
+			expect(after?.title).toBe("Renamed title");
+			expect(after?.body).toBe("Original body content.");
+			expect(after?.scope).toEqual(["kbcli"]);
+		});
+
+		it("refuses with a non-zero exit when no editable field is given", async () => {
+			// Given a canonical entry seeded in the database.
+			const db = await getTestDatabase();
+			const id = await storeKbDocInTestDatabase(db, {
+				type: KbType.Til,
+				status: KbStatus.Canonical,
+				title: "Untouched title",
+				body: "Untouched body.",
+				scope: ["kbcli"],
+			});
+
+			// When the developer runs `kb update <id>` with no editable flag.
+			const { result } = spawnCLI(["kb", "update", id], { timeout: 30000 });
+			const output = await result;
+
+			// Then the command refuses and nothing changes.
+			expect(output.exitCode, `stdout: ${output.stdout}\nstderr: ${output.stderr}`).not.toBe(0);
+			// The client-side pre-check message, not the server's generic 400 body — proves the
+			// request was refused before ever reaching the network.
+			expect(output.stderr).toContain("Provide at least one of");
+			const after = await db.collection<StoredKbDocDocument>(KB_DOCS_COLLECTION_NAME).findOne({
+				_id: new ObjectId(id),
+			});
+			expect(after?.title).toBe("Untouched title");
+		});
+
+		it("exits non-zero when the id is unknown", async () => {
+			// When the developer updates an id that doesn't exist.
+			const { result } = spawnCLI(["kb", "update", "000000000000000000000000", "--title", "whatever"], {
+				timeout: 30000,
+			});
+			const output = await result;
+
+			// Then the command fails.
+			expect(output.exitCode).not.toBe(0);
+		});
+
+		it("updates the scope via --scope, replacing the previous scope tags", async () => {
+			// Given a canonical entry seeded in the database.
+			const db = await getTestDatabase();
+			const id = await storeKbDocInTestDatabase(db, {
+				type: KbType.Til,
+				status: KbStatus.Canonical,
+				title: "Scope target",
+				body: "Body content.",
+				scope: ["kbcli"],
+			});
+
+			// When the developer updates the scope.
+			const { result } = spawnCLI(["kb", "update", id, "--scope", "kbcli,other"], { timeout: 30000 });
+			const output = await result;
+
+			// Then the CLI exits cleanly and the scope is replaced.
+			expect(output.exitCode, `stdout: ${output.stdout}\nstderr: ${output.stderr}`).toBe(0);
+			const after = await db.collection<StoredKbDocDocument>(KB_DOCS_COLLECTION_NAME).findOne({
+				_id: new ObjectId(id),
+			});
+			expect(after?.scope).toEqual(["kbcli", "other"]);
+		});
+
+		it("clears the scope to global via --global", async () => {
+			// Given a canonical entry seeded in the database.
+			const db = await getTestDatabase();
+			const id = await storeKbDocInTestDatabase(db, {
+				type: KbType.Til,
+				status: KbStatus.Canonical,
+				title: "Global target",
+				body: "Body content.",
+				scope: ["kbcli"],
+			});
+
+			// When the developer clears the scope to global.
+			const { result } = spawnCLI(["kb", "update", id, "--global"], { timeout: 30000 });
+			const output = await result;
+
+			// Then the CLI exits cleanly and the scope is empty.
+			expect(output.exitCode, `stdout: ${output.stdout}\nstderr: ${output.stderr}`).toBe(0);
+			const after = await db.collection<StoredKbDocDocument>(KB_DOCS_COLLECTION_NAME).findOne({
+				_id: new ObjectId(id),
+			});
+			expect(after?.scope).toEqual([]);
+		});
+
+		it("refuses with a non-zero exit when --scope and --global are passed together", async () => {
+			// Given a canonical entry seeded in the database.
+			const db = await getTestDatabase();
+			const id = await storeKbDocInTestDatabase(db, {
+				type: KbType.Til,
+				status: KbStatus.Canonical,
+				title: "Conflict target",
+				body: "Body content.",
+				scope: ["kbcli"],
+			});
+
+			// When the developer passes both --scope and --global.
+			const { result } = spawnCLI(["kb", "update", id, "--scope", "kbcli", "--global"], { timeout: 30000 });
+			const output = await result;
+
+			// Then the command fails.
+			expect(output.exitCode).not.toBe(0);
+		});
+
+		it("updates the body via --body, leaving the title intact", async () => {
+			// Given a canonical entry seeded in the database.
+			const db = await getTestDatabase();
+			const id = await storeKbDocInTestDatabase(db, {
+				type: KbType.Til,
+				status: KbStatus.Canonical,
+				title: "Body target",
+				body: "Original body.",
+				scope: ["kbcli"],
+			});
+
+			// When the developer updates only the body.
+			const { result } = spawnCLI(["kb", "update", id, "--body", "new body"], { timeout: 30000 });
+			const output = await result;
+
+			// Then the CLI exits cleanly and the title is preserved.
+			expect(output.exitCode, `stdout: ${output.stdout}\nstderr: ${output.stderr}`).toBe(0);
+			const after = await db.collection<StoredKbDocDocument>(KB_DOCS_COLLECTION_NAME).findOne({
+				_id: new ObjectId(id),
+			});
+			expect(after?.body).toBe("new body");
+			expect(after?.title).toBe("Body target");
+		});
+
+		it("updates the body from a file via --body-file", async () => {
+			// Given a canonical entry seeded in the database.
+			const db = await getTestDatabase();
+			const id = await storeKbDocInTestDatabase(db, {
+				type: KbType.Til,
+				status: KbStatus.Canonical,
+				title: "Body file target",
+				body: "Original body.",
+				scope: ["kbcli"],
+			});
+			const dir = await createTestProject("kb-cli-update-body-file");
+			projects.push(dir);
+			const bodyFilePath = join(dir, "body.txt");
+			await writeFile(bodyFilePath, "body from file");
+
+			// When the developer updates the body from a file.
+			const { result } = spawnCLI(["kb", "update", id, "--body-file", bodyFilePath], { timeout: 30000 });
+			const output = await result;
+
+			// Then the CLI exits cleanly and the body matches the file contents.
+			expect(output.exitCode, `stdout: ${output.stdout}\nstderr: ${output.stderr}`).toBe(0);
+			const after = await db.collection<StoredKbDocDocument>(KB_DOCS_COLLECTION_NAME).findOne({
+				_id: new ObjectId(id),
+			});
+			expect(after?.body).toBe("body from file");
+		});
+	});
+
+	describe("when deleting an entry", () => {
+		it("deletes an entry by id, leaving it gone from storage", async () => {
+			// Given a canonical entry seeded in the database.
+			const db = await getTestDatabase();
+			const id = await storeKbDocInTestDatabase(db, {
+				type: KbType.Til,
+				status: KbStatus.Canonical,
+				title: "Delete target",
+				body: "Should be removed.",
+				scope: ["kbcli"],
+			});
+
+			// When the developer deletes it by id.
+			const { result } = spawnCLI(["kb", "delete", id], { timeout: 30000 });
+			const output = await result;
+
+			// Then the CLI exits cleanly and the doc is gone.
+			expect(output.exitCode, `stdout: ${output.stdout}\nstderr: ${output.stderr}`).toBe(0);
+			const after = await db.collection<StoredKbDocDocument>(KB_DOCS_COLLECTION_NAME).findOne({
+				_id: new ObjectId(id),
+			});
+			expect(after).toBeNull();
+		});
+
+		it("exits non-zero when the id is unknown", async () => {
+			// When the developer deletes an id that doesn't exist.
+			const { result } = spawnCLI(["kb", "delete", "000000000000000000000000"], { timeout: 30000 });
+			const output = await result;
+
+			// Then the command fails.
+			expect(output.exitCode).not.toBe(0);
 		});
 	});
 });

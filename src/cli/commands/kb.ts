@@ -2,12 +2,15 @@ import { readFile } from "node:fs/promises";
 import chalk from "chalk";
 import { Command } from "commander";
 import {
+	type KbUpdateFields,
 	kbCaptureBlueprint,
 	kbCaptureMemory,
 	kbCaptureQuestion,
 	kbCaptureTil,
+	kbDelete,
 	kbGet,
 	kbSearch,
+	kbUpdate,
 } from "../lib/api-client";
 import { readConfigOrNull } from "../lib/config";
 import { resolveWriteScope } from "../lib/write-scope";
@@ -69,6 +72,41 @@ function reportCaptured(id: string): void {
 	console.log(chalk.green(`✅ Captured draft ${id} — pending human review (not yet visible to agents).`));
 }
 
+/**
+ * Resolves an optional body field for `kb update`. Unlike `resolveBody` (capture-oriented: falls
+ * back to stdin, throws on empty), an omitted `--body`/`--body-file` here means "leave the body
+ * untouched" — so this never reads stdin and never throws.
+ * @param body - Inline body value
+ * @param file - Path to read the body from (takes precedence over inline)
+ * @returns The resolved body, or `undefined` when neither flag was given
+ */
+async function resolveOptionalBody(body: string | undefined, file: string | undefined): Promise<string | undefined> {
+	if (file) return readFile(file, "utf8");
+	return body;
+}
+
+/**
+ * Resolves the optional scope for `kb update`. Unlike `resolveWriteScope` (which requires one of
+ * `--scope`/`--global`), an omitted pair here means "leave scope untouched" — a title/body-only
+ * edit must not be forced to restate visibility.
+ * @param scope - The `--scope` CSV value (if provided)
+ * @param global - Whether `--global` was passed
+ * @returns `[]` for `--global`, the parsed CSV tags for `--scope`, or `undefined` when neither was given
+ */
+function resolveOptionalScope(scope: string | undefined, global: boolean | undefined): string[] | undefined {
+	if (scope !== undefined && global) {
+		throw new Error("--scope and --global are mutually exclusive — pass one, not both.");
+	}
+	if (global) return [];
+	if (scope === undefined) return undefined;
+	const tags = scope
+		.split(",")
+		.map((tag) => tag.trim())
+		.filter((tag) => tag.length > 0);
+	if (tags.length === 0) throw new Error("--scope requires at least one non-empty tag.");
+	return tags;
+}
+
 /** The `kb` command and its subcommands (search/get/capture-*) over the shared knowledge base. */
 export const kbCommand = new Command("kb").description("Search and capture entries in the shared knowledge base");
 
@@ -108,6 +146,63 @@ kbCommand
 			console.log(chalk.bold(`${doc.title}  ${chalk.dim(`[${doc.type}]`)}`));
 			console.log(chalk.dim(`scope: ${doc.scope.join(", ") || "(none)"}\n`));
 			console.log(doc.body);
+		} catch (error) {
+			console.error(chalk.red(`❌ ${error instanceof Error ? error.message : error}`));
+			process.exit(1);
+		}
+	});
+
+kbCommand
+	.command("update <id>")
+	.description("Edit a knowledge-base entry's title/body/scope by id (requires AI_RULES_SECRET)")
+	.option("--title <title>", "New title")
+	.option("--body <text>", "New body (or use --body-file)")
+	.option("--body-file <path>", "Read the new body from a file")
+	.option("--scope <csv>", "New comma-separated scope tags. Mutually exclusive with --global.")
+	.option("--global", "Set scope to global (empty scope, visible to every workspace). Mutually exclusive with --scope.")
+	.action(
+		async (
+			id: string,
+			options: { title?: string; body?: string; bodyFile?: string; scope?: string; global?: boolean },
+		) => {
+			try {
+				const fields: KbUpdateFields = {};
+				if (options.title !== undefined) fields.title = options.title;
+				const body = await resolveOptionalBody(options.body, options.bodyFile);
+				if (body !== undefined) fields.body = body;
+				const scope = resolveOptionalScope(options.scope, options.global);
+				if (scope !== undefined) fields.scope = scope;
+
+				if (Object.keys(fields).length === 0) {
+					throw new Error("Provide at least one of --title, --body, --body-file, --scope, --global to update.");
+				}
+
+				const updated = await kbUpdate(id, fields);
+				if (!updated) {
+					console.error(chalk.red(`❌ No entry found with id ${id}.`));
+					process.exit(1);
+					return;
+				}
+				console.log(chalk.green(`✅ Updated entry ${id}.`));
+			} catch (error) {
+				console.error(chalk.red(`❌ ${error instanceof Error ? error.message : error}`));
+				process.exit(1);
+			}
+		},
+	);
+
+kbCommand
+	.command("delete <id>")
+	.description("Permanently remove a knowledge-base entry by id, canonical or draft (requires AI_RULES_SECRET)")
+	.action(async (id: string) => {
+		try {
+			const deleted = await kbDelete(id);
+			if (!deleted) {
+				console.error(chalk.red(`❌ No entry found with id ${id}.`));
+				process.exit(1);
+				return;
+			}
+			console.log(chalk.green(`✅ Deleted entry ${id}.`));
 		} catch (error) {
 			console.error(chalk.red(`❌ ${error instanceof Error ? error.message : error}`));
 			process.exit(1);
