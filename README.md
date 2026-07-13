@@ -71,16 +71,39 @@ npx @quanvo99/ai-rules@latest add --skills test-quality-reviewer --workflows com
 npx @quanvo99/ai-rules@latest add --categories all --overwrite-strategy force
 ```
 
-### `npx @quanvo99/ai-rules@latest upload`
+### `npx @quanvo99/ai-rules@latest skill upload`
 
-Publish a local skill directory as a **private, scoped** skill (see [Private Skills](#private-skills)). Requires the `AI_RULES_SECRET` environment variable:
+Publish a local skill directory as a **private, scoped** skill (see [Private Skills](#private-skills)). Requires the `AI_RULES_SECRET` environment variable. (Renamed from the old top-level `upload` command — `upload` no longer exists.)
 
 ```bash
-AI_RULES_SECRET=… npx @quanvo99/ai-rules@latest upload ./path/to/skill-dir --agent claude-code --scope work
-AI_RULES_SECRET=… npx @quanvo99/ai-rules@latest upload ./my-skill --agent cursor --scope work,client-x
+AI_RULES_SECRET=… npx @quanvo99/ai-rules@latest skill upload ./path/to/skill-dir --agent claude-code --scope work
+AI_RULES_SECRET=… npx @quanvo99/ai-rules@latest skill upload ./my-skill --agent cursor --scope work,client-x
 ```
 
 The directory must contain a `SKILL.md`; any other files are uploaded as supporting files. The skill name is the directory's basename, and re-uploading the same `{agent, name}` replaces it.
+
+### `npx @quanvo99/ai-rules@latest skill list` / `update` / `delete`
+
+Manage private skills you've already uploaded. Requires `AI_RULES_SECRET`:
+
+```bash
+AI_RULES_SECRET=… npx @quanvo99/ai-rules@latest skill list
+AI_RULES_SECRET=… npx @quanvo99/ai-rules@latest skill update <id> --description "new description"
+AI_RULES_SECRET=… npx @quanvo99/ai-rules@latest skill delete <id>
+```
+
+`skill list` prints each private skill's id/name/agent/scopes. `skill update <id>` accepts `--name` / `--content` / `--content-file` / `--description` / `--scope` / `--global` — at least one is required, and only the fields you pass change (`--description ""` clears it). `skill delete <id>` removes a skill permanently. Both `update` and `delete` exit non-zero on an unknown `<id>`.
+
+### `npx @quanvo99/ai-rules@latest kb update` / `delete`
+
+Manage a KB entry by id. Requires `AI_RULES_SECRET`:
+
+```bash
+AI_RULES_SECRET=… npx @quanvo99/ai-rules@latest kb update <id> --title "new title"
+AI_RULES_SECRET=… npx @quanvo99/ai-rules@latest kb delete <id>
+```
+
+`kb update <id>` accepts `--title` / `--body` / `--body-file` / `--scope` / `--global` — at least one is required, and only the fields you pass change. `kb delete <id>` removes an entry permanently. Both exit non-zero on an unknown `<id>`.
 
 ## Private Skills
 
