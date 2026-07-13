@@ -106,6 +106,78 @@ describe("Private Skills browse page", () => {
 		expect(screen.queryByText("old-name")).not.toBeInTheDocument();
 	});
 
+	it("clears the description on the card when the reviewer empties the field and saves", async () => {
+		const fetchMock = vi.fn().mockResolvedValue({ ok: true } as Response);
+		vi.stubGlobal("fetch", fetchMock);
+
+		renderPage([
+			{
+				id: "skill-1",
+				name: "deploy-helper",
+				agent: "claude-code",
+				content: "body",
+				scopes: ["work"],
+				description: "old desc",
+			},
+		]);
+
+		fireEvent.click(screen.getByRole("button", { name: /edit/i }));
+		const dialog = screen.getByRole("dialog");
+
+		fireEvent.change(within(dialog).getByLabelText("Description"), { target: { value: "" } });
+		fireEvent.click(screen.getByRole("button", { name: /save/i }));
+
+		// The PATCH carries an empty description string, which clears it under the partial-patch contract.
+		await waitFor(() =>
+			expect(fetchMock).toHaveBeenCalledWith(
+				"/api/skills/skill-1",
+				expect.objectContaining({
+					method: "PATCH",
+					body: JSON.stringify({ name: "deploy-helper", content: "body", description: "", scopes: ["work"] }),
+				}),
+			),
+		);
+
+		// And the card no longer shows a description — no reload needed.
+		await waitFor(() => expect(screen.queryByText("old desc")).not.toBeInTheDocument());
+	});
+
+	it("clears the description when the reviewer enters a whitespace-only value and saves (D8 R18, trim-to-clear)", async () => {
+		const fetchMock = vi.fn().mockResolvedValue({ ok: true } as Response);
+		vi.stubGlobal("fetch", fetchMock);
+
+		renderPage([
+			{
+				id: "skill-1",
+				name: "deploy-helper",
+				agent: "claude-code",
+				content: "body",
+				scopes: ["work"],
+				description: "old desc",
+			},
+		]);
+
+		fireEvent.click(screen.getByRole("button", { name: /edit/i }));
+		const dialog = screen.getByRole("dialog");
+
+		fireEvent.change(within(dialog).getByLabelText("Description"), { target: { value: "   " } });
+		fireEvent.click(screen.getByRole("button", { name: /save/i }));
+
+		// The PATCH carries a trimmed-to-empty description, not the literal spaces.
+		await waitFor(() =>
+			expect(fetchMock).toHaveBeenCalledWith(
+				"/api/skills/skill-1",
+				expect.objectContaining({
+					method: "PATCH",
+					body: JSON.stringify({ name: "deploy-helper", content: "body", description: "", scopes: ["work"] }),
+				}),
+			),
+		);
+
+		// And the card no longer shows the old description — no reload needed.
+		await waitFor(() => expect(screen.queryByText("old desc")).not.toBeInTheDocument());
+	});
+
 	it("marks a global skill with a 'Global' badge while a scoped skill shows its scope", () => {
 		renderPage([
 			{
@@ -164,5 +236,96 @@ describe("Private Skills browse page", () => {
 		// When toggled off again, both skills are visible.
 		fireEvent.click(screen.getByRole("button", { name: /show all/i }));
 		expect(screen.getByText("scoped-skill")).toBeInTheDocument();
+	});
+
+	it("opens a confirm dialog when the reviewer clicks Delete", () => {
+		renderPage([
+			{
+				id: "skill-1",
+				name: "deploy-helper",
+				agent: "claude-code",
+				content: "deploy body",
+				scopes: ["work"],
+				description: "Helps deploy",
+			},
+		]);
+
+		fireEvent.click(screen.getByRole("button", { name: /delete/i }));
+
+		expect(screen.getByRole("dialog", { name: /delete this skill/i })).toBeInTheDocument();
+	});
+
+	it("deletes the skill and removes its card when the reviewer confirms", async () => {
+		const fetchMock = vi.fn().mockResolvedValue({ ok: true } as Response);
+		vi.stubGlobal("fetch", fetchMock);
+
+		renderPage([
+			{
+				id: "skill-1",
+				name: "deploy-helper",
+				agent: "claude-code",
+				content: "deploy body",
+				scopes: ["work"],
+				description: "Helps deploy",
+			},
+		]);
+
+		fireEvent.click(screen.getByRole("button", { name: /delete/i }));
+		const dialog = screen.getByRole("dialog", { name: /delete this skill/i });
+		fireEvent.click(within(dialog).getByRole("button", { name: /^delete$/i }));
+
+		// The confirm calls DELETE on the skill's own URL.
+		await waitFor(() => expect(fetchMock).toHaveBeenCalledWith("/api/skills/skill-1", { method: "DELETE" }));
+
+		// And the card is gone — no reload needed.
+		await waitFor(() => expect(screen.queryByText("deploy-helper")).not.toBeInTheDocument());
+	});
+
+	it("removes the card when the DELETE responds 404, since the skill is already gone (D9 R19)", async () => {
+		const fetchMock = vi.fn().mockResolvedValue({ ok: false, status: 404 } as Response);
+		vi.stubGlobal("fetch", fetchMock);
+
+		renderPage([
+			{
+				id: "skill-1",
+				name: "deploy-helper",
+				agent: "claude-code",
+				content: "deploy body",
+				scopes: ["work"],
+				description: "Helps deploy",
+			},
+		]);
+
+		fireEvent.click(screen.getByRole("button", { name: /delete/i }));
+		const dialog = screen.getByRole("dialog", { name: /delete this skill/i });
+		fireEvent.click(within(dialog).getByRole("button", { name: /^delete$/i }));
+
+		// A 404 means the skill is already gone — the reviewer's intent is satisfied, so the card still drops.
+		await waitFor(() => expect(screen.queryByText("deploy-helper")).not.toBeInTheDocument());
+	});
+
+	it("keeps the card and sends no request when the reviewer cancels the delete", () => {
+		const fetchMock = vi.fn().mockResolvedValue({ ok: true } as Response);
+		vi.stubGlobal("fetch", fetchMock);
+
+		renderPage([
+			{
+				id: "skill-1",
+				name: "deploy-helper",
+				agent: "claude-code",
+				content: "deploy body",
+				scopes: ["work"],
+				description: "Helps deploy",
+			},
+		]);
+
+		fireEvent.click(screen.getByRole("button", { name: /delete/i }));
+		const dialog = screen.getByRole("dialog", { name: /delete this skill/i });
+		fireEvent.click(within(dialog).getByRole("button", { name: /cancel/i }));
+
+		// The dialog closes, the card stays, and no request was ever sent.
+		expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+		expect(screen.getByText("deploy-helper")).toBeInTheDocument();
+		expect(fetchMock).not.toHaveBeenCalled();
 	});
 });

@@ -24,6 +24,7 @@ export interface PrivateSkillsPageState {
 export enum PrivateSkillsPageActionType {
 	ToggleGlobalFilter = "toggle-global-filter",
 	EditSkill = "edit-skill",
+	Remove = "remove",
 }
 
 /** Toggles the "global only" filter on the skills list. */
@@ -37,8 +38,14 @@ export interface EditSkillAction {
 	id: string;
 	name: string;
 	content: string;
-	description?: string;
+	description: string;
 	scopes: string[];
 }
 
-export type PrivateSkillsPageAction = ToggleGlobalFilterAction | EditSkillAction;
+/** Drops a skill from the list (after a delete resolves). */
+export interface RemoveSkillAction {
+	type: PrivateSkillsPageActionType.Remove;
+	id: string;
+}
+
+export type PrivateSkillsPageAction = ToggleGlobalFilterAction | EditSkillAction | RemoveSkillAction;

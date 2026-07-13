@@ -33,12 +33,14 @@ function privateSkillsReducer(state: PrivateSkillsPageState, action: PrivateSkil
 						agent: skill.agent,
 						name: action.name,
 						content: action.content,
+						description: action.description,
 						scopes: action.scopes,
 					};
-					if (action.description !== undefined) next.description = action.description;
 					return next;
 				}),
 			};
+		case PrivateSkillsPageActionType.Remove:
+			return { ...state, skills: state.skills.filter((skill) => skill.id !== action.id) };
 		default:
 			return state;
 	}
@@ -72,20 +74,24 @@ export function usePrivateSkillsFilter() {
 
 /**
  * Domain actions for the private-skills page. `editSkill` saves a skill's edited fields via the
- * PATCH endpoint (addressed by id), normalizing scopes and coercing an empty description to
- * undefined (so it is cleared), then updates the in-memory list on success so the card re-renders.
- * @returns the `editSkill` action callback
+ * PATCH endpoint (addressed by id), normalizing scopes and always sending the description as a raw
+ * string (whitespace-only is trimmed to "" so a blank field still clears it) — the partial-patch
+ * contract treats an absent key as "leave intact" and "" as "clear", so the key must always be sent.
+ * Updates the in-memory list on success so the card re-renders. `deleteSkill` permanently removes a
+ * skill via the DELETE endpoint (addressed by id); a 404 (already gone) is treated the same as
+ * success (D9 R19), since the reviewer's intent — the skill being gone — is already satisfied.
+ * @returns the `editSkill` and `deleteSkill` action callbacks
  */
 export function usePrivateSkillsActions() {
 	const dispatch = useRawDispatch();
 	return {
 		editSkill: async (id: string, name: string, content: string, description: string, scopes: string[]) => {
 			const normalizedScopes = normalizeScopes(scopes);
-			const cleanedDescription = description.trim() === "" ? undefined : description;
+			const sendableDescription = description.trim() === "" ? "" : description;
 			const response = await fetch(`/api/skills/${id}`, {
 				method: "PATCH",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ name, content, description: cleanedDescription, scopes: normalizedScopes }),
+				body: JSON.stringify({ name, content, description: sendableDescription, scopes: normalizedScopes }),
 			});
 			if (response.ok) {
 				const action: EditSkillAction = {
@@ -93,10 +99,16 @@ export function usePrivateSkillsActions() {
 					id,
 					name,
 					content,
+					description: sendableDescription,
 					scopes: normalizedScopes,
 				};
-				if (cleanedDescription !== undefined) action.description = cleanedDescription;
 				dispatch(action);
+			}
+		},
+		deleteSkill: async (id: string) => {
+			const response = await fetch(`/api/skills/${id}`, { method: "DELETE" });
+			if (response.ok || response.status === 404) {
+				dispatch({ type: PrivateSkillsPageActionType.Remove, id });
 			}
 		},
 	};

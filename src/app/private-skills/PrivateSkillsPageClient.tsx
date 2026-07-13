@@ -34,12 +34,14 @@ import {
 export function PrivateSkillsPageClient() {
 	const skills = usePrivateSkills();
 	const { showGlobalOnly, toggleGlobalFilter } = usePrivateSkillsFilter();
-	const { editSkill } = usePrivateSkillsActions();
+	const { editSkill, deleteSkill } = usePrivateSkillsActions();
 	const [editingId, setEditingId] = useState<string | null>(null);
 	const [editName, setEditName] = useState("");
 	const [editContent, setEditContent] = useState("");
 	const [editDescription, setEditDescription] = useState("");
 	const [editScopes, setEditScopes] = useState<string[]>([]);
+	const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
+	const [deleting, setDeleting] = useState(false);
 	const titleId = useId();
 	const contentId = useId();
 	const descriptionId = useId();
@@ -56,6 +58,17 @@ export function PrivateSkillsPageClient() {
 		if (editingId === null) return;
 		await editSkill(editingId, editName, editContent, editDescription, editScopes);
 		setEditingId(null);
+	}
+
+	async function confirmDelete() {
+		if (confirmingDeleteId === null) return;
+		setDeleting(true);
+		try {
+			await deleteSkill(confirmingDeleteId);
+		} finally {
+			setDeleting(false);
+			setConfirmingDeleteId(null);
+		}
 	}
 
 	return (
@@ -86,9 +99,14 @@ export function PrivateSkillsPageClient() {
 									skill.scopes.map((scope) => <PrivateSkillScopeTag key={scope}>{scope}</PrivateSkillScopeTag>)
 								)}
 							</PrivateSkillScopes>
-							<Button variant="outline" onClick={() => openEdit(skill)}>
-								Edit
-							</Button>
+							<div className="flex gap-2">
+								<Button variant="outline" onClick={() => openEdit(skill)}>
+									Edit
+								</Button>
+								<Button variant="destructive" onClick={() => setConfirmingDeleteId(skill.id)}>
+									Delete
+								</Button>
+							</div>
 						</PrivateSkillCard>
 					))}
 				</PrivateSkillsList>
@@ -118,6 +136,26 @@ export function PrivateSkillsPageClient() {
 					<DialogFooter>
 						<Button onClick={saveEdit} disabled={editName.trim().length === 0 || editContent.trim().length === 0}>
 							Save
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+
+			<Dialog
+				open={confirmingDeleteId !== null}
+				onOpenChange={(open) => !open && !deleting && setConfirmingDeleteId(null)}
+			>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Delete this skill?</DialogTitle>
+						<DialogDescription>This permanently removes the skill. This action cannot be undone.</DialogDescription>
+					</DialogHeader>
+					<DialogFooter>
+						<Button variant="outline" onClick={() => setConfirmingDeleteId(null)} disabled={deleting}>
+							Cancel
+						</Button>
+						<Button variant="destructive" onClick={confirmDelete} disabled={deleting}>
+							{deleting ? "Deleting…" : "Delete"}
 						</Button>
 					</DialogFooter>
 				</DialogContent>
