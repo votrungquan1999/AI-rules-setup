@@ -8,8 +8,8 @@ import { addCommand } from "./commands/add";
 import { initCommand } from "./commands/init";
 import { kbCommand } from "./commands/kb";
 import { pullCommand } from "./commands/pull";
+import { skillCommand } from "./commands/skill";
 import { syncCommand } from "./commands/sync";
-import { uploadCommand } from "./commands/upload";
 
 /**
  * Reads the CLI version from its own package.json. Resolves in both the compiled dist
@@ -179,25 +179,8 @@ program
 		}
 	});
 
-program
-	.command("upload <skillPath>")
-	.description("Upload a local skill directory to the API as a private, scoped skill (requires AI_RULES_SECRET)")
-	.requiredOption("--agent <name>", "AI agent name the skill belongs to (e.g., claude-code)")
-	.option("--scope <csv>", "Comma-separated list of scope tags (e.g., work,client-x). Required unless --global is set.")
-	.option(
-		"--global",
-		"Upload as a global skill (empty scope, visible to every workspace). Mutually exclusive with --scope.",
-	)
-	.action(async (skillPath, options) => {
-		try {
-			await uploadCommand({ agent: options.agent, scope: options.scope, global: options.global, skillPath });
-		} catch (error) {
-			console.error(chalk.red(`❌ Error: ${error}`));
-			process.exit(1);
-		}
-	});
-
 program.addCommand(kbCommand);
+program.addCommand(skillCommand);
 
 program
 	.command("help")

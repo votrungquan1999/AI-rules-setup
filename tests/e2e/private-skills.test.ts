@@ -45,6 +45,37 @@ describe("E2E: Private Skills", () => {
 		return skillDir;
 	}
 
+	function apiUrl(): string {
+		const url = process.env.AI_RULES_API_URL;
+		if (!url) throw new Error("AI_RULES_API_URL not set by E2E setup");
+		return url;
+	}
+
+	/**
+	 * Uploads a private skill through the public upload route (which assigns a permanent id), then
+	 * reads the stored document back so a test can address it by that id.
+	 * @param name - The skill name to upload
+	 * @returns The stored document, guaranteed to carry an id
+	 */
+	async function uploadAndReadStored(name: string): Promise<StoredPrivateSkillDocument & { id: string }> {
+		const response = await fetch(`${apiUrl()}/api/skills/upload`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json", "x-ai-rules-secret": "test-secret" },
+			body: JSON.stringify({
+				agent: "claude-code",
+				skill: { name, content: "original content", description: "original desc" },
+				scopes: ["work"],
+			}),
+		});
+		expect(response.status).toBe(200);
+		const db = await getTestDatabase();
+		const stored = await db
+			.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME)
+			.findOne({ agent: "claude-code", name });
+		if (!stored?.id) throw new Error("expected uploaded skill to have a permanent id");
+		return stored as StoredPrivateSkillDocument & { id: string };
+	}
+
 	describe("when uploading a private skill with the right credentials", () => {
 		it("should accept the upload and persist the skill to private_skills_data", async () => {
 			// Given a local skill directory with a SKILL.md file.
@@ -56,7 +87,7 @@ describe("E2E: Private Skills", () => {
 			expect(process.env.AI_RULES_SECRET).toBe("test-secret");
 
 			// When the developer runs `upload --agent claude-code --scope work <skillDir>`.
-			const { result } = spawnCLI(["upload", "--agent", "claude-code", "--scope", "work", skillDir], {
+			const { result } = spawnCLI(["skill", "upload", "--agent", "claude-code", "--scope", "work", skillDir], {
 				timeout: 30000,
 			});
 			const output = await result;
@@ -72,6 +103,27 @@ describe("E2E: Private Skills", () => {
 			expect(stored).not.toBeNull();
 			expect(stored?.content).toBe(skillContent);
 			expect(stored?.scopes).toEqual(["work"]);
+		});
+	});
+
+	describe("when invoking the former top-level `upload` command directly", () => {
+		it("should be rejected as an unknown command now that upload lives under `skill upload`", async () => {
+			// Given a valid skill directory (the flags/path are irrelevant — the bare command must be unknown).
+			const skillDir = await createSkillDir("bare-upload-gone", "---\nname: bare-upload-gone\n---\n# x");
+
+			// When the developer runs the old top-level `upload ...` invocation.
+			const { result } = spawnCLI(["upload", "--agent", "claude-code", "--scope", "work", skillDir], {
+				timeout: 30000,
+			});
+			const output = await result;
+
+			// Then the CLI rejects it as an unrecognized command and persists nothing.
+			expect(output.exitCode, `stdout: ${output.stdout}\nstderr: ${output.stderr}`).not.toBe(0);
+			const db = await getTestDatabase();
+			const stored = await db
+				.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME)
+				.findOne({ agent: "claude-code", name: "bare-upload-gone" });
+			expect(stored).toBeNull();
 		});
 	});
 
@@ -113,7 +165,7 @@ describe("E2E: Private Skills", () => {
 			const skillDir = await createSkillDir("scopeless", "---\nname: scopeless\n---\n# x");
 
 			// When the developer runs `upload --agent claude-code <skillDir>` without stating visibility.
-			const { result } = spawnCLI(["upload", "--agent", "claude-code", skillDir], { timeout: 30000 });
+			const { result } = spawnCLI(["skill", "upload", "--agent", "claude-code", skillDir], { timeout: 30000 });
 			const output = await result;
 
 			// Then the CLI refuses on the scope rule and persists nothing.
@@ -131,7 +183,9 @@ describe("E2E: Private Skills", () => {
 			const skillDir = await createSkillDir("scopeless-global", "---\nname: scopeless-global\n---\n# x");
 
 			// When the developer runs `upload --agent claude-code <skillDir> --global`.
-			const { result } = spawnCLI(["upload", "--agent", "claude-code", skillDir, "--global"], { timeout: 30000 });
+			const { result } = spawnCLI(["skill", "upload", "--agent", "claude-code", skillDir, "--global"], {
+				timeout: 30000,
+			});
 			const output = await result;
 
 			// Then the CLI exits cleanly and the skill is stored as global.
@@ -289,7 +343,7 @@ describe("E2E: Private Skills", () => {
 		it("should overwrite the previous content and update the timestamp", async () => {
 			// Given a private skill is uploaded with the original content.
 			const firstSkillDir = await createSkillDir("upsert-target", "first version");
-			const first = spawnCLI(["upload", "--agent", "claude-code", "--scope", "work", firstSkillDir], {
+			const first = spawnCLI(["skill", "upload", "--agent", "claude-code", "--scope", "work", firstSkillDir], {
 				timeout: 30000,
 			});
 			expect((await first.result).exitCode).toBe(0);
@@ -304,9 +358,10 @@ describe("E2E: Private Skills", () => {
 
 			// When a second upload runs with the same agent + skill name but new content + new scopes.
 			const secondSkillDir = await createSkillDir("upsert-target", "second version");
-			const second = spawnCLI(["upload", "--agent", "claude-code", "--scope", "work,client-x", secondSkillDir], {
-				timeout: 30000,
-			});
+			const second = spawnCLI(
+				["skill", "upload", "--agent", "claude-code", "--scope", "work,client-x", secondSkillDir],
+				{ timeout: 30000 },
+			);
 			expect((await second.result).exitCode).toBe(0);
 
 			// Then the document is replaced in place — only one doc remains, with the new content, new scopes,
@@ -536,37 +591,6 @@ describe("E2E: Private Skills", () => {
 	});
 
 	describe("PATCH /api/skills/[id]", () => {
-		function apiUrl(): string {
-			const url = process.env.AI_RULES_API_URL;
-			if (!url) throw new Error("AI_RULES_API_URL not set by E2E setup");
-			return url;
-		}
-
-		/**
-		 * Uploads a private skill through the public upload route (which assigns a permanent id), then
-		 * reads the stored document back so a test can address it by that id.
-		 * @param name - The skill name to upload
-		 * @returns The stored document, guaranteed to carry an id
-		 */
-		async function uploadAndReadStored(name: string): Promise<StoredPrivateSkillDocument & { id: string }> {
-			const response = await fetch(`${apiUrl()}/api/skills/upload`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json", "x-ai-rules-secret": "test-secret" },
-				body: JSON.stringify({
-					agent: "claude-code",
-					skill: { name, content: "original content", description: "original desc" },
-					scopes: ["work"],
-				}),
-			});
-			expect(response.status).toBe(200);
-			const db = await getTestDatabase();
-			const stored = await db
-				.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME)
-				.findOne({ agent: "claude-code", name });
-			if (!stored?.id) throw new Error("expected uploaded skill to have a permanent id");
-			return stored as StoredPrivateSkillDocument & { id: string };
-		}
-
 		it("rejects a request without the secret with 401 and persists nothing", async () => {
 			const stored = await uploadAndReadStored("patch-no-secret");
 			const response = await fetch(`${apiUrl()}/api/skills/${stored.id}`, {
@@ -584,12 +608,51 @@ describe("E2E: Private Skills", () => {
 			expect(after?.name).toBe("patch-no-secret");
 		});
 
-		it("returns 400 when name or content is missing", async () => {
-			const stored = await uploadAndReadStored("patch-bad-body");
+		it("accepts a scopes-only patch, since a single valid field is sufficient", async () => {
+			const stored = await uploadAndReadStored("patch-scopes-only");
 			const response = await fetch(`${apiUrl()}/api/skills/${stored.id}`, {
 				method: "PATCH",
 				headers: { "Content-Type": "application/json", "x-ai-rules-secret": "test-secret" },
 				body: JSON.stringify({ scopes: [] }),
+			});
+			expect(response.status).toBe(200);
+		});
+
+		it("leaves other fields intact when only one field is patched", async () => {
+			const stored = await uploadAndReadStored("patch-single-field");
+			const response = await fetch(`${apiUrl()}/api/skills/${stored.id}`, {
+				method: "PATCH",
+				headers: { "Content-Type": "application/json", "x-ai-rules-secret": "test-secret" },
+				body: JSON.stringify({ name: "patch-single-field-renamed" }),
+			});
+			expect(response.status).toBe(200);
+
+			const db = await getTestDatabase();
+			const after = await db
+				.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME)
+				.findOne({ id: stored.id });
+			expect(after?.name).toBe("patch-single-field-renamed");
+			expect(after?.content).toBe("original content");
+			expect(after?.description).toBe("original desc");
+			expect(after?.scopes).toEqual(["work"]);
+		});
+
+		it("returns 400 when a present field has the wrong type", async () => {
+			const stored = await uploadAndReadStored("patch-wrong-type");
+			const response = await fetch(`${apiUrl()}/api/skills/${stored.id}`, {
+				method: "PATCH",
+				headers: { "Content-Type": "application/json", "x-ai-rules-secret": "test-secret" },
+				body: JSON.stringify({ content: 12345 }),
+			});
+			expect(response.status).toBe(400);
+		});
+
+		it("returns 400 when the body has none of the editable fields", async () => {
+			const stored = await uploadAndReadStored("patch-empty-body");
+			const response = await fetch(`${apiUrl()}/api/skills/${stored.id}`, {
+				method: "PATCH",
+				headers: { "Content-Type": "application/json", "x-ai-rules-secret": "test-secret" },
+				body: JSON.stringify({}),
 			});
 			expect(response.status).toBe(400);
 		});
@@ -629,14 +692,14 @@ describe("E2E: Private Skills", () => {
 			expect(after?.agent).toBe("claude-code");
 		});
 
-		it("clears the description when the PATCH omits it", async () => {
+		it("clears the description when the PATCH sends an empty string", async () => {
 			const stored = await uploadAndReadStored("patch-clear-desc");
 			expect(stored.description).toBe("original desc");
 
 			const response = await fetch(`${apiUrl()}/api/skills/${stored.id}`, {
 				method: "PATCH",
 				headers: { "Content-Type": "application/json", "x-ai-rules-secret": "test-secret" },
-				body: JSON.stringify({ name: "patch-clear-desc", content: "original content", scopes: ["work"] }),
+				body: JSON.stringify({ description: "" }),
 			});
 			expect(response.status).toBe(200);
 
@@ -645,6 +708,238 @@ describe("E2E: Private Skills", () => {
 				.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME)
 				.findOne({ id: stored.id });
 			expect(after?.description).toBeUndefined();
+		});
+	});
+
+	describe("GET /api/skills", () => {
+		it("rejects a request without the secret with 401", async () => {
+			await uploadAndReadStored("list-no-secret");
+			const response = await fetch(`${apiUrl()}/api/skills`);
+			expect(response.status).toBe(401);
+		});
+
+		it("returns an uploaded skill's id, name, agent, scopes, and description", async () => {
+			const stored = await uploadAndReadStored("list-target");
+			const response = await fetch(`${apiUrl()}/api/skills`, {
+				headers: { "x-ai-rules-secret": "test-secret" },
+			});
+			expect(response.status).toBe(200);
+
+			const skills = (await response.json()) as Array<{
+				id: string;
+				name: string;
+				agent: string;
+				scopes: string[];
+				description?: string;
+			}>;
+			const found = skills.find((s) => s.id === stored.id);
+			expect(found).toBeDefined();
+			expect(found?.name).toBe("list-target");
+			expect(found?.agent).toBe("claude-code");
+			expect(found?.scopes).toEqual(["work"]);
+			expect(found?.description).toBe("original desc");
+		});
+	});
+
+	describe("skill list", () => {
+		it("lists an uploaded skill's id and name", async () => {
+			const stored = await uploadAndReadStored("list-cli-target");
+
+			const { result } = spawnCLI(["skill", "list"], { timeout: 30000 });
+			const output = await result;
+
+			expect(output.exitCode, `stdout: ${output.stdout}\nstderr: ${output.stderr}`).toBe(0);
+			expect(output.stdout).toContain(stored.id);
+			expect(output.stdout).toContain("list-cli-target");
+		});
+	});
+
+	describe("skill update <id>", () => {
+		it("updates only the name field via --name, leaving content/description/scopes intact", async () => {
+			const stored = await uploadAndReadStored("cli-update-name-only");
+
+			const { result } = spawnCLI(["skill", "update", stored.id, "--name", "cli-update-name-only-renamed"], {
+				timeout: 30000,
+			});
+			const output = await result;
+
+			expect(output.exitCode, `stdout: ${output.stdout}\nstderr: ${output.stderr}`).toBe(0);
+			const db = await getTestDatabase();
+			const after = await db
+				.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME)
+				.findOne({ id: stored.id });
+			expect(after?.name).toBe("cli-update-name-only-renamed");
+			expect(after?.content).toBe("original content");
+			expect(after?.description).toBe("original desc");
+			expect(after?.scopes).toEqual(["work"]);
+		});
+
+		it("clears the description when --description is passed an empty string", async () => {
+			const stored = await uploadAndReadStored("cli-update-clear-desc");
+			expect(stored.description).toBe("original desc");
+
+			const { result } = spawnCLI(["skill", "update", stored.id, "--description", ""], { timeout: 30000 });
+			const output = await result;
+
+			expect(output.exitCode, `stdout: ${output.stdout}\nstderr: ${output.stderr}`).toBe(0);
+			const db = await getTestDatabase();
+			const after = await db
+				.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME)
+				.findOne({ id: stored.id });
+			expect(after?.description).toBeUndefined();
+		});
+
+		it("refuses with a non-zero exit and sends no request when no editable flag is given", async () => {
+			const stored = await uploadAndReadStored("cli-update-no-flags");
+
+			const { result } = spawnCLI(["skill", "update", stored.id], { timeout: 30000 });
+			const output = await result;
+
+			expect(output.exitCode, `stdout: ${output.stdout}\nstderr: ${output.stderr}`).not.toBe(0);
+			// The client-side pre-check message, not the server's generic 400 body — proves the
+			// request was refused before ever reaching the network.
+			expect(output.stderr).toContain("Provide at least one of");
+			const db = await getTestDatabase();
+			const after = await db
+				.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME)
+				.findOne({ id: stored.id });
+			expect(after?.name).toBe("cli-update-no-flags");
+		});
+
+		it("exits non-zero when the id is unknown", async () => {
+			const { result } = spawnCLI(["skill", "update", "no-such-id", "--name", "whatever"], { timeout: 30000 });
+			const output = await result;
+
+			expect(output.exitCode).not.toBe(0);
+		});
+
+		it("updates the scope via --scope, replacing the previous scope tags", async () => {
+			const stored = await uploadAndReadStored("cli-update-scope");
+
+			const { result } = spawnCLI(["skill", "update", stored.id, "--scope", "client-x,team"], { timeout: 30000 });
+			const output = await result;
+
+			expect(output.exitCode, `stdout: ${output.stdout}\nstderr: ${output.stderr}`).toBe(0);
+			const db = await getTestDatabase();
+			const after = await db
+				.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME)
+				.findOne({ id: stored.id });
+			expect(after?.scopes).toEqual(["client-x", "team"]);
+		});
+
+		it("clears the scope to global via --global", async () => {
+			const stored = await uploadAndReadStored("cli-update-global");
+
+			const { result } = spawnCLI(["skill", "update", stored.id, "--global"], { timeout: 30000 });
+			const output = await result;
+
+			expect(output.exitCode, `stdout: ${output.stdout}\nstderr: ${output.stderr}`).toBe(0);
+			const db = await getTestDatabase();
+			const after = await db
+				.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME)
+				.findOne({ id: stored.id });
+			expect(after?.scopes).toEqual([]);
+		});
+
+		it("refuses with a non-zero exit when --scope and --global are passed together", async () => {
+			const stored = await uploadAndReadStored("cli-update-scope-global-conflict");
+
+			const { result } = spawnCLI(["skill", "update", stored.id, "--scope", "work", "--global"], { timeout: 30000 });
+			const output = await result;
+
+			expect(output.exitCode).not.toBe(0);
+		});
+
+		it("updates the content from a file via --content-file, leaving name/scopes intact", async () => {
+			const stored = await uploadAndReadStored("cli-update-content-file");
+			const fileContent = "# New Content\n\nLoaded from a file.";
+			const parent = await mkdtemp(join(tmpdir(), "private-skill-content-"));
+			tempDirs.push(parent);
+			const contentFilePath = join(parent, "content.md");
+			await writeFile(contentFilePath, fileContent);
+
+			const { result } = spawnCLI(["skill", "update", stored.id, "--content-file", contentFilePath], {
+				timeout: 30000,
+			});
+			const output = await result;
+
+			expect(output.exitCode, `stdout: ${output.stdout}\nstderr: ${output.stderr}`).toBe(0);
+			const db = await getTestDatabase();
+			const after = await db
+				.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME)
+				.findOne({ id: stored.id });
+			expect(after?.content).toBe(fileContent);
+			expect(after?.name).toBe("cli-update-content-file");
+			expect(after?.scopes).toEqual(["work"]);
+		});
+
+		it("updates the content inline via --content", async () => {
+			const stored = await uploadAndReadStored("cli-update-content-inline");
+
+			const { result } = spawnCLI(["skill", "update", stored.id, "--content", "inline"], { timeout: 30000 });
+			const output = await result;
+
+			expect(output.exitCode, `stdout: ${output.stdout}\nstderr: ${output.stderr}`).toBe(0);
+			const db = await getTestDatabase();
+			const after = await db
+				.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME)
+				.findOne({ id: stored.id });
+			expect(after?.content).toBe("inline");
+		});
+	});
+
+	describe("DELETE /api/skills/[id]", () => {
+		it("rejects a request without the secret with 401", async () => {
+			const stored = await uploadAndReadStored("delete-no-secret");
+			const response = await fetch(`${apiUrl()}/api/skills/${stored.id}`, { method: "DELETE" });
+			expect(response.status).toBe(401);
+		});
+
+		it("deletes a private skill by id, leaving it gone from storage", async () => {
+			const stored = await uploadAndReadStored("delete-target");
+
+			const response = await fetch(`${apiUrl()}/api/skills/${stored.id}`, {
+				method: "DELETE",
+				headers: { "x-ai-rules-secret": "test-secret" },
+			});
+			expect(response.status).toBe(200);
+
+			const db = await getTestDatabase();
+			const after = await db
+				.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME)
+				.findOne({ id: stored.id });
+			expect(after).toBeNull();
+		});
+
+		it("returns 404 when no skill has that id", async () => {
+			const response = await fetch(`${apiUrl()}/api/skills/no-such-id`, {
+				method: "DELETE",
+				headers: { "x-ai-rules-secret": "test-secret" },
+			});
+			expect(response.status).toBe(404);
+		});
+	});
+
+	describe("skill delete <id>", () => {
+		it("deletes a private skill by id, leaving it gone from storage", async () => {
+			const stored = await uploadAndReadStored("cli-delete-target");
+
+			const { result } = spawnCLI(["skill", "delete", stored.id], { timeout: 30000 });
+			const output = await result;
+
+			expect(output.exitCode, `stdout: ${output.stdout}\nstderr: ${output.stderr}`).toBe(0);
+			const db = await getTestDatabase();
+			const after = await db
+				.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME)
+				.findOne({ id: stored.id });
+			expect(after).toBeNull();
+		});
+
+		it("exits non-zero when the id is unknown", async () => {
+			const { result } = spawnCLI(["skill", "delete", "no-such-id"], { timeout: 30000 });
+			const output = await result;
+
+			expect(output.exitCode).not.toBe(0);
 		});
 	});
 });
