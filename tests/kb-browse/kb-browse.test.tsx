@@ -110,4 +110,62 @@ describe("KB browse screen", () => {
 		await waitFor(() => expect(screen.getAllByText("Global")).toHaveLength(1));
 		expect(screen.queryByText("work")).not.toBeInTheDocument();
 	});
+
+	it("opens a confirm dialog when a reviewer clicks Delete on an entry", () => {
+		renderBrowse([canonicalEntry({ title: "Deploy helper" })]);
+
+		fireEvent.click(screen.getByRole("button", { name: /delete/i }));
+
+		const dialog = screen.getByRole("dialog");
+		expect(within(dialog).getByText(/delete this entry/i)).toBeInTheDocument();
+	});
+
+	it("calls DELETE on the correct URL and removes the card after confirming", async () => {
+		const fetchMock = vi.fn().mockResolvedValue({ ok: true } as Response);
+		vi.stubGlobal("fetch", fetchMock);
+
+		renderBrowse([canonicalEntry({ id: "507f1f77bcf86cd799439011", title: "Deploy helper" })]);
+
+		fireEvent.click(screen.getByRole("button", { name: /delete/i }));
+		const dialog = screen.getByRole("dialog");
+		fireEvent.click(within(dialog).getByRole("button", { name: "Delete" }));
+
+		await waitFor(() =>
+			expect(fetchMock).toHaveBeenCalledWith(
+				"/api/kb/507f1f77bcf86cd799439011",
+				expect.objectContaining({ method: "DELETE" }),
+			),
+		);
+
+		await waitFor(() => expect(screen.queryByText("Deploy helper")).not.toBeInTheDocument());
+	});
+
+	it("removes the card when DELETE responds 404, since the entry is already gone (D9 R19)", async () => {
+		const fetchMock = vi.fn().mockResolvedValue({ ok: false, status: 404 } as Response);
+		vi.stubGlobal("fetch", fetchMock);
+
+		renderBrowse([canonicalEntry({ id: "507f1f77bcf86cd799439011", title: "Deploy helper" })]);
+
+		fireEvent.click(screen.getByRole("button", { name: /delete/i }));
+		const dialog = screen.getByRole("dialog");
+		fireEvent.click(within(dialog).getByRole("button", { name: "Delete" }));
+
+		// A 404 means the entry is already gone — the reviewer's intent is satisfied, so the card still drops.
+		await waitFor(() => expect(screen.queryByText("Deploy helper")).not.toBeInTheDocument());
+	});
+
+	it("leaves the card in place and makes no request when a reviewer cancels the delete", () => {
+		const fetchMock = vi.fn();
+		vi.stubGlobal("fetch", fetchMock);
+
+		renderBrowse([canonicalEntry({ title: "Deploy helper" })]);
+
+		fireEvent.click(screen.getByRole("button", { name: /delete/i }));
+		const dialog = screen.getByRole("dialog");
+		fireEvent.click(within(dialog).getByRole("button", { name: /cancel/i }));
+
+		expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+		expect(screen.getByText("Deploy helper")).toBeInTheDocument();
+		expect(fetchMock).not.toHaveBeenCalled();
+	});
 });

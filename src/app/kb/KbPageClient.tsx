@@ -34,10 +34,12 @@ import {
 export function KbPageClient() {
 	const entries = useKbBrowseEntries();
 	const { editingEntry, openEdit, closeEdit } = useKbBrowseEditDialog();
-	const { editEntry } = useKbBrowseActions();
+	const { editEntry, deleteEntry } = useKbBrowseActions();
 	const [editTitle, setEditTitle] = useState("");
 	const [editBody, setEditBody] = useState("");
 	const [editScopes, setEditScopes] = useState<string[]>([]);
+	const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
+	const [deleting, setDeleting] = useState(false);
 	const titleId = useId();
 	const bodyId = useId();
 
@@ -51,6 +53,17 @@ export function KbPageClient() {
 	async function saveEdit() {
 		if (!editingEntry) return;
 		await editEntry(editingEntry.id, editTitle, editBody, editScopes);
+	}
+
+	async function confirmDelete() {
+		if (!confirmingDeleteId) return;
+		setDeleting(true);
+		try {
+			await deleteEntry(confirmingDeleteId);
+		} finally {
+			setDeleting(false);
+			setConfirmingDeleteId(null);
+		}
 	}
 
 	return (
@@ -84,6 +97,9 @@ export function KbPageClient() {
 								<Button variant="outline" onClick={() => handleOpenEdit(entry)}>
 									Edit
 								</Button>
+								<Button variant="destructive" onClick={() => setConfirmingDeleteId(entry.id)}>
+									Delete
+								</Button>
 							</div>
 						</KbListCard>
 					))}
@@ -110,6 +126,26 @@ export function KbPageClient() {
 					<DialogFooter>
 						<Button onClick={saveEdit} disabled={editBody.trim().length === 0}>
 							Save
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+
+			<Dialog
+				open={confirmingDeleteId !== null}
+				onOpenChange={(open) => !open && !deleting && setConfirmingDeleteId(null)}
+			>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Delete this entry?</DialogTitle>
+						<DialogDescription>This permanently removes the entry. This cannot be undone.</DialogDescription>
+					</DialogHeader>
+					<DialogFooter>
+						<Button variant="outline" onClick={() => setConfirmingDeleteId(null)} disabled={deleting}>
+							Cancel
+						</Button>
+						<Button variant="destructive" onClick={confirmDelete} disabled={deleting}>
+							{deleting ? "Deleting…" : "Delete"}
 						</Button>
 					</DialogFooter>
 				</DialogContent>

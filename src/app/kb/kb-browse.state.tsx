@@ -25,6 +25,8 @@ function kbBrowseReducer(state: KbBrowseState, action: KbBrowseAction): KbBrowse
 					e.id === action.id ? { ...e, title: action.title, body: action.body, scope: action.scope } : e,
 				),
 			};
+		case KbBrowseActionType.Remove:
+			return { ...state, entries: state.entries.filter((e) => e.id !== action.id) };
 		default:
 			return state;
 	}
@@ -61,7 +63,9 @@ export function useKbBrowseEditDialog() {
  * Domain actions for the browse screen. `editEntry` saves a canonical entry's edited title/body/scope
  * via the PATCH endpoint (which preserves status), normalizing scopes first; on success it updates
  * the in-memory list and closes the dialog so the card reflects the change immediately, no reload.
- * @returns the `editEntry` action callback
+ * `deleteEntry` permanently removes an entry via the DELETE endpoint; a 404 (already gone) is treated
+ * the same as success, since the reviewer's intent — the entry being gone — is already satisfied.
+ * @returns the `editEntry` and `deleteEntry` action callbacks
  */
 export function useKbBrowseActions() {
 	const dispatch = useRawDispatch();
@@ -76,6 +80,12 @@ export function useKbBrowseActions() {
 			if (response.ok) {
 				dispatch({ type: KbBrowseActionType.Edit, id, title, body, scope: normalizedScope });
 				dispatch({ type: KbBrowseActionType.SetEditing, id: null });
+			}
+		},
+		deleteEntry: async (id: string) => {
+			const response = await fetch(`/api/kb/${id}`, { method: "DELETE" });
+			if (response.ok || response.status === 404) {
+				dispatch({ type: KbBrowseActionType.Remove, id });
 			}
 		},
 	};

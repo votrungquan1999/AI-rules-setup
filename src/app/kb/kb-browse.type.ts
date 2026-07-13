@@ -4,6 +4,7 @@ import type { KbDoc } from "src/server/types";
 export enum KbBrowseActionType {
 	Edit = "edit",
 	SetEditing = "set-editing",
+	Remove = "remove",
 }
 
 /**
@@ -24,7 +25,13 @@ export interface SetEditingAction {
 	id: string | null;
 }
 
-export type KbBrowseAction = EditEntryAction | SetEditingAction;
+/** Removes a canonical entry from the list (after a delete resolves). */
+export interface RemoveEntryAction {
+	type: KbBrowseActionType.Remove;
+	id: string;
+}
+
+export type KbBrowseAction = EditEntryAction | SetEditingAction | RemoveEntryAction;
 
 /** Browse screen state: the canonical entries on display, plus which one's editor is open. */
 export interface KbBrowseState {
