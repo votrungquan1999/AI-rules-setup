@@ -361,4 +361,79 @@ describe("E2E: KB Review (drafts + approve/reject/edit)", () => {
 			expect(response.status).toBe(400);
 		});
 	});
+
+	describe("DELETE /api/kb/[id]", () => {
+		it("deletes a canonical entry, removing it from the database", async () => {
+			const db = await getTestDatabase();
+			const id = await storeKbDocInTestDatabase(db, {
+				type: KbType.Question,
+				status: KbStatus.Canonical,
+				title: "Delete me (canonical)",
+				body: "b",
+				scope: ["work"],
+			});
+
+			const response = await fetch(`${apiUrl()}/api/kb/${id}`, {
+				method: "DELETE",
+				headers: { "x-ai-rules-secret": SECRET },
+			});
+			expect(response.status).toBe(200);
+
+			const stored = await db.collection("kb_docs").findOne({ _id: ObjectId.createFromHexString(id) });
+			expect(stored).toBeNull();
+		});
+
+		it("deletes a draft entry, removing it from the database", async () => {
+			const db = await getTestDatabase();
+			const id = await storeKbDocInTestDatabase(db, {
+				type: KbType.Question,
+				status: KbStatus.Draft,
+				title: "Delete me (draft)",
+				body: "b",
+				scope: ["work"],
+			});
+
+			const response = await fetch(`${apiUrl()}/api/kb/${id}`, {
+				method: "DELETE",
+				headers: { "x-ai-rules-secret": SECRET },
+			});
+			expect(response.status).toBe(200);
+
+			const stored = await db.collection("kb_docs").findOne({ _id: ObjectId.createFromHexString(id) });
+			expect(stored).toBeNull();
+		});
+
+		it("returns 404 when deleting an unknown (but well-formed) id", async () => {
+			const response = await fetch(`${apiUrl()}/api/kb/000000000000000000000000`, {
+				method: "DELETE",
+				headers: { "x-ai-rules-secret": SECRET },
+			});
+			expect(response.status).toBe(404);
+		});
+
+		it("returns 400 when the id is malformed", async () => {
+			const response = await fetch(`${apiUrl()}/api/kb/not-a-valid-id`, {
+				method: "DELETE",
+				headers: { "x-ai-rules-secret": SECRET },
+			});
+			expect(response.status).toBe(400);
+		});
+
+		it("rejects a request without the secret with 401, leaving the entry intact", async () => {
+			const db = await getTestDatabase();
+			const id = await storeKbDocInTestDatabase(db, {
+				type: KbType.Question,
+				status: KbStatus.Canonical,
+				title: "Do not delete me",
+				body: "b",
+				scope: ["work"],
+			});
+
+			const response = await fetch(`${apiUrl()}/api/kb/${id}`, { method: "DELETE" });
+			expect(response.status).toBe(401);
+
+			const stored = await db.collection("kb_docs").findOne({ _id: ObjectId.createFromHexString(id) });
+			expect(stored).not.toBeNull();
+		});
+	});
 });

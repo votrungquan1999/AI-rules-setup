@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { type NextRequest, NextResponse } from "next/server";
-import { updateKbDoc } from "../../../../server/kb-repository";
+import { rejectKbDoc, updateKbDoc } from "../../../../server/kb-repository";
 import { verifySecret } from "../../lib/verify-secret";
 
 interface PatchRequestBody {
@@ -48,6 +48,29 @@ export async function PATCH(request: NextRequest, ctx: { params: Promise<{ id: s
 
 	const updated = await updateKbDoc(id, fields);
 	if (!updated) {
+		return NextResponse.json({ error: "Not found" }, { status: 404 });
+	}
+	return NextResponse.json({ success: true }, { status: 200 });
+}
+
+/**
+ * DELETE /api/kb/[id]
+ *
+ * Browse-flow permanent removal of a KB entry, canonical or draft (mirrors the review-flow
+ * `POST /api/kb/[id]/reject`, which stays untouched). Secret-gated (401). Returns 400 on an
+ * invalid id, 404 when no document matched.
+ */
+export async function DELETE(request: NextRequest, ctx: { params: Promise<{ id: string }> }) {
+	if (!verifySecret(request)) {
+		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	}
+
+	const { id } = await ctx.params;
+	if (!ObjectId.isValid(id)) {
+		return NextResponse.json({ error: "Invalid id" }, { status: 400 });
+	}
+	const deleted = await rejectKbDoc(id);
+	if (!deleted) {
 		return NextResponse.json({ error: "Not found" }, { status: 404 });
 	}
 	return NextResponse.json({ success: true }, { status: 200 });
