@@ -151,40 +151,55 @@ export async function findAllPrivateSkills(): Promise<StoredPrivateSkillDocument
 }
 
 interface UpdatePrivateSkillFields {
-	name: string;
-	content: string;
+	name?: string;
+	content?: string;
 	description?: string;
-	scopes: string[];
+	scopes?: string[];
 }
 
 /**
- * Updates a private skill's editable fields — name, content, description, and scopes — addressed by
- * its permanent id. Leaves the owning agent, createdAt, and supportingFiles intact. A `description`
- * of `undefined` clears (unsets) the stored description; a string (even empty) sets it.
+ * Partially updates a private skill's editable fields — name, content, description, scopes —
+ * addressed by its permanent id. Any subset of fields may be provided; only the keys present on
+ * `fields` are `$set`. Leaves the owning agent, createdAt, and supportingFiles intact. `description`
+ * uses key-presence semantics: absent = leave the stored description untouched, `""` = clear
+ * (`$unset`) it, non-empty string = `$set` it.
  * @param id - The private skill's permanent id
- * @param fields - The new name, content, optional description, and scopes
+ * @param fields - Any subset of name, content, description, and scopes to update
  * @returns True when a document matched (even if values were unchanged); false when no skill had that id
  */
 export async function updatePrivateSkill(id: string, fields: UpdatePrivateSkillFields): Promise<boolean> {
 	const db = await getDatabase();
 	const collection = db.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME);
 
-	const $set: Partial<StoredPrivateSkillDocument> = {
-		name: fields.name,
-		content: fields.content,
-		scopes: fields.scopes,
-		updatedAt: new Date(),
-	};
+	const $set: Partial<StoredPrivateSkillDocument> = { updatedAt: new Date() };
+	if ("name" in fields && fields.name !== undefined) $set.name = fields.name;
+	if ("content" in fields && fields.content !== undefined) $set.content = fields.content;
+	if ("scopes" in fields && fields.scopes !== undefined) $set.scopes = fields.scopes;
+
 	const update: UpdateFilter<StoredPrivateSkillDocument> = { $set };
-	if (fields.description === undefined) {
-		// Reviewer cleared the description — remove it from the stored document.
-		update.$unset = { description: "" };
-	} else {
-		$set.description = fields.description;
+	// Key presence distinguishes "leave intact" (absent) from "clear" ("") from "set" (non-empty).
+	if ("description" in fields) {
+		if (fields.description === "") {
+			update.$unset = { description: "" };
+		} else {
+			$set.description = fields.description;
+		}
 	}
 
 	const result = await collection.updateOne({ id }, update);
 	return result.matchedCount === 1;
+}
+
+/**
+ * Deletes a private skill by its permanent id.
+ * @param id - The private skill's permanent id
+ * @returns True when a document was deleted; false when no skill had that id
+ */
+export async function deletePrivateSkill(id: string): Promise<boolean> {
+	const db = await getDatabase();
+	const collection = db.collection<StoredPrivateSkillDocument>(PRIVATE_SKILLS_COLLECTION_NAME);
+	const result = await collection.deleteOne({ id });
+	return result.deletedCount === 1;
 }
 
 /**

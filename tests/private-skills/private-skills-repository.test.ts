@@ -1,7 +1,12 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { getDatabase } from "../../src/server/database";
-import { findAllPrivateSkills, storePrivateSkill, updatePrivateSkill } from "../../src/server/rules-repository";
+import {
+	deletePrivateSkill,
+	findAllPrivateSkills,
+	storePrivateSkill,
+	updatePrivateSkill,
+} from "../../src/server/rules-repository";
 import { PRIVATE_SKILLS_COLLECTION_NAME, type StoredPrivateSkillDocument } from "../../src/server/types";
 import { dropTestDatabase, generateTestDatabaseName, withTestDatabase } from "../helpers/database-utils";
 
@@ -101,21 +106,71 @@ describe("private skills repository", () => {
 		});
 	});
 
-	it("clears a skill's description when the update omits it", async () => {
+	it("updates only the provided field, leaving the others intact", async () => {
 		await withTestDatabase(generateTestDatabaseName(), async () => {
 			try {
-				// Given a stored skill that has a description.
-				await storePrivateSkill("claude-code", { name: "desc-skill", content: "c1", description: "had one" }, ["work"]);
-				const stored = (await findAllPrivateSkills()).find((s) => s.name === "desc-skill");
+				// Given a stored private skill with all editable fields set.
+				await storePrivateSkill("claude-code", { name: "partial-skill", content: "c1", description: "d1" }, ["work"]);
+				const stored = (await findAllPrivateSkills()).find((s) => s.name === "partial-skill");
 				const id = stored?.id;
 				if (!id) throw new Error("expected stored skill to have an id");
 
-				// When the skill is updated without a description (reviewer cleared the field).
-				await updatePrivateSkill(id, { name: "desc-skill", content: "c1", scopes: ["work"] });
+				// When only the name is patched.
+				const ok = await updatePrivateSkill(id, { name: "renamed-skill" });
+
+				// Then the update succeeds and the untouched fields keep their original values.
+				expect(ok).toBe(true);
+				const after = (await findAllPrivateSkills()).find((s) => s.id === id);
+				expect(after?.name).toBe("renamed-skill");
+				expect(after?.content).toBe("c1");
+				expect(after?.description).toBe("d1");
+				expect(after?.scopes).toEqual(["work"]);
+			} finally {
+				await dropTestDatabase();
+			}
+		});
+	});
+
+	it("clears the description when the update sends an empty string", async () => {
+		await withTestDatabase(generateTestDatabaseName(), async () => {
+			try {
+				// Given a stored skill that has a description.
+				await storePrivateSkill("claude-code", { name: "desc-clear-skill", content: "c1", description: "had one" }, [
+					"work",
+				]);
+				const stored = (await findAllPrivateSkills()).find((s) => s.name === "desc-clear-skill");
+				const id = stored?.id;
+				if (!id) throw new Error("expected stored skill to have an id");
+
+				// When the description is explicitly patched to an empty string.
+				await updatePrivateSkill(id, { description: "" });
 
 				// Then the stored description is removed.
 				const after = (await findAllPrivateSkills()).find((s) => s.id === id);
 				expect(after?.description).toBeUndefined();
+			} finally {
+				await dropTestDatabase();
+			}
+		});
+	});
+
+	it("leaves the description intact when the update omits the key", async () => {
+		await withTestDatabase(generateTestDatabaseName(), async () => {
+			try {
+				// Given a stored skill that has a description.
+				await storePrivateSkill("claude-code", { name: "desc-intact-skill", content: "c1", description: "keep me" }, [
+					"work",
+				]);
+				const stored = (await findAllPrivateSkills()).find((s) => s.name === "desc-intact-skill");
+				const id = stored?.id;
+				if (!id) throw new Error("expected stored skill to have an id");
+
+				// When the update patches an unrelated field and never mentions description.
+				await updatePrivateSkill(id, { content: "c2" });
+
+				// Then the stored description is untouched.
+				const after = (await findAllPrivateSkills()).find((s) => s.id === id);
+				expect(after?.description).toBe("keep me");
 			} finally {
 				await dropTestDatabase();
 			}
@@ -127,6 +182,32 @@ describe("private skills repository", () => {
 			try {
 				const ok = await updatePrivateSkill("no-such-id", { name: "x", content: "y", scopes: [] });
 				expect(ok).toBe(false);
+			} finally {
+				await dropTestDatabase();
+			}
+		});
+	});
+
+	it("deletes a private skill by id, reporting false on a second delete", async () => {
+		await withTestDatabase(generateTestDatabaseName(), async () => {
+			try {
+				// Given a stored private skill with a real permanent id.
+				await storePrivateSkill("claude-code", { name: "to-delete", content: "c1" }, ["work"]);
+				const stored = (await findAllPrivateSkills()).find((s) => s.name === "to-delete");
+				const id = stored?.id;
+				if (!id) throw new Error("expected stored skill to have an id");
+
+				// When the skill is deleted by id.
+				const firstDelete = await deletePrivateSkill(id);
+
+				// Then the deletion reports success and the skill is gone from a re-listing.
+				expect(firstDelete).toBe(true);
+				const after = (await findAllPrivateSkills()).find((s) => s.id === id);
+				expect(after).toBeUndefined();
+
+				// And deleting the same id again reports false (nothing left to remove).
+				const secondDelete = await deletePrivateSkill(id);
+				expect(secondDelete).toBe(false);
 			} finally {
 				await dropTestDatabase();
 			}
