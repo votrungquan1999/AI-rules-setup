@@ -270,6 +270,112 @@ export async function uploadPrivateSkill(
 	return { success: true, status: response.status };
 }
 
+/** Partial fields for `PATCH /api/skills/[id]` — any subset may be sent; omitted keys are left untouched. */
+export interface SkillUpdateFields {
+	name?: string;
+	content?: string;
+	description?: string;
+	scopes?: string[];
+}
+
+/**
+ * Partially updates a private skill by id via `PATCH /api/skills/[id]`. Only the keys present on
+ * `fields` are sent, so omitted fields are left untouched server-side (key-presence semantics —
+ * an empty-string `description` clears it, per D2b).
+ * Attaches the `AI_RULES_SECRET` env var as the `x-ai-rules-secret` header when set.
+ * Returns a structured result instead of throwing — callers decide how to surface failure.
+ * @param id - The private skill's permanent id
+ * @param fields - The subset of fields to update
+ * @returns Object with success flag, HTTP status, and optional error string from the server
+ */
+export async function skillUpdate(
+	id: string,
+	fields: SkillUpdateFields,
+): Promise<{ success: boolean; status: number; error?: string }> {
+	const secret = process.env.AI_RULES_SECRET;
+	const response = await fetch(`${API_BASE_URL}/api/skills/${id}`, {
+		method: "PATCH",
+		headers: {
+			"Content-Type": "application/json",
+			...(secret ? { [SECRET_HEADER]: secret } : {}),
+		},
+		body: JSON.stringify(fields),
+	});
+	if (!response.ok) {
+		const errorBody = (await response.json().catch(() => ({}))) as { error?: string };
+		const failure: { success: false; status: number; error?: string } = {
+			success: false,
+			status: response.status,
+		};
+		if (errorBody.error !== undefined) failure.error = errorBody.error;
+		return failure;
+	}
+	return { success: true, status: response.status };
+}
+
+/**
+ * Permanently deletes a private skill by id via `DELETE /api/skills/[id]`.
+ * Attaches the `AI_RULES_SECRET` env var as the `x-ai-rules-secret` header when set.
+ * Returns a structured result instead of throwing — callers decide how to surface failure.
+ * @param id - The private skill's permanent id
+ * @returns Object with success flag, HTTP status, and optional error string from the server
+ */
+export async function skillDelete(id: string): Promise<{ success: boolean; status: number; error?: string }> {
+	const secret = process.env.AI_RULES_SECRET;
+	const response = await fetch(`${API_BASE_URL}/api/skills/${id}`, {
+		method: "DELETE",
+		headers: { ...(secret ? { [SECRET_HEADER]: secret } : {}) },
+	});
+	if (!response.ok) {
+		const errorBody = (await response.json().catch(() => ({}))) as { error?: string };
+		const failure: { success: false; status: number; error?: string } = {
+			success: false,
+			status: response.status,
+		};
+		if (errorBody.error !== undefined) failure.error = errorBody.error;
+		return failure;
+	}
+	return { success: true, status: response.status };
+}
+
+/** A single private skill summary as returned by `GET /api/skills` (list, not full content). */
+export interface PrivateSkillSummary {
+	id: string;
+	name: string;
+	agent: string;
+	scopes: string[];
+	description?: string;
+}
+
+/**
+ * Lists all private skills across every scope via `GET /api/skills`.
+ * Attaches the `AI_RULES_SECRET` env var as the `x-ai-rules-secret` header when set.
+ * Returns a structured result instead of throwing — callers decide how to surface failure.
+ * @returns Object with success flag, HTTP status, optional error string, and the skill list on success
+ */
+export async function skillList(): Promise<{
+	success: boolean;
+	status: number;
+	error?: string;
+	data?: PrivateSkillSummary[];
+}> {
+	const secret = process.env.AI_RULES_SECRET;
+	const response = await fetch(`${API_BASE_URL}/api/skills`, {
+		headers: { ...(secret ? { [SECRET_HEADER]: secret } : {}) },
+	});
+	if (!response.ok) {
+		const errorBody = (await response.json().catch(() => ({}))) as { error?: string };
+		const failure: { success: false; status: number; error?: string } = {
+			success: false,
+			status: response.status,
+		};
+		if (errorBody.error !== undefined) failure.error = errorBody.error;
+		return failure;
+	}
+	const data = (await response.json()) as PrivateSkillSummary[];
+	return { success: true, status: response.status, data };
+}
+
 /**
  * Fetches the workspace's canonical KB memories via `GET /api/kb/memories`. This is a standalone
  * fetch that BYPASSES the rules cache (memories are a separate endpoint and must always be fresh on
@@ -372,6 +478,46 @@ export async function kbGet(id: string): Promise<KbDocResult | null> {
 	if (response.status === 404) return null;
 	if (!response.ok) throw new Error(`KB get failed: ${response.status} ${response.statusText}`);
 	return (await response.json()) as KbDocResult;
+}
+
+/** Partial fields for `PATCH /api/kb/[id]` — any subset may be sent; omitted keys are left untouched. */
+export interface KbUpdateFields {
+	title?: string;
+	body?: string;
+	scope?: string[];
+}
+
+/**
+ * Partially updates a KB doc by id via `PATCH /api/kb/[id]`. Only the keys present on `fields`
+ * are sent, so omitted fields are left untouched server-side.
+ * @param id - The document's hex ObjectId
+ * @param fields - The subset of fields to update
+ * @returns `false` when no document has that id (404), `true` on success; throws on other non-ok
+ */
+export async function kbUpdate(id: string, fields: KbUpdateFields): Promise<boolean> {
+	const response = await fetch(`${KB_BASE_URL}/${id}`, {
+		method: "PATCH",
+		headers: { "Content-Type": "application/json", ...kbAuthHeaders() },
+		body: JSON.stringify(fields),
+	});
+	if (response.status === 404) return false;
+	if (!response.ok) throw new Error(`KB update failed: ${response.status} ${response.statusText}`);
+	return true;
+}
+
+/**
+ * Permanently deletes a KB doc by id via `DELETE /api/kb/[id]` (canonical or draft).
+ * @param id - The document's hex ObjectId
+ * @returns `false` when no document has that id (404), `true` on success; throws on other non-ok
+ */
+export async function kbDelete(id: string): Promise<boolean> {
+	const response = await fetch(`${KB_BASE_URL}/${id}`, {
+		method: "DELETE",
+		headers: kbAuthHeaders(),
+	});
+	if (response.status === 404) return false;
+	if (!response.ok) throw new Error(`KB delete failed: ${response.status} ${response.statusText}`);
+	return true;
 }
 
 /**
