@@ -14,16 +14,16 @@
     "workflow",
     "agent-guidance"
   ],
-  "description": "Always-loaded policy for the shared knowledge base: retrieve relevant canonical knowledge with the `npx @quanvo99/ai-rules@latest kb search` command before non-trivial work and cite it, capture worthwhile non-trivial knowledge afterward with the matching `npx @quanvo99/ai-rules@latest kb capture` command (question/til/blueprint), use `npx @quanvo99/ai-rules@latest kb capture memory` sparingly for tiny always-true project facts, and treat every capture as a draft pending human review rather than canonical knowledge",
+  "description": "Always-loaded policy for the shared knowledge base: retrieve relevant canonical knowledge before non-trivial work and cite it, capture worthwhile or generalizable non-trivial knowledge afterward, use memory sparingly for tiny always-true project facts, and treat every capture as a draft pending human review rather than canonical knowledge. The `kb` CLI command mechanics live in the knowledge-base skill.",
   "version": "1.0.0",
-  "lastUpdated": "2026-06-17T00:00:00Z",
+  "lastUpdated": "2026-07-13T00:00:00Z",
   "activation": {
     "mode": "always"
   },
   "files": [
     {
       "path": "knowledge-base.md",
-      "description": "Concise always-loaded rule: retrieve-first via `npx @quanvo99/ai-rules@latest kb search` and cite, capture-when-worthwhile via `npx @quanvo99/ai-rules@latest kb capture question/til/blueprint`, memory sparingly for always-true facts, drafts are not canonical",
+      "description": "Concise always-loaded policy: retrieve-first and cite, capture what generalizes, memory sparingly for always-true facts, drafts are not canonical; commands live in the knowledge-base skill",
       "targetPath": "knowledge-base.md",
       "required": true
     }
