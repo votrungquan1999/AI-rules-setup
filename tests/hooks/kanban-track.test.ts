@@ -22,7 +22,7 @@ const NO_POINTER_REMINDER =
 function activeCardReminder(cardNumber: number, summary: string): string {
 	return (
 		`Active AI-Kanban card #${cardNumber} (${summary}). ` +
-		"If this prompt diverges into a new task, open a NEW card; otherwise append progress to this card."
+		"Append progress to THIS card. Open a new card only if the work has genuinely diverged into a distinct task — create_card with forceNew:true."
 	);
 }
 
