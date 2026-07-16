@@ -18,8 +18,7 @@ Read all workflow state files:
 1. **Count completed steps** from `<ws>/PLAN_STEPS.md` (all with status `done`)
 2. **Gather quality gate results** from all quality checkpoints
 3. **List all files changed** across all steps
-4. **Run the full test suite** one final time to confirm everything passes
-5. **Run linting** to check for any remaining issues
+4. **Aggregate test/lint status** from what the run already recorded — each BDD step ran its own tests test-first and the quality gates re-ran the recent steps' tests, so the suite is already green. Do **not** re-run the whole project's test suite or lint the whole project here; it's slow and redundant. Only if a state file flags an unresolved failure, note it (and at most re-run that one step's tests).
 
 ## Output
 
@@ -46,9 +45,8 @@ Present to the user:
 [From `<ws>/DECISIONS.md` — each point where 2+ viable options existed and one was chosen. Omit this section only if the decision log is empty.]
 - [choice]: chose [option] over [alternative(s)] — [why]
 
-## Test Results
-- Total tests: [count]
-- All passing: [yes/no]
+## Test/Lint Status
+- [From per-step results + quality gates — e.g. "all step tests green; lint clean per last quality gate". Flag any unresolved failure a state file recorded.]
 
 ## Files Changed
 - [file1]: [brief description]

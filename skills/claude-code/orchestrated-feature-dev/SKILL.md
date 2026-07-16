@@ -115,7 +115,7 @@ Present combined results.
 
 ## Phase 6: Summary
 
-Spawn `node-summary.md` (reads the state files, runs the full suite + lint) → complete summary with steps, quality gates, conformance + adversarial results, tests, files changed, key decisions. Present it.
+Spawn `node-summary.md` (reads the state files, aggregates the test/lint status already recorded — no full-project re-run) → complete summary with steps, quality gates, conformance + adversarial results, tests, files changed, key decisions. Present it.
 
 ## Error Handling
 
