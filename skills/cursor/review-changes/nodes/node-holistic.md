@@ -47,6 +47,10 @@ Compare the change against your mental model:
 
 This evaluation is holistic and is NOT repeated by any lens — it lives only here.
 
+### 6. Perf-sensitivity signal (gate)
+
+The orchestrator runs the **performance** lens only if you flag the change perf-sensitive. Answer **yes** if the diff touches any of: new/changed loops (especially nested or over unbounded collections); DB/ORM/network/IO calls (especially inside a loop → N+1); data-structure or algorithm choice on non-trivial `n` (sort/search/dedup/recursion/regex on user input); hot paths (request handlers, middleware, serializers, render paths, event-loop callbacks); memory (unbounded accumulation, large copies, uncleaned listeners/timers); **removal** of an existing optimization (memo/index/cache/batch/`LIMIT`/pagination/virtualization); or frontend render frequency, effect deps, un-virtualized lists, or bundle-size-adding imports. Answer **no** for config/docs/type-only/test-only diffs and one-time cold-path scripts with bounded input. When genuinely uncertain, prefer **yes** — the lens is cheap; a missed regression is not.
+
 ## Output
 
 Write `./tmp/review-changes/HOLISTIC.md`:
@@ -73,6 +77,9 @@ Write `./tmp/review-changes/HOLISTIC.md`:
 
 ## Approach Evaluation
 [Root cause vs symptom, layer, alternatives, complexity, trade-offs, verdict]
+
+## Perf-Sensitive
+[yes | no] — [one line: the perf-sensitive surface the diff touches, or why none]
 
 ## Overall Risk Level
 [low | medium | high] — [one line]

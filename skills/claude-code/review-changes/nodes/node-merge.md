@@ -62,7 +62,7 @@ Write the complete review to `<ws>/review-changes.md` (one level above the inter
 - **Severity**: MUST FIX / SHOULD FIX / NIT
 - **Confidence**: [80–100]
 - **Verified**: confirmed (went through verification) / trusted (lens confirmed it, no check needed) / unverified (UNCERTAIN after a check)
-- **Lens**: [correctness / security / quality / tests]
+- **Lens**: [correctness / security / quality / tests / performance]
 - **Description**: [What's wrong]
 - **Failure mode**: [Concrete trigger → behavior → harm, OR "No distinct failure mode — <maintainability/readability> concern". Never a vague restatement.]
 - **Why it matters**: [Impact/risk — the magnitude, given the failure mode above]

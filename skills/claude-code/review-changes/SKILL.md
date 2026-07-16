@@ -1,6 +1,6 @@
 ---
 name: review-changes
-description: Senior engineer code review analyzing diffs for correctness, security, edge cases, and best practices with severity-based findings. Use when reviewing code, checking changes, or when user says "review my changes", "code review", "review this diff", or "check my code".
+description: Senior engineer code review analyzing diffs for correctness, security, performance, edge cases, and best practices with severity-based findings. Use when reviewing code, checking changes, or when user says "review my changes", "code review", "review this diff", or "check my code".
 ---
 
 # Review Changes
@@ -24,7 +24,7 @@ Resolve the target from the conversation, then get these right — each is a com
 Order and who-runs-each — the source of truth for the *flow*. Models live in **Model Selection**, paths in **Workspace**, per-phase detail in the `nodes/` files; point every lens/verifier subagent at its matching node file.
 
 1. **holistic** — sub-agent → `HOLISTIC.md` + eligibility verdict
-2. **gate** — which lenses apply? (by what the diff touches)
+2. **gate** — which lenses apply? (by what the diff touches, plus holistic's perf-sensitive signal)
 3. **lenses** — parallel subagents
 4. **gate** — which findings did the lenses report as `Needs verification: yes`?
 5. **verify** flagged findings — parallel subagents
@@ -47,7 +47,7 @@ You MUST NOT:
 
 The `Agent` tool accepts a per-call `model` parameter (`"haiku" | "sonnet" | "opus"`).
 - **holistic, merge** → omit `model` (session default / strongest). Holistic sets the shared framing every lens trusts; merge does the scoring and final judgment — neither should be discounted.
-- **correctness, quality, tests** → `model: "sonnet"` — focused, mostly mechanical lens work.
+- **correctness, quality, tests, performance** → `model: "sonnet"` — focused, mostly mechanical lens work (performance traces magnitude across files, but the judgment stays mechanical).
 - **security** → omit `model` (use the session default / strongest available). Cheap security review gives false confidence; this is the one lens not to discount. It also needs to trace data flow *across* files, not just read the diff.
 - **verifiers** → `model: "sonnet"` by default, but **omit `model` for any batch containing a security finding** — verifying a security claim cheaply gives the same false confidence as reviewing it cheaply.
 
@@ -59,14 +59,14 @@ Establish `<ws>` = `./tmp/<identifier>/` first (identifier = branch name, PR/MR 
 
 ## Phase 1: Holistic (sub-agent)
 
-Spawn `node-holistic.md`. It reads the diff, writes `HOLISTIC.md` (shared context for the lenses), and returns an **eligibility verdict**. Gate on it:
+Spawn `node-holistic.md`. It reads the diff, writes `HOLISTIC.md` (shared context for the lenses), and returns an **eligibility verdict** plus a **`Perf-sensitive: yes/no`** signal. Gate the pipeline on the eligibility verdict; hold the perf-sensitive signal for the Phase 2 lens gate.
 - **stop** (no changes) → relay and finish.
 - **single-inline-pass** (trivial diff) → it already wrote the final `<ws>/review-changes.md`; relay its summary and finish.
 - **proceed-with-fan-out** → continue.
 
 ## Phase 2: Lens gate
 
-Pick lenses by what the diff touches — don't always run all four. **correctness, quality, security** → always; **tests** → only if the diff touches test files. State which and why before spawning.
+Pick lenses by what the diff touches — don't always run all of them. **correctness, quality, security** → always; **tests** → only if the diff touches test files; **performance** → only if holistic reported `Perf-sensitive: yes`. State which and why before spawning.
 
 ## Phase 3: Lenses (parallel)
 

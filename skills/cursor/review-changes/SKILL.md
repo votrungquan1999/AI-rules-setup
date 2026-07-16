@@ -10,8 +10,8 @@ Orchestrate a code review as a lightweight **fan-out → verify → merge** pipe
 ## Pipeline
 
 1. **holistic** — inline, strong model: eligibility + summary + approach-eval
-2. **gate** — which lenses apply? (by what the diff touches)
-3. **lenses** — correctness / quality / security / tests, parallel subagents
+2. **gate** — which lenses apply? (by what the diff touches, plus holistic's perf-sensitive signal)
+3. **lenses** — correctness / quality / security / tests / performance, parallel subagents
 4. **gate** — which findings are flagged `Needs verification: yes`?
 5. **verify** flagged findings — parallel subagents
 6. **merge** — inline: apply verdicts → confidence-score → filter → dedupe → severity → `<ws>/review-changes.md`
@@ -27,7 +27,7 @@ Establish a task identifier first — the branch name under review, the PR/MR nu
 ## Orchestrator Responsibilities
 
 - Run the holistic phase **inline on the strong model** — it needs the whole picture and produces the framing every lens depends on.
-- Spawn lens subagents **in parallel**; pass each its node file + `HOLISTIC.md`. Use a smaller model for correctness/quality/tests; keep **security on the strong model** (cheap security review gives false confidence, and it must trace data flow across files).
+- Spawn lens subagents **in parallel**; pass each its node file + `HOLISTIC.md`. Use a smaller model for correctness/quality/tests/performance; keep **security on the strong model** (cheap security review gives false confidence, and it must trace data flow across files).
 - Spawn verifier subagents **only** for findings flagged `Needs verification: yes`; trust the rest. Keep a verifier batch on the strong model if it contains a security finding.
 - Merge **inline**: apply verdicts, score, filter, dedupe, write the report yourself.
 - Never output the raw diff, and never comment on code outside the diff.
@@ -36,7 +36,7 @@ Establish a task identifier first — the branch name under review, the PR/MR nu
 
 - `nodes/node-holistic.md` — run inline (Phase 1)
 - `nodes/lens-common.md` — shared lens rules (every lens reads this)
-- `nodes/node-lens-correctness.md`, `node-lens-quality.md`, `node-lens-security.md`, `node-lens-tests.md`
+- `nodes/node-lens-correctness.md`, `node-lens-quality.md`, `node-lens-security.md`, `node-lens-tests.md`, `node-lens-performance.md`
 - `nodes/node-verify.md` — verify flagged findings
 
 ## Step 0 — Work in the right repo, against a fresh base
@@ -70,8 +70,8 @@ Scope: branch/PR → committed since `$BASE`; uncommitted → also `git status -
 
 ## Phases
 
-1. **Holistic (inline).** Run `node-holistic.md` from inside the repo, against `$BASE` from Step 0: eligibility (empty/trivial diff -> say so and stop, or do a single inline pass and skip the fan-out), changes summary, approach evaluation. Write `HOLISTIC.md`. **Gate:** if eligibility stops the review, stop.
-2. **Lens gate.** Always run correctness, quality, security; run tests only if the diff adds/modifies test files. State which lenses and why before spawning.
+1. **Holistic (inline).** Run `node-holistic.md` from inside the repo, against `$BASE` from Step 0: eligibility (empty/trivial diff -> say so and stop, or do a single inline pass and skip the fan-out), changes summary, approach evaluation, and a `Perf-sensitive: yes/no` signal. Write `HOLISTIC.md`. **Gate:** if eligibility stops the review, stop; otherwise hold the perf-sensitive signal for the lens gate.
+2. **Lens gate.** Always run correctness, quality, security; run tests only if the diff adds/modifies test files; run performance only if holistic flagged `Perf-sensitive: yes`. State which lenses and why before spawning.
 3. **Lenses (parallel subagents).** Each reads its node file + `lens-common.md` + `HOLISTIC.md`, sees the changes via `git diff "$BASE"` from inside the repo, reviews ONLY the diff, writes `LENS_<name>.md`, and reports finding count + highest severity.
 4. **Verification (parallel subagents).** Lenses are **trusted by default**. Verify only findings marked `Needs verification: yes` — the lens flagged something it couldn't confirm from the diff alone (behavior outside the diff, a caller's actual input, a runtime assumption, a guard that may exist elsewhere). Batch 2-4 flagged findings by shared file; each verifier resolves the flagged uncertainty against the real code and writes `VERDICT_<batch>.md`. Skip the phase entirely if nothing is flagged.
 5. **Merge (inline).** Apply verdicts — REFUTED -> drop; CONFIRMED -> keep with the verifier's adjusted severity; UNCERTAIN -> score conservatively (usually falls below the filter); trusted (never-flagged) findings -> carry through as-is. Then score each survivor 0-100 for "real, in-scope issue", **drop everything < 80**, dedupe by file+line (keep highest severity), normalize severity. Write `<ws>/review-changes.md`. If nothing survives, say the changes look good.

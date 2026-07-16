@@ -15,6 +15,7 @@ Your prompt lists a batch of findings (each: lens, `file:line`, claimed severity
    - Is the cited line part of the diff, or pre-existing? (pre-existing → **REFUTE** as out of scope)
    - Would a linter / typechecker / compiler already catch it? (→ **REFUTE**)
    - Is it already handled elsewhere — a guard, a caller-side check, framework behavior? (→ **REFUTE** or downgrade)
+   - For a **performance** finding, confirm the **magnitude assumption** — `n` really unbounded, path really hot — not merely that the code runs. If magnitude can't be confirmed from the code, return **UNCERTAIN**; unmeasurable perf speculation must not survive.
 3. Assign a verdict:
    - **CONFIRMED** — you traced the path and the issue genuinely holds.
    - **REFUTED** — false positive, out of scope, pre-existing, already handled, or CI would catch it.

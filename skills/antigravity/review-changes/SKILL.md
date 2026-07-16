@@ -1,6 +1,6 @@
 ---
 name: review-changes
-description: Senior engineer code review that inspects a diff through correctness, security, quality, and test lenses in sequence, then reports confidence-scored, severity-ranked findings. Use when reviewing code, checking changes, or when the user says "review my changes", "code review", "review this diff", or "check my code".
+description: Senior engineer code review that inspects a diff through correctness, security, quality, performance, and test lenses in sequence, then reports confidence-scored, severity-ranked findings. Use when reviewing code, checking changes, or when the user says "review my changes", "code review", "review this diff", or "check my code".
 ---
 
 # Review Changes
@@ -74,13 +74,14 @@ Which lenses apply — run only these, one at a time:
 - **quality** — always
 - **security** — always
 - **tests** — only if the diff adds or modifies test files
+- **performance** — only if the change is perf-sensitive: it touches loops, DB/network/IO calls, data-structure/algorithm choice on non-trivial `n`, hot paths (request/render/event-loop), memory, or removes an existing optimization (index/memo/cache/batch/`LIMIT`/pagination). Skip for config/docs/type-only/test-only or one-time cold-path code.
 
 For each lens, review the diff for the criteria below. **Shared discipline for every lens:** review ONLY the code in the diff (the security lens may read across files to trace data flow, but the finding must still concern diff'd code); assume intent is correct unless there's clear risk; and for every finding give a concrete **failure mode** (see Report). State which lenses you're running and why before starting.
 
 **Correctness — review the diff for logic and behavioral defects:**
 - Logic bugs: off-by-one, inverted conditions, wrong operators, incorrect control flow; state mutated wrongly, stale reads, bad ordering assumptions.
 - Edge cases & error handling: null/undefined/empty inputs, empty collections, boundary values; failure paths handled vs. silently falling through; concurrency / races / async ordering where relevant.
-- Performance regressions **introduced by the change**: obviously inefficient algorithms, N+1 queries, work inside hot loops.
+- Performance is **out of scope here** — the performance lens owns it. Raise a perf issue in correctness only if it also produces a *wrong result* (e.g. a timeout silently dropping data), not mere slowness.
 
 **Quality — review the diff for code quality and standards:**
 - Naming (clear, descriptive), structure (logical flow), duplication (only flag at 3+ repetitions), comments (present for genuinely complex logic, accurate, not noise), typing (no unjustified `any`).
@@ -94,6 +95,10 @@ For each lens, review the diff for the criteria below. **Shared discipline for e
 - Coverage of the change (do tests exercise what was added/modified?), edge cases (not just happy path), sensitivity (would the test actually fail if the code broke? flag over-mocked tests or ones asserting on mocks), validity (assertions check real behavior), resilience (tests go through public interfaces, not brittle internals).
 - For a deep pass, defer to `@test-quality-reviewer` (4 Pillars) rather than duplicating its analysis.
 
+**Performance (only if perf-sensitive) — review the diff for performance regressions it introduces.** Like security, you may read across files, but only to establish **magnitude**: is the path hot (per-request/render/item vs one-time/cold) and is `n` unbounded? Anchor to the change — cost before vs after. A finding without magnitude is a NIT; drop it. You can't benchmark a diff, so when magnitude depends on runtime data you can't see, state the finding conditionally or mark it unverified — never invent numbers.
+- Algorithmic complexity (nested loops / repeated scans over unbounded `n`, accidental quadratics like `includes` in a loop); data access & I/O (N+1, per-item DB/network calls in a loop, missing batching/pagination, blocking the event loop); memory & allocation (unbounded growth, large copies, leaks); redundant work (recompute that could be hoisted/memoized); frontend rendering (needless re-renders, un-virtualized lists, bundle-size regressions); regression by removal (the diff deletes an index/memo/cache/batch/`LIMIT`/pagination).
+- **Severity**: MUST FIX for unbounded growth/OOM, timeout/DoS on realistic input, N+1 on a hot path at real scale, blocking the event loop; SHOULD FIX for bounded degradation; NIT for micro-opts with no magnitude. **Don't flag**: premature optimization on cold paths, bounded-small `n`, patterns the runtime/DB planner already optimizes, or readability-costing micro-opts. If attacker-triggerable (ReDoS, complexity DoS), note the security/DoS angle too.
+
 ---
 
 ## Step 3 — Verify what you couldn't confirm
@@ -102,6 +107,7 @@ Most findings you can confirm from what you read while reviewing — trust those
 - If the chain holds → keep it as **confirmed**.
 - If a guard, caller-side check, framework behavior, or unreachable trigger breaks the chain, or the line is pre-existing / CI-caught → drop it.
 - If it's plausible but you still can't confirm → keep as a candidate marked **unverified** and score it conservatively in Step 4.
+- For a **performance** finding, confirming means the magnitude holds — `n` really unbounded, path really hot. If you can't confirm magnitude from the code, keep it **unverified**, not confirmed.
 
 ---
 
@@ -140,7 +146,7 @@ Write the complete review to `<ws>/review-changes.md`:
 - **Severity**: MUST FIX / SHOULD FIX / NIT
 - **Confidence**: [80–100]
 - **Verified**: confirmed (re-checked against real code) / trusted (confirmed while reviewing, no check needed) / unverified (still uncertain after a check)
-- **Lens**: correctness / security / quality / tests
+- **Lens**: correctness / security / quality / tests / performance
 - **Description**: [What's wrong]
 - **Failure mode**: [Concrete trigger → behavior → harm, OR "No distinct failure mode — <maintainability/readability> concern". Never a vague restatement like "could cause bugs".]
 - **Why it matters**: [Impact/risk — the magnitude, given the failure mode above]
