@@ -1,7 +1,7 @@
 ---
 name: ai-kanban-track-session
 description: Auto-tracks the current operator's (coding agent, non-coding agent, or human) substantive, multi-step work as a self-owned AI-Kanban card — create the card in progress (tagged from whatever scope is available, session id included only when one exists), append concise progress notes as the work advances, and hand it to review when done. Trigger automatically at the start of any substantive multi-step task, or when the user types "/ai-kanban-track-session", says "track this on the board", or "open a card for this work".
-allowed-tools: Bash, mcp__ai-kanban-dispatch__create_card, mcp__ai-kanban-dispatch__append_progress, mcp__ai-kanban-dispatch__set_status, mcp__ai-kanban-dispatch__get_card_context
+allowed-tools: Bash, mcp__ai-kanban-dispatch__create_card, mcp__ai-kanban-dispatch__append_progress, mcp__ai-kanban-dispatch__append_decision, mcp__ai-kanban-dispatch__mark_decision_outdated, mcp__ai-kanban-dispatch__set_status, mcp__ai-kanban-dispatch__get_card_context
 ---
 
 # AI-Kanban: Track This Session
