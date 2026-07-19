@@ -19,8 +19,16 @@ describe("ai-kanban-work-card skill", () => {
 		expect(skill).toContain("description:");
 		expect(skill).toMatch(/allowed-tools:/);
 
-		// allowed-tools covers the four dispatch tools + the shell (tolerate mcp__ prefix)
-		for (const tool of ["claim_card", "get_card_context", "set_status", "set_workspace"]) {
+		// allowed-tools covers the seven dispatch tools + the shell (tolerate mcp__ prefix)
+		for (const tool of [
+			"claim_card",
+			"get_card_context",
+			"set_status",
+			"set_workspace",
+			"append_progress",
+			"append_decision",
+			"mark_decision_outdated",
+		]) {
 			expect(skill).toContain(tool);
 		}
 		expect(skill).toContain("Bash");
@@ -54,5 +62,6 @@ describe("ai-kanban-work-card skill", () => {
 		expect(work).toContain("set_status");
 		expect(work).toContain("need_review");
 		expect(work.toLowerCase()).toContain("park");
+		expect(work).toContain("append_decision");
 	});
 });
