@@ -16,8 +16,8 @@ const HOOK_JSON_PATH = join(ARTIFACT_DIR, "hook.json");
  * wording change is a deliberate, visible test update rather than a silent pass. */
 function specNudge(specPath: string): string {
 	return (
-		`Code changed this session but ${specPath} wasn't touched. ` +
-		"If this work changed feature behavior, update the living spec before wrapping up."
+		`This session is tracked against the living spec ${specPath}. ` +
+		"If you changed feature behavior, update that spec before wrapping up."
 	);
 }
 
@@ -111,7 +111,7 @@ describe("spec-reminder hook (shipped artifact)", () => {
 		expect(stdout).toBe("");
 	});
 
-	it("sentinel present, git tree clean -> no nudge", async () => {
+	it("sentinel present, git tree clean -> still nudges (advisory, no change-detection)", async () => {
 		makeHome();
 		repo = makeGitRepo();
 		writeSentinelFixture(home, "sess-clean", {
@@ -126,40 +126,24 @@ describe("spec-reminder hook (shipped artifact)", () => {
 
 		expect(exitCode).toBe(0);
 		expect(stderr).toBe("");
-		expect(stdout).toBe("");
+		const output = JSON.parse(stdout);
+		expect(output.hookSpecificOutput.hookEventName).toBe("Stop");
+		expect(output.hookSpecificOutput.additionalContext).toBe(specNudge("docs/features/my-feature/spec.md"));
 	});
 
-	it("sentinel present, git tree dirty, spec path IS among changed files -> no nudge", async () => {
+	// Regression guard for the false-positive fix: the spec often lives outside the code's git
+	// repo (cross-repo / monorepo-root specs). The hook must nudge on the sentinel alone and never
+	// consult git — a cwd with no git repo at all must still produce the nudge, not silence.
+	it("sentinel present, cwd is not a git repo -> still nudges (hook never touches git)", async () => {
 		makeHome();
-		repo = makeGitRepo();
-		writeSentinelFixture(home, "sess-spec-touched", {
+		writeSentinelFixture(home, "sess-no-repo", {
 			slug: "my-feature",
 			specPath: "docs/features/my-feature/spec.md",
 		});
-		mkdirSync(join(repo, "docs", "features", "my-feature"), { recursive: true });
-		writeFileSync(join(repo, "docs", "features", "my-feature", "spec.md"), "# My Feature\n");
+		const nonRepoCwd = join(tmpdir(), `spec-reminder-missing-${Date.now()}`);
 
 		const { stdout, stderr, exitCode } = await runHook(
-			{ session_id: "sess-spec-touched", hook_event_name: "Stop", cwd: repo },
-			{ HOME: home },
-		);
-
-		expect(exitCode).toBe(0);
-		expect(stderr).toBe("");
-		expect(stdout).toBe("");
-	});
-
-	it("sentinel present, git tree dirty, spec path NOT among changed files -> nudge emitted", async () => {
-		makeHome();
-		repo = makeGitRepo();
-		writeSentinelFixture(home, "sess-spec-untouched", {
-			slug: "my-feature",
-			specPath: "docs/features/my-feature/spec.md",
-		});
-		writeFileSync(join(repo, "src-change.js"), "console.log('changed');\n");
-
-		const { stdout, stderr, exitCode } = await runHook(
-			{ session_id: "sess-spec-untouched", hook_event_name: "Stop", cwd: repo },
+			{ session_id: "sess-no-repo", hook_event_name: "Stop", cwd: nonRepoCwd },
 			{ HOME: home },
 		);
 
@@ -168,26 +152,6 @@ describe("spec-reminder hook (shipped artifact)", () => {
 		const output = JSON.parse(stdout);
 		expect(output.hookSpecificOutput.hookEventName).toBe("Stop");
 		expect(output.hookSpecificOutput.additionalContext).toBe(specNudge("docs/features/my-feature/spec.md"));
-	});
-
-	it("cwd is not a git repo -> exits 0, no throw, no nudge (defensive fallback)", async () => {
-		makeHome();
-		writeSentinelFixture(home, "sess-not-a-repo", {
-			slug: "my-feature",
-			specPath: "docs/features/my-feature/spec.md",
-		});
-		// A path that doesn't exist at all guarantees `git status` fails deterministically,
-		// regardless of whether the OS temp dir happens to sit inside some ancestor git repo.
-		const missingCwd = join(tmpdir(), `spec-reminder-missing-${Date.now()}`);
-
-		const { stdout, stderr, exitCode } = await runHook(
-			{ session_id: "sess-not-a-repo", hook_event_name: "Stop", cwd: missingCwd },
-			{ HOME: home },
-		);
-
-		expect(exitCode).toBe(0);
-		expect(stderr).toBe("");
-		expect(stdout).toBe("");
 	});
 
 	it("hook.json's settingsFragment matches Claude Code's nested Stop schema and targets the shipped script", () => {

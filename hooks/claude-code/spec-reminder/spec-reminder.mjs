@@ -1,12 +1,13 @@
 #!/usr/bin/env node
-// Claude Code Stop hook: nudges (never blocks) when a feature-dev session changed code but
-// left the living spec untouched. Reads the hook JSON on stdin, checks a session-scoped
-// sentinel the feature-dev skill drops at Phase 0, and — only when the sentinel is present,
-// the git tree is dirty, and the sentinel's spec path is NOT among the changed paths — emits
-// an additionalContext nudge. Always exits 0 — exit 2 on Stop would block the session from
-// ending.
+// Claude Code Stop hook: on a feature-dev session, nudges (never blocks) to update the living
+// spec before wrapping up. Reads the hook JSON on stdin and a session-scoped sentinel the
+// feature-dev skill drops at Phase 0; when the sentinel is present it emits an advisory
+// additionalContext nudge. It deliberately does NOT inspect git — a git diff can't tell whether
+// a spec-worthy behavior change happened, and comparing the sentinel's spec path against
+// git-tracked changes produced unsatisfiable false positives whenever the spec lived outside the
+// code's git repo (cross-repo / monorepo-root specs). Always exits 0 — exit 2 on Stop would block
+// the session from ending.
 
-import { execSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -37,33 +38,10 @@ function readSentinel(sessionId) {
   }
 }
 
-// Repo-relative changed paths from `git status --porcelain` in cwd, or null if the command
-// fails (git missing, cwd not a repo) — treated as "can't determine, stay silent".
-// --untracked-files=all: a brand-new spec.md typically lives in a brand-new
-// docs/features/<slug>/ directory; without this flag git collapses the whole untracked
-// directory into a single "?? docs/" line instead of listing the leaf file.
-function changedPaths(cwd) {
-  try {
-    const output = execSync("git status --porcelain --untracked-files=all", { cwd, encoding: "utf8" });
-    return output
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .map((line) => {
-        const withoutStatus = line.slice(3);
-        // Renames report as "old -> new"; the new path is what matters for "was it touched".
-        const arrowIndex = withoutStatus.indexOf(" -> ");
-        return arrowIndex === -1 ? withoutStatus : withoutStatus.slice(arrowIndex + 4);
-      });
-  } catch {
-    return null;
-  }
-}
-
 function buildNudge(specPath) {
   return (
-    `Code changed this session but ${specPath} wasn't touched. ` +
-    "If this work changed feature behavior, update the living spec before wrapping up."
+    `This session is tracked against the living spec ${specPath}. ` +
+    "If you changed feature behavior, update that spec before wrapping up."
   );
 }
 
@@ -86,18 +64,7 @@ async function main() {
 
   const sentinel = readSentinel(input.session_id);
   if (!sentinel) {
-    process.exit(0);
-    return;
-  }
-
-  const changed = changedPaths(input.cwd);
-  if (!changed || changed.length === 0) {
-    process.exit(0); // clean tree, or git status couldn't be determined — nothing to nudge about
-    return;
-  }
-
-  if (changed.includes(sentinel.specPath)) {
-    process.exit(0); // the living spec was already part of this session's changes
+    process.exit(0); // not a feature-dev session — stay silent
     return;
   }
 
@@ -106,6 +73,6 @@ async function main() {
 }
 
 // Belt-and-suspenders: an unexpected error must never crash the hook or exit non-zero
-// (exit 2 on Stop blocks the session from ending) — per-function try/catches already cover
-// the known failure modes; this is the final backstop.
+// (exit 2 on Stop blocks the session from ending) — readSentinel already covers the known
+// failure modes; this is the final backstop.
 main().catch(() => process.exit(0));

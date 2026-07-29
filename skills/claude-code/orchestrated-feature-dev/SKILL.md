@@ -56,7 +56,7 @@ Ask for a task identifier (or derive a kebab-case slug from the request and conf
 
 The identifier doubles as the `<slug>` for the feature's living spec (`docs/features/<slug>/spec.md`, written at Phase 6). If a spec already exists for this `<slug>`, skim it first as recall context — this run **updates** that same living spec rather than starting fresh.
 
-**Drop the spec-reminder sentinel (best-effort).** Write `{ slug, specPath: "docs/features/<slug>/spec.md" }` to `~/.claude/spec-reminder-state/$CLAUDE_CODE_SESSION_ID.json`. This is what the `spec-reminder` Stop hook reads to nudge if code changes this session but the living spec doesn't. Skip silently if `$CLAUDE_CODE_SESSION_ID` is unset.
+**Drop the spec-reminder sentinel (best-effort).** Write `{ slug, specPath: "docs/features/<slug>/spec.md" }` to `~/.claude/spec-reminder-state/$CLAUDE_CODE_SESSION_ID.json`. This is what the `spec-reminder` Stop hook reads to nudge you, at session end, to update the living spec before wrapping up. Skip silently if `$CLAUDE_CODE_SESSION_ID` is unset.
 
 ## Phase 1: Research (convergence loop)
 

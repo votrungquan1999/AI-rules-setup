@@ -1,5 +1,5 @@
 {
-  "description": "Non-blocking Stop-hook nudge: reminds the model to update the living spec when a feature-dev session changed code but left docs/features/<slug>/spec.md untouched.",
+  "description": "Non-blocking Stop-hook nudge: on a feature-dev session (per the session sentinel) reminds the model to update the living spec docs/features/<slug>/spec.md before wrapping up. Advisory only — does not inspect git.",
   "event": "Stop",
   "script": "spec-reminder.mjs",
   "settingsFragment": {
