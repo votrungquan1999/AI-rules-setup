@@ -23,8 +23,8 @@ Resolve the target from the conversation, then get these right — each is a com
 
 Order and who-runs-each — the source of truth for the *flow*. Models live in **Model Selection**, paths in **Workspace**, per-phase detail in the `nodes/` files; point every lens/verifier subagent at its matching node file.
 
-1. **holistic** — sub-agent → `HOLISTIC.md` + eligibility verdict
-2. **gate** — which lenses apply? (by what the diff touches, plus holistic's perf-sensitive signal)
+1. **holistic** — sub-agent → `HOLISTIC.md` + eligibility verdict + per-lens applicability
+2. **gate** — spawn only the lenses holistic marked applicable (correctness is the floor)
 3. **lenses** — parallel subagents
 4. **gate** — which findings did the lenses report as `Needs verification: yes`?
 5. **verify** flagged findings — parallel subagents
@@ -55,18 +55,22 @@ The `Agent` tool accepts a per-call `model` parameter (`"haiku" | "sonnet" | "op
 
 Establish `<ws>` = `./tmp/<identifier>/` first (identifier = branch name, PR/MR number, or a short slug). If `<ws>` already holds an unrelated review's artifacts, STOP and ask. Every sub-agent gets `<ws>`: intermediates go under `<ws>/review-changes/`, the final report to `<ws>/review-changes.md`. Node files write `./tmp/review-changes/…` as shorthand for `<ws>/review-changes/…`.
 
+Holistic captures the diff once to `<ws>/review-changes/DIFF.patch`; lenses and verifiers read that file rather than each rebuilding the diff. Tell every sub-agent it exists.
+
 **Spawning convention (applies to every phase):** point the sub-agent at its `nodes/*.md` — the real instructions live there, don't restate them — and give it the repo dir, `$BASE`, and `<ws>`. Models per phase are in Model Selection above.
 
 ## Phase 1: Holistic (sub-agent)
 
-Spawn `node-holistic.md`. It reads the diff, writes `HOLISTIC.md` (shared context for the lenses), and returns an **eligibility verdict** plus a **`Perf-sensitive: yes/no`** signal. Gate the pipeline on the eligibility verdict; hold the perf-sensitive signal for the Phase 2 lens gate.
+Spawn `node-holistic.md`. It reads the diff, writes `HOLISTIC.md` (shared context for the lenses), and returns an **eligibility verdict** plus its **`## Lens Applicability`** block — a `yes`/`no` and a reason for each of the five lenses. Gate the pipeline on the eligibility verdict; hold the applicability block for the Phase 2 lens gate.
 - **stop** (no changes) → relay and finish.
 - **single-inline-pass** (trivial diff) → it already wrote the final `<ws>/review-changes.md`; relay its summary and finish.
 - **proceed-with-fan-out** → continue.
 
 ## Phase 2: Lens gate
 
-Pick lenses by what the diff touches — don't always run all of them. **correctness, quality, security** → always; **tests** → only if the diff touches test files; **performance** → only if holistic reported `Perf-sensitive: yes`. State which and why before spawning.
+Spawn exactly the lenses holistic marked `yes` in its **Lens Applicability** block — it assessed the diff, so route off its verdicts rather than re-deriving them. **correctness** is the floor and always runs; **security, quality, tests, performance** each run only on a `yes`. Do not add a lens holistic marked `no`, and do not drop one it marked `yes`.
+
+State which lenses you are running, and the reason for each skip, before spawning — a skipped lens is a gap in what the review covers, so it has to be visible.
 
 ## Phase 3: Lenses (parallel)
 

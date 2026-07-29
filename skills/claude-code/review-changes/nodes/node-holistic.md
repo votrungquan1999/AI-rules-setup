@@ -8,6 +8,7 @@ You are the **holistic sub-agent**, spawned first on the strong model. You produ
 
 Work from inside the repo the orchestrator resolved in Step 0 (the repo the conversation is about, not the launch pwd), against the fresh `$BASE` it fetched (not a stale local `main`). Run `git diff "$BASE"` (fall back to `HEAD~1` only if no base branch exists).
 - **Do NOT output the raw diff to the user.**
+- **Capture it once:** redirect the same diff to `<ws>/review-changes/DIFF.patch`. Every lens and verifier reads that file instead of rebuilding the diff themselves — without it, each of them re-runs `git diff` several times over and the review pays for the same bytes a dozen times.
 
 ### 2. Eligibility check (gate)
 
@@ -46,9 +47,25 @@ Compare the change against your mental model:
 
 This evaluation is holistic and is NOT repeated by any lens — it lives only here.
 
-### 6. Perf-sensitivity signal (gate)
+### 6. Lens applicability (gate)
 
-The orchestrator runs the **performance** lens only if you flag the change perf-sensitive. Answer **yes** if the diff touches any of: new/changed loops (especially nested or over unbounded collections); DB/ORM/network/IO calls (especially inside a loop → N+1); data-structure or algorithm choice on non-trivial `n` (sort/search/dedup/recursion/regex on user input); hot paths (request handlers, middleware, serializers, render paths, event-loop callbacks); memory (unbounded accumulation, large copies, uncleaned listeners/timers); **removal** of an existing optimization (memo/index/cache/batch/`LIMIT`/pagination/virtualization); or frontend render frequency, effect deps, un-virtualized lists, or bundle-size-adding imports. Answer **no** for config/docs/type-only/test-only diffs and one-time cold-path scripts with bounded input. When genuinely uncertain, prefer **yes** — the lens is cheap; a missed regression is not.
+The orchestrator spawns **only the lenses you mark `yes`** — this is the main cost lever, so judge each one on what the diff actually touches. **Correctness always runs**; it is the floor and needs no verdict beyond `yes`. The other four are yours to gate: give each a `yes`/`no` plus the trigger that fired, or why the diff has no such surface.
+
+#### Security triggers
+
+Answer **yes** if the diff touches any of: auth/authz, session, token, or crypto handling; parsing, persisting, or rendering user-controlled input; HTTP handlers, routes, middleware, or public API surface; query construction (SQL/ORM/NoSQL), shell/exec, file paths, or outbound URLs; serialization/deserialization; secrets, env, or config, or logging of request data; permission / tenancy / ownership checks; or new third-party dependencies. Answer **no** for docs-or-comments-only, type-only, formatting, generated files, and test fixtures with no production path. When genuinely uncertain, prefer **yes** — skipping security is the one skip that buys false confidence.
+
+#### Quality triggers
+
+Answer **yes** if the diff introduces design surface worth judging: new modules, functions, or abstractions; non-trivial control flow; new dependencies; public API, interface, or config changes; or anything a project convention file speaks to. Answer **no** when the change is mechanical with no design decision in it — renames or moves without logic changes, generated code, lockfiles, pure data/fixture updates, single-constant edits, reverts. When genuinely uncertain, prefer **yes**.
+
+#### Tests trigger
+
+Answer **yes** only if the diff adds or modifies test files — this one is directly observable, so no bias applies.
+
+#### Performance triggers
+
+Answer **yes** if the diff touches any of: new/changed loops (especially nested or over unbounded collections); DB/ORM/network/IO calls (especially inside a loop → N+1); data-structure or algorithm choice on non-trivial `n` (sort/search/dedup/recursion/regex on user input); hot paths (request handlers, middleware, serializers, render paths, event-loop callbacks); memory (unbounded accumulation, large copies, uncleaned listeners/timers); **removal** of an existing optimization (memo/index/cache/batch/`LIMIT`/pagination/virtualization); or frontend render frequency, effect deps, un-virtualized lists, or bundle-size-adding imports. Answer **no** for config/docs/type-only/test-only diffs and one-time cold-path scripts with bounded input. When genuinely uncertain, prefer **yes** — the lens is cheap; a missed regression is not.
 
 ## Output
 
@@ -77,11 +94,15 @@ Write `./tmp/review-changes/HOLISTIC.md`:
 ## Approach Evaluation
 [Root cause vs symptom, layer, alternatives, complexity, trade-offs, verdict]
 
-## Perf-Sensitive
-[yes | no] — [one line: the perf-sensitive surface the diff touches, or why none]
+## Lens Applicability
+- correctness: yes — always (floor)
+- security: [yes | no] — [the trigger that fired, or why the diff has no security surface]
+- quality: [yes | no] — [the trigger that fired, or why the change is mechanical]
+- tests: [yes | no] — [test files the diff touches, or none]
+- performance: [yes | no] — [the perf-sensitive surface, or why none]
 
 ## Overall Risk Level
 [low | medium | high] — [one line]
 ```
 
-Then report back to the orchestrator: your **eligibility verdict** (`proceed-with-fan-out` | `single-inline-pass` | `stop`), your **`Perf-sensitive: yes/no`** verdict, and a one-paragraph summary. For `single-inline-pass`, note that you already wrote `<ws>/review-changes.md`.
+Then report back to the orchestrator: your **eligibility verdict** (`proceed-with-fan-out` | `single-inline-pass` | `stop`), the **`## Lens Applicability` block verbatim** (all five lines — the orchestrator gates on it and never opens this file), and a one-paragraph summary. For `single-inline-pass`, note that you already wrote `<ws>/review-changes.md`.

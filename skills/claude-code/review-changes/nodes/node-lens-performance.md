@@ -1,6 +1,6 @@
 # Node: Performance Lens
 
-Find performance regressions the diff introduces. Runs **only when holistic flagged the change `Perf-sensitive: yes`**. Read `lens-common.md` for shared rules and `HOLISTIC.md` for framing.
+Find performance regressions the diff introduces. Runs **only when holistic marked `performance: yes`** in its Lens Applicability block. Read `lens-common.md` for shared rules and `HOLISTIC.md` for framing.
 
 **This lens reads beyond the diff — but only to establish magnitude.** Like the security lens, you may follow callers/callees/types/config (Read/Grep) to answer "is this path hot?" and "is `n` unbounded?". The finding must still concern code the diff introduced, changed, or newly exposed.
 

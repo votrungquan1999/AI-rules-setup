@@ -10,7 +10,7 @@ Orchestrate a code review as a lightweight **fan-out → verify → merge** pipe
 ## Pipeline
 
 1. **holistic** — inline, strong model: eligibility + summary + approach-eval
-2. **gate** — which lenses apply? (by what the diff touches, plus holistic's perf-sensitive signal)
+2. **gate** — run only the lenses holistic marked applicable (correctness is the floor)
 3. **lenses** — correctness / quality / security / tests / performance, parallel subagents
 4. **gate** — which findings are flagged `Needs verification: yes`?
 5. **verify** flagged findings — parallel subagents
@@ -21,6 +21,7 @@ Orchestrate a code review as a lightweight **fan-out → verify → merge** pipe
 Establish a task identifier first — the branch name under review, the PR/MR number, or a short slug you derive and confirm. Set `<ws>` = `./tmp/<identifier>/`; **before creating it, check whether it already holds artifacts from unrelated work — if so, STOP and ask the user** rather than overwriting another review. Intermediates live in `<ws>/review-changes/`; the final report is `<ws>/review-changes.md` (one level up, a stable path for the caller). The `./tmp/review-changes/…` paths below are shorthand for `<ws>/review-changes/…` — pass the resolved `<ws>` into every sub-agent prompt.
 
 - `HOLISTIC.md` — summary + approach evaluation (you, Phase 1; shared with every lens)
+- `DIFF.patch` — the diff, captured once in Phase 1; every lens and verifier reads it instead of re-running `git diff`
 - `LENS_<name>.md` — per-lens findings
 - `VERDICT_<batch>.md` — per-batch verification verdicts
 
@@ -70,13 +71,15 @@ Scope: branch/PR → committed since `$BASE`; uncommitted → also `git status -
 
 ## Phases
 
-1. **Holistic (inline).** Run `node-holistic.md` from inside the repo, against `$BASE` from Step 0: eligibility (empty/trivial diff -> say so and stop, or do a single inline pass and skip the fan-out), changes summary, approach evaluation, and a `Perf-sensitive: yes/no` signal. Write `HOLISTIC.md`. **Gate:** if eligibility stops the review, stop; otherwise hold the perf-sensitive signal for the lens gate.
-2. **Lens gate.** Always run correctness, quality, security; run tests only if the diff adds/modifies test files; run performance only if holistic flagged `Perf-sensitive: yes`. State which lenses and why before spawning.
-3. **Lenses (parallel subagents).** Each reads its node file + `lens-common.md` + `HOLISTIC.md`, sees the changes via `git diff "$BASE"` from inside the repo, reviews ONLY the diff, writes `LENS_<name>.md`, and reports finding count + highest severity.
+1. **Holistic (inline).** Run `node-holistic.md` from inside the repo, against `$BASE` from Step 0: eligibility (empty/trivial diff -> say so and stop, or do a single inline pass and skip the fan-out), changes summary, approach evaluation, and a **Lens Applicability** block — a `yes`/`no` plus a reason for each of the five lenses. Write `HOLISTIC.md`. **Gate:** if eligibility stops the review, stop; otherwise hold the applicability block for the lens gate.
+2. **Lens gate.** Run exactly the lenses holistic marked `yes` — you assessed the diff in phase 1, so route off those verdicts rather than re-deriving them. **correctness** is the floor and always runs; security, quality, tests, and performance each run only on a `yes`. State which lenses you are running, and the reason for each skip, before spawning — a skipped lens is a gap in what the review covers, so it has to be visible.
+3. **Lenses (parallel subagents).** Each reads its node file + `lens-common.md` + `HOLISTIC.md`, sees the changes via `DIFF.patch` (captured once in phase 1 — they do not re-run `git diff`), reviews ONLY the diff, writes `LENS_<name>.md`, and reports finding count + highest severity.
 4. **Verification (parallel subagents).** Lenses are **trusted by default**. Verify only findings marked `Needs verification: yes` — the lens flagged something it couldn't confirm from the diff alone (behavior outside the diff, a caller's actual input, a runtime assumption, a guard that may exist elsewhere). Batch 2-4 flagged findings by shared file; each verifier resolves the flagged uncertainty against the real code and writes `VERDICT_<batch>.md`. Skip the phase entirely if nothing is flagged.
 5. **Merge (inline).** Apply verdicts — REFUTED -> drop; CONFIRMED -> keep with the verifier's adjusted severity; UNCERTAIN -> score conservatively (usually falls below the filter); trusted (never-flagged) findings -> carry through as-is. Then score each survivor 0-100 for "real, in-scope issue", **drop everything < 80**, dedupe by file+line (keep highest severity), normalize severity. Write `<ws>/review-changes.md`. If nothing survives, say the changes look good.
 
 ## Report Format
+
+Open with a **Summary** and a **Coverage** line — which lenses ran, and each skipped lens with its one-line reason from the applicability block. A skipped lens is unreviewed, not clean; the reader has to be able to see the gap.
 
 Each finding lists: **Severity**, **Confidence** (80-100), **Verified** (confirmed / trusted / unverified), **Lens**, **Description**, **Failure mode** (concrete trigger -> behavior -> harm, or `No distinct failure mode — <maintainability/readability> concern` — never a vague restatement), **Why it matters**, **Suggested fix**. End the report with **Positive Notes** and a **Recommendation**: safe to merge / merge with comments / needs changes.
 

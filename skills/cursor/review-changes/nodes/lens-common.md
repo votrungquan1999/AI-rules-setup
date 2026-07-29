@@ -5,6 +5,7 @@ Rules every review lens follows. Your specific focus is in your own `node-lens-*
 ## Scope
 
 - Review **ONLY the code shown in the current diff**. Do not comment on unchanged code or pre-existing issues on lines the diff didn't touch.
+- **Read the diff from `./tmp/review-changes/DIFF.patch`** — holistic already captured it there — instead of re-running `git diff` yourself. Use `Read` with an offset to page through a large patch, or `grep` it for a path. Shell out to git only for something the patch genuinely cannot answer (full file context around a hunk, history of a line).
 - Read `./tmp/review-changes/HOLISTIC.md` first for shared framing: the intended approach, constraints, and the root cause being solved. Judge the change against that intent.
 - Assume intent is correct unless there is clear risk. Prefer concrete, actionable suggestions and explain the "why".
 - Judging the diff sometimes depends on code **outside** it — a callee, a caller, a type, a config, a runtime assumption — that you haven't read. Don't guess and don't stay silent: mark the finding `Needs verification: yes` and name what to check (see [Flag findings that need a code-level check](#flag-findings-that-need-a-code-level-check) below).

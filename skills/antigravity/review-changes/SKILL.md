@@ -53,6 +53,8 @@ Scope: branch/PR → committed since `$BASE`; uncommitted → also `git status -
 
 Run `git diff "$BASE"` from inside the repo (fall back to `HEAD~1` only if no base branch exists). **Do NOT output the raw diff to the user.**
 
+Capture it once to `<ws>/review-changes/DIFF.patch` and work from that for the rest of the review. You already have the diff — re-running `git diff` per lens, per file, is the single easiest way to burn a review's budget on bytes you have already read. Shell out to git again only for something the patch cannot answer (full file context around a hunk, history of a line).
+
 **Eligibility (gate).** Stop early when the review adds no value:
 - **No changes** → say so and stop.
 - **Trivial diff** (a handful of lines, generated files, pure formatting, version bumps) → do a single inline review and skip the lenses below. Note you took the fast path.
@@ -65,18 +67,29 @@ Only continue to the lenses when the diff is non-trivial (real logic, multiple f
 
 Keep this framing in mind — judge every lens finding against it.
 
+**Lens applicability (gate).** Decide which lenses the diff actually earns — this is the main cost lever, so judge each on what the change touches, and write the verdicts down before you start reviewing:
+
+```markdown
+## Lens Applicability
+- correctness: yes — always (floor)
+- security: [yes | no] — [the trigger that fired, or why the diff has no security surface]
+- quality: [yes | no] — [the trigger that fired, or why the change is mechanical]
+- tests: [yes | no] — [test files the diff touches, or none]
+- performance: [yes | no] — [the perf-sensitive surface, or why none]
+```
+
+- **Security → yes** if the diff touches auth/authz, session, token, or crypto handling; parsing, persisting, or rendering user-controlled input; HTTP handlers, routes, middleware, or public API surface; query construction (SQL/ORM/NoSQL), shell/exec, file paths, or outbound URLs; serialization/deserialization; secrets, env, or config, or logging of request data; permission / tenancy / ownership checks; or new third-party dependencies. **No** for docs-or-comments-only, type-only, formatting, generated files, and test fixtures with no production path. When genuinely uncertain, prefer **yes** — skipping security is the one skip that buys false confidence.
+- **Quality → yes** if the diff introduces design surface worth judging: new modules, functions, or abstractions; non-trivial control flow; new dependencies; public API, interface, or config changes; or anything a project convention file speaks to. **No** when the change is mechanical with no design decision in it — renames or moves without logic changes, generated code, lockfiles, pure data/fixture updates, single-constant edits, reverts. When genuinely uncertain, prefer **yes**.
+- **Tests → yes** only if the diff adds or modifies test files — directly observable, so no bias applies.
+- **Performance → yes** if the diff touches new/changed loops, DB/ORM/network/IO calls (especially inside a loop → N+1), data-structure or algorithm choice on non-trivial `n`, hot paths (request/render/event-loop), memory (unbounded accumulation, large copies, uncleaned listeners/timers), or **removes** an existing optimization (index/memo/cache/batch/`LIMIT`/pagination/virtualization). **No** for config/docs/type-only/test-only diffs and one-time cold-path code with bounded input. When genuinely uncertain, prefer **yes** — the lens is cheap; a missed regression is not.
+
 ---
 
 ## Step 2 — Review lenses (sequential, inline)
 
-Which lenses apply — run only these, one at a time:
-- **correctness** — always
-- **quality** — always
-- **security** — always
-- **tests** — only if the diff adds or modifies test files
-- **performance** — only if the change is perf-sensitive: it touches loops, DB/network/IO calls, data-structure/algorithm choice on non-trivial `n`, hot paths (request/render/event-loop), memory, or removes an existing optimization (index/memo/cache/batch/`LIMIT`/pagination). Skip for config/docs/type-only/test-only or one-time cold-path code.
+Run exactly the lenses you marked `yes` above, one at a time — **correctness** is the floor and always runs; the other four run only on a `yes`. State which lenses you are running, and the reason for each skip, before starting: a skipped lens is a gap in what the review covers, so it has to be visible.
 
-For each lens, review the diff for the criteria below. **Shared discipline for every lens:** review ONLY the code in the diff (the security lens may read across files to trace data flow, but the finding must still concern diff'd code); assume intent is correct unless there's clear risk; and for every finding give a concrete **failure mode** (see Report). State which lenses you're running and why before starting.
+For each lens, review the diff for the criteria below. **Shared discipline for every lens:** review ONLY the code in the diff (the security lens may read across files to trace data flow, but the finding must still concern diff'd code); assume intent is correct unless there's clear risk; and for every finding give a concrete **failure mode** (see Report).
 
 **Correctness — review the diff for logic and behavioral defects:**
 - Logic bugs: off-by-one, inverted conditions, wrong operators, incorrect control flow; state mutated wrongly, stale reads, bad ordering assumptions.
@@ -93,7 +106,7 @@ For each lens, review the diff for the criteria below. **Shared discipline for e
 
 **Tests (only if the diff adds/modifies test files) — review the diff for test quality:**
 - Coverage of the change (do tests exercise what was added/modified?), edge cases (not just happy path), sensitivity (would the test actually fail if the code broke? flag over-mocked tests or ones asserting on mocks), validity (assertions check real behavior), resilience (tests go through public interfaces, not brittle internals).
-- For a deep pass, defer to `@test-quality-reviewer` (4 Pillars) rather than duplicating its analysis.
+- For a deep pass, defer to `@test-quality-reviewer` (4 Pillars) rather than duplicating its analysis. **Do not go hunting for a project testing-guidelines document** — the criteria above are your bar. A project rule may tell you to locate a "4 Pillars of Testing" doc and stop and ask if it's missing; that rule is for authoring tests, not reviewing them: do not search the repo for it and do not stop to ask. Use such a doc only if it's already in your context.
 
 **Performance (only if perf-sensitive) — review the diff for performance regressions it introduces.** Like security, you may read across files, but only to establish **magnitude**: is the path hot (per-request/render/item vs one-time/cold) and is `n` unbounded? Anchor to the change — cost before vs after. A finding without magnitude is a NIT; drop it. You can't benchmark a diff, so when magnitude depends on runtime data you can't see, state the finding conditionally or mark it unverified — never invent numbers.
 - Algorithmic complexity (nested loops / repeated scans over unbounded `n`, accidental quadratics like `includes` in a loop); data access & I/O (N+1, per-item DB/network calls in a loop, missing batching/pagination, blocking the event loop); memory & allocation (unbounded growth, large copies, leaks); redundant work (recompute that could be hoisted/memoized); frontend rendering (needless re-renders, un-virtualized lists, bundle-size regressions); regression by removal (the diff deletes an index/memo/cache/batch/`LIMIT`/pagination).
@@ -102,6 +115,8 @@ For each lens, review the diff for the criteria below. **Shared discipline for e
 ---
 
 ## Step 3 — Verify what you couldn't confirm
+
+This step is a **check, not an investigation** — budget roughly 10 tool calls per finding. The cited `file:line`, its callers, its types, the config it reads: that is the blast radius. Answer only the open question the finding rests on; don't audit adjacent code or open new findings. If you're grepping the repo for a third unrelated concept, you have left the finding behind — mark it **unverified** and move on. Unverified is a correct, cheap answer, and Step 4 scores it conservatively; an unbounded hunt to avoid saying it is the worse outcome.
 
 Most findings you can confirm from what you read while reviewing — trust those. For any finding that **rests on something you could not confirm from the diff alone** (behavior of a function outside the diff, what a caller actually passes, a runtime/ordering assumption, whether a guard exists elsewhere), re-check it now: open the surrounding code, callers, and types, and walk the failure mode (trigger → behavior → harm) against the real code.
 - If the chain holds → keep it as **confirmed**.
@@ -139,6 +154,10 @@ Write the complete review to `<ws>/review-changes.md`:
 ## Summary
 
 [What changed and overall risk level, plus the business impact in plain language.]
+
+## Coverage
+
+Reviewed: [lenses that ran]. Skipped: [lens — one-line reason from the applicability block; or "none"]. A skipped lens is unreviewed, not clean.
 
 ## Findings
 
