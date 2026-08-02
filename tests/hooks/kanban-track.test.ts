@@ -16,7 +16,7 @@ const README_PATH = join(ARTIFACT_DIR, "README.md");
 // Expected reminder text, mirroring the hook's buildReminder(). Asserted exactly (not by pattern)
 // so any wording change is a deliberate, visible test update rather than a silent pass.
 const NO_POINTER_REMINDER =
-	"No AI-Kanban card is active for this session. If this prompt starts substantive, multi-step work, open a card to track it.";
+	"No AI-Kanban card is active for this session. If this prompt starts substantive, multi-step work, search the board first (list_cards with text) for an existing card covering it — continue on that card if you find one, and open a new card only if you don't.";
 
 /** The exact active-card reminder the hook emits for a given card. */
 function activeCardReminder(cardNumber: number, summary: string): string {
