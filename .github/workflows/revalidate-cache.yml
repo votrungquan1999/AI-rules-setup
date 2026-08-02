@@ -1,6 +1,6 @@
 name: Revalidate Rules Cache
 
-# Trigger this workflow when changes are pushed to rules/skills/workflows on main branch
+# Trigger this workflow when changes are pushed to rules/skills/workflows/hooks on main branch
 # or when manually triggered from the GitHub Actions UI
 on:
   push:
@@ -10,6 +10,7 @@ on:
       - "rules/**"
       - "skills/**"
       - "workflows/**"
+      - "hooks/**"
   workflow_dispatch:
 
 # Security: Use minimal required permissions
@@ -59,6 +60,6 @@ jobs:
           echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "MongoDB cache has been populated with latest rules, skills, and workflows from local filesystem." >> $GITHUB_STEP_SUMMARY
+          echo "MongoDB cache has been populated with latest rules, skills, workflows, and hooks from local filesystem." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "The serverless/edge API will now serve from this primed cache." >> $GITHUB_STEP_SUMMARY
