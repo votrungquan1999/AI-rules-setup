@@ -154,6 +154,27 @@ describe("spec-reminder hook (shipped artifact)", () => {
 		expect(output.hookSpecificOutput.additionalContext).toBe(specNudge("docs/features/my-feature/spec.md"));
 	});
 
+	// Loop guard. additionalContext on Stop CONTINUES the conversation, so a nudge that fires again
+	// on the resulting Stop re-triggers itself until Claude Code's 8-continuation cap. Observed live:
+	// one un-updated spec produced 8 consecutive identical nudges.
+	it("stop_hook_active -> stays silent, so the nudge cannot re-trigger itself", async () => {
+		makeHome();
+		repo = makeGitRepo();
+		writeSentinelFixture(home, "sess-reentrant", {
+			slug: "my-feature",
+			specPath: "docs/features/my-feature/spec.md",
+		});
+
+		const { stdout, stderr, exitCode } = await runHook(
+			{ session_id: "sess-reentrant", hook_event_name: "Stop", cwd: repo, stop_hook_active: true },
+			{ HOME: home },
+		);
+
+		expect(exitCode).toBe(0);
+		expect(stderr).toBe("");
+		expect(stdout).toBe("");
+	});
+
 	it("hook.json's settingsFragment matches Claude Code's nested Stop schema and targets the shipped script", () => {
 		const manifest = JSON.parse(readFileSync(HOOK_JSON_PATH, "utf8"));
 

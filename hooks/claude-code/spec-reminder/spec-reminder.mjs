@@ -62,6 +62,13 @@ async function main() {
     input = {};
   }
 
+  // additionalContext on Stop CONTINUES the conversation, so nudging again on the Stop that
+  // continuation produced would re-trigger this hook until Claude Code's 8-continuation cap.
+  if (input.stop_hook_active) {
+    process.exit(0);
+    return;
+  }
+
   const sentinel = readSentinel(input.session_id);
   if (!sentinel) {
     process.exit(0); // not a feature-dev session — stay silent
