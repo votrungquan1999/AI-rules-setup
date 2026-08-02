@@ -28,7 +28,7 @@ You decide silently. Do **not** ask the user "should I track this?" — either t
 
 Each step has its own instruction file in this skill's `steps/` directory — read and follow it:
 
-1. **Open or adopt the card** — `steps/1-open-card.md`: check three places before creating anything — the hook's "Active card #N" line, the pointer file, and **the board itself** via `list_cards({ text })`. The first two are session-scoped and miss the common case: the work has a card, opened by a session that is no longer you. Adopt what you find (`adopt_card` + `set_status`); only when all three come up empty do you gather tags (+ session id if one exists), infer a name, `create_card(...)` (it starts directly `in_progress`), write the `~/.claude/kanban-session-state/<sessionId>.json` pointer (best-effort, only when a session id exists), and announce it in one line.
+1. **Open or adopt the card** — `steps/1-open-card.md`: check three places before creating anything — the hook's "Active card #N" line, the pointer file, and **the board itself** via `list_cards({ text })`. The first two are session-scoped and miss the common case: the work has a card, opened by a session that is no longer you. Adopt what you find — a card from the hook line or pointer is already yours, so just carry on with it; a card found on the BOARD needs `adopt_card` + `set_status` to change hands. Only when all three come up empty do you gather tags (+ session id if one exists), infer a name, `create_card(...)` (it starts directly `in_progress`), write the `~/.claude/kanban-session-state/<sessionId>.json` pointer (best-effort, only when a session id exists), and announce it in one line.
 2. **Track progress** — `steps/2-track-progress.md`: as the work reaches meaningful checkpoints, `append_progress(<id>, <note>)` with one concise note each. Don't narrate every keystroke.
 3. **Hand off** — `steps/3-hand-off.md`: when the work is done (or you're parking it), `set_status(<id>, "need_review")`.
 
@@ -38,13 +38,14 @@ Each step has its own instruction file in this skill's `steps/` directory — re
 - Track exactly one card per unit of work — the work you're currently doing.
 - **Search the board before creating.** The hook line and the pointer file only know about *this* session; a card opened by an earlier one is invisible to both. `list_cards({ text })` is the check that catches it — and it reaches `done`/`archived` cards, which is where prior work usually sits.
 - **Adopt, don't duplicate** — reuse a card you find rather than creating another, and `adopt_card` it so the board knows the work changed hands. A follow-up, a review fix, a next step, or a second attempt is the **same** task.
+- **Resolve ambiguity yourself; escalate only what you can't undo.** Several plausible matches → verify the top-ranked one and take it. An `archived` match, or a card you can't adopt → ask the user. Those are the cases a wrong guess can't be walked back from.
 - Open a second card only when the work **genuinely diverges** into a distinct task — via `create_card({ …, forceNew: true })`. Never `forceNew` because a compact lost your pointer, because the match is `done`, or because the search failed.
 - Let the dispatch tools own card creation, status, and persistence.
 - Keep progress notes short and state-bearing — what changed and where, not a transcript.
 - Announce the card once, briefly (e.g. "Tracking this as card #N."), then get back to the work.
 
 **DO NOT:**
-- Ask the user for permission to track — decide silently per the rules above.
+- Ask the user for permission to track, or which card to use when the board is merely ambiguous — decide silently per the rules above. The narrow exceptions are an `archived` match, a card you can't adopt, and a failed search.
 - Track trivial / one-off requests.
 - Invent your own status values — use the board's own statuses (the tool enforces them). You may move a card between any two of them, same as a person on the webview.
 - Read a failed board search as "no card exists" — an error means **unknown**. Stop and tell the user once rather than falling through to `create_card`.

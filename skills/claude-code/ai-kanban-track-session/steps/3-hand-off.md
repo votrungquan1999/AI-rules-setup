@@ -27,6 +27,8 @@ Handing off is not the end of the card. When review comes back with fixes — or
 set_status(<id>, "in_progress")
 ```
 
+If you are resuming from an id you were handed rather than one you opened — a subagent passed it up, the user pasted `#114`, your pointer file is gone — `adopt_card({ id, sessionId })` first, for the same reason `steps/1-open-card.md` gives: until ownership moves, your own `create_card` can't see this card and will open a second one.
+
 Then carry on as before, appending progress and handing off again when done. A review fix, a follow-up, or a second attempt is the **same** unit of work: opening a fresh card for it splits one piece of work across two, which is the duplication `steps/1-open-card.md` exists to prevent.
 
 If you no longer have the card's id (a compact, a new session), find it the same way you would at the start — search the board, per `steps/1-open-card.md`.
