@@ -1,5 +1,5 @@
 {
-  "description": "Auto-tracks the current session on the AI-Kanban board: reminds the model which card is active and best-effort POSTs each prompt as a progress note.",
+  "description": "Auto-tracks the current session on the AI-Kanban board: reminds the model which card is active and where to record a decision, a step transition, or an open question/finding/command. The hook records nothing itself — it only instructs.",
   "event": "UserPromptSubmit",
   "script": "kanban-track.mjs",
   "settingsFragment": {
