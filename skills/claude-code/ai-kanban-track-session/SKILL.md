@@ -46,7 +46,7 @@ Each step has its own instruction file in this skill's `steps/` directory — re
 **DO NOT:**
 - Ask the user for permission to track — decide silently per the rules above.
 - Track trivial / one-off requests.
-- Invent your own status values — move only along the board's legal agent edges (the tool enforces this).
+- Invent your own status values — use the board's own statuses (the tool enforces them). You may move a card between any two of them, same as a person on the webview.
 - Read a failed board search as "no card exists" — an error means **unknown**. Stop and tell the user once rather than falling through to `create_card`.
 - Silently continue untracked when the **critical** step fails — if `create_card` fails, **stop and tell the user**; card creation is not a fire-and-forget side channel.
 - Conversely, block the actual work on a **non-critical** tracking failure — if `append_progress` or `set_status` fails, tell the user and keep working; those are the side channel, not the task.
