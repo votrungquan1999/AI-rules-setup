@@ -1,6 +1,6 @@
 ---
 name: review-changes
-description: Senior engineer code review analyzing diffs for correctness, security, performance, edge cases, and best practices with severity-based findings. Use when reviewing code, checking changes, or when user says "review my changes", "code review", "review this diff", or "check my code".
+description: Senior engineer code review analyzing diffs for correctness, security, architecture and design fit, performance, edge cases, and best practices with severity-based findings. Use when reviewing code, checking changes, or when user says "review my changes", "code review", "review this diff", or "check my code".
 ---
 
 # Review Changes
@@ -25,7 +25,7 @@ Order and who-runs-each — the source of truth for the *flow*. Models live in *
 
 1. **holistic** — sub-agent → `HOLISTIC.md` + eligibility verdict + per-lens applicability
 2. **gate** — spawn only the lenses holistic marked applicable (correctness is the floor)
-3. **lenses** — parallel subagents
+3. **lenses** — parallel subagents: correctness / security / architecture / quality / tests / performance
 4. **gate** — which findings did the lenses report as `Needs verification: yes`?
 5. **verify** flagged findings — parallel subagents
 6. **merge** — sub-agent → `<ws>/review-changes.md`
@@ -49,6 +49,7 @@ The `Agent` tool accepts a per-call `model` parameter (`"haiku" | "sonnet" | "op
 - **holistic, merge** → omit `model` (session default / strongest). Holistic sets the shared framing every lens trusts; merge does the scoring and final judgment — neither should be discounted.
 - **correctness, quality, tests, performance** → `model: "sonnet"` — focused, mostly mechanical lens work (performance traces magnitude across files, but the judgment stays mechanical).
 - **security** → omit `model` (use the session default / strongest available). Cheap security review gives false confidence; this is the one lens not to discount. It also needs to trace data flow *across* files, not just read the diff.
+- **architecture** → omit `model`. Like security it reads across files — route tables, schema, the layers above and below — and unlike the mechanical lenses its output is a judgment call. Discounted, it degrades into style nits, which is precisely the failure this lens exists to fix.
 - **verifiers** → `model: "sonnet"` by default, but **omit `model` for any batch containing a security finding** — verifying a security claim cheaply gives the same false confidence as reviewing it cheaply.
 
 ## Workspace
@@ -61,14 +62,14 @@ Holistic captures the diff once to `<ws>/review-changes/DIFF.patch`; lenses and 
 
 ## Phase 1: Holistic (sub-agent)
 
-Spawn `node-holistic.md`. It reads the diff, writes `HOLISTIC.md` (shared context for the lenses), and returns an **eligibility verdict** plus its **`## Lens Applicability`** block — a `yes`/`no` and a reason for each of the five lenses. Gate the pipeline on the eligibility verdict; hold the applicability block for the Phase 2 lens gate.
+Spawn `node-holistic.md`. It reads the diff, writes `HOLISTIC.md` (shared context for the lenses), and returns an **eligibility verdict** plus its **`## Lens Applicability`** block — a `yes`/`no` and a reason for each of the six lenses. Gate the pipeline on the eligibility verdict; hold the applicability block for the Phase 2 lens gate.
 - **stop** (no changes) → relay and finish.
 - **single-inline-pass** (trivial diff) → it already wrote the final `<ws>/review-changes.md`; relay its summary and finish.
 - **proceed-with-fan-out** → continue.
 
 ## Phase 2: Lens gate
 
-Spawn exactly the lenses holistic marked `yes` in its **Lens Applicability** block — it assessed the diff, so route off its verdicts rather than re-deriving them. **correctness** is the floor and always runs; **security, quality, tests, performance** each run only on a `yes`. Do not add a lens holistic marked `no`, and do not drop one it marked `yes`.
+Spawn exactly the lenses holistic marked `yes` in its **Lens Applicability** block — it assessed the diff, so route off its verdicts rather than re-deriving them. **correctness** is the floor and always runs; **security, architecture, quality, tests, performance** each run only on a `yes`. Do not add a lens holistic marked `no`, and do not drop one it marked `yes`.
 
 State which lenses you are running, and the reason for each skip, before spawning — a skipped lens is a gap in what the review covers, so it has to be visible.
 

@@ -1,11 +1,15 @@
 # Node: Merge
 
-You are the **merge agent** — the final phase. Every lens has run and every flagged finding has been verified. Read the intermediate artifacts, apply the verdicts, score and filter what survives, and write the single report the user reads. You do NOT re-review the code or add findings of your own.
+You are the **merge agent** — the final phase. The applicable lenses have run and every flagged finding has been verified. Read the intermediate artifacts, apply the verdicts, score and filter what survives, and write the single report the user reads. You do NOT re-review the code or add findings of your own.
+
+Lenses are gated: holistic decides which apply, so only some `LENS_*.md` files may exist. A lens that never ran is **unreviewed, not clean** — never treat its absence as a pass, and never fill its gap with findings of your own.
+
+`HOLISTIC.md`'s approach evaluation is **framing, not findings** — it feeds the report's Summary. Its `## Design Concerns to Investigate` entries reach the report only as architecture-lens findings; do not promote an unresolved concern into a finding yourself.
 
 ## Input
 
 From your prompt: the repo dir, `$BASE`, and the resolved `<ws>`. Read from `<ws>/review-changes/`:
-- `HOLISTIC.md` — summary, approach evaluation, risk level (source for the report's Summary)
+- `HOLISTIC.md` — summary, approach evaluation, risk level (source for the report's Summary), and the **Lens Applicability** block (source for the report's Coverage)
 - every `LENS_*.md` — the findings
 - every `VERDICT_*.md` — verifier verdicts for the findings that were flagged
 
@@ -20,20 +24,30 @@ Comment ONLY on findings the lenses raised about the current diff. Never introdu
 
 ## 2. Confidence score
 
-Score each surviving finding 0–100 for how likely it is a real, in-scope issue:
-- **0–25** — false positive under light scrutiny, or a pre-existing issue on lines the diff didn't touch
-- **26–50** — might be real but unverified, or a stylistic nit not called out in project conventions
-- **51–75** — verified real, but low-impact / infrequent / minor relative to the change
-- **76–90** — important; double-checked and likely to bite in practice
-- **91–100** — certain; directly confirmed, will happen frequently
+Score each surviving finding 0–100 on **one axis only: how certain you are the finding is true and in scope.** Nothing else.
+
+- **0–25** — refuted, or a pre-existing issue on lines the diff didn't touch
+- **26–50** — rests on an assumption you cannot support; may well be a false positive
+- **51–75** — plausible and unrefuted, but a link in the chain is unconfirmed (an UNCERTAIN verdict usually lands here)
+- **76–90** — confirmed, with a minor open question
+- **91–100** — certain: directly confirmed against the code, and the failure mode or design consequence holds exactly as written
+
+**Do not lower the score because the issue feels small.** Impact is already carried by severity — scoring it a second time here is what buries findings that are certainly true but quiet, which is the usual shape of a contract, data-model, or convention problem. A certain-but-minor finding is a **NIT at 95**, not a SHOULD FIX at 70. If you catch yourself reaching for the 51–75 band on a finding you have no actual doubt about, the correct move is a high score and a lower severity.
 
 ## 3. Filter
 
-Drop everything scoring **< 80**. If nothing remains, say the changes look good. Attach the score to each surfaced finding.
+Surface by severity — the more it costs to miss, the lower the certainty bar:
+- **MUST FIX** — surface at **≥ 70** (a possible data-loss or security bug is worth raising unconfirmed; mark it "(unverified)")
+- **SHOULD FIX** — surface at **≥ 80**
+- **NIT** — surface at **≥ 90**
+
+Drop the rest. If nothing remains, say the changes look good. Attach the score to each surfaced finding.
 
 ## 4. Dedupe
 
 When two lenses flag the same file + line + root issue, keep one entry at the **highest** severity and note both lenses.
+
+**Root findings survive dedupe intact.** The architecture lens may file a finding that names other findings it would dissolve. Do not collapse it into them or drop the references — it is the cause, they are the symptoms. Order it **above** the findings it names, and keep its "this also removes X and Y" statement verbatim; a reader who fixes the root should be able to see what stops mattering. If a verifier refuted the root, the symptom findings still stand on their own.
 
 ## 5. Normalize severity
 
@@ -56,15 +70,19 @@ Write the complete review to `<ws>/review-changes.md` (one level above the inter
 
 [Brief overview of what changed and overall risk level — from HOLISTIC.md. Include the business impact: what this delivers in business/stakeholder terms, in plain language.]
 
+## Coverage
+
+Reviewed: [lenses that ran]. Skipped: [lens — one-line reason, from HOLISTIC.md's Lens Applicability; or "none"].
+
 ## Findings
 
 ### [Issue Title]
 - **Severity**: MUST FIX / SHOULD FIX / NIT
-- **Confidence**: [80–100]
+- **Confidence**: [70–100]
 - **Verified**: confirmed (went through verification) / trusted (lens confirmed it, no check needed) / unverified (UNCERTAIN after a check)
-- **Lens**: [correctness / security / quality / tests]
+- **Lens**: [correctness / security / architecture / quality / tests / performance]
 - **Description**: [What's wrong]
-- **Failure mode**: [Concrete trigger → behavior → harm, OR "No distinct failure mode — <maintainability/readability> concern". Never a vague restatement.]
+- **Failure mode**: [Concrete trigger → behavior → harm; OR, for architecture only, a design consequence (what becomes true → what it forces → who pays); OR "No distinct failure mode — <maintainability/readability> concern". Never a vague restatement.]
 - **Why it matters**: [Impact/risk — the magnitude, given the failure mode above]
 - **Suggested fix**: [Concrete, actionable; code snippet only if helpful]
 

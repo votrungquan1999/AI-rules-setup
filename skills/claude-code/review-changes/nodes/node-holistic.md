@@ -38,6 +38,7 @@ A high-level functional summary (not line-by-line):
 ### 5. Approach evaluation
 
 Compare the change against your mental model:
+- Is it built on the **right concept**? Ask what the design requires to be true of each thing it leans on — stable, unique, owned by us, safe to expose — and whether the chosen thing actually guarantees it. A mutable display value carrying identity, a derived value stored as truth, a natural key that isn't stable: the code reads fine and the premise is wrong.
 - Does it fix the **root cause** or just a symptom?
 - Is this the right **layer/level** to fix at?
 - Are there **simpler or more robust alternatives** the author missed?
@@ -45,19 +46,25 @@ Compare the change against your mental model:
 - What **trade-offs** should the author be aware of?
 - If the approach differs from yours, is the author's still valid?
 
-This evaluation is holistic and is NOT repeated by any lens — it lives only here.
+You produce the *framing*; you do not produce findings. Every concern this evaluation surfaces must land in the `## Design Concerns to Investigate` list in your output — one line each, phrased as something checkable. The **architecture lens** owns that list and must resolve every entry into a finding or an explicit dismissal. A concern you raise only in prose here reaches no report and gets no verification, so anything you actually want acted on has to appear in that list.
 
 ### 6. Lens applicability (gate)
 
-The orchestrator spawns **only the lenses you mark `yes`** — this is the main cost lever, so judge each one on what the diff actually touches. **Correctness always runs**; it is the floor and needs no verdict beyond `yes`. The other four are yours to gate: give each a `yes`/`no` plus the trigger that fired, or why the diff has no such surface.
+The orchestrator spawns **only the lenses you mark `yes`** — this is the main cost lever, so judge each one on what the diff actually touches. **Correctness always runs**; it is the floor and needs no verdict beyond `yes`. The other five are yours to gate: give each a `yes`/`no` plus the trigger that fired, or why the diff has no such surface.
 
 #### Security triggers
 
 Answer **yes** if the diff touches any of: auth/authz, session, token, or crypto handling; parsing, persisting, or rendering user-controlled input; HTTP handlers, routes, middleware, or public API surface; query construction (SQL/ORM/NoSQL), shell/exec, file paths, or outbound URLs; serialization/deserialization; secrets, env, or config, or logging of request data; permission / tenancy / ownership checks; or new third-party dependencies. Answer **no** for docs-or-comments-only, type-only, formatting, generated files, and test fixtures with no production path. When genuinely uncertain, prefer **yes** — skipping security is the one skip that buys false confidence.
 
+#### Architecture triggers
+
+Answer **yes** if the diff makes a decision that is **expensive to reverse after merge**: a **modeling** decision — some value taking on an identifying, keying, ownership, or state-carrying role (an identifier in a URL or key, a natural key, a stored derived value, a new status/flag), which is the deepest trigger and the easiest to miss because it looks like ordinary code; a new or changed **contract** (route/URL shape, endpoint, RPC, event or message schema, exported API, CLI flag, config key); a **data model** change (new table/column/index, nullability or uniqueness change, a migration or implied backfill); a **boundary** change (new module/service/package, responsibility moved between layers, a new dependency direction); or a new **external dependency** — another service, infra, a third party, or any out-of-repo step the change needs in order to work. Answer **no** when the change stays inside existing boundaries and contracts: a bugfix within a function, an internal refactor with no signature change, tests-only, docs, formatting, renames with no contract impact. When genuinely uncertain on a contract or data-model change, prefer **yes** — those cost the most to undo once clients depend on them.
+
 #### Quality triggers
 
 Answer **yes** if the diff introduces design surface worth judging: new modules, functions, or abstractions; non-trivial control flow; new dependencies; public API, interface, or config changes; or anything a project convention file speaks to. Answer **no** when the change is mechanical with no design decision in it — renames or moves without logic changes, generated code, lockfiles, pure data/fixture updates, single-constant edits, reverts. When genuinely uncertain, prefer **yes**.
+
+Quality and architecture often fire together and that is fine — they judge different altitudes of the same code (quality: naming/duplication/typing; architecture: boundaries/contracts/data model). Do not gate one off because the other ran.
 
 #### Tests trigger
 
@@ -94,9 +101,13 @@ Write `./tmp/review-changes/HOLISTIC.md`:
 ## Approach Evaluation
 [Root cause vs symptom, layer, alternatives, complexity, trade-offs, verdict]
 
+## Design Concerns to Investigate
+[One line per concern the approach evaluation raised, each phrased as something checkable against the code. The architecture lens must resolve every entry. Write "none" only if the evaluation genuinely raised nothing.]
+
 ## Lens Applicability
 - correctness: yes — always (floor)
 - security: [yes | no] — [the trigger that fired, or why the diff has no security surface]
+- architecture: [yes | no] — [the modeling / contract / data-model / boundary / external-dependency decision that fired, or why the change stays inside existing boundaries and models nothing new]
 - quality: [yes | no] — [the trigger that fired, or why the change is mechanical]
 - tests: [yes | no] — [test files the diff touches, or none]
 - performance: [yes | no] — [the perf-sensitive surface, or why none]
@@ -105,4 +116,4 @@ Write `./tmp/review-changes/HOLISTIC.md`:
 [low | medium | high] — [one line]
 ```
 
-Then report back to the orchestrator: your **eligibility verdict** (`proceed-with-fan-out` | `single-inline-pass` | `stop`), the **`## Lens Applicability` block verbatim** (all five lines — the orchestrator gates on it and never opens this file), and a one-paragraph summary. For `single-inline-pass`, note that you already wrote `<ws>/review-changes.md`.
+Then report back to the orchestrator: your **eligibility verdict** (`proceed-with-fan-out` | `single-inline-pass` | `stop`), the **`## Lens Applicability` block verbatim** (all six lines — the orchestrator gates on it and never opens this file), and a one-paragraph summary. For `single-inline-pass`, note that you already wrote `<ws>/review-changes.md`.
