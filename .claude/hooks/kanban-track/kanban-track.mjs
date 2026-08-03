@@ -7,8 +7,10 @@ import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
+// Search-first, not create-first: a session with no pointer is usually a resumed
+// one (compact, restart), and its card already exists.
 const NO_POINTER_REMINDER =
-  "No AI-Kanban card is active for this session. If this prompt starts substantive, multi-step work, open a card to track it.";
+  "No AI-Kanban card is active for this session. If this prompt starts substantive, multi-step work, search the board first (list_cards with text) for an existing card covering it — continue on that card if you find one, and open a new card only if you don't.";
 
 function readStdin() {
   return new Promise((resolve) => {
@@ -39,7 +41,7 @@ function readPointer(sessionId) {
 function buildReminder(pointer) {
   if (!pointer) return NO_POINTER_REMINDER;
   return `Active AI-Kanban card #${pointer.cardNumber} (${pointer.summary}). ` +
-    "If this prompt diverges into a new task, open a NEW card; otherwise append progress to this card.";
+    "Append progress to THIS card. Open a new card only if the work has genuinely diverged into a distinct task — create_card with forceNew:true.";
 }
 
 function isValidMcpEntry(entry) {

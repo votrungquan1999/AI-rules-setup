@@ -27,6 +27,7 @@
     "find-patterns",
     "knowledge-base",
     "orchestrated-feature-dev",
+    "recall",
     "repo-knowledge",
     "review-changes",
     "root-cause-analysis",
@@ -37,7 +38,8 @@
     "validate-pr-comments",
     "web-search",
     "pr-comment-triage",
-    "recall"
+    "scout-and-plan",
+    "orchestrated-reasoning"
   ],
   "hooks": [
     "kanban-track",

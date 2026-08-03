@@ -1,13 +1,22 @@
 ---
 name: test-quality-reviewer
 description: Reviews test code quality using the 4 Pillars framework (Reliability, Validity, Sensitivity, Resilience). Use when reviewing tests, analyzing test quality, checking test coverage, or when user says "review these tests", "check test quality", or "analyze test coverage".
-allowed-tools: Read, Grep, Glob, Write
-context: fork
+allowed-tools: Agent, Read, Grep, Glob, Write
 ---
 
 # Test Quality Reviewer
 
 This Skill reviews test code using the **4 Pillars of Good Tests** framework to ensure tests are reliable, valid, sensitive, and appropriately resilient.
+
+## Execution — delegate to a Sonnet 5 sub-agent
+
+You run in the **main session** as a thin coordinator — do **not** perform the review below yourself:
+
+1. Resolve **which tests / files to review** from the conversation (the one thing only you can see).
+2. Spawn **one** sub-agent — `Agent` tool, `subagent_type: general-purpose`, `model: "sonnet"` (Sonnet 5). Pass it the resolved targets, the workspace `<identifier>`, and the framework below as its instructions. The test files are on disk in the shared working directory.
+3. It does all the reading/analysis/writing and returns a short summary + the artifact path. Relay those to the user; keep the test-file reads out of the main context.
+
+The framework and steps below are the **sub-agent's** instructions.
 
 ## The 4 Pillars Framework
 
