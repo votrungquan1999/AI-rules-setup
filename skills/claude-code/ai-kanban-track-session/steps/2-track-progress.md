@@ -18,6 +18,12 @@ Each call adds one timestamped note to the card's history (earlier notes are pre
 
 If an `append_progress` call fails, tell the user and keep working — tracking is a side channel, never a blocker for the actual task.
 
+## Re-stamp the mirror baseline
+
+After a **successful** `append_progress` (or `append_decision`), update `lastMirroredAt` to the current ISO timestamp in `~/.claude/kanban-session-state/<sessionId>.json`, preserving the file's other fields.
+
+This is what clears the `flush-debt` nudge: it compares your notes folder's file mtimes against this timestamp, so a stamp that lags behind reports work as unmirrored when it isn't — and re-mirroring in response would duplicate entries on the card. **Only stamp when the call actually succeeded**; on failure, leave it, so the debt correctly stays visible. Best-effort and never blocking, like the pointer write itself.
+
 ## Writing a good note
 
 - **One line, state-bearing.** What changed and where — e.g. `Staled reconcile service done + wired into board read; UI next.`
