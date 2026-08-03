@@ -1,0 +1,19 @@
+{
+  "description": "Nudges at the end of a turn when the task workspace holds records newer than the last mirror to the AI-Kanban card, so an interruption never strands them in a folder the operator may delete. Silent when there is no debt, when the session pointer lacks a workspace/last-mirror baseline, and on a re-entrant stop.",
+  "event": "Stop",
+  "script": "flush-debt.mjs",
+  "settingsFragment": {
+    "hooks": {
+      "Stop": [
+        {
+          "hooks": [
+            {
+              "type": "command",
+              "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/flush-debt/flush-debt.mjs"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
