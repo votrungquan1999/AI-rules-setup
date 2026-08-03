@@ -1,6 +1,6 @@
 ---
 name: review-changes
-description: Senior-level diff review via parallel review-lens subagents with a verification pass and confidence-scored merge. Use when the user asks for a code review, PR review, or pre-merge validation.
+description: Senior-level diff review via parallel review-lens subagents — correctness, security, architecture and design fit, quality, tests, performance — with a verification pass and confidence-scored merge. Use when the user asks for a code review, PR review, or pre-merge validation.
 ---
 
 # Review Changes
@@ -11,7 +11,7 @@ Orchestrate a code review as a lightweight **fan-out → verify → merge** pipe
 
 1. **holistic** — inline, strong model: eligibility + summary + approach-eval
 2. **gate** — run only the lenses holistic marked applicable (correctness is the floor)
-3. **lenses** — correctness / quality / security / tests / performance, parallel subagents
+3. **lenses** — correctness / security / architecture / quality / tests / performance, parallel subagents
 4. **gate** — which findings are flagged `Needs verification: yes`?
 5. **verify** flagged findings — parallel subagents
 6. **merge** — inline: apply verdicts → confidence-score → filter → dedupe → severity → `<ws>/review-changes.md`
@@ -28,7 +28,7 @@ Establish a task identifier first — the branch name under review, the PR/MR nu
 ## Orchestrator Responsibilities
 
 - Run the holistic phase **inline on the strong model** — it needs the whole picture and produces the framing every lens depends on.
-- Spawn lens subagents **in parallel**; pass each its node file + `HOLISTIC.md`. Use a smaller model for correctness/quality/tests/performance; keep **security on the strong model** (cheap security review gives false confidence, and it must trace data flow across files).
+- Spawn lens subagents **in parallel**; pass each its node file + `HOLISTIC.md`. Use a smaller model for correctness/quality/tests/performance; keep **security and architecture on the strong model** (cheap security review gives false confidence, and architecture reads across files — siblings, schema, adjacent layers — on a judgment call that degrades into style nits when discounted).
 - Spawn verifier subagents **only** for findings flagged `Needs verification: yes`; trust the rest. Keep a verifier batch on the strong model if it contains a security finding.
 - Merge **inline**: apply verdicts, score, filter, dedupe, write the report yourself.
 - Never output the raw diff, and never comment on code outside the diff.
@@ -37,7 +37,7 @@ Establish a task identifier first — the branch name under review, the PR/MR nu
 
 - `nodes/node-holistic.md` — run inline (Phase 1)
 - `nodes/lens-common.md` — shared lens rules (every lens reads this)
-- `nodes/node-lens-correctness.md`, `node-lens-quality.md`, `node-lens-security.md`, `node-lens-tests.md`, `node-lens-performance.md`
+- `nodes/node-lens-correctness.md`, `node-lens-security.md`, `node-lens-architecture.md`, `node-lens-quality.md`, `node-lens-tests.md`, `node-lens-performance.md`
 - `nodes/node-verify.md` — verify flagged findings
 
 ## Step 0 — Work in the right repo, against a fresh base
@@ -71,17 +71,33 @@ Scope: branch/PR → committed since `$BASE`; uncommitted → also `git status -
 
 ## Phases
 
-1. **Holistic (inline).** Run `node-holistic.md` from inside the repo, against `$BASE` from Step 0: eligibility (empty/trivial diff -> say so and stop, or do a single inline pass and skip the fan-out), changes summary, approach evaluation, and a **Lens Applicability** block — a `yes`/`no` plus a reason for each of the five lenses. Write `HOLISTIC.md`. **Gate:** if eligibility stops the review, stop; otherwise hold the applicability block for the lens gate.
-2. **Lens gate.** Run exactly the lenses holistic marked `yes` — you assessed the diff in phase 1, so route off those verdicts rather than re-deriving them. **correctness** is the floor and always runs; security, quality, tests, and performance each run only on a `yes`. State which lenses you are running, and the reason for each skip, before spawning — a skipped lens is a gap in what the review covers, so it has to be visible.
+1. **Holistic (inline).** Run `node-holistic.md` from inside the repo, against `$BASE` from Step 0: eligibility (empty/trivial diff -> say so and stop, or do a single inline pass and skip the fan-out), changes summary, approach evaluation, a **Design Concerns to Investigate** list (which the architecture lens must resolve), and a **Lens Applicability** block — a `yes`/`no` plus a reason for each of the six lenses. Write `HOLISTIC.md`. **Gate:** if eligibility stops the review, stop; otherwise hold the applicability block for the lens gate.
+2. **Lens gate.** Run exactly the lenses holistic marked `yes` — you assessed the diff in phase 1, so route off those verdicts rather than re-deriving them. **correctness** is the floor and always runs; security, architecture, quality, tests, and performance each run only on a `yes`. State which lenses you are running, and the reason for each skip, before spawning — a skipped lens is a gap in what the review covers, so it has to be visible.
 3. **Lenses (parallel subagents).** Each reads its node file + `lens-common.md` + `HOLISTIC.md`, sees the changes via `DIFF.patch` (captured once in phase 1 — they do not re-run `git diff`), reviews ONLY the diff, writes `LENS_<name>.md`, and reports finding count + highest severity.
 4. **Verification (parallel subagents).** Lenses are **trusted by default**. Verify only findings marked `Needs verification: yes` — the lens flagged something it couldn't confirm from the diff alone (behavior outside the diff, a caller's actual input, a runtime assumption, a guard that may exist elsewhere). Batch 2-4 flagged findings by shared file; each verifier resolves the flagged uncertainty against the real code and writes `VERDICT_<batch>.md`. Skip the phase entirely if nothing is flagged.
-5. **Merge (inline).** Apply verdicts — REFUTED -> drop; CONFIRMED -> keep with the verifier's adjusted severity; UNCERTAIN -> score conservatively (usually falls below the filter); trusted (never-flagged) findings -> carry through as-is. Then score each survivor 0-100 for "real, in-scope issue", **drop everything < 80**, dedupe by file+line (keep highest severity), normalize severity. Write `<ws>/review-changes.md`. If nothing survives, say the changes look good.
+5. **Merge (inline).** Apply verdicts — REFUTED -> drop; CONFIRMED -> keep with the verifier's adjusted severity; UNCERTAIN -> score conservatively; trusted (never-flagged) findings -> carry through as-is. Then score, filter, and dedupe per **Scoring and Filter** below, normalize severity, and write `<ws>/review-changes.md`. If nothing survives, say the changes look good.
+
+## Scoring and Filter
+
+Score each surviving finding 0-100 on **one axis only: how certain you are the finding is true and in scope.** Nothing else.
+
+- **0-25** — refuted, or a pre-existing issue on lines the diff didn't touch
+- **26-50** — rests on an assumption you cannot support; may well be a false positive
+- **51-75** — plausible and unrefuted, but a link in the chain is unconfirmed (an UNCERTAIN verdict usually lands here)
+- **76-90** — confirmed, with a minor open question
+- **91-100** — certain: directly confirmed against the code, and the failure mode or design consequence holds exactly as written
+
+**Do not lower the score because the issue feels small.** Impact is already carried by severity — scoring it a second time here is what buries findings that are certainly true but quiet, which is the usual shape of a contract, data-model, or convention problem. A certain-but-minor finding is a **NIT at 95**, not a SHOULD FIX at 70.
+
+**Filter — surface by severity**, since the more it costs to miss, the lower the certainty bar: **MUST FIX at >=70** (a possible data-loss or security bug is worth raising unconfirmed; mark it "(unverified)"), **SHOULD FIX at >=80**, **NIT at >=90**. Drop the rest, and attach the score to each surfaced finding.
+
+**Dedupe** by file + line + root issue, keeping the highest severity and noting both lenses. **Root findings survive dedupe intact:** the architecture lens may file a finding that names other findings it would dissolve — order it *above* the ones it names and keep its "this also removes X and Y" statement verbatim, rather than collapsing it into them. If a verifier refuted the root, the symptom findings still stand on their own.
 
 ## Report Format
 
 Open with a **Summary** and a **Coverage** line — which lenses ran, and each skipped lens with its one-line reason from the applicability block. A skipped lens is unreviewed, not clean; the reader has to be able to see the gap.
 
-Each finding lists: **Severity**, **Confidence** (80-100), **Verified** (confirmed / trusted / unverified), **Lens**, **Description**, **Failure mode** (concrete trigger -> behavior -> harm, or `No distinct failure mode — <maintainability/readability> concern` — never a vague restatement), **Why it matters**, **Suggested fix**. End the report with **Positive Notes** and a **Recommendation**: safe to merge / merge with comments / needs changes.
+Each finding lists: **Severity**, **Confidence** (70-100), **Verified** (confirmed / trusted / unverified), **Lens** (correctness / security / architecture / quality / tests / performance), **Description**, **Failure mode** (concrete trigger -> behavior -> harm; for architecture only, a design consequence — what becomes true -> what it forces -> who pays; or `No distinct failure mode — <maintainability/readability> concern` — never a vague restatement), **Why it matters**, **Suggested fix**. End the report with **Positive Notes** and a **Recommendation**: safe to merge / merge with comments / needs changes.
 
 ## Severity
 

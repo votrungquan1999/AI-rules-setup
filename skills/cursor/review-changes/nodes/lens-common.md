@@ -4,7 +4,7 @@ Rules every review lens follows. Your specific focus is in your own `node-lens-*
 
 ## Scope
 
-- Review **ONLY the code shown in the current diff**. Do not comment on unchanged code or pre-existing issues on lines the diff didn't touch.
+- Review **ONLY the code shown in the current diff**. Do not comment on unchanged code or pre-existing issues on lines the diff didn't touch. (**Architecture is the exception** — judging system fit requires reading the structure around the change; its node file defines how far that goes. The fault it reports must still be in the diff.)
 - **Read the diff from `./tmp/review-changes/DIFF.patch`** — holistic already captured it there — instead of re-running `git diff` yourself. Use `Read` with an offset to page through a large patch, or `grep` it for a path. Shell out to git only for something the patch genuinely cannot answer (full file context around a hunk, history of a line).
 - Read `./tmp/review-changes/HOLISTIC.md` first for shared framing: the intended approach, constraints, and the root cause being solved. Judge the change against that intent.
 - Assume intent is correct unless there is clear risk. Prefer concrete, actionable suggestions and explain the "why".
@@ -32,6 +32,7 @@ For each finding, give the **failure mode**: the concrete sequence that turns th
 - Be **concrete and specific to THIS code**: name the trigger (a user action, an input value, a timing/concurrency window, a second tab or request), trace what the code actually does step by step, and end at the observable harm (wrong data, a race, a crash, a leak, a user locked out). Reference bar for the level of detail: *"user updates a field → mutation returns task IDs → FE polls → user refreshes → FE returns empty pending IDs while the BE task is still IN_PROGRESS → user edits assignees and races the worker."*
 - A vague restatement — "this could cause bugs", "may break", "is risky" — is **NOT** a failure mode; it just repeats the description. **Never write a hollow one to fill the field.**
 - If you cannot construct a concrete runtime failure (the finding is a pure maintainability / readability / style concern), **omit it and say so**: `No distinct failure mode — <maintainability/readability> concern`.
+- The **architecture** lens has a third accepted form — the *design consequence* (what the change forces later, when nothing fails at runtime). It is defined in that lens's node file and is held to the same specificity bar; no other lens may use it.
 
 ## Flag findings that need a code-level check
 

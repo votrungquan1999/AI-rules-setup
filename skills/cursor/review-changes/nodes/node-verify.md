@@ -27,6 +27,7 @@ You are a **check, not an investigation** — the cheapest phase in the pipeline
    - Would a linter / typechecker / compiler already catch it? (→ **REFUTE**)
    - Is it already handled elsewhere — a guard, a caller-side check, framework behavior? (→ **REFUTE** or downgrade)
    - For a **performance** finding, confirm the **magnitude assumption** — `n` really unbounded, path really hot — not merely that the code runs. If magnitude can't be confirmed from the code, return **UNCERTAIN**; unmeasurable perf speculation must not survive.
+   - For an **architecture** finding, confirm the **structural claim** against the real surrounding code: the siblings really do use that segment/field to mean something else, the layer really does already own that responsibility, the out-of-repo step really is absent (search the repo before believing it missing). For a **modeling-premise** finding, the check is whether the property the design needs is genuinely unguaranteed — is the value actually mutable (is there an edit path?), actually non-unique (is there really no constraint?), actually derived (does something else recompute it?). Finding a guarantee that does hold **REFUTES** it; finding none **CONFIRMS** it. Note the asymmetry in the pre-existing rule above: an architecture finding *cites unchanged code as its evidence* — that is the frame of reference, not the fault. Refute it only if the **diff's own** decision turns out to be fine; never merely because the comparison points are outside the diff.
 3. Assign a verdict:
    - **CONFIRMED** — you traced the path and the issue genuinely holds.
    - **REFUTED** — false positive, out of scope, pre-existing, already handled, or CI would catch it.
@@ -42,7 +43,7 @@ Write to the `./tmp/review-changes/VERDICT_[batch].md` path named in your prompt
 ### [Issue Title] (lens: <name>, <file:line>)
 - **Verdict**: CONFIRMED / REFUTED / UNCERTAIN
 - **Evidence**: [what you read in the code that supports the verdict — cite specific lines/behavior]
-- **Failure mode**: [the verified concrete sequence — trigger → behavior → harm; sharpened if the original was vague. Omit only for a pure maintainability/readability concern.]
+- **Failure mode**: [the verified concrete sequence — trigger → behavior → harm; for an architecture finding, the verified design consequence (what becomes true → what it forces → who pays). Sharpened if the original was vague. Omit only for a pure maintainability/readability concern.]
 - **Adjusted severity**: MUST FIX / SHOULD FIX / NIT   (only if CONFIRMED; otherwise N/A)
 - **Confidence**: [0–100]
 ```
