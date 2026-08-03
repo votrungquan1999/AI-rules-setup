@@ -55,19 +55,11 @@ must never do.
 
 ## Why the re-entrancy guard
 
-`additionalContext` on `Stop` is not a passive annotation — it **continues the conversation**,
-under the same loop protections as `decision: "block"`. So the continuation this hook causes ends
-in another `Stop`, which fired the nudge again, which continued again, until Claude Code's
-**8-consecutive-continuation cap** ended the turn. Observed live: a single un-updated spec produced
-eight identical back-to-back nudges, none of which the operator could clear by answering.
+`additionalContext` on `Stop` is not a passive annotation — it **continues the conversation**, under the same loop protections as `decision: "block"`. So the continuation this hook causes ends in another `Stop`, which fired the nudge again, which continued again, until Claude Code's **8-consecutive-continuation cap** ended the turn. Observed live: a single un-updated spec produced eight identical back-to-back nudges, none of which the operator could clear by answering.
 
-`stop_hook_active` is `true` exactly when Claude Code is already continuing because of a stop hook,
-so returning silently on it breaks the self-trigger while leaving the first nudge of each turn
-intact. This is the guard the Claude Code docs prescribe for `Stop` hooks.
+`stop_hook_active` is `true` exactly when Claude Code is already continuing because of a stop hook, so returning silently on it breaks the self-trigger while leaving the first nudge of each turn intact. This is the guard the Claude Code docs prescribe for `Stop` hooks.
 
-**Deliberately not fire-once.** The guard stops a nudge re-triggering *itself*; it still nudges once
-per user turn while the spec is untouched. Suppressing that too would mean persisting a "already
-nudged" flag, i.e. a new automatic write into `~/.claude/`, which is out of scope here.
+**Deliberately not fire-once.** The guard stops a nudge re-triggering *itself*; it still nudges once per user turn while the spec is untouched. Suppressing that too would mean persisting a "already nudged" flag, i.e. a new automatic write into `~/.claude/`, which is out of scope here.
 
 ## Why no change-detection
 
