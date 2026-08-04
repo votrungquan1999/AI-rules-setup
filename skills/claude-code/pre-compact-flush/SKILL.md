@@ -1,7 +1,7 @@
 ---
 name: pre-compact-flush
 description: Writes everything durable-worthy out of the current context into the task workspace and the AI-Kanban card, so a compaction cannot lose it — then tells the operator it is safe to run /compact. Trigger when the user types "/pre-compact-flush", says "flush before compacting", "I'm about to compact", "save context before /compact", or asks to preserve the session's state before it gets summarized.
-allowed-tools: Read, Write, Edit, Glob, Grep, Bash, mcp__ai-kanban-dispatch__append_decision, mcp__ai-kanban-dispatch__append_progress, mcp__ai-kanban-dispatch__mark_decision_outdated, mcp__ai-kanban-dispatch__get_card_context
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash, mcp__ai-kanban-dispatch__append_decision, mcp__ai-kanban-dispatch__append_progress, mcp__ai-kanban-dispatch__update_card, mcp__ai-kanban-dispatch__mark_decision_outdated, mcp__ai-kanban-dispatch__get_card_context
 ---
 
 # Pre-Compact Flush
@@ -32,31 +32,42 @@ When you're unsure, ask whether a competent person with the repo in front of the
 
 ## Where each thing goes
 
-Each type has exactly one home. Never write the same thing to two of them.
+Each type has exactly one home. Never write the same thing to two of them — except where a bullet says **and**, which means the card gets a copy because the workspace can be deleted and the card cannot.
 
-- **Decision** → append to `<ws>/DECISIONS.md` **and** call `append_decision` on the active card. Both, because the workspace can be deleted and the card cannot.
+- **Decision** → append to `<ws>/DECISIONS.md` **and** call `append_decision` on the active card.
 - **Step transition / status change** → append to `<ws>/IMPLEMENTATION_PROGRESS.md`.
 - **Open question, finding, or reusable command** → append to `<ws>/JOURNAL.md`.
 - **A decision that is now superseded** → call `mark_decision_outdated` on the card and note the supersession in `DECISIONS.md`. Do not delete the old entry; a decision that was reversed is itself a record.
+- **Where the work stands as a whole** → the card only, via `append_progress` **and** `update_card`. See *The card state note*.
 
 `<ws>` is the task workspace you have been writing to this session — the folder holding `IMPLEMENTATION_PROGRESS.md` and any plan files. If you can't identify it, don't guess a path: see *No workspace* below.
 
+## The card state note
+
+Every other entry above is a *record* — a thing that happened. This one is a *summary*: it answers "where is this work right now", and it is the only thing a fresh session gets before it has read anything.
+
+- **`append_progress`** — one note: what is done, what is not, what is in flight. A few lines, not a transcript. If the previous note still describes the situation accurately, skip it rather than restate it.
+- **`update_card` with `nextAction`** — the single next concrete step. This field is a pointer, not a log: it holds one line and is overwritten each flush, so a stale one is worse than an empty one.
+
+Don't re-list decisions here; they are already on the card as their own entries.
+
 ## Flow
 
-1. **Locate `<ws>`.** It's the folder you've written progress to this session. Confirm it exists before writing.
+1. **Locate `<ws>`.** It's the folder you've written progress to this session. If you're unsure, call `get_card_context` — the card records it as `workspacePath` and `repos[].worktreePath`. Confirm it exists before writing.
 2. **Scan your own context** against the selection test. Go back to the start of what you can still see, not just the last few turns — the oldest entries are the ones a summary has already thinned.
 3. **Append** each item to its home. Always append; never rewrite or reflow an existing file, and never renumber existing entries.
 4. **Mirror decisions to the card**, including any supersessions.
-5. **Report and hand off** (below).
+5. **Write the card state note** — `append_progress`, then `nextAction`. Do this last, so it reflects everything you just wrote.
+6. **Report and hand off** (below).
 
 ## No workspace
 
-A session with no task workspace still has things worth keeping. Write them to the **card alone** via `append_progress` and `append_decision` — that path needs no `<ws>` and is the more durable of the two anyway.
+A session with no task workspace still has things worth keeping. Write them to the **card alone** — `append_decision` for decisions, then the card state note. That path needs no `<ws>` and is the more durable of the two anyway.
 
 If there is no workspace *and* no card, say so plainly and ask whether to open a card before compacting. Don't invent a folder to write into.
 
 ## Finish
 
-Report what you wrote: the counts per file, and one line naming each decision recorded. Then state explicitly that **the operator can now run `/compact`** — you cannot trigger it.
+Report what you wrote: the counts per file, one line naming each decision recorded, and the `nextAction` you left on the card. Then state explicitly that **the operator can now run `/compact`** — you cannot trigger it.
 
 Name anything you deliberately left out, and anything you were unsure whether to keep. An entry you skipped is fine; an entry you skipped *silently* is the failure this skill exists to prevent.
