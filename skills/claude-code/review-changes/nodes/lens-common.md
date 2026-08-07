@@ -1,6 +1,6 @@
 # Shared Lens Rules
 
-Rules every review lens follows. Your specific focus is in your own `node-lens-*.md` file; this file is the common discipline.
+Rules every review lens follows. Your specific focus is in the `node-lens-*.md` file(s) your prompt names — one if you carry a single lens, several if you are a grouped agent; this file is the common discipline either way.
 
 ## Scope
 
@@ -52,7 +52,7 @@ Most findings you can confirm from what you've read — report those as settled 
 
 ## Output
 
-Write findings to the `./tmp/review-changes/LENS_<name>.md` path named in your prompt:
+Write findings to the `./tmp/review-changes/LENS_<name>.md` path named in your prompt. **Grouped agents:** `node-lens-grouped.md` extends this format with a per-finding `Lens` field and a per-lens Coverage block — follow it instead, since one file then carries several lenses.
 
 ```markdown
 # Lens: <name>

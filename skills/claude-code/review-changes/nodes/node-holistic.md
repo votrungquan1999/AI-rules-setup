@@ -15,7 +15,21 @@ Work from inside the repo the orchestrator resolved in Step 0 (the repo the conv
 Decide whether the fan-out adds value, and report your verdict back to the orchestrator:
 - **No changes** → verdict `stop`. Report it back; write nothing else.
 - **Trivial diff** (a handful of lines, generated files, pure formatting, version bumps) → verdict `single-inline-pass`. Review it yourself in one pass and write the **final report** directly to `<ws>/review-changes.md` (format below), then report the verdict back. Skip the lens fan-out.
-- **Non-trivial** (real logic, multiple files, or anything touching data/auth/security) → verdict `proceed-with-fan-out`. Write `HOLISTIC.md` (below); the orchestrator takes it from there.
+- **Non-trivial** (real logic, multiple files, or anything touching data/auth/security) → verdict `proceed`. Write `HOLISTIC.md` (below) and set the **review depth** (step 2b); the orchestrator takes it from there.
+
+### 2b. Review depth (the main cost gate)
+
+Every review agent costs the same fixed overhead — its own system prompt, this repo's convention files, its node file, `HOLISTIC.md` — regardless of how much diff it reads. A six-lens fan-out therefore costs roughly the same on a 40-line diff as on a 3000-line one, which is why depth is gated on **size** here and not only on applicability in step 6.
+
+**Measure now, decide after step 6.** Run `git diff --stat "$BASE"` here — it is cheap and it also informs the summary — but the depth itself depends on your security and architecture verdicts, so settle it once step 6 is done. Judge the size on the **non-generated, non-lockfile** portion: a 4000-line lockfile or snapshot update is one reviewable decision, not four thousand.
+
+- **`compact`** — ≤ 8 files **and** ≤ 300 changed lines, **and** you marked both security and architecture `no` in step 6. One reviewer agent covers every applicable lens in a single pass.
+- **`grouped`** — ≤ 25 files **and** ≤ 1000 changed lines. Also where a `compact`-sized diff lands when security or architecture fired: those two get their own agent rather than sharing one with the mechanical lenses.
+- **`fan-out`** — anything larger. One agent can no longer hold the whole diff well, so each lens gets its own.
+
+**Escalate one step when the diff is small but consequential** — a migration, an auth path, a public contract, a payment or permission surface. Size measures reading cost, not blast radius, and a 30-line auth change deserves the depth its risk earns. Escalate one step only; never jump `compact` → `fan-out`.
+
+**Do not escalate for volume alone** when the change is repetitive — a rename across 40 files, a mechanical codemod, a bulk import rewrite. Those are one decision applied N times, and a fan-out reviews the same decision six times over. Say so in your reason.
 
 ### 3. Understand the problem
 
@@ -50,7 +64,9 @@ You produce the *framing*; you do not produce findings. Every concern this evalu
 
 ### 6. Lens applicability (gate)
 
-The orchestrator spawns **only the lenses you mark `yes`** — this is the main cost lever, so judge each one on what the diff actually touches. **Correctness always runs**; it is the floor and needs no verdict beyond `yes`. The other five are yours to gate: give each a `yes`/`no` plus the trigger that fired, or why the diff has no such surface.
+Only the lenses you mark `yes` get reviewed at all — depth (step 2b) decides how many *agents* carry them, applicability decides *which* run. Judge each one on what the diff actually touches. **Correctness always runs**; it is the floor and needs no verdict beyond `yes`. The other five are yours to gate: give each a `yes`/`no` plus the trigger that fired, or why the diff has no such surface.
+
+Answer these on the merits of the diff — do **not** mark a lens `no` to save cost, and do not let a `compact` measurement in step 2b pull a verdict toward `no`. The dependency runs the other way: step 2b reads your security and architecture verdicts, so shading one to hit `compact` corrupts the depth decision it feeds.
 
 #### Security triggers
 
@@ -82,7 +98,10 @@ Write `./tmp/review-changes/HOLISTIC.md`:
 # Holistic
 
 ## Eligibility
-[proceed-with-fan-out | single-inline-pass | stop] — [reason]
+[proceed | single-inline-pass | stop] — [reason]
+
+## Review Depth
+[compact | grouped | fan-out] — [N files, N changed lines] — [reason; name the escalation trigger if you escalated, or the repetition if you declined to]
 
 ## Root Cause & Constraints
 [The problem being solved and the constraints around it]
@@ -116,4 +135,4 @@ Write `./tmp/review-changes/HOLISTIC.md`:
 [low | medium | high] — [one line]
 ```
 
-Then report back to the orchestrator: your **eligibility verdict** (`proceed-with-fan-out` | `single-inline-pass` | `stop`), the **`## Lens Applicability` block verbatim** (all six lines — the orchestrator gates on it and never opens this file), and a one-paragraph summary. For `single-inline-pass`, note that you already wrote `<ws>/review-changes.md`.
+Then report back to the orchestrator: your **eligibility verdict** (`proceed` | `single-inline-pass` | `stop`), the **`## Review Depth` line verbatim**, the **`## Lens Applicability` block verbatim** (all six lines — the orchestrator gates on both and never opens this file), and a one-paragraph summary. For `single-inline-pass`, note that you already wrote `<ws>/review-changes.md`.
