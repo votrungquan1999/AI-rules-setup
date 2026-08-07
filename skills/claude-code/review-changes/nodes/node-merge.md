@@ -13,7 +13,7 @@ From your prompt: the repo dir, `$BASE`, and the resolved `<ws>`. Read from `<ws
 - every `LENS_*.md` — the findings
 - every `VERDICT_*.md` — verifier verdicts for the findings that were flagged
 
-Comment ONLY on findings the lenses raised about the current diff. Never introduce an issue about code outside the diff.
+Comment ONLY on findings the lenses raised. Never open an issue of your own, about the diff or anything outside it.
 
 ## 1. Apply verdicts (only for findings that went through verification)
 
@@ -26,11 +26,13 @@ Comment ONLY on findings the lenses raised about the current diff. Never introdu
 
 Score each surviving finding 0–100 on **one axis only: how certain you are the finding is true and in scope.** Nothing else.
 
-- **0–25** — refuted, or a pre-existing issue on lines the diff didn't touch
+- **0–25** — refuted, or an unrelated pre-existing issue this change neither reaches nor worsens
 - **26–50** — rests on an assumption you cannot support; may well be a false positive
 - **51–75** — plausible and unrefuted, but a link in the chain is unconfirmed (an UNCERTAIN verdict usually lands here)
 - **76–90** — confirmed, with a minor open question
 - **91–100** — certain: directly confirmed against the code, and the failure mode or design consequence holds exactly as written
+
+**Do not lower the score because of Origin.** Origin is information for the reviewer, not a discount: a `pre-existing — touched` or `pre-existing — newly reached` finding is scored on the same one axis as any other — how certain you are it is true and in scope. The reach test in step 5 already decided whether it is in scope; do not re-decide it here by scoring it down.
 
 **Do not lower the score because the issue feels small.** Impact is already carried by severity — scoring it a second time here is what buries findings that are certainly true but quiet, which is the usual shape of a contract, data-model, or convention problem. A certain-but-minor finding is a **NIT at 95**, not a SHOULD FIX at 70. If you catch yourself reaching for the 51–75 band on a finding you have no actual doubt about, the correct move is a high score and a lower severity.
 
@@ -53,8 +55,10 @@ When two lenses flag the same file + line + root issue, keep one entry at the **
 
 Normalize to MUST FIX / SHOULD FIX / NIT (definitions below).
 
+**Carry `Origin` through to the report** — from the `VERDICT_*.md` when the finding was verified (the verifier settles it), otherwise from the `LENS_*.md`. Never drop the field and never re-derive it yourself; you have not read the code. A surviving `(unconfirmed)` origin stays marked unconfirmed.
+
 **False positives to drop:**
-- Pre-existing issues, or issues on lines the diff did not modify
+- **Unrelated** pre-existing issues — untouched code this change neither reaches nor worsens. A pre-existing defect on a line the diff touched, or one the diff newly reaches, is **kept** and labeled by its Origin, not dropped
 - Anything a linter / typechecker / compiler would catch (imports, types, formatting) — assume CI runs these
 - Pedantic nitpicks a senior engineer wouldn't raise
 - Changes that are clearly intentional and part of the broader change
@@ -74,11 +78,14 @@ Write the complete review to `<ws>/review-changes.md` (one level above the inter
 
 Reviewed: [lenses that ran]. Skipped: [lens — one-line reason, from HOLISTIC.md's Lens Applicability; or "none"].
 
+Origin of findings: [N] introduced by this change, [N] pre-existing on lines it touched, [N] pre-existing but newly reached by it.
+
 ## Findings
 
 ### [Issue Title]
 - **Severity**: MUST FIX / SHOULD FIX / NIT
 - **Confidence**: [70–100]
+- **Origin**: introduced by this change / pre-existing — touched by this change / pre-existing — newly reached by this change [+ the link the diff created; keep "(unconfirmed)" if it was never settled]
 - **Verified**: confirmed (went through verification) / trusted (lens confirmed it, no check needed) / unverified (UNCERTAIN after a check)
 - **Lens**: [correctness / security / architecture / quality / tests / performance]
 - **Description**: [What's wrong]
@@ -101,4 +108,4 @@ Reviewed: [lenses that ran]. Skipped: [lens — one-line reason, from HOLISTIC.m
 - **SHOULD FIX**: Important for maintainability, performance, or best practices
 - **NIT**: Minor style/consistency (only mention if worth noting)
 
-Report back to the orchestrator: the recommendation line (✅ / ⚠️ / ❌) and the count of surfaced findings by severity. Do not paste the full report back — it lives at `<ws>/review-changes.md`.
+Report back to the orchestrator: the recommendation line (✅ / ⚠️ / ❌), the count of surfaced findings by severity, and the origin split (how many the change introduced vs inherited). Do not paste the full report back — it lives at `<ws>/review-changes.md`.

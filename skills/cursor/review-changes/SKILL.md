@@ -1,6 +1,6 @@
 ---
 name: review-changes
-description: Senior-level diff review via parallel review-lens subagents — correctness, security, architecture and design fit, quality, tests, performance — with a verification pass and confidence-scored merge. Use when the user asks for a code review, PR review, or pre-merge validation.
+description: Senior-level diff review via parallel review-lens subagents — correctness, security, architecture and design fit, quality, tests, performance — with a verification pass and a confidence-scored merge that labels each finding by origin (introduced by this change vs pre-existing). Use when the user asks for a code review, PR review, or pre-merge validation.
 ---
 
 # Review Changes
@@ -73,7 +73,7 @@ Scope: branch/PR → committed since `$BASE`; uncommitted → also `git status -
 
 1. **Holistic (inline).** Run `node-holistic.md` from inside the repo, against `$BASE` from Step 0: eligibility (empty/trivial diff -> say so and stop, or do a single inline pass and skip the fan-out), changes summary, approach evaluation, a **Design Concerns to Investigate** list (which the architecture lens must resolve), and a **Lens Applicability** block — a `yes`/`no` plus a reason for each of the six lenses. Write `HOLISTIC.md`. **Gate:** if eligibility stops the review, stop; otherwise hold the applicability block for the lens gate.
 2. **Lens gate.** Run exactly the lenses holistic marked `yes` — you assessed the diff in phase 1, so route off those verdicts rather than re-deriving them. **correctness** is the floor and always runs; security, architecture, quality, tests, and performance each run only on a `yes`. State which lenses you are running, and the reason for each skip, before spawning — a skipped lens is a gap in what the review covers, so it has to be visible.
-3. **Lenses (parallel subagents).** Each reads its node file + `lens-common.md` + `HOLISTIC.md`, sees the changes via `DIFF.patch` (captured once in phase 1 — they do not re-run `git diff`), reviews ONLY the diff, writes `LENS_<name>.md`, and reports finding count + highest severity.
+3. **Lenses (parallel subagents).** Each reads its node file + `lens-common.md` + `HOLISTIC.md`, sees the changes via `DIFF.patch` (captured once in phase 1 — they do not re-run `git diff`), reviews ONLY what the change is answerable for (the diff, plus what it newly reaches), labels each finding's **Origin**, writes `LENS_<name>.md`, and reports finding count + highest severity.
 4. **Verification (parallel subagents).** Lenses are **trusted by default**. Verify only findings marked `Needs verification: yes` — the lens flagged something it couldn't confirm from the diff alone (behavior outside the diff, a caller's actual input, a runtime assumption, a guard that may exist elsewhere). Batch 2-4 flagged findings by shared file; each verifier resolves the flagged uncertainty against the real code and writes `VERDICT_<batch>.md`. Skip the phase entirely if nothing is flagged.
 5. **Merge (inline).** Apply verdicts — REFUTED -> drop; CONFIRMED -> keep with the verifier's adjusted severity; UNCERTAIN -> score conservatively; trusted (never-flagged) findings -> carry through as-is. Then score, filter, and dedupe per **Scoring and Filter** below, normalize severity, and write `<ws>/review-changes.md`. If nothing survives, say the changes look good.
 
@@ -81,11 +81,13 @@ Scope: branch/PR → committed since `$BASE`; uncommitted → also `git status -
 
 Score each surviving finding 0-100 on **one axis only: how certain you are the finding is true and in scope.** Nothing else.
 
-- **0-25** — refuted, or a pre-existing issue on lines the diff didn't touch
+- **0-25** — refuted, or an unrelated pre-existing issue this change neither reaches nor worsens
 - **26-50** — rests on an assumption you cannot support; may well be a false positive
 - **51-75** — plausible and unrefuted, but a link in the chain is unconfirmed (an UNCERTAIN verdict usually lands here)
 - **76-90** — confirmed, with a minor open question
 - **91-100** — certain: directly confirmed against the code, and the failure mode or design consequence holds exactly as written
+
+**Do not lower the score because of Origin.** Origin is information for the reviewer, not a discount — a `pre-existing — touched` or `pre-existing — newly reached` finding is scored on the same one axis as any other. Carry each finding's Origin through to the report from the verdict when it was verified, otherwise from the lens; never re-derive it yourself.
 
 **Do not lower the score because the issue feels small.** Impact is already carried by severity — scoring it a second time here is what buries findings that are certainly true but quiet, which is the usual shape of a contract, data-model, or convention problem. A certain-but-minor finding is a **NIT at 95**, not a SHOULD FIX at 70.
 
@@ -95,9 +97,9 @@ Score each surviving finding 0-100 on **one axis only: how certain you are the f
 
 ## Report Format
 
-Open with a **Summary** and a **Coverage** line — which lenses ran, and each skipped lens with its one-line reason from the applicability block. A skipped lens is unreviewed, not clean; the reader has to be able to see the gap.
+Open with a **Summary** and a **Coverage** line — which lenses ran, and each skipped lens with its one-line reason from the applicability block. A skipped lens is unreviewed, not clean; the reader has to be able to see the gap. Follow it with an **origin split**: how many findings this change introduced, how many are pre-existing on lines it touched, how many are pre-existing but newly reached by it.
 
-Each finding lists: **Severity**, **Confidence** (70-100), **Verified** (confirmed / trusted / unverified), **Lens** (correctness / security / architecture / quality / tests / performance), **Description**, **Failure mode** (concrete trigger -> behavior -> harm; for architecture only, a design consequence — what becomes true -> what it forces -> who pays; or `No distinct failure mode — <maintainability/readability> concern` — never a vague restatement), **Why it matters**, **Suggested fix**. End the report with **Positive Notes** and a **Recommendation**: safe to merge / merge with comments / needs changes.
+Each finding lists: **Severity**, **Confidence** (70-100), **Origin** (introduced by this change / pre-existing — touched by this change / pre-existing — newly reached by this change, plus the link the diff created; keep any "(unconfirmed)" marker), **Verified** (confirmed / trusted / unverified), **Lens** (correctness / security / architecture / quality / tests / performance), **Description**, **Failure mode** (concrete trigger -> behavior -> harm; for architecture only, a design consequence — what becomes true -> what it forces -> who pays; or `No distinct failure mode — <maintainability/readability> concern` — never a vague restatement), **Why it matters**, **Suggested fix**. End the report with **Positive Notes** and a **Recommendation**: safe to merge / merge with comments / needs changes.
 
 ## Severity
 
@@ -107,7 +109,7 @@ Each finding lists: **Severity**, **Confidence** (70-100), **Verified** (confirm
 
 ## What NOT to flag
 
-Pre-existing issues or lines the diff didn't touch; anything a linter/typechecker/compiler catches; pedantic nits; clearly intentional changes. Do not run the build or typecheck — that is CI's job.
+**Unrelated** pre-existing issues — untouched code this change neither reaches nor worsens (a pre-existing flaw on a line the diff touched, or one the diff newly reaches, is kept and labeled by Origin, not dropped); anything a linter/typechecker/compiler catches; pedantic nits; clearly intentional changes. Do not run the build or typecheck — that is CI's job.
 
 ## Related Skills
 

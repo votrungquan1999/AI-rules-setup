@@ -1,6 +1,6 @@
 ---
 name: review-changes
-description: Senior engineer code review that inspects a diff through correctness, security, architecture, quality, performance, and test lenses in sequence, then reports confidence-scored, severity-ranked findings. Use when reviewing code, checking changes, or when the user says "review my changes", "code review", "review this diff", or "check my code".
+description: Senior engineer code review that inspects a diff through correctness, security, architecture, quality, performance, and test lenses in sequence, then reports confidence-scored, severity-ranked findings, each labeled by origin (introduced by this change vs pre-existing). Use when reviewing code, checking changes, or when the user says "review my changes", "code review", "review this diff", or "check my code".
 ---
 
 # Review Changes
@@ -91,14 +91,23 @@ Keep this framing in mind — judge every lens finding against it. **Write down 
 
 Run exactly the lenses you marked `yes` above, one at a time — **correctness** is the floor and always runs; the other five run only on a `yes`. State which lenses you are running, and the reason for each skip, before starting: a skipped lens is a gap in what the review covers, so it has to be visible.
 
-For each lens, review the diff for the criteria below. **Shared discipline for every lens:** review ONLY the code in the diff (security may read across files to trace data flow, and architecture reads the surrounding structure by design — but the finding must still concern diff'd code); assume intent is correct unless there's clear risk; and for every finding give a concrete **failure mode** (see Report).
+For each lens, review the diff for the criteria below. **Shared discipline for every lens:** review ONLY what this change is answerable for — the code the diff introduced or changed, plus code outside it that the diff **newly reaches, feeds, exposes, or multiplies** (security may read across files to trace data flow, and architecture reads the surrounding structure by design); assume intent is correct unless there's clear risk; and for every finding give a concrete **failure mode** (see Report).
+
+**Label every finding's `Origin`** so the reviewer can tell whether this change caused the problem or inherited it. You state it; you do not judge on it — Origin never changes severity and is never a reason to soften or drop a finding, because a pre-existing bug this change is the first to trigger harms production exactly as much as a new one.
+
+- `introduced` — this change created the defect.
+- `pre-existing — touched` — the defect predates the change; the diff only moved, reformatted, renamed, or edited around it. Say so plainly: the author did not write this bug.
+- `pre-existing — newly reached` — the faulty code predates the change, but the change now calls it, feeds it new input, exposes it on a new surface, or multiplies its cost. **Name what the diff did to reach it** — that link is the whole justification for reporting it.
+
+Decide it from the patch, cheaply: a `+` line carrying the defect is `introduced`; a context line or code outside the diff is pre-existing, and you pick which of the two pre-existing forms applies. Do **not** run `git blame` per finding. When the patch cannot settle it — moved code, a rename, a re-indent, each of which makes a relocated old line look introduced — write your best guess, append `(unconfirmed)`, and settle it in Step 3 rather than guessing.
 
 **Correctness — review the diff for logic and behavioral defects:**
 - Logic bugs: off-by-one, inverted conditions, wrong operators, incorrect control flow; state mutated wrongly, stale reads, bad ordering assumptions.
 - Edge cases & error handling: null/undefined/empty inputs, empty collections, boundary values; failure paths handled vs. silently falling through; concurrency / races / async ordering where relevant.
 - Performance is **out of scope here** — the performance lens owns it. Raise a perf issue in correctness only if it also produces a *wrong result* (e.g. a timeout silently dropping data), not mere slowness.
+- A claim about unrelated unchanged code is out of scope, but a pre-existing bug this diff **newly reaches** (a new caller, a new input value, a branch that was unreachable before) is in scope — file it with that Origin and name the link.
 
-**Architecture (only if the diff makes an expensive-to-reverse decision) — judge the design, starting with whether its premise is sound.** Quality owns micro-hygiene; you own what cannot be undone cheaply. **You are the one lens exempt from diff-only reading** — "does this fit the system" is unanswerable from the diff, so read the sibling routes, the schema, the registry, the layers above and below. The exemption is on what you *read*, not what you *flag*: the fault must be in the diff, and surrounding code is the frame of reference, never the target.
+**Architecture (only if the diff makes an expensive-to-reverse decision) — judge the design, starting with whether its premise is sound.** Quality owns micro-hygiene; you own what cannot be undone cheaply. **You are the one lens exempt from diff-only reading** — "does this fit the system" is unanswerable from the diff, so read the sibling routes, the schema, the registry, the layers above and below. The exemption is on what you *read*, not what you *flag*: the fault must belong to the change, and surrounding code is the frame of reference, never the target. Because of that framing your findings are almost always `Origin: introduced` — the diff's own design decision — even though the evidence cites unchanged code.
 
 - **Modeling premise — is the right concept doing the job?** The deepest question, and it outranks the rest: structure cannot rescue a wrong premise. Ask what the design **requires to be true** of each thing it leans on, then whether the chosen concept guarantees it. *A nickname used as a URL alias:* a URL identifier requires stability (links are shared, bookmarked, indexed), uniqueness, and path safety — a mutable display label guarantees none of them. The right review is not "rename the param" or "add a unique index"; it is **a display attribute must not carry identity**. Same class: a derived value stored as truth, a translated string as a machine key, an unstable natural key (email, phone, filename), booleans standing in for a state machine, a tenant-scoped id treated as global. When the premise is wrong, lead with it and name the principle — softening it into the nearest mechanical fix entrenches it.
 - **Scope — does the change reach further than the requirement?** A presentation concern does not automatically become a system concern; an abstraction layer exists to absorb it. "Profile links should read `/profile/alice`" is a frontend routing requirement, satisfied by the frontend route plus one lookup — it does not oblige the backend to stop keying on id. Name the layer where the concern should have stopped. Then weigh reversibility: as a lookup key, backing it out is one endpoint and one column; as the routing identity, it is in every client that stored a URL. **When two placements both satisfy the requirement, the shallower one is right.**
@@ -120,7 +129,7 @@ For each lens, review the diff for the criteria below. **Shared discipline for e
 - Coverage of the change (do tests exercise what was added/modified?), edge cases (not just happy path), sensitivity (would the test actually fail if the code broke? flag over-mocked tests or ones asserting on mocks), validity (assertions check real behavior), resilience (tests go through public interfaces, not brittle internals).
 - For a deep pass, defer to `@test-quality-reviewer` (4 Pillars) rather than duplicating its analysis. **Do not go hunting for a project testing-guidelines document** — the criteria above are your bar. A project rule may tell you to locate a "4 Pillars of Testing" doc and stop and ask if it's missing; that rule is for authoring tests, not reviewing them: do not search the repo for it and do not stop to ask. Use such a doc only if it's already in your context.
 
-**Performance (only if perf-sensitive) — review the diff for performance regressions it introduces.** Like security, you may read across files, but only to establish **magnitude**: is the path hot (per-request/render/item vs one-time/cold) and is `n` unbounded? Anchor to the change — cost before vs after. A finding without magnitude is a NIT; drop it. You can't benchmark a diff, so when magnitude depends on runtime data you can't see, state the finding conditionally or mark it unverified — never invent numbers.
+**Performance (only if perf-sensitive) — review the diff for performance regressions it introduces.** Like security, you may read across files, but only to establish **magnitude**: is the path hot (per-request/render/item vs one-time/cold) and is `n` unbounded? Anchor to the change — cost before vs after. Pre-existing slowness the change neither reaches nor multiplies is out of scope, but an existing cost the diff now pays per-request, per-item, or inside a new loop **is** in scope: file it as `pre-existing — newly reached` and let the delta carry it. A finding without magnitude is a NIT; drop it. You can't benchmark a diff, so when magnitude depends on runtime data you can't see, state the finding conditionally or mark it unverified — never invent numbers.
 - Algorithmic complexity (nested loops / repeated scans over unbounded `n`, accidental quadratics like `includes` in a loop); data access & I/O (N+1, per-item DB/network calls in a loop, missing batching/pagination, blocking the event loop); memory & allocation (unbounded growth, large copies, leaks); redundant work (recompute that could be hoisted/memoized); frontend rendering (needless re-renders, un-virtualized lists, bundle-size regressions); regression by removal (the diff deletes an index/memo/cache/batch/`LIMIT`/pagination).
 - **Severity**: MUST FIX for unbounded growth/OOM, timeout/DoS on realistic input, N+1 on a hot path at real scale, blocking the event loop; SHOULD FIX for bounded degradation; NIT for micro-opts with no magnitude. **Don't flag**: premature optimization on cold paths, bounded-small `n`, patterns the runtime/DB planner already optimizes, or readability-costing micro-opts. If attacker-triggerable (ReDoS, complexity DoS), note the security/DoS angle too.
 
@@ -132,7 +141,8 @@ This step is a **check, not an investigation** — budget roughly 10 tool calls 
 
 Most findings you can confirm from what you read while reviewing — trust those. For any finding that **rests on something you could not confirm from the diff alone** (behavior of a function outside the diff, what a caller actually passes, a runtime/ordering assumption, whether a guard exists elsewhere), re-check it now: open the surrounding code, callers, and types, and walk the failure mode (trigger → behavior → harm) against the real code.
 - If the chain holds → keep it as **confirmed**.
-- If a guard, caller-side check, framework behavior, or unreachable trigger breaks the chain, or the line is pre-existing / CI-caught → drop it.
+- If a guard, caller-side check, framework behavior, or unreachable trigger breaks the chain, or CI would catch it → drop it.
+- **Settle the finding's `Origin`** — it goes in the report, so it has to be right, and "pre-existing" is not by itself a reason to drop. The diff wrote the defect → `introduced`. It predates the diff but sits on a line the diff touched → `pre-existing — touched`, kept, and say so: the author did not write this bug. It predates the diff and the diff **newly reaches, feeds, exposes, or multiplies** it → `pre-existing — newly reached`, kept — name the link. It predates the diff and the change neither reaches nor worsens it → **drop** as unrelated pre-existing. A `+` line that is relocated old code reads as introduced and isn't: when origin is marked `(unconfirmed)` or the code looks moved, settle it with one `git blame` / `git log -S` against `$BASE`.
 - If it's plausible but you still can't confirm → keep as a candidate marked **unverified** and score it conservatively in Step 4.
 - For a **performance** finding, confirming means the magnitude holds — `n` really unbounded, path really hot. If you can't confirm magnitude from the code, keep it **unverified**, not confirmed.
 - For an **architecture** finding, confirming means the structural claim holds against the real surrounding code — the siblings really do use that segment or field differently, the out-of-repo step really is absent (search before believing it missing). For a **modeling-premise** finding, check whether the property the design needs is genuinely unguaranteed: is the value actually mutable (is there an edit path?), actually non-unique (is there really no constraint?), actually derived? A guarantee that holds drops it; none confirms it. Note the asymmetry with the pre-existing rule: an architecture finding *cites unchanged code as its evidence* — that is the frame of reference, not the fault. Drop it only if the **diff's own** decision turns out fine, never merely because the comparison points sit outside the diff.
@@ -142,11 +152,13 @@ Most findings you can confirm from what you read while reviewing — trust those
 ## Step 4 — Merge
 
 **Confidence score.** Score each surviving finding 0–100 on **one axis only: how certain you are the finding is true and in scope.** Nothing else.
-- **0–25** — refuted, or a pre-existing issue on lines the diff didn't touch
+- **0–25** — refuted, or an unrelated pre-existing issue this change neither reaches nor worsens
 - **26–50** — rests on an assumption you cannot support; may well be a false positive
 - **51–75** — plausible and unrefuted, but a link in the chain is unconfirmed (unverified findings usually land here)
 - **76–90** — confirmed, with a minor open question
 - **91–100** — certain: directly confirmed against the code, and the failure mode or design consequence holds exactly as written
+
+**Do not lower the score because of Origin.** Origin is information for the reviewer, not a discount — a `pre-existing — touched` or `pre-existing — newly reached` finding is scored on the same one axis as any other. Step 3 already decided whether it is in scope; don't re-decide it here by scoring it down.
 
 **Do not lower the score because the issue feels small.** Impact is already carried by severity — scoring it a second time here is what buries findings that are certainly true but quiet, the usual shape of a contract, data-model, or convention problem. A certain-but-minor finding is a **NIT at 95**, not a SHOULD FIX at 70.
 
@@ -174,11 +186,14 @@ Write the complete review to `<ws>/review-changes.md`:
 
 Reviewed: [lenses that ran]. Skipped: [lens — one-line reason from the applicability block; or "none"]. A skipped lens is unreviewed, not clean.
 
+Origin of findings: [N] introduced by this change, [N] pre-existing on lines it touched, [N] pre-existing but newly reached by it.
+
 ## Findings
 
 ### [Issue Title]
 - **Severity**: MUST FIX / SHOULD FIX / NIT
 - **Confidence**: [70–100]
+- **Origin**: introduced by this change / pre-existing — touched by this change / pre-existing — newly reached by this change [+ the link the diff created; keep any "(unconfirmed)" marker]
 - **Verified**: confirmed (re-checked against real code) / trusted (confirmed while reviewing, no check needed) / unverified (still uncertain after a check)
 - **Lens**: correctness / security / architecture / quality / tests / performance
 - **Description**: [What's wrong]
@@ -199,12 +214,12 @@ Reviewed: [lenses that ran]. Skipped: [lens — one-line reason from the applica
 
 ## What NOT to flag
 
-- Pre-existing issues, or anything on lines the diff did not modify.
+- **Unrelated** pre-existing issues — untouched code this change neither reaches nor worsens. (A pre-existing flaw on a line the diff touched, or one the diff newly reaches, is **kept** and labeled by its Origin, not dropped.)
 - Anything a linter / typechecker / compiler would catch (imports, types, formatting) — assume CI runs these.
 - Pedantic nitpicks a senior engineer wouldn't raise.
 - Changes that are clearly intentional and part of the broader change.
 
-Do NOT run the build or typecheck — that is CI's job. Never comment on code outside the diff.
+Do NOT run the build or typecheck — that is CI's job. Comment only on what this change is answerable for.
 
 ## Related Skills
 

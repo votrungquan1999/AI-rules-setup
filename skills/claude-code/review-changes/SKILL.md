@@ -1,6 +1,6 @@
 ---
 name: review-changes
-description: Senior engineer code review analyzing diffs for correctness, security, architecture and design fit, performance, edge cases, and best practices with severity-based findings. Use when reviewing code, checking changes, or when user says "review my changes", "code review", "review this diff", or "check my code".
+description: Senior engineer code review analyzing diffs for correctness, security, architecture and design fit, performance, edge cases, and best practices with severity-based findings, each labeled by origin (introduced by this change vs pre-existing). Use when reviewing code, checking changes, or when user says "review my changes", "code review", "review this diff", or "check my code".
 ---
 
 # Review Changes
@@ -83,7 +83,7 @@ Lenses are **trusted by default**; only their `Needs verification: yes` findings
 
 ## Phase 5: Merge (sub-agent)
 
-Spawn `node-merge.md`. It reads every `HOLISTIC.md` / `LENS_*.md` / `VERDICT_*.md`, applies verdicts, scores, filters, dedupes, writes the final `<ws>/review-changes.md`, and returns the recommendation + severity counts. Relay the recommendation and the report path; don't re-list findings inline.
+Spawn `node-merge.md`. It reads every `HOLISTIC.md` / `LENS_*.md` / `VERDICT_*.md`, applies verdicts, scores, filters, dedupes, writes the final `<ws>/review-changes.md`, and returns the recommendation, severity counts, and the origin split (how many findings this change introduced vs inherited). Relay the recommendation, the origin split, and the report path; don't re-list findings inline.
 
 ## Related Skills
 

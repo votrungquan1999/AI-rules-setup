@@ -8,7 +8,9 @@ Quality owns micro-hygiene — naming, duplication, typing, comments. Do not res
 
 `lens-common.md` says review only the diff. **This lens is the exception** — "does this fit the system" is unanswerable from the diff alone, because the sibling routes, the existing table, and the layer above and below are all outside it. Read what you need: route tables and registries, the schema and migrations, the module the change sits in, callers on the far side of a contract.
 
-The exemption is on what you **read**, not on what you **flag** — the fault must still be in the diff. Surrounding code is the frame of reference, never the target. "This existing module is poorly layered" is out of scope; "this change puts X in a layer that already owns Y" is in scope.
+The exemption is on what you **read**, not on what you **flag** — the fault must still belong to the change. Surrounding code is the frame of reference, never the target. "This existing module is poorly layered" is out of scope; "this change puts X in a layer that already owns Y" is in scope.
+
+Because of that framing, your findings are almost always `Origin: introduced` — the diff's own design decision — even though the evidence cites unchanged code. Do not label one pre-existing merely because the comparison points sit outside the diff.
 
 ## Focus
 

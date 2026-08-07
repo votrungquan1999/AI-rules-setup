@@ -11,7 +11,7 @@ A performance finding is only real if it has **magnitude**: estimate both
 - **`n`-scale** — is the data bounded/small, or unbounded/large?
 - **path-heat** — per-request / per-render / per-item, or one-time / cold?
 
-Anchor to the change: what did the path cost **before vs after** (the complexity delta)? Pre-existing slowness on untouched lines is out of scope. If you cannot construct a magnitude, it is a NIT — drop it. You cannot benchmark a diff, so when magnitude depends on runtime data you can't see, state the finding **conditionally** ("if `n` is large / this path is hot, then …") or mark `Needs verification: yes` on the magnitude assumption — never invent numbers.
+Anchor to the change: what did the path cost **before vs after** (the complexity delta)? Pre-existing slowness the change neither reaches nor multiplies is out of scope — but an existing cost the diff now pays per-request, per-item, or inside a new loop **is** in scope: file it as `pre-existing — newly reached` and let the before/after delta carry the finding. If you cannot construct a magnitude, it is a NIT — drop it. You cannot benchmark a diff, so when magnitude depends on runtime data you can't see, state the finding **conditionally** ("if `n` is large / this path is hot, then …") or mark `Needs verification: yes` on the magnitude assumption — never invent numbers.
 
 ## Focus
 
