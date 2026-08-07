@@ -16,7 +16,21 @@ Stop early — do not fan out — when the review adds no value:
 - **No changes** → state that clearly and stop.
 - **Trivial diff** (a handful of lines, generated files, pure formatting, version bumps) → do a single inline review and skip the lens fan-out. Note that you took the fast path.
 
-Only proceed to the lens fan-out when the diff is **non-trivial** (real logic, multiple files, or anything touching data/auth/security).
+Only proceed to the lens fan-out when the diff is **non-trivial** (real logic, multiple files, or anything touching data/auth/security). When you do, also set the **review depth** (step 2b) — it decides how many agents the fan-out costs.
+
+### 2b. Review depth (the main cost gate)
+
+Every lens and verifier subagent costs the same fixed overhead — its own system prompt, this project's rule files, its node file, `HOLISTIC.md` — regardless of how much diff it reads. A six-lens fan-out therefore costs roughly the same on a 40-line diff as on a 3000-line one, which is why depth is gated on **size** here and not only on applicability in step 6.
+
+**Measure now, decide after step 6.** Run `git diff --stat "$BASE"` here — it is cheap and it also informs the summary — but the depth itself depends on your security and architecture verdicts, so settle it once step 6 is done. Judge the size on the **non-generated, non-lockfile** portion: a 4000-line lockfile or snapshot update is one reviewable decision, not four thousand.
+
+- **`compact`** — ≤ 8 files **and** ≤ 300 changed lines, **and** you marked both security and architecture `no` in step 6. One reviewer subagent covers every applicable lens in a single pass.
+- **`grouped`** — ≤ 25 files **and** ≤ 1000 changed lines. Also where a `compact`-sized diff lands when security or architecture fired: those two get their own subagent rather than sharing one with the mechanical lenses.
+- **`fan-out`** — anything larger. One subagent can no longer hold the whole diff well, so each lens gets its own.
+
+**Escalate one step when the diff is small but consequential** — a migration, an auth path, a public contract, a payment or permission surface. Size measures reading cost, not blast radius, and a 30-line auth change deserves the depth its risk earns. Escalate one step only; never jump `compact` → `fan-out`.
+
+**Do not escalate for volume alone** when the change is repetitive — a rename across 40 files, a mechanical codemod, a bulk import rewrite. Those are one decision applied N times, and a fan-out reviews the same decision six times over. Say so in your reason.
 
 ### 3. Understand the problem
 
@@ -51,7 +65,9 @@ You produce the *framing*; you do not produce findings. Every concern this evalu
 
 ### 6. Lens applicability (gate)
 
-Only the lenses you mark `yes` get run — this is the main cost lever, so judge each one on what the diff actually touches. **Correctness always runs**; it is the floor and needs no verdict beyond `yes`. The other five are yours to gate: give each a `yes`/`no` plus the trigger that fired, or why the diff has no such surface.
+Only the lenses you mark `yes` get reviewed at all — depth (step 2b) decides how many *subagents* carry them, applicability decides *which* run. Judge each one on what the diff actually touches. **Correctness always runs**; it is the floor and needs no verdict beyond `yes`. The other five are yours to gate: give each a `yes`/`no` plus the trigger that fired, or why the diff has no such surface.
+
+Answer these on the merits of the diff — do **not** mark a lens `no` to save cost, and do not let a `compact` measurement in step 2b pull a verdict toward `no`. The dependency runs the other way: step 2b reads your security and architecture verdicts, so shading one to hit `compact` corrupts the depth decision it feeds.
 
 #### Security triggers
 
@@ -83,7 +99,10 @@ Write `./tmp/review-changes/HOLISTIC.md`:
 # Holistic
 
 ## Eligibility
-[proceed-with-fan-out | single-inline-pass | stop] — [reason]
+[proceed | single-inline-pass | stop] — [reason]
+
+## Review Depth
+[compact | grouped | fan-out] — [N files, N changed lines] — [reason; name the escalation trigger if you escalated, or the repetition if you declined to]
 
 ## Root Cause & Constraints
 [The problem being solved and the constraints around it]
