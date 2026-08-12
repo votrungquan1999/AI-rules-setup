@@ -30,6 +30,23 @@ Write it down if **re-deriving it would cost more than reading it**. That single
 
 When you're unsure, ask whether a competent person with the repo in front of them could work it out. If yes, skip it.
 
+## The shape of an entry
+
+The test above decides *what* you write. This decides *how long* — and it is the half that slips, because a flush happens under pressure and an over-full entry feels like safety. It isn't: the next session pays to read every word of it, before it knows which entry it needed.
+
+One line for the decision, at most two for the why:
+
+```
+D7 — Dedicated feed item type (GroupedMarketInteractionFeedItem), not reuse of the Market-tab type.
+     why: the two carry different fields and would drift apart; sharing one forces optional-everything.
+```
+
+- **Number them** — `D1`, `D2`, … Later decisions and progress notes cite the number (`per D11`) instead of restating the decision, which is what keeps *those* short too.
+- **Budget ~200 characters for the decision, ~400 for the why.** Past that you are writing minutes, not a record.
+- **The why is the alternative and the reason it lost** — never the discussion that got you there.
+
+This is measured, not stylistic: fifteen entries in this shape cost a resuming session ~1,500 tokens. Twelve entries written as prose cost ~4,500.
+
 ## Where each thing goes
 
 Each type has exactly one home. Never write the same thing to two of them — except where a bullet says **and**, which means the card gets a copy because the workspace can be deleted and the card cannot.
@@ -41,6 +58,8 @@ Each type has exactly one home. Never write the same thing to two of them — ex
 - **Where the work stands as a whole** → the card only, via `append_progress` **and** `update_card`. See *The card state note*.
 
 `<ws>` is the task workspace you have been writing to this session — the folder holding `IMPLEMENTATION_PROGRESS.md` and any plan files. If you can't identify it, don't guess a path: see *No workspace* below.
+
+**Decisions have two homes, but only one is worth reading back.** The next session orients from the **card** — it is the copy that survives a deleted workspace, and it is one call. Open `DECISIONS.md` only for what the card lacks: a mirror you know failed, or the surrounding prose. Loading both in full buys nothing and is the single most expensive thing a resumed session can do.
 
 ## The card state note
 
@@ -58,7 +77,26 @@ Don't re-list decisions here; they are already on the card as their own entries.
 3. **Append** each item to its home. Always append; never rewrite or reflow an existing file, and never renumber existing entries.
 4. **Mirror decisions to the card**, including any supersessions.
 5. **Write the card state note** — `append_progress`, then `nextAction`. Do this last, so it reflects everything you just wrote.
-6. **Report and hand off** (below).
+6. **Re-stamp the session pointer** (below).
+7. **Report and hand off** (below).
+
+## Re-stamp the session pointer
+
+Everything above is useless if the next session can't find the card. It resolves one from `~/.claude/kanban-session-state/$CLAUDE_CODE_SESSION_ID.json` — and when that file is missing it falls through to a board search and a re-adoption, paying for both before it has read a single record. Rewrite the pointer here, whether or not you think it already exists.
+
+```json
+{
+  "cardId": "<active card id>",
+  "cardNumber": 0,
+  "summary": "<task name>",
+  "workspacePath": "<absolute path to `<ws>` — omit the key if there is none>",
+  "lastMirroredAt": "<ISO timestamp of this flush>"
+}
+```
+
+Write the whole object, not a patch. `cardId` + `cardNumber` + `summary` are what the `kanban-track` hook needs to name your card next turn — it ignores a pointer missing any of them — and `workspacePath` + `lastMirroredAt` are what `flush-debt` compares file mtimes against. A fresh `lastMirroredAt` also clears the debt you just settled by mirroring.
+
+Best-effort, like every other card call here: no session id, or a failed write, means say so in the report and move on. Never block the handoff on it.
 
 ## No workspace
 
@@ -68,6 +106,6 @@ If there is no workspace *and* no card, say so plainly and ask whether to open a
 
 ## Finish
 
-Report what you wrote: the counts per file, one line naming each decision recorded, and the `nextAction` you left on the card. Then state explicitly that **the operator can now run `/compact`** — you cannot trigger it.
+Report what you wrote: the counts per file, one line naming each decision recorded, the `nextAction` you left on the card, and whether the pointer was written. Then state explicitly that **the operator can now run `/compact`** — you cannot trigger it.
 
 Name anything you deliberately left out, and anything you were unsure whether to keep. An entry you skipped is fine; an entry you skipped *silently* is the failure this skill exists to prevent.
