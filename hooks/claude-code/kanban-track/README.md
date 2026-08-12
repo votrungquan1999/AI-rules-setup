@@ -31,14 +31,15 @@ active for the session:
 - `cardNumber` + `summary` are shown to the user in the hook's reminder text.
 - `cardId` is the 24-hex Mongo ObjectId the model passes to `append_progress` /
   `append_decision` — validated by the hook, but never emitted or shown to the user.
-- No pointer for the session = no active card; the hook reminds the model to open one
-  if the prompt looks substantive.
+- No pointer for the session = no active card; the hook reminds the model to open one only
+  if the work is worth revisiting a week from now, and to check the repo's open cards first.
 
 ## Behavior per prompt
 
 1. Read stdin (`session_id`, `prompt`, `cwd`).
 2. Look up the pointer for `session_id`.
-   - No pointer → emit an "open a card if substantive" reminder.
+   - No pointer → emit an "open a card only if you'd revisit this in a week, and check the
+     repo's open cards first" reminder. Asked retrospectively, so it re-fires as work grows.
    - Pointer present → emit the active card # + summary, the recording routes below, and
      "open a new card only on genuine divergence (`forceNew`)".
 3. Exit 0. Always — exit 2 would erase the user's prompt.

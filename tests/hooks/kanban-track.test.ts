@@ -12,15 +12,19 @@ const HOOK_PATH = join(ARTIFACT_DIR, "kanban-track.mjs");
 const HOOK_JSON_PATH = join(ARTIFACT_DIR, "hook.json");
 const README_PATH = join(ARTIFACT_DIR, "README.md");
 
-/** Asserts the no-pointer reminder's MEANING: search the board first, create only if nothing
- * covers this work. With no card there is no task workspace either, so this branch must not
- * reference any recording mechanism (card write tools or workspace files).
+/** Asserts the no-pointer reminder's MEANING: track only work worth revisiting, judged from what
+ * the work has already produced, and check the repo's open cards before creating. With no card
+ * there is no task workspace either, so this branch must not reference any recording mechanism
+ * (card write tools or workspace files).
  * Not a full-string match — the exact wording is expected to keep getting tuned. */
 function expectNoPointerReminder(context: string): void {
 	expect(context).toContain("No AI-Kanban card is active for this session");
-	// Search-first, not create-first: a pointerless session is usually a resumed one.
-	expect(context).toContain("search the board first");
-	expect(context).toContain("open a new card only if you don't");
+	// The gate is durability, not effort: a card no one returns to is noise on the board.
+	expect(context).toContain("revisit this work a week from now");
+	// Retrospective, because at prompt time the size of the work is least knowable.
+	expect(context).toContain("already produced");
+	// Keyword search finds the same task; only the repo tag finds the card this belongs under.
+	expect(context).toContain("tagged with this repo");
 	// No card exists to append to, and no workspace exists to hold a journal — nothing to dangle.
 	expect(context).not.toContain("append_progress");
 	expect(context).not.toContain("append_decision");

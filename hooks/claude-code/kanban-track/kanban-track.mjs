@@ -8,10 +8,12 @@ import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-// Search-first, not create-first: a session with no pointer is usually a resumed
-// one (compact, restart), and its card already exists.
+// Asked retrospectively and re-asked every prompt, because at prompt time the size of the work is
+// least knowable — the cheap error is opening a card late, never opening one for finished work.
+// Search-first too: a session with no pointer is usually a resumed one (compact, restart), and the
+// repo tag is the only rung that finds the OPEN card this work belongs under rather than its twin.
 const NO_POINTER_REMINDER =
-  "No AI-Kanban card is active for this session. If this prompt starts substantive, multi-step work, search the board first (list_cards with text) for an existing card covering it — continue on that card if you find one, and open a new card only if you don't.";
+  "No AI-Kanban card is active for this session. Open one only if you would want to revisit this work a week from now — judge that from what the work has already produced, not from what it might become. If you would, check the board before creating: the same task by keyword, and the open cards tagged with this repo, which is where a card covering this usually already sits.";
 
 function readStdin() {
   return new Promise((resolve) => {
