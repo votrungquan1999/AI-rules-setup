@@ -18,6 +18,7 @@
     "ai-kanban-track-session",
     "ai-kanban-work-card",
     "bdd-design",
+    "claude-usage",
     "code-refactoring",
     "commit-plan",
     "context7",
@@ -27,6 +28,7 @@
     "find-patterns",
     "knowledge-base",
     "orchestrated-feature-dev",
+    "pre-compact-flush",
     "recall",
     "repo-knowledge",
     "review-changes",
@@ -39,9 +41,11 @@
     "web-search",
     "pr-comment-triage",
     "scout-and-plan",
-    "orchestrated-reasoning"
+    "orchestrated-reasoning",
+    "monthly-dca-research"
   ],
   "hooks": [
+    "flush-debt",
     "kanban-track",
     "spec-reminder"
   ],

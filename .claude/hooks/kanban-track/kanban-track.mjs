@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Claude Code UserPromptSubmit hook for AI-Kanban tracking. Reads the hook JSON on
-// stdin, injects a card-status reminder via additionalContext, and best-effort POSTs
-// the prompt to the active card. Always exits 0 — exit 2 would erase the user's prompt.
+// stdin and injects a card-status + record-keeping reminder via additionalContext —
+// the agent does the recording, in its own words, not this hook mechanically.
+// Always exits 0 — exit 2 would erase the user's prompt.
 
 import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
@@ -38,64 +39,20 @@ function readPointer(sessionId) {
   }
 }
 
+// Fires on every prompt, so the record-keeping ask must be conditional — only when something
+// notable actually happened — or it just trades verbatim noise for agent-generated noise. The
+// hook only knows session_id/cwd, never the task workspace path, so instructions refer to "your
+// task workspace" generically rather than interpolating or inventing an absolute path.
+//
+// D18/D19 routing: each entry type has exactly one home, never the journal for the two that
+// already have a dedicated file/tool — decisions and transitions would otherwise be recorded twice.
 function buildReminder(pointer) {
   if (!pointer) return NO_POINTER_REMINDER;
   return `Active AI-Kanban card #${pointer.cardNumber} (${pointer.summary}). ` +
-    "Append progress to THIS card. Open a new card only if the work has genuinely diverged into a distinct task — create_card with forceNew:true.";
-}
-
-function isValidMcpEntry(entry) {
-  return !!entry && typeof entry.url === "string" && typeof entry.headers?.Authorization === "string";
-}
-
-// Kanban URL + Basic auth live in ~/.claude.json. Precedence: a project-scoped
-// override (projects[cwd].mcpServers) wins, else fall back to the top-level
-// global entry. Missing/unparseable config is the expected common case, not an error.
-function readKanbanConfig(cwd) {
-  try {
-    const path = join(homedir(), ".claude.json");
-    const parsed = JSON.parse(readFileSync(path, "utf8"));
-    const projectEntry = parsed.projects?.[cwd]?.mcpServers?.["ai-kanban-dispatch"];
-    if (isValidMcpEntry(projectEntry)) return projectEntry;
-    const globalEntry = parsed.mcpServers?.["ai-kanban-dispatch"];
-    return isValidMcpEntry(globalEntry) ? globalEntry : null;
-  } catch {
-    return null;
-  }
-}
-
-const FETCH_TIMEOUT_MS = 5000; // well under the 30s UserPromptSubmit hook budget
-
-// Best-effort: never let a POST failure block or crash the hook.
-async function postProgress(pointer, prompt, cwd) {
-  if (!pointer || !prompt) return;
-  const config = readKanbanConfig(cwd);
-  if (!config) return;
-
-  const body = JSON.stringify({
-    jsonrpc: "2.0",
-    id: 1,
-    method: "tools/call",
-    params: {
-      name: "append_progress",
-      arguments: { id: pointer.cardId, note: prompt },
-    },
-  });
-
-  try {
-    await fetch(config.url, {
-      method: "POST",
-      headers: {
-        Authorization: config.headers.Authorization,
-        "Content-Type": "application/json",
-        Accept: "application/json, text/event-stream",
-      },
-      body,
-      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-    });
-  } catch {
-    // unreachable/refused/slow endpoint — swallow, the prompt must still go through
-  }
+    "If something notable just happened, record it in your task workspace: a decision (with why) -> " +
+    "append_decision + DECISIONS.md; a step finishing/starting -> IMPLEMENTATION_PROGRESS.md; an open " +
+    "question, a finding, or a reusable command -> JOURNAL.md (append). Diverged into a distinct task? " +
+    "create_card with forceNew:true.";
 }
 
 function emit(additionalContext) {
@@ -117,7 +74,6 @@ async function main() {
 
   const pointer = readPointer(input.session_id);
   emit(buildReminder(pointer));
-  await postProgress(pointer, input.prompt, input.cwd);
   process.exit(0);
 }
 

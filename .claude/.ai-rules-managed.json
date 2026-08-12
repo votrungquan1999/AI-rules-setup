@@ -10,6 +10,11 @@
       "event": "Stop",
       "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/spec-reminder/spec-reminder.mjs",
       "scriptPath": ".claude/hooks/spec-reminder/spec-reminder.mjs"
+    },
+    "flush-debt": {
+      "event": "Stop",
+      "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/flush-debt/flush-debt.mjs",
+      "scriptPath": ".claude/hooks/flush-debt/flush-debt.mjs"
     }
   }
 }

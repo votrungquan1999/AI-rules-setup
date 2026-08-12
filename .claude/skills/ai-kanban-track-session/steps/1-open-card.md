@@ -109,8 +109,18 @@ If a session id exists, write the pointer as soon as you have a card — right a
 ```
 
 ```json
-{ "cardId": "<created card id>", "cardNumber": <created card number>, "summary": "<task name>" }
+{
+  "cardId": "<created card id>",
+  "cardNumber": <created card number>,
+  "summary": "<task name>",
+  "workspacePath": "<absolute path to the task/notes folder, if one exists>",
+  "lastMirroredAt": "<ISO timestamp of this write>"
+}
 ```
+
+**`workspacePath` is the task/notes folder** — the one holding `IMPLEMENTATION_PROGRESS.md` and `DECISIONS.md`. It is **not** cwd (often a container of many sibling repos) and **not** a code worktree (those are the card's `repos[].worktreePath`). One task spanning several repos still has a single notes folder, so this stays a single path. Omit the field entirely if the work has no notes folder — never guess one.
+
+**`lastMirroredAt`** is the baseline the `flush-debt` hook compares workspace file mtimes against, to spot records that exist only in a folder you may delete. Set it on this first write, then **re-stamp it every time you mirror to the card** (see `2-track-progress.md`). Both fields omitted is fine and normal — the hook stays silent rather than guessing.
 
 Best-effort — a failed write must not block card creation; note it and move on. No session id → skip this step.
 

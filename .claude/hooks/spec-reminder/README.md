@@ -44,13 +44,22 @@ and which spec to name in the reminder:
 
 ## Behavior on Stop
 
-1. Read stdin (`session_id`).
-2. Look up the sentinel for `session_id`.
+1. Read stdin (`session_id`, `stop_hook_active`).
+2. If `stop_hook_active` is true → silent, exit 0. See *Why the re-entrancy guard* below.
+3. Look up the sentinel for `session_id`.
    - Absent or malformed JSON → silent, exit 0.
    - Present → emit an `additionalContext` nudge naming `sentinel.specPath`, then exit 0.
 
 Always exits 0 — exit 2 on a `Stop` hook would block the session from ending, which this hook
 must never do.
+
+## Why the re-entrancy guard
+
+`additionalContext` on `Stop` is not a passive annotation — it **continues the conversation**, under the same loop protections as `decision: "block"`. So the continuation this hook causes ends in another `Stop`, which fired the nudge again, which continued again, until Claude Code's **8-consecutive-continuation cap** ended the turn. Observed live: a single un-updated spec produced eight identical back-to-back nudges, none of which the operator could clear by answering.
+
+`stop_hook_active` is `true` exactly when Claude Code is already continuing because of a stop hook, so returning silently on it breaks the self-trigger while leaving the first nudge of each turn intact. This is the guard the Claude Code docs prescribe for `Stop` hooks.
+
+**Deliberately not fire-once.** The guard stops a nudge re-triggering *itself*; it still nudges once per user turn while the spec is untouched. Suppressing that too would mean persisting a "already nudged" flag, i.e. a new automatic write into `~/.claude/`, which is out of scope here.
 
 ## Why no change-detection
 
