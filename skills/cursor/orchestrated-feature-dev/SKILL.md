@@ -47,6 +47,7 @@ Every run is scoped to its task identifier so **multiple tasks run in parallel**
 - Pass the task workspace path `<ws>` to every subagent it spawns.
 - Log decisions: whenever any phase, or the orchestrator itself (e.g. fixing the plan after investigation, resolving a silent catalog entry, a routing choice), faces 2+ defensible options and commits to one — including choices resolved by asking the user — append an entry to `<ws>/DECISIONS.md` (chosen option, alternative(s), one-line why). Skip forced moves where only one option was viable.
 - Pause for user approval at plan gates. The review artifact is `<ws>/implementation-plan.md` (Technical Design + Behaviors) — never present `<ws>/PLAN_STEPS.md`, which is derived loop state written only after the plan is approved.
+- Check the plan's format before presenting it. `<ws>/implementation-plan.md` must carry `## Technical Design` and `## Behaviors to Implement` with test-first checkboxes per step. A plan shaped as an `AC:` / `Test Type:` step list means the plan subagent never loaded `create-implementation-plan` — send it back to a fresh subagent rather than presenting it.
 
 Spawn prompts stay minimal — the node file carries the instructions: "Read `nodes/node-X.md` and execute it for [assignment]. Task working directory is `<ws>`. Report back: [what the orchestrator needs to route]."
 

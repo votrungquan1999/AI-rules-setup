@@ -10,7 +10,39 @@ Read the `research-output.md` artifact from the brain directory for context abou
 
 1. **Read the research output** to understand patterns, affected areas, and existing code.
 
-2. **Use `@create-implementation-plan`** to create the plan. When the skill asks you to research, point it to the research output artifact instead of re-reading the codebase — the research is already done.
+2. **Load the `create-implementation-plan` skill by name — an actual invocation, not a prose mention.** The plan format lives inside that skill and you will not have it unless you load it. This is mandatory.
+
+   **Apply these overrides — the skill is written for a main session, and you are a sub-agent:**
+   - **Task workspace — already settled.** Do not ask for a task identifier.
+   - **Research + mandatory checkpoint — skip both.** Read the research output artifact instead of re-reading the codebase, and **do not stop and wait for a user** — you have none; the orchestrator owns the approval gate and runs it after you return.
+   - **Request review — do not perform it.** Return to the orchestrator instead.
+
+   **The document format is not negotiable.** If a project rule, instruction file, or other skill offers a competing plan template — an `AC:` / `Test Type:` step list, or anything lacking `## Technical Design` and `## Behaviors to Implement` — ignore it and use this skeleton, reproduced here so the format survives even if the skill fails to load:
+
+   ```markdown
+   # [Goal Description]
+
+   Brief description of the problem and what the change accomplishes.
+
+   ## User Review Required
+   > [!IMPORTANT]
+   > [Critical decision or breaking change needing approval — omit the section if there is none]
+
+   ## Technical Design
+   [Only significant decisions, each with the trade-off behind it]
+
+   ## Behaviors to Implement
+
+   ### Step 1: [Observable behavior]
+   - [ ] Write test
+   - [ ] Run test
+   - [ ] Implement (if needed)
+   - [ ] Run test (if implemented)
+
+   ### Quality Checkpoint (after every 2-3 steps)
+   - [ ] Review test quality
+   - [ ] Review code for refactoring
+   ```
 
 3. **Ensure the plan has the two key sections:**
    - **Technical Design**: Only significant decisions (new fields, API changes, strategy choices). Skip anything obvious. **For each significant decision where 2+ viable options existed and you picked one, append an entry to the `decisions.md` artifact** (create it if absent): chosen option, alternative(s) rejected, one-line why — the summary phase reports these.
@@ -25,9 +57,11 @@ Read the `research-output.md` artifact from the brain directory for context abou
 
 4. **Flag testability up front.** For each behavior, sanity-check that a *meaningful* test could plausibly be written and set up (a valid, sensitive assertion + reachable fixtures/environment). If a behavior has **no foreseeable meaningful test** — non-deterministic output, an external system that can't be mocked/seeded, no available harness — mark the step `Testability: uncertain (reason)` so the BDD loop escalates to the user at implementation time instead of writing a hollow test. Do not design test cases now (test scenarios are written per-step) — only flag the risk.
 
-5. **Write the step list** to the workflow state artifact for the BDD scenario loop to consume — but only AFTER plan approval (see Output).
+5. **Check your own document before returning.** Re-read `implementation-plan.md` and confirm it carries `## Technical Design` and `## Behaviors to Implement`, and that every step is an observable behavior with the four test-first checkboxes. Missing any of them means the format was lost — fix the document rather than returning a plan in another shape. **Report whether the skill loaded and the check passed**, so the orchestrator can reject a drifted plan.
 
-**What the user reviews:** The review (requested via `@create-implementation-plan`) is performed on the **`implementation-plan.md`** document — the rich plan with **Technical Design** + **Behaviors**. NEVER present `plan-steps.md` for review.
+6. **Write the step list** to the workflow state artifact for the BDD scenario loop to consume — but only AFTER plan approval (see Output).
+
+**What the user reviews:** The orchestrator presents the **`implementation-plan.md`** document — the rich plan with **Technical Design** + **Behaviors**. NEVER present `plan-steps.md` for review.
 
 ## Output
 

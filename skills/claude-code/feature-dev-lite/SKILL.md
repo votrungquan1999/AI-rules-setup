@@ -58,39 +58,49 @@ This context-gathering phase helps you create a more accurate plan and avoid sur
 
 **Step 2: Create the Plan**
 
-Create plan based on the gathered information. MUST pause for user review and wait for user to say "implement it" before starting implementation phase.
+Write the plan to `<ws>/implementation-plan.md`. MUST pause for user review and wait for user to say "implement it" before starting implementation phase.
+
+**One plan format across both tiers.** The shape below is the one `@create-implementation-plan` defines, and that skill is canonical — if the two ever differ, follow it. If a project rule or another skill offers a competing plan template, this shape still wins; two formats in circulation is what makes plans drift.
 
 **What to include:**
 
-- List of implementation steps in logical order
-- Acceptance criteria for each step (what "done" looks like)
-- Test type for each step (unit, integration, e2e, etc.) - ONLY the test type, not test cases yet
-- Dependencies between steps
-- Any known blockers or risks
+- **Technical Design** — only significant decisions (new fields, API contract changes, strategy choices) and the trade-offs behind them
+- **Behaviors to Implement** — ordered observable behaviors, each becoming exactly one test-first step
+- Dependencies between steps, and any known blockers or risks
 
 **What NOT to include:**
 
-- Specific test scenarios or test code
-- Detailed implementation approaches
-- Exact function signatures or component structure
-- Database schema details
+- Specific test scenarios or test code — those are designed per-step during implementation
+- A verification plan — test-first development verifies as you go
+- Every file that will be touched, or detail that follows obviously from existing patterns
+
+**Write behaviors in the client's language.** Name the client/stakeholder first (business/end-user by default) and describe the outcome they would recognize — never implementation mechanics (schemas, fields, queries, error codes, function/class names, the linter, CI, HTTP status). Litmus test: if the stakeholder wouldn't recognize it as something they asked for, rewrite it.
+
+> ✅ `A trader sees trending markets at the top of the list` (client: trader)
+> ❌ `Add isTrending field to the Market model`
 
 **Example Plan:**
 
 ```markdown
-## Task: [Task name]
+# [Goal Description]
 
-### Step 1: [High-level description]
+Brief description of the problem and what the change accomplishes.
 
-**AC:** [What must be true when this step is done]
+## Technical Design
 
-**Test Type:** unit
+- **New `score` field on `Market`**: computed at read time from engagement stats, not persisted — avoids write amplification.
 
-### Step 2: [High-level description]
+## Behaviors to Implement
 
-**AC:** [What must be true when this step is done]
+### Step 1: [Observable behavior]
+- [ ] Write test
+- [ ] Run test
+- [ ] Implement (if needed)
+- [ ] Run test (if implemented)
 
-**Test Type:** integration
+### Quality Checkpoint (after every 2-3 steps)
+- [ ] Review test quality
+- [ ] Review code for refactoring
 ```
 
 **Create Progress File:**
@@ -226,5 +236,5 @@ When the feature is done — all steps complete, tests and lint green:
 - `@tdd-design` - Inner-loop helper for unit/algorithm-level tests within a scenario step
 - `@test-quality-reviewer` - Review test quality during quality checkpoints
 - `@code-refactoring` - Apply refactoring patterns during quality checkpoints
-- `@create-implementation-plan` - Use for more detailed planning with design decisions
+- `@create-implementation-plan` - Canonical owner of the plan format used in Phase 1; invoke it when the design warrants a fuller treatment
 - `@orchestrated-feature-dev` - Premium version with automated quality gates and sub-agent phases

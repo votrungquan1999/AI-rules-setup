@@ -66,7 +66,9 @@ Spawn `node-research.md` as the INITIAL agent → writes `RESEARCH_OUTPUT.md`. W
 
 ## Phase 2: Plan
 
-Spawn `node-plan.md` (reads `RESEARCH_OUTPUT.md`, uses `@create-implementation-plan`) → writes `implementation-plan.md` + `PLAN_STEPS.md`. Present `implementation-plan.md` (never `PLAN_STEPS.md`) for review.
+Spawn `node-plan.md` (reads `RESEARCH_OUTPUT.md`, loads the `create-implementation-plan` skill) → writes `implementation-plan.md` + `PLAN_STEPS.md`.
+
+**Check the format before presenting.** `implementation-plan.md` must carry `## Technical Design` and `## Behaviors to Implement` with test-first checkboxes per step. A plan shaped as an `AC:` / `Test Type:` step list means the sub-agent never loaded the skill — send it back to a fresh sub-agent rather than presenting it. Then present `implementation-plan.md` (never `PLAN_STEPS.md`) for review.
 
 **Gate:** do not proceed until the user approves the plan.
 

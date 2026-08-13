@@ -100,7 +100,9 @@ Research runs as a loop that **keeps re-running until no code-answerable threads
 
 Read the node instructions from `nodes/node-plan.md` in this skill's directory, then execute them.
 
-The plan node will use `@create-implementation-plan` to create the plan, reading research output as additional context. The step list must include affected files and dependencies per step.
+The plan node loads the `create-implementation-plan` skill to create the plan, reading research output as additional context. The step list must include affected files and dependencies per step.
+
+**Check the format before presenting.** `implementation-plan.md` must carry `## Technical Design` and `## Behaviors to Implement` with test-first checkboxes per step. A plan shaped as an `AC:` / `Test Type:` step list means the sub-agent never loaded the skill — send it back to a fresh sub-agent rather than presenting it.
 
 **Gate:** The plan node will request user review of the **`implementation-plan.md`** document (the rich plan with Technical Design + Behaviors). NEVER present `plan-steps.md` for review — it is derived workflow state for the BDD loop, written only after approval. Do NOT proceed until the user approves.
 
