@@ -42,7 +42,7 @@ D7 — Dedicated feed item type (GroupedMarketInteractionFeedItem), not reuse of
 ```
 
 - **Number them** — `D1`, `D2`, … Later decisions and progress notes cite the number (`per D11`) instead of restating the decision, which is what keeps *those* short too.
-- **Budget ~200 characters for the decision, ~400 for the why.** Past that you are writing minutes, not a record.
+- **200 characters for the decision, 400 for the why — enforced, not advisory.** `append_decision` refuses anything longer with `ERR_VALIDATION` naming the actual length. That refusal is **not** a mirror failure to shrug off: rewrite the entry shorter and call again. Only a transport failure (no card, server unreachable) is skipped silently.
 - **The why is the alternative and the reason it lost** — never the discussion that got you there.
 
 This is measured, not stylistic: fifteen entries in this shape cost a resuming session ~1,500 tokens. Twelve entries written as prose cost ~4,500.
