@@ -2,6 +2,8 @@
 
 Post-implementation validation of each plan step. Runs sequentially — one step at a time — with full plan and implementation context.
 
+> **Report only — never touch git.** Several executions run in parallel, so staging, committing, or rebasing here would race the others and corrupt the branch. Record what needs fixing in your verdict; the single fix pass that follows applies it and folds it into the owning commit.
+
 ## Input
 
 - Read the `implementation-plan.md` artifact for the **full plan**

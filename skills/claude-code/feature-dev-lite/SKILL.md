@@ -125,6 +125,28 @@ Create the progress file at `<ws>/IMPLEMENTATION_PROGRESS.md` (the task workspac
 
 ## Phase 2: Implement Each Step
 
+**Step 0: Ask how to commit — before writing any code.**
+
+The plan is approved and the behavior list is final, so this is the last stable moment to decide. Ask the user to choose:
+
+- **One commit per behavior** — commit each behavior as soon as it goes green, and fold every later fix (quality checkpoint, review) back into the commit that owns that behavior. You end with exactly one commit per behavior in the plan. Say plainly that folding **rewrites history**, so it is only free while the branch is unpushed.
+- **Defer all commits** — never touch git; changes accumulate in the working tree and the user commits at the end.
+
+Record the answer at the top of `<ws>/IMPLEMENTATION_PROGRESS.md` (`Commit strategy: per-behavior | defer`, plus the base SHA from `git rev-parse HEAD` if per-behavior) and record it as a decision on the AI-Kanban card. **Do not start Step 1 until the user has chosen.**
+
+**Under `per-behavior`:**
+
+- **Commit when a behavior goes green**, after its tests and lint pass. Stage **explicit paths only** — never `git add -A`, `-a`, or `.`. One behavior, one commit, subject naming the behavior in the repo's existing convention.
+- **Fold later fixes into the owning commit.** A quality-checkpoint refactor or a review fix to already-committed behavior code belongs in that behavior's commit:
+  ```
+  git commit --fixup <sha>
+  GIT_SEQUENCE_EDITOR=true git rebase --autosquash <base>
+  ```
+  `GIT_SEQUENCE_EDITOR=true` is what keeps the rebase non-interactive. Re-run the affected tests afterwards.
+- **Resolve the owning commit by subject, not by a remembered SHA** (`git log --format='%H %s' <base>..HEAD`) — every autosquash rewrites the SHAs after it.
+- **A fix that adds genuinely new behavior is a new step**, and earns its own commit. The invariant is one commit per behavior, so adding a behavior adds a commit.
+- **Stop and ask** if the owning commit is already pushed (fold + `--force-with-lease`, or an ordinary follow-up commit that breaks the count) or if a rebase conflicts. Never force-push on your own initiative, and never resolve a conflict with `-X ours` / `-X theirs`.
+
 **For each step in your plan:**
 
 1. **Add step to progress file** - When starting a new step, add it with 🔄 In Progress status
@@ -147,6 +169,8 @@ Create the progress file at `<ws>/IMPLEMENTATION_PROGRESS.md` (the task workspac
 12. **Move to next step** - Only after current step is complete
 
 **Record decisions as you go.** Whenever a step involved choosing one of 2+ viable options, record it on the AI-Kanban card (best-effort): `append_decision(cardId, { decision, why? })`, resolving `cardId` from `~/.claude/kanban-session-state/$CLAUDE_CODE_SESSION_ID.json`; skip silently if absent (no card tracked this session). If it supersedes an earlier decision, `mark_decision_outdated(cardId, index)` on the older entry **first** (match it by text via `get_card_context`; skip the mark if you can't locate it unambiguously), then append. **After a successful mirror, re-stamp `lastMirroredAt` in the session pointer** (skip the stamp if the call failed). Never block the work on a mirror failure.
+
+`decision` is capped at **200 characters** and `why` at **400**; over that the call is refused with `ERR_VALIDATION` naming the actual length. A refusal is **not** a mirror failure — rewrite it shorter and call again, or the decision is lost. Only transport failures (no card, server unreachable) are skipped silently.
 
 ### When Writing Tests
 
@@ -227,6 +251,7 @@ Follow the guidelines in the 4 Pillars document when defining test scenarios and
 
 When the feature is done — all steps complete, tests and lint green:
 
+- **Check the commit invariant.** Under `per-behavior`, `git rev-list --count <base>..HEAD` must equal the number of completed behaviors. Report the count either way; if they differ, say so plainly and name the likely cause (a fix committed separately instead of folded, or a behavior never committed) rather than quietly reporting success. Under `defer`, note that the changes are uncommitted by design.
 - **Write/update the living spec.** Write `docs/features/<slug>/spec.md` in the repo you're working on: what the feature does, its behaviors/ACs, and pointers to key files + PRs. `<slug>` is the Step-0 task identifier — reuse it so a later change to the same feature updates the same spec. First search `docs/features/*/` for an existing spec on this feature and **update-in-place** rather than blind-overwriting. No identifier available? Derive a slug from the git branch or ask the operator; if none can be established, **skip the spec write** (don't guess a slug). **Re-read the final diff and make sure the spec reflects the *latest* behavior** — if you updated it early and later work changed behavior, fold that in now. "Present but stale" is a real gap the `spec-reminder` hook can't catch (it only sees whether the file was touched, not whether it's current).
 - **Architectural decision → prompt for an ADR.** If a decision made during this work is *project-level architectural* (affects more than one feature, changes an architectural pattern, or its alternative would force a migration — not a routine implementation choice), **prompt the operator** to record a `docs/adr/NNNN-title.md` (MADR-lean: Title, Status [`accepted | superseded by ADR-NNNN`], Date, Context, Decision, Consequences incl. negatives). **Prompt only — don't auto-draft.** ADRs are immutable: a reversal is a NEW ADR that supersedes the old one (flip the old Status, link both ways), never an edit. This is a different tier from card decisions: card `append_decision` = implementation-level (on the card); an ADR = project-level (in the repo).
 

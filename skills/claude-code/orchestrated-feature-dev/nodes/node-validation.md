@@ -4,6 +4,8 @@ Post-implementation validation of assigned plan steps. A few instances run in pa
 
 > **Task workspace:** All state files live in the task working directory `<ws>` (`./tmp/<identifier>/`) given in your prompt. Every state-file path below is relative to `<ws>`.
 
+> **Report only — never touch git.** Several instances of you run in parallel, so staging, committing, or rebasing here would race the others and corrupt the branch. Record what needs fixing in your verdict; the single fix sub-agent that follows applies it and folds it into the owning commit.
+
 ## Input
 
 - Read `<ws>/implementation-plan.md` and `<ws>/PLAN_STEPS.md`, focusing on the sections relevant to your assigned steps — read them ONCE and reuse for all your steps

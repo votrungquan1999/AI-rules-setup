@@ -15,8 +15,9 @@ Pipeline: research → plan → (investigation ∥ behavior-risk catalog) → BD
 - **Batch to the cap.** For investigation, BDD, and verification, put **as many related steps as possible into one sub-agent, capped at 4** (group by shared files/module) — one agent amortizes the shared-context read across its steps, but beyond ~4 its context congests and quality drops. Spawn a phase's batches in a single message so they run in parallel.
 - **Route on returns.** Read state files to make decisions and relay sub-agent outputs to the user. Do not re-analyze findings in your own words.
 - **Freeze `BEHAVIOR_RISKS.md`** once Phase 3b writes it — the adversarial phase checks against it; never edit it to match what was built.
+- **Serialize git.** Under the `per-behavior` commit strategy, never spawn BDD batches in parallel — concurrent sub-agents committing to one branch corrupt each other's history, and batches are grouped by *shared files*, so one file's diff cannot be split across behaviors after the fact. Run batches one at a time. Verification (Phase 5) stays parallel because those sub-agents only report; the single fix sub-agent does the git work.
 - **Log decisions.** Whenever any phase or the orchestrator faces **2+ viable options and picks one** (including choices the user resolved), append to `<ws>/DECISIONS.md`: chosen option, alternative(s), one-line why. Skip forced moves.
-- **Mirror decisions to the card (best-effort).** The `DECISIONS.md` write *is* the trigger: every time you add a NEW entry, also mirror *that entry* to the AI-Kanban card so the "why" outlives `<ws>` — `append_decision(cardId, { decision, why? })`. Resolve `cardId` from the session pointer `~/.claude/kanban-session-state/$CLAUDE_CODE_SESSION_ID.json` (`cardId` field); if the file/field is absent (no card tracked this session), **skip the mirror silently**. If the new entry **supersedes** a specific earlier decision, call `mark_decision_outdated(cardId, index)` on the older entry **first**, then `append_decision` for the replacement — so a mid-way failure never leaves two contradictory *active* entries. Resolve `index` by re-reading `get_card_context(cardId)` and matching the older entry's **text** (not a remembered position); skip the mark if you can't locate it unambiguously. Mirror only newly-added entries, never re-send the whole file. **After a successful mirror, re-stamp `lastMirroredAt` in the session pointer** — that is what clears the `flush-debt` nudge; skip the stamp if the call failed, so the debt stays visible. Every call is non-blocking — on failure, note it and keep working.
+- **Mirror decisions to the card (best-effort).** The `DECISIONS.md` write *is* the trigger: every time you add a NEW entry, also mirror *that entry* to the AI-Kanban card so the "why" outlives `<ws>` — `append_decision(cardId, { decision, why? })`. Resolve `cardId` from the session pointer `~/.claude/kanban-session-state/$CLAUDE_CODE_SESSION_ID.json` (`cardId` field); if the file/field is absent (no card tracked this session), **skip the mirror silently**. If the new entry **supersedes** a specific earlier decision, call `mark_decision_outdated(cardId, index)` on the older entry **first**, then `append_decision` for the replacement — so a mid-way failure never leaves two contradictory *active* entries. Resolve `index` by re-reading `get_card_context(cardId)` and matching the older entry's **text** (not a remembered position); skip the mark if you can't locate it unambiguously. Mirror only newly-added entries, never re-send the whole file. **After a successful mirror, re-stamp `lastMirroredAt` in the session pointer** — that is what clears the `flush-debt` nudge; skip the stamp if the call failed, so the debt stays visible. Every call is non-blocking — on failure, note it and keep working. **One exception:** `decision` is capped at 200 characters and `why` at 400, and an over-long entry is refused with `ERR_VALIDATION` naming the actual length. That is not a failure to keep working past — rewrite it shorter and call again, or the entry never reaches the card.
 
 **Spawn pattern** — keep the prompt minimal; the node carries the instructions:
 
@@ -47,6 +48,7 @@ Every run is scoped to a **task identifier** (a ticket id, or a confirmed kebab-
 - `IMPLEMENTATION_PROGRESS.md` — per-step results + red/green audit trail
 - `VALIDATION_STEP_[N].md` — conformance results (5a); `ADVERSARIAL_REVALIDATION.md` — adversarial findings (5b)
 - `DECISIONS.md` — running decision log (each new entry is also mirrored to the AI-Kanban card — see **Mirror decisions to the card**)
+- `COMMIT_PLAN.md` — the commit strategy, base SHA, and behavior→commit-subject map (see `nodes/commit-protocol.md`)
 
 ---
 
@@ -89,6 +91,13 @@ Spawn `node-behavior-risk.md` (may go in the same message as the investigation b
 
 ## Phase 4: Implementation Loop
 
+**4·0. Commit-strategy gate — ask before any code is written.** The behavior list is final now (Phase 3b may have added steps), so this is the last moment the answer is stable. Ask the operator to choose:
+
+- **One commit per behavior** — each behavior is committed as soon as it goes green, and every later fix (quality gate, conformance, adversarial) is folded back into the commit that owns that behavior. The branch ends with exactly one commit per behavior in the plan. Say plainly that folding **rewrites history**, so it is only free while the branch is unpushed.
+- **Defer all commits** — the run never touches git; everything accumulates in the working tree and the operator commits at the end.
+
+Write the answer to `<ws>/COMMIT_PLAN.md` per `nodes/commit-protocol.md`, log it to `DECISIONS.md`, and mirror it to the card. **Gate:** do not spawn the first BDD batch until the operator has chosen. Pass the strategy into every sub-agent you spawn from here on.
+
 Batched BDD sub-agents alternate with quality gates.
 
 **4a. BDD batch** — spawn `node-bdd-step.md` per batch (batch to the cap; same grouping as investigation). It runs its steps one-test-at-a-time with meaningful-red discipline and **bubbles up** on any gate. Route on its return:
@@ -109,9 +118,11 @@ Two independent axes, spawned together so all run in parallel:
 
 **5b. Adversarial Revalidation** — "does the code survive the frozen catalog?" Spawn `node-adversarial-revalidation.md` per risk-group (related risks together) → `ADVERSARIAL_REVALIDATION.md`.
 
+Both verification passes **report only — they never stage, commit, or rebase** (they run in parallel; git must stay serialized).
+
 On return:
-- **Conformance (5a):** invalid steps → one fix sub-agent for all of them, then re-validate only those.
-- **Adversarial (5b): report + triage.** Present each break/silent-misbehavior with severity; the user decides **new step** (→ Phase 4) or **accepted/out-of-scope**. No auto-loop; log each to `DECISIONS.md` (and mirror each to the card).
+- **Conformance (5a):** invalid steps → one fix sub-agent for all of them, then re-validate only those. Under `per-behavior`, that fix sub-agent **folds each fix into the commit owning that behavior** per `nodes/commit-protocol.md` — never a new commit.
+- **Adversarial (5b): report + triage.** Present each break/silent-misbehavior with severity; the user decides **new step** (→ Phase 4) or **accepted/out-of-scope**. No auto-loop; log each to `DECISIONS.md` (and mirror each to the card). A fix to an existing behavior folds into that behavior's commit; a genuinely new behavior becomes a new step and earns its own commit — either way the one-commit-per-behavior count holds.
 
 Present combined results.
 

@@ -43,6 +43,23 @@ Build features incrementally with explicit planning and verification.
 2. Include risk notes and test strategy per step.
 3. Get user confirmation when plan materially changes behavior.
 
+### Phase 2b: Decide How to Commit
+
+Ask the user **before writing any code** — the plan is approved and the behavior list is final, so this is the last stable moment. Two options:
+
+- **One commit per behavior** — commit each behavior as soon as it goes green, and fold every later fix (quality gate, review) back into the commit owning that behavior, so you end with exactly one commit per behavior. Say plainly that folding **rewrites history**, so it is only free while the branch is unpushed.
+- **Defer all commits** — never touch git; changes accumulate in the working tree and the user commits at the end.
+
+Record the answer (and the base SHA from `git rev-parse HEAD` if per-behavior) at the top of `<ws>/IMPLEMENTATION_PROGRESS.md`. Don't start Phase 3 until the user has chosen.
+
+**Under one-commit-per-behavior:**
+
+- Commit when a behavior is green and its tests/lint pass. Stage **explicit paths only** — never `git add -A`, `-a`, or `.`. One behavior, one commit, subject naming the behavior in the repo's convention.
+- Fold a later fix into its owning commit: `git commit --fixup <sha>` then `GIT_SEQUENCE_EDITOR=true git rebase --autosquash <base>` (that env var is what keeps the rebase non-interactive). Re-run affected tests after.
+- Resolve the owning commit **by subject**, not a remembered SHA (`git log --format='%H %s' <base>..HEAD`) — every autosquash rewrites the SHAs after it.
+- A fix that adds genuinely new behavior is a **new step** with its own commit, not a fold.
+- **Stop and ask** if the owning commit is already pushed (fold + `--force-with-lease`, or a follow-up commit that breaks the count) or if a rebase conflicts. Never force-push unprompted; never resolve a conflict with `-X ours` / `-X theirs`.
+
 ### Phase 3: Implement Incrementally
 
 For each step:
@@ -62,6 +79,11 @@ After every 2-3 steps:
 - Review test quality and coverage gaps.
 - Refactor only where it improves clarity/safety.
 - Re-verify before continuing.
+- Under one-commit-per-behavior, **fold each fix into the commit owning that behavior** (Phase 2b) rather than adding a new commit.
+
+### Phase 5: Wrap Up
+
+- **Check the commit invariant.** Under one-commit-per-behavior, `git rev-list --count <base>..HEAD` must equal the number of completed behaviors. Report the count either way; if they differ, say so plainly and name the likely cause (a fix committed separately instead of folded, or a behavior never committed). Under defer, note the changes are uncommitted by design.
 
 ## Suggested Progress Format
 

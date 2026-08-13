@@ -23,6 +23,7 @@ The main session MUST:
 - **Present node outputs** to the user by reading and relaying their output artifacts. Nodes never talk to the user — they write artifacts and return control; the orchestrator owns every user-facing escalation.
 - **Fix state artifacts** when investigation reveals plan issues (update `plan-steps.md` and `implementation-plan.md`)
 - **Freeze `behavior-risks.md`** once Phase 3b writes it — the adversarial pass checks the built code against it, so it must never be edited to match what was built.
+- **Serialize git.** Under the `per-behavior` commit strategy, never dispatch BDD batches in parallel — concurrent executions committing to one branch corrupt each other's history, and batches are grouped by *shared files*, so one file's diff cannot be split across behaviors after the fact. Run batches one at a time. The Phase 5 verification passes stay parallel because they only report; the single fix pass does the git work.
 - **Log decisions** — whenever any node, or the orchestrator itself (e.g. fixing the plan after investigation, or a routing choice), faces **2+ defensible options and commits to one** (including choices resolved by asking the user), append an entry to `decisions.md`: chosen option, alternative(s), one-line why. Skip forced moves where only one option was viable.
 
 The main session MUST NOT:
@@ -50,6 +51,7 @@ All workflow state files are created as Antigravity artifacts in the brain direc
 - `validation-summary.md` — Consolidated conformance results (5a)
 - `adversarial-revalidation.md` — Adversarial revalidation findings against the frozen catalog (5b)
 - `decisions.md` — Running decision log: every point where 2+ viable options existed and one was chosen; read and reported by the summary node
+- `commit-plan.md` — Commit strategy, base SHA, and behavior→commit-subject map (see `nodes/commit-protocol.md`)
 
 ---
 
@@ -149,6 +151,15 @@ Read the node instructions from `nodes/node-behavior-risk.md` in this skill's di
 
 The core loop — batched BDD executions alternate with quality gates.
 
+### 4·0. Commit-Strategy Gate — before any code is written
+
+The behavior list is final now (Phase 3b may have added steps), so this is the last moment the answer is stable. Ask the user to choose:
+
+- **One commit per behavior** — each behavior is committed as soon as it goes green, and every later fix (quality gate, conformance, adversarial) is folded back into the commit owning that behavior. The branch ends with exactly one commit per behavior in the plan. Say plainly that folding **rewrites history**, so it is only free while the branch is unpushed.
+- **Defer all commits** — the run never touches git; everything accumulates in the working tree and the user commits at the end.
+
+Write the answer to `commit-plan.md` per `nodes/commit-protocol.md` and log it to `decisions.md`. **Gate:** do not dispatch the first BDD batch until the user has chosen. Pass the strategy into every execution from here on.
+
 ### Initialize
 
 Update `loop-state.json`: set `"current_step": 1, "quality_checks": 0, "max_steps": 20`.
@@ -179,7 +190,7 @@ Stop when: all planned behaviors are implemented (check against the plan), the u
 
 ## Phase 5: Verification
 
-After implementation, verify along two independent axes. Both run in this pre-summary window.
+After implementation, verify along two independent axes. Both run in this pre-summary window, and both **report only — they never stage, commit, or rebase** (git stays serialized; the fix pass that follows does it).
 
 ### 5a. Conformance Validation — "did each step match the plan?"
 
@@ -187,13 +198,13 @@ Update `loop-state.json`: add `"validation_step": 1, "validation_total": [comple
 
 Read the node instructions from `nodes/node-validation.md` in this skill's directory, then execute them. The node validates each completed step against the plan (implementation match, test coverage & meaningfulness per the 4 Pillars, cross-step consistency, code quality), writing per-step `validation-step-[N].md` and a consolidated `validation-summary.md`.
 
-**On return:** read `validation-summary.md`; if any step is invalid → fix the issues, then re-validate only those steps.
+**On return:** read `validation-summary.md`; if any step is invalid → fix the issues, then re-validate only those steps. Under `per-behavior`, **fold each fix into the commit owning that behavior** per `nodes/commit-protocol.md` — never a new commit.
 
 ### 5b. Adversarial Revalidation — "does the code survive the frozen catalog?"
 
 Read the node instructions from `nodes/node-adversarial-revalidation.md` in this skill's directory, then execute them per risk-group (related catalog entries together, capped at 4). It takes the frozen `behavior-risks.md` as ground truth for expected behavior on paths the plan never specified, probes the real implementation, and writes findings to `adversarial-revalidation.md`. It does NOT fix anything.
 
-**On return — report + triage.** Present each `breaks` / `silent-misbehavior` finding with severity; the user decides per finding: **new step** (→ back to Phase 4) or **accepted / out-of-scope**. There is no auto-loop back into implementation. Log each decision to `decisions.md`.
+**On return — report + triage.** Present each `breaks` / `silent-misbehavior` finding with severity; the user decides per finding: **new step** (→ back to Phase 4) or **accepted / out-of-scope**. There is no auto-loop back into implementation. Log each decision to `decisions.md`. A fix to an existing behavior folds into that behavior's commit; a genuinely new behavior becomes a new step with its own commit — either way the one-commit-per-behavior count holds.
 
 **Then present combined 5a + 5b results.**
 

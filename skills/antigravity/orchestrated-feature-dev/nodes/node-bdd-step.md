@@ -86,6 +86,18 @@ Confirm it passes. Also run any related previous tests to check for regressions.
 
 Only if there's an obvious improvement. Keep it small. Run tests again.
 
+### 7. Commit the Behavior (only under the `per-behavior` strategy)
+
+Read `commit-plan.md`. If `Strategy: defer`, **skip this step entirely — run no git commands at all.**
+
+Under `Strategy: per-behavior`, this behavior is green, so commit it now per `nodes/commit-protocol.md`:
+- Capture `Base:` first if you are the run's first behavior commit
+- Stage **explicit paths only** — the files listed under "Files Changed" in `step-result.md`; never `git add -A`, `-a`, or `.`
+- One commit, subject naming the behavior in the repo's existing convention
+- Record the row in `commit-plan.md` as `committed`
+
+Commit **per behavior, not per batch** — your batch holds several behaviors and each gets its own commit as it goes green.
+
 ## Output
 
 Update the `plan-steps.md` artifact:

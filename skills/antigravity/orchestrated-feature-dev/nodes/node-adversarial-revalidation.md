@@ -2,6 +2,8 @@
 
 Check the **actual implemented code** against the frozen behavior-risk catalog. Runs in Phase 5b, alongside conformance validation (5a). Each execution handles a group of related catalog entries (as many as possible, capped at 4).
 
+> **Report only — never touch git.** Several executions run in parallel alongside conformance validation, so staging, committing, or rebasing here would race the others and corrupt the branch. Report findings; the user triages them and a single fix pass applies whatever is accepted.
+
 ## What makes this different from conformance validation
 
 Conformance validation (5a, `node-validation.md`) asks "did each step match the plan?" — it trusts the plan as the spec. **You do the opposite:** you take the frozen `behavior-risks.md` artifact as the source of truth for *expected* behavior on paths the plan never specified, and you probe whether the real implementation actually survives them.

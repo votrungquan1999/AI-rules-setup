@@ -36,6 +36,7 @@ If issues are found:
 1. Fix them immediately
 2. Run all tests to confirm nothing broke
 3. Note what was fixed
+4. **Fold each fix into the behavior that owns it** — read `<ws>/COMMIT_PLAN.md`; if `Strategy: defer`, run no git commands. Under `per-behavior`, a refactor or test fix touching already-committed behavior code belongs in that behavior's commit, not a new one — follow the fold procedure in `nodes/commit-protocol.md`. A fix spanning several behaviors folds into each owning commit separately. If a fix's owning commit is already pushed, or a rebase conflicts, **stop and hand it back to the orchestrator** rather than forcing it.
 
 ## Output
 

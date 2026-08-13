@@ -22,6 +22,7 @@ Execute one BDD scenario (test-first) for a single observable behavior.
 6. If failing on the behavior assertion, implement minimal code to pass.
 7. Re-run test and related nearby tests.
 8. Mark step status and progress updates.
+9. **Commit the behavior — only under `per-behavior`.** Read `<ws>/COMMIT_PLAN.md`; if `Strategy: defer`, run no git commands at all. Otherwise commit this behavior now per `nodes/commit-protocol.md`: capture `Base:` if you are the run's first behavior commit, stage **explicit paths only** (never `git add -A`, `-a`, or `.`), one commit whose subject names the behavior, then record the row as `committed`. Commit **per behavior, not per batch** — each behavior in your batch gets its own commit as it goes green.
 
 **Other bubble-up triggers (same protocol):** 2+ defensible implementation behaviors for the step, or an unexpected failure you cannot resolve with minimum code. Stop, write progress, return control — the orchestrator escalates and re-spawns you with the decision.
 

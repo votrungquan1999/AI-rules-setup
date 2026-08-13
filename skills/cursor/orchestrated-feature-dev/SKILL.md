@@ -35,6 +35,7 @@ Every run is scoped to its task identifier so **multiple tasks run in parallel**
 - `<ws>/VALIDATION_STEP_<N>.md` — conformance results (5a)
 - `<ws>/ADVERSARIAL_REVALIDATION.md` — adversarial findings against the frozen catalog (5b)
 - `<ws>/DECISIONS.md` — running decision log: every point where 2+ viable options existed and one was chosen; read and reported by the summary node
+- `<ws>/COMMIT_PLAN.md` — commit strategy, base SHA, and behavior→commit-subject map (see `nodes/commit-protocol.md`)
 
 `./tmp/` should be in `.gitignore`; delete `<ws>` once the feature is merged.
 
@@ -44,7 +45,8 @@ Every run is scoped to its task identifier so **multiple tasks run in parallel**
 - **Batch to the cap.** For investigation, BDD, and both verification passes, put **as many related steps as possible into one subagent, capped at 4** (grouped by shared files/module) — one agent amortizes the shared-context read across its steps, but past ~4 its context congests and quality drops. Spawn a phase's batches in a single message so they run in parallel.
 - Route based on state files and gate outcomes; relay subagent outputs rather than re-analyzing them.
 - **Freeze `BEHAVIOR_RISKS.md`** once Phase 3b writes it — the adversarial pass checks against it, so never edit it to match what was built; that is what keeps 5b an honest test.
-- Pass the task workspace path `<ws>` to every subagent it spawns.
+- Pass the task workspace path `<ws>` — and the commit strategy — to every subagent it spawns.
+- **Serialize git.** Under the `per-behavior` commit strategy, never spawn BDD batches in parallel: concurrent subagents committing to one branch corrupt each other's history, and batches are grouped by *shared files*, so one file's diff cannot be split across behaviors after the fact. Run BDD batches one at a time. Verification (Phase 5) stays parallel because those subagents only report; the single fix subagent does the git work.
 - Log decisions: whenever any phase, or the orchestrator itself (e.g. fixing the plan after investigation, resolving a silent catalog entry, a routing choice), faces 2+ defensible options and commits to one — including choices resolved by asking the user — append an entry to `<ws>/DECISIONS.md` (chosen option, alternative(s), one-line why). Skip forced moves where only one option was viable.
 - Pause for user approval at plan gates. The review artifact is `<ws>/implementation-plan.md` (Technical Design + Behaviors) — never present `<ws>/PLAN_STEPS.md`, which is derived loop state written only after the plan is approved.
 - Check the plan's format before presenting it. `<ws>/implementation-plan.md` must carry `## Technical Design` and `## Behaviors to Implement` with test-first checkboxes per step. A plan shaped as an `AC:` / `Test Type:` step list means the plan subagent never loaded `create-implementation-plan` — send it back to a fresh subagent rather than presenting it.
@@ -62,15 +64,17 @@ Spawn prompts stay minimal — the node file carries the instructions: "Read `no
 - `nodes/node-validation.md` — conformance (5a)
 - `nodes/node-adversarial-revalidation.md` — adversarial (5b)
 - `nodes/node-summary.md`
+- `nodes/commit-protocol.md` — reference, not a phase: how behaviors become commits and how fixes fold
 
 ## Execution Rules
 
 - Research and planning must converge before coding.
 - **Behavior-risk catalog (Phase 3b)** runs parallel with investigation (spawn it in the same message). It is implementation-blind — cataloguing edge-case behaviors from the requirement + existing system only. On return: escalate every **requirement-silent** entry to the user as a product decision (2+ defensible behaviors) **before** implementation, fold each resolution into `implementation-plan.md` (+ a `PLAN_STEPS.md` step if it adds behavior) and `DECISIONS.md`, then **freeze** the catalog — requirement-implied entries become the Phase 5b checks.
+- **Ask how to commit before any code is written** (after Phase 3b, when the behavior list is final — the last moment the answer is stable). Two options: **one commit per behavior** (committed as it goes green, every later fix folded back into its owning commit, so the branch ends with exactly one commit per behavior — say plainly that folding **rewrites history**, so it is only free while the branch is unpushed), or **defer all commits** (never touch git; the user commits at the end). Write the answer to `<ws>/COMMIT_PLAN.md` per `nodes/commit-protocol.md`, log it to `DECISIONS.md`. **Gate:** do not spawn the first BDD batch until the user has chosen.
 - One behavior/test per BDD scenario step.
 - **BDD runs as batched subagents, NOT inline** (same grouping/cap as investigation). Each batch runs autonomously with one-test-at-a-time meaningful-red discipline, but a batch subagent cannot talk to the user — so on any gate (no meaningful test possible / 2+ defensible behaviors / unresolved failure) it **BUBBLES UP**: stops, writes progress, returns control. The orchestrator escalates to the user, logs to `DECISIONS.md`, then spawns a **fresh** subagent to resume that batch with the decision baked in. Verify discipline via the red/green trail in `IMPLEMENTATION_PROGRESS.md`, not the prose summary.
 - Trigger quality gate every 2-3 completed steps; `needs-fixes` → fix subagent, re-check (max 2 per checkpoint).
-- **Verification (Phase 5)** splits into two parallel passes, spawned together:
-  - **5a Conformance Validation** ("did each step match the plan?") — `node-validation.md` per step-batch, one output file per step. Invalid steps → ONE fix subagent covering all, then re-validate only those.
-  - **5b Adversarial Revalidation** ("does the code survive the frozen catalog?") — `node-adversarial-revalidation.md` per risk-group. On return, **report + triage with the user**: each break/silent-misbehavior is either a **new step** (→ back to BDD) or **accepted/out-of-scope**. No auto-loop into implementation; log each to `DECISIONS.md`.
+- **Verification (Phase 5)** splits into two parallel passes, spawned together. Both **report only — they never stage, commit, or rebase** (they run in parallel; git stays serialized):
+  - **5a Conformance Validation** ("did each step match the plan?") — `node-validation.md` per step-batch, one output file per step. Invalid steps → ONE fix subagent covering all, then re-validate only those. Under `per-behavior`, that fix subagent **folds each fix into the commit owning that behavior** per `nodes/commit-protocol.md` — never a new commit.
+  - **5b Adversarial Revalidation** ("does the code survive the frozen catalog?") — `node-adversarial-revalidation.md` per risk-group. On return, **report + triage with the user**: each break/silent-misbehavior is either a **new step** (→ back to BDD) or **accepted/out-of-scope**. No auto-loop into implementation; log each to `DECISIONS.md`. A fix to an existing behavior folds into that behavior's commit; a genuinely new behavior becomes a new step with its own commit — either way the one-commit-per-behavior count holds.
 - Stop on blocking uncertainty and request user decision.

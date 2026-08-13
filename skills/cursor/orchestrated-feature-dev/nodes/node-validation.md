@@ -4,6 +4,8 @@ Validate a batch of related completed steps (grouped by shared files) after impl
 
 > **Task workspace:** All state files live in the task working directory `<ws>` (`./tmp/<identifier>/`) given in your prompt. Every state-file path below is relative to `<ws>`.
 
+> **Report only — never touch git.** Several instances of you run in parallel, so staging, committing, or rebasing here would race the others and corrupt the branch. Record what needs fixing in your verdict; the single fix subagent that follows applies it and folds it into the owning commit.
+
 ## Input
 
 - `<ws>/implementation-plan.md` and `<ws>/PLAN_STEPS.md` — read only the sections relevant to your assigned steps, ONCE

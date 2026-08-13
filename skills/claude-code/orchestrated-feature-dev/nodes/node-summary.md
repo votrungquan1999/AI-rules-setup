@@ -18,7 +18,8 @@ Read all workflow state files:
 1. **Count completed steps** from `<ws>/PLAN_STEPS.md` (all with status `done`)
 2. **Gather quality gate results** from all quality checkpoints
 3. **List all files changed** across all steps
-4. **Aggregate test/lint status** from what the run already recorded — each BDD step ran its own tests test-first and the quality gates re-ran the recent steps' tests, so the suite is already green. Do **not** re-run the whole project's test suite or lint the whole project here; it's slow and redundant. Only if a state file flags an unresolved failure, note it (and at most re-run that one step's tests).
+4. **Check the commit invariant** — read `<ws>/COMMIT_PLAN.md`. Under `Strategy: per-behavior`, `git rev-list --count <base>..HEAD` must equal the number of behaviors with status `done`. Report the count either way; if they differ, say so plainly and name the likely cause (a fix committed separately instead of folded, or a behavior that never got committed) rather than quietly reporting success. Under `Strategy: defer`, skip this and note that the changes are uncommitted by design.
+5. **Aggregate test/lint status** from what the run already recorded — each BDD step ran its own tests test-first and the quality gates re-ran the recent steps' tests, so the suite is already green. Do **not** re-run the whole project's test suite or lint the whole project here; it's slow and redundant. Only if a state file flags an unresolved failure, note it (and at most re-run that one step's tests).
 
 ## Output
 
@@ -36,6 +37,9 @@ Present to the user:
 | 1 | [behavior] | ✅ done |
 | 2 | [behavior] | ✅ done (already covered) |
 | ... | ... | ... |
+
+## Commits: [N commits / M behaviors]
+[Under `per-behavior`: list each commit subject against its behavior, and state whether the counts match. Under `defer`: "no commits made — changes are in the working tree for you to commit."]
 
 ## Quality Gates: [X] checkpoints passed
 - Checkpoint 1 (after steps 1-3): [pass/fixed N issues]
