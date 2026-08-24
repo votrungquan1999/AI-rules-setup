@@ -177,6 +177,8 @@ Most findings you can confirm from what you read while reviewing — trust those
 
 Write the complete review to `<ws>/review-changes.md`:
 
+**Number every finding.** Write each one as `### 1. [Issue Title]`, `### 2. …` — sequential, starting at 1, in the order the report lists them. Assign the numbers **last**, once verdicts, filtering, dedupe, and root-above-symptom ordering have settled the order. This is mandatory: the number is how the reader cites a finding back ("fix 2 and 4"), and an unnumbered report forces them to quote titles instead. Never leave a gap where a dropped finding was, and never carry a number over from a lens file — the report's numbering is its own.
+
 ```markdown
 ## Summary
 
@@ -190,7 +192,7 @@ Origin of findings: [N] introduced by this change, [N] pre-existing on lines it 
 
 ## Findings
 
-### [Issue Title]
+### 1. [Issue Title]
 - **Severity**: MUST FIX / SHOULD FIX / NIT
 - **Confidence**: [70–100]
 - **Origin**: introduced by this change / pre-existing — touched by this change / pre-existing — newly reached by this change [+ the link the diff created; keep any "(unconfirmed)" marker]

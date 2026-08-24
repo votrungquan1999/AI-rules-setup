@@ -14,7 +14,7 @@ Work from inside the repo the orchestrator resolved in Step 0 (the repo the conv
 
 Stop early — do not fan out — when the review adds no value:
 - **No changes** → state that clearly and stop.
-- **Trivial diff** (a handful of lines, generated files, pure formatting, version bumps) → do a single inline review and skip the lens fan-out. Note that you took the fast path.
+- **Trivial diff** (a handful of lines, generated files, pure formatting, version bumps) → do a single inline review and skip the lens fan-out. Note that you took the fast path. Number the findings `### 1.`, `### 2.` … as the report format requires — the reader cites them by number.
 
 Only proceed to the lens fan-out when the diff is **non-trivial** (real logic, multiple files, or anything touching data/auth/security). When you do, also set the **review depth** (step 2b) — it decides how many agents the fan-out costs.
 
