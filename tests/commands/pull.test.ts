@@ -1,4 +1,4 @@
-import { mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -256,5 +256,43 @@ describe("Pull Command Integration", () => {
 		const output = logSpy.mock.calls.map((call) => call.join(" ")).join("\n");
 		expect(output).toContain("Successfully pulled 1 items");
 		expect(output).not.toContain("rule categories");
+	});
+
+	it("should install a skill's supporting files next to its SKILL.md, including nested folders", async () => {
+		// Arrange: the catalog skill ships a top-level and a nested supporting file
+		const config = {
+			version: "1.0.0",
+			agent: "antigravity",
+			categories: [],
+			skills: ["my-skill"],
+		};
+		await writeFile(join(testDir, ".ai-rules.json"), JSON.stringify(config, null, 2));
+
+		setCachedRules({
+			agents: {
+				antigravity: {
+					categories: {},
+					skills: [
+						{
+							name: "my-skill",
+							content: "# My Skill",
+							supportingFiles: [
+								{ path: "reference.md", content: "# Reference" },
+								{ path: "steps/1-open.md", content: "# Step 1: Open" },
+							],
+						},
+					],
+				},
+			},
+		});
+
+		// Act
+		await pullCommand();
+
+		// Assert: every supporting file lands beside SKILL.md with its catalog content intact
+		const skillDir = join(testDir, ".agents/skills/my-skill");
+		expect(await readFile(join(skillDir, "SKILL.md"), "utf-8")).toBe("# My Skill");
+		expect(await readFile(join(skillDir, "reference.md"), "utf-8")).toBe("# Reference");
+		expect(await readFile(join(skillDir, "steps/1-open.md"), "utf-8")).toBe("# Step 1: Open");
 	});
 });

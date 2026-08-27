@@ -3,7 +3,12 @@ import chalk from "chalk";
 import type { KbMemory } from "../lib/api-client";
 import { fetchKbMemories, fetchManifests, fetchRuleFile, fetchSkills, fetchWorkflows } from "../lib/api-client";
 import { loadConfig, saveConfig } from "../lib/config";
-import { applyNamingConvention, applySkillNamingConvention, writeRuleFile } from "../lib/files";
+import {
+	applyNamingConvention,
+	applySkillFileNamingConvention,
+	applySkillNamingConvention,
+	writeRuleFile,
+} from "../lib/files";
 import { installHooks } from "../lib/hooks-install";
 import { AIAgent, type OverwriteStrategy } from "../lib/types";
 
@@ -117,6 +122,11 @@ export async function pullCommand(_options: PullOptions = {}): Promise<void> {
 
 			const targetPath = applySkillNamingConvention(agent as AIAgent, skill.name);
 			await writeRuleFile(skill.content, join(process.cwd(), targetPath));
+			// A skill is a folder, not one file — its steps/nodes/scripts must land beside SKILL.md.
+			for (const supportingFile of skill.supportingFiles ?? []) {
+				const supportingPath = applySkillFileNamingConvention(agent as AIAgent, skill.name, supportingFile.path);
+				await writeRuleFile(supportingFile.content, join(process.cwd(), supportingPath));
+			}
 			console.log(chalk.green(`  ✓ ${targetPath}`));
 			totalInstalled++;
 		}
