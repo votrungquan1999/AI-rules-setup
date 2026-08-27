@@ -70,7 +70,7 @@ Run the test. You **MUST** see the result before writing ANY behavior logic.
 
 - **If it fails on the behavior assertion** → real red, proceed to step 4
 - **If it fails structurally** (404 route not registered, missing field, import error) → that red validates nothing; fix the scaffolding (step 2c) and run again
-- **If it passes** → either the behavior is already covered, or this is the expected green-from-start case. Update `<ws>/PLAN_STEPS.md` accordingly. Skip to Output.
+- **If it passes** → either the behavior is already covered (nothing changed: update `<ws>/PLAN_STEPS.md`, skip to Output), or this is the expected green-from-start case (the scaffolding IS the implementation — skip to step 6 so it still gets reviewed and committed)
 
 ### 4. Implement
 
@@ -80,14 +80,25 @@ Write the **minimum code** to make the test pass. Nothing more.
 
 Confirm it passes. Also run any related previous tests to check for regressions.
 
-- **If all pass** → proceed to Output
+- **If all pass** → proceed to step 6
 - **If regression** → fix the regression, run tests again
 
-### 6. Quick Refactor (Optional)
+### 6. Review the Changes
+
+Read the **full diff of this behavior** — every file you touched, not just the last edit (`git diff` on those paths; under `defer` the working tree is the diff). Check:
+
+- **Every hunk is intentional and belongs to this behavior.** Drop debug leftovers, stray formatting churn, and edits to files this step should not own — under `per-behavior` they would land in the wrong commit. The `Files Changed` list in your Output must match this diff exactly; the commit step stages from it.
+- **Comments are concise and skimmable.** One line, one idea; say WHY, not WHAT. Delete any comment that restates the code or narrates an obvious step. Match the surrounding code's comment density.
+- **No narrating block at the top.** A file- or function-level comment that walks through the steps of the code below it (`// 1. fetch… 2. validate… 3. save…`) gets **broken up and distributed**: move each piece next to the line or clause it describes, so a dev reads it in place. Leave at most a one-line intro at the top.
+- **Ticket IDs stay out of the code** — they belong in the commit message.
+
+If anything changed, re-run the scoped test before moving on.
+
+### 7. Quick Refactor (Optional)
 
 Only if there's an obvious improvement. Keep it small. Run tests again.
 
-### 7. Commit the Behavior (only under the `per-behavior` strategy)
+### 8. Commit the Behavior (only under the `per-behavior` strategy)
 
 Read `<ws>/COMMIT_PLAN.md`. If `Strategy: defer`, **skip this step entirely — run no git commands at all.**
 
