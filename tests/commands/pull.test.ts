@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -294,5 +295,41 @@ describe("Pull Command Integration", () => {
 		expect(await readFile(join(skillDir, "SKILL.md"), "utf-8")).toBe("# My Skill");
 		expect(await readFile(join(skillDir, "reference.md"), "utf-8")).toBe("# Reference");
 		expect(await readFile(join(skillDir, "steps/1-open.md"), "utf-8")).toBe("# Step 1: Open");
+	});
+
+	it("should refuse a supporting file whose path escapes the project directory", async () => {
+		// Arrange: a catalog path that climbs out of .agents/skills/my-skill/ and past the project root
+		const config = {
+			version: "1.0.0",
+			agent: "antigravity",
+			categories: [],
+			skills: ["my-skill"],
+		};
+		await writeFile(join(testDir, ".ai-rules.json"), JSON.stringify(config, null, 2));
+
+		setCachedRules({
+			agents: {
+				antigravity: {
+					categories: {},
+					skills: [
+						{
+							name: "my-skill",
+							content: "# My Skill",
+							supportingFiles: [{ path: "../../../../escaped.md", content: "must never be written" }],
+						},
+					],
+				},
+			},
+		});
+		const escapedPath = join(testDir, "..", "escaped.md");
+
+		try {
+			// Act + Assert: the pull is refused and nothing lands outside the project
+			await expect(pullCommand()).rejects.toThrow("Refusing to write outside the project directory");
+			expect(existsSync(escapedPath)).toBe(false);
+		} finally {
+			// A failing run would have written into the OS tmp dir — never leave that behind
+			await rm(escapedPath, { force: true });
+		}
 	});
 });

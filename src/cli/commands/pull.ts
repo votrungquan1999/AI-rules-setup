@@ -7,6 +7,7 @@ import {
 	applyNamingConvention,
 	applySkillFileNamingConvention,
 	applySkillNamingConvention,
+	resolveWithinDir,
 	writeRuleFile,
 } from "../lib/files";
 import { installHooks } from "../lib/hooks-install";
@@ -123,9 +124,10 @@ export async function pullCommand(_options: PullOptions = {}): Promise<void> {
 			const targetPath = applySkillNamingConvention(agent as AIAgent, skill.name);
 			await writeRuleFile(skill.content, join(process.cwd(), targetPath));
 			// A skill is a folder, not one file — its steps/nodes/scripts must land beside SKILL.md.
+			// Supporting-file paths come from the catalog, so refuse any that escape the project.
 			for (const supportingFile of skill.supportingFiles ?? []) {
 				const supportingPath = applySkillFileNamingConvention(agent as AIAgent, skill.name, supportingFile.path);
-				await writeRuleFile(supportingFile.content, join(process.cwd(), supportingPath));
+				await writeRuleFile(supportingFile.content, resolveWithinDir(process.cwd(), supportingPath));
 			}
 			console.log(chalk.green(`  ✓ ${targetPath}`));
 			totalInstalled++;
