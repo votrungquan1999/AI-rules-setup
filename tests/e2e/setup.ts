@@ -3,17 +3,8 @@ import { afterAll, beforeAll } from "vitest";
 
 let apiServerProcess: ChildProcess | null = null;
 
-/**
- * Generate a unique port number for the test suite run
- * Uses a range starting from 4000 to avoid conflicts
- */
-function generateTestPort(): number {
-	const basePort = 4000;
-	const timestamp = Date.now();
-	const random = Math.floor(Math.random() * 100);
-	const port = basePort + (((timestamp % 1000) + random) % 1000);
-	return port;
-}
+/** Fixed port for the E2E API server — predictable for firewall prompts and manual debugging. */
+const TEST_API_PORT = 4000;
 
 /**
  * Start a single API server shared across all E2E tests.
@@ -21,7 +12,7 @@ function generateTestPort(): number {
  */
 beforeAll(async () => {
 	const testDbName = "ai-rules-e2e-test";
-	const testPort = generateTestPort();
+	const testPort = TEST_API_PORT;
 	const testApiUrl = `http://localhost:${testPort}`;
 	const testSecret = "test-secret";
 
