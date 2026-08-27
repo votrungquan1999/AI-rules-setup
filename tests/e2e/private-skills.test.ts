@@ -295,12 +295,16 @@ describe("E2E: Private Skills", () => {
 
 	describe("when running pull in a project with a matching scope", () => {
 		it("should install both public and private skills onto disk end-to-end", async () => {
-			// Given a private skill exists under scope "work" for claude-code.
+			// Given a private skill exists under scope "work" for claude-code, shipping a nested supporting file.
 			const db = await getTestDatabase();
 			await storePrivateSkillInTestDatabase(
 				db,
 				"claude-code",
-				{ name: "work-helper", content: "---\nname: work-helper\n---\n# Work Helper" },
+				{
+					name: "work-helper",
+					content: "---\nname: work-helper\n---\n# Work Helper",
+					supportingFiles: [{ path: "steps/1-open.md", content: "# Step 1: Open" }],
+				},
 				["work"],
 			);
 
@@ -333,6 +337,13 @@ describe("E2E: Private Skills", () => {
 					"utf-8",
 				);
 				expect(installedPrivateContent).toBe("---\nname: work-helper\n---\n# Work Helper");
+
+				// And the private skill's supporting file lands beside it — a skill is a folder, not one file.
+				const installedSupportingContent = await readFile(
+					join(projectDir, ".claude/skills/work-helper/steps/1-open.md"),
+					"utf-8",
+				);
+				expect(installedSupportingContent).toBe("# Step 1: Open");
 			} finally {
 				await cleanupTestProject(projectDir);
 			}
