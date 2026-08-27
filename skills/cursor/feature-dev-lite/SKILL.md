@@ -54,7 +54,7 @@ Record the answer (and the base SHA from `git rev-parse HEAD` if per-behavior) a
 
 **Under one-commit-per-behavior:**
 
-- Commit when a behavior is green and its tests/lint pass. Stage **explicit paths only** — never `git add -A`, `-a`, or `.`. One behavior, one commit, subject naming the behavior in the repo's convention.
+- Commit when a behavior is green and its tests, lint, and diff review (Phase 3 step 7) pass. Stage **explicit paths only** — never `git add -A`, `-a`, or `.`. One behavior, one commit, subject naming the behavior in the repo's convention.
 - Fold a later fix into its owning commit: `git commit --fixup <sha>` then `GIT_SEQUENCE_EDITOR=true git rebase --autosquash <base>` (that env var is what keeps the rebase non-interactive). Re-run affected tests after.
 - Resolve the owning commit **by subject**, not a remembered SHA (`git log --format='%H %s' <base>..HEAD`) — every autosquash rewrites the SHAs after it.
 - A fix that adds genuinely new behavior is a **new step** with its own commit, not a fold.
@@ -70,7 +70,8 @@ For each step:
 4. Run the test before writing behavior logic — expect a failure on the behavior assertion. A structural error (404, missing field, import error) is NOT a valid red; fix the scaffolding and re-run. If no meaningful red is possible (the scaffolding IS the implementation), write just enough code to pass first and expect green from the first run — note this explicitly.
 5. Implement minimal code to satisfy behavior.
 6. Re-run tests and quick lint/type checks.
-7. Move to next step only when current step is stable.
+7. **Review the full diff of this behavior** — every file you touched, not just the last edit. Every hunk is intentional and owned by this step (drop debug leftovers, stray formatting, edits to files another step owns — under one-commit-per-behavior they land in the wrong commit); comments are concise and skimmable (one line, one idea, WHY not WHAT — delete any that restate the code); a top-of-file/function block that narrates the steps below it is **broken up and distributed** next to the line each piece describes, at most a one-line intro left; no ticket IDs in code. Re-run the scoped test if anything changed.
+8. Move to next step only when current step is stable.
 
 ### Phase 4: Quality Gate
 

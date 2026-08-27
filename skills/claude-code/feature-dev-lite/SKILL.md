@@ -136,7 +136,7 @@ Record the answer at the top of `<ws>/IMPLEMENTATION_PROGRESS.md` (`Commit strat
 
 **Under `per-behavior`:**
 
-- **Commit when a behavior goes green**, after its tests and lint pass. Stage **explicit paths only** — never `git add -A`, `-a`, or `.`. One behavior, one commit, subject naming the behavior in the repo's existing convention.
+- **Commit when a behavior goes green**, after its tests, lint, and the diff review (step 10 below) pass. Stage **explicit paths only** — never `git add -A`, `-a`, or `.`. One behavior, one commit, subject naming the behavior in the repo's existing convention.
 - **Fold later fixes into the owning commit.** A quality-checkpoint refactor or a review fix to already-committed behavior code belongs in that behavior's commit:
   ```
   git commit --fixup <sha>
@@ -164,9 +164,15 @@ Record the answer at the top of `<ws>/IMPLEMENTATION_PROGRESS.md` (`Commit strat
 **After all tests are passing:**
 
 9. **Run linting** - Check for code quality issues and fix any problems
-10. **Verify** - All tests pass, acceptance criteria met
-11. **Mark step as complete** - Update progress file with ✅ Done, test list, and notes
-12. **Move to next step** - Only after current step is complete
+10. **Review the changes** - Read the **full diff of this behavior** (every file you touched, not just the last edit) before it gets committed:
+    - Every hunk is intentional and belongs to this behavior — drop debug leftovers, stray formatting, and edits to files another step owns (under `per-behavior` they land in the wrong commit).
+    - Comments are concise and skimmable — one line, one idea, WHY not WHAT; delete any that restate the code.
+    - A top-of-file/function block that narrates the steps below it is **broken up and distributed** next to the line each piece describes; at most a one-line intro stays at the top.
+    - No ticket IDs in code — they belong in the commit message.
+    - Re-run the scoped test if anything changed.
+11. **Verify** - All tests pass, acceptance criteria met
+12. **Mark step as complete** - Update progress file with ✅ Done, test list, and notes
+13. **Move to next step** - Only after current step is complete
 
 **Record decisions as you go.** Whenever a step involved choosing one of 2+ viable options, record it on the AI-Kanban card (best-effort): `append_decision(cardId, { decision, why? })`, resolving `cardId` from `~/.claude/kanban-session-state/$CLAUDE_CODE_SESSION_ID.json`; skip silently if absent (no card tracked this session). If it supersedes an earlier decision, `mark_decision_outdated(cardId, index)` on the older entry **first** (match it by text via `get_card_context`; skip the mark if you can't locate it unambiguously), then append. **After a successful mirror, re-stamp `lastMirroredAt` in the session pointer** (skip the stamp if the call failed). Never block the work on a mirror failure.
 
