@@ -94,6 +94,8 @@ Read the **full diff of this behavior** — every file you touched, not just the
 
 If anything changed, re-run the scoped test before moving on.
 
+**Do NOT mutate the implementation to check the test is sensitive.** Judge sensitivity by reading the assertion: would it still pass if the behavior were wrong? Injecting a real defect is Phase 5c's job — it is budgeted, runs alone, and uses a harness that restores safely. Mutating here with `Edit` (or `cp` + edit) has left mutants in the tree and corrupted later steps.
+
 ### 7. Quick Refactor (Optional)
 
 Only if there's an obvious improvement. Keep it small. Run tests again.

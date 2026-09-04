@@ -17,7 +17,7 @@ Validate a batch of related completed steps (grouped by shared files) after impl
 For EACH assigned step, one at a time (files shared between assigned steps need reading only once):
 
 1. Confirm implementation matches planned behavior.
-2. Verify test coverage AND meaningfulness: coverage is good (happy path + relevant edge/error cases tested, note anything untested), and each test is meaningful (4 Pillars — valid + sensitive assertion that fails if behavior is wrong; reject hollow/tautological/over-mocked tests). If the step is marked `test skipped (no meaningful test possible — user approved)`, confirm it was approved and record the behavior as untested rather than flagging a gap to fix.
+2. Verify test coverage AND meaningfulness: coverage is good (happy path + relevant edge/error cases tested, note anything untested), and each test is meaningful (4 Pillars — valid + sensitive assertion that fails if behavior is wrong; reject hollow/tautological/over-mocked tests — decide by reading, **never mutate the source to find out**: you run in parallel with other validators and a mutated file breaks their test runs; Phase 5c proves it empirically). If the step is marked `test skipped (no meaningful test possible — user approved)`, confirm it was approved and record the behavior as untested rather than flagging a gap to fix.
 3. Check cross-step consistency for shared files.
 4. Run step-relevant tests.
 5. Classify result.

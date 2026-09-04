@@ -31,7 +31,7 @@ Find and read the test(s) written for this step:
 - **Tests are meaningful** (apply the 4 Pillars, especially Validity & Sensitivity): does each test have a valid, sensitive assertion that would FAIL if the behavior were wrong? Reject hollow/tautological tests, over-mocking that bypasses the code under test, and assertions too loose to catch a real defect.
 - Does the test actually assert the planned behavior?
 - Run the test in isolation — does it pass?
-- Could the test pass even if the implementation were wrong (false positive)?
+- Could the test pass even if the implementation were wrong (false positive)? Decide this by reading — **never mutate the source to find out.** Phase 5c proves it empirically.
 - **Skipped tests**: if the step is marked `done (test skipped — no meaningful test possible, user approved)`, confirm the skip was user-approved and record the behavior as implementation-only (untested) in the verdict. Do NOT flag it as a coverage gap to fix unless the original reason no longer holds (a fixture/seam now exists that makes a meaningful test possible).
 
 #### 3. Check for Regressions Against Other Steps

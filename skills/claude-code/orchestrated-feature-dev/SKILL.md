@@ -7,7 +7,7 @@ description: Orchestrated multi-phase feature development — sub-agent phases (
 
 The main session is an **orchestrator**: it spawns a sub-agent for every working phase (it does none of the work itself), passes data between phases through state files in a per-task workspace, and routes based on what each sub-agent returns. Each node file under `nodes/` holds the *how* for one phase; this file holds only *what to spawn, what to pass, and how to route*.
 
-Pipeline: research → plan → (investigation ∥ behavior-risk catalog) → BDD-batch ↔ quality-gate → (conformance ∥ adversarial verification) → summary.
+Pipeline: research → plan → (investigation ∥ behavior-risk catalog) → BDD-batch ↔ quality-gate → (conformance ∥ adversarial verification) → mutation pass → summary.
 
 ## Orchestrator Rules
 
@@ -16,6 +16,7 @@ Pipeline: research → plan → (investigation ∥ behavior-risk catalog) → BD
 - **Route on returns.** Read state files to make decisions and relay sub-agent outputs to the user. Do not re-analyze findings in your own words.
 - **Freeze `BEHAVIOR_RISKS.md`** once Phase 3b writes it — the adversarial phase checks against it; never edit it to match what was built.
 - **Serialize git.** Under the `per-behavior` commit strategy, never spawn BDD batches in parallel — concurrent sub-agents committing to one branch corrupt each other's history, and batches are grouped by *shared files*, so one file's diff cannot be split across behaviors after the fact. Run batches one at a time. Verification (Phase 5) stays parallel because those sub-agents only report; the single fix sub-agent does the git work.
+- **Mutation testing happens in Phase 5c or not at all.** No phase mutates source to check a test — not the BDD loop, not the quality gate, not conformance. Judging sensitivity by reading is every other phase's job; the one pass that injects real defects is budgeted, runs alone, and uses `nodes/mutation-harness.py`. Never write mutation instructions into a sub-agent prompt yourself.
 - **Log decisions.** Whenever any phase or the orchestrator faces **2+ viable options and picks one** (including choices the user resolved), append to `<ws>/DECISIONS.md`: chosen option, alternative(s), one-line why. Skip forced moves.
 - **Mirror decisions to the card (best-effort).** The `DECISIONS.md` write *is* the trigger: every time you add a NEW entry, also mirror *that entry* to the AI-Kanban card so the "why" outlives `<ws>` — `append_decision(cardId, { decision, why? })`. Resolve `cardId` from the session pointer `~/.claude/kanban-session-state/$CLAUDE_CODE_SESSION_ID.json` (`cardId` field); if the file/field is absent (no card tracked this session), **skip the mirror silently**. If the new entry **supersedes** a specific earlier decision, call `mark_decision_outdated(cardId, index)` on the older entry **first**, then `append_decision` for the replacement — so a mid-way failure never leaves two contradictory *active* entries. Resolve `index` by re-reading `get_card_context(cardId)` and matching the older entry's **text** (not a remembered position); skip the mark if you can't locate it unambiguously. Mirror only newly-added entries, never re-send the whole file. **After a successful mirror, re-stamp `lastMirroredAt` in the session pointer** — that is what clears the `flush-debt` nudge; skip the stamp if the call failed, so the debt stays visible. Every call is non-blocking — on failure, note it and keep working. **One exception:** `decision` is capped at 200 characters and `why` at 400, and an over-long entry is refused with `ERR_VALIDATION` naming the actual length. That is not a failure to keep working past — rewrite it shorter and call again, or the entry never reaches the card.
 
@@ -33,7 +34,7 @@ Agent(
 
 **Model lever** (per-call `model`: `"haiku"|"sonnet"|"opus"`; `"sonnet"` = current Sonnet 5). `CLAUDE_CODE_SUBAGENT_MODEL` overrides all.
 - Orchestrator, research, plan, quality-gate, **behavior-risk catalog** → default (Opus) — full/adversarial judgment.
-- Investigation, BDD, both verification passes → `"sonnet"` (Sonnet 5 is strong enough; keeps the main session lean).
+- Investigation, BDD, both verification passes, **mutation pass** → `"sonnet"` (Sonnet 5 is strong enough; keeps the main session lean).
 - Summary → `"haiku"`.
 
 ## Task Workspace & State Files
@@ -47,6 +48,7 @@ Every run is scoped to a **task identifier** (a ticket id, or a confirmed kebab-
 - `BEHAVIOR_RISKS.md` — implementation-blind behavior-risk catalog (Phase 3b); **frozen** after
 - `IMPLEMENTATION_PROGRESS.md` — per-step results + red/green audit trail
 - `VALIDATION_STEP_[N].md` — conformance results (5a); `ADVERSARIAL_REVALIDATION.md` — adversarial findings (5b)
+- `MUTATION_PLAN.md` — whether Phase 5c runs, and its budget; `MUTANTS.json` + `MUTATION_RESULTS.md/.json` — the pass's inputs and findings
 - `DECISIONS.md` — running decision log (each new entry is also mirrored to the AI-Kanban card — see **Mirror decisions to the card**)
 - `COMMIT_PLAN.md` — the commit strategy, base SHA, and behavior→commit-subject map (see `nodes/commit-protocol.md`)
 
@@ -91,12 +93,15 @@ Spawn `node-behavior-risk.md` (may go in the same message as the investigation b
 
 ## Phase 4: Implementation Loop
 
-**4·0. Commit-strategy gate — ask before any code is written.** The behavior list is final now (Phase 3b may have added steps), so this is the last moment the answer is stable. Ask the operator to choose:
+**4·0. Run-options gate — ask both questions before any code is written.** The behavior list is final now (Phase 3b may have added steps), so this is the last moment the answers are stable. Ask the operator both, in one message:
 
+**a. How to commit?**
 - **One commit per behavior** — each behavior is committed as soon as it goes green, and every later fix (quality gate, conformance, adversarial) is folded back into the commit that owns that behavior. The branch ends with exactly one commit per behavior in the plan. Say plainly that folding **rewrites history**, so it is only free while the branch is unpushed.
 - **Defer all commits** — the run never touches git; everything accumulates in the working tree and the operator commits at the end.
 
-Write the answer to `<ws>/COMMIT_PLAN.md` per `nodes/commit-protocol.md`, log it to `DECISIONS.md`, and mirror it to the card. **Gate:** do not spawn the first BDD batch until the operator has chosen. Pass the strategy into every sub-agent you spawn from here on.
+**b. Run a mutation pass?** One budgeted Phase 5c pass that injects defects to prove the tests would catch them. Quote the real trade: on a past run it surfaced **8 false-green tests** the other phases missed, and the budgeted version costs roughly **10-20 minutes**. Default **on** for correctness-critical work (money, data integrity, scoring); **off** for UI/wiring work where a false green is cheap.
+
+Write the commit answer to `<ws>/COMMIT_PLAN.md` per `nodes/commit-protocol.md` and the mutation answer to `<ws>/MUTATION_PLAN.md` (`Mutation: on|off`, plus the budget if it differs from the default ≤3 per behavior / ≤30 per run). Log both to `DECISIONS.md` and mirror them to the card. **Gate:** do not spawn the first BDD batch until the operator has answered both. Pass the commit strategy into every sub-agent you spawn from here on.
 
 Batched BDD sub-agents alternate with quality gates.
 
@@ -119,6 +124,8 @@ Two independent axes, spawned together so all run in parallel:
 **5b. Adversarial Revalidation** — "does the code survive the frozen catalog?" Spawn `node-adversarial-revalidation.md` per risk-group (related risks together) → `ADVERSARIAL_REVALIDATION.md`.
 
 Both verification passes **report only — they never stage, commit, or rebase** (they run in parallel; git must stay serialized).
+
+**5c. Mutation pass (only if `MUTATION_PLAN.md` says `on`)** — "would the tests catch a defect at all?" Spawn `node-mutation.md` as a **single sub-agent, alone, after 5a and 5b have both returned** — it writes to the source tree, so it cannot overlap with passes that read and test it. It reports survivors; it never fixes. Triage each false green with the operator like a 5b finding.
 
 On return:
 - **Conformance (5a):** invalid steps → one fix sub-agent for all of them, then re-validate only those. Under `per-behavior`, that fix sub-agent **folds each fix into the commit owning that behavior** per `nodes/commit-protocol.md` — never a new commit.

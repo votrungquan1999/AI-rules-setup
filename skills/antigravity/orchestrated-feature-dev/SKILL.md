@@ -50,6 +50,8 @@ All workflow state files are created as Antigravity artifacts in the brain direc
 - `validation-step-[N].md` — Per-step conformance validation results (5a)
 - `validation-summary.md` — Consolidated conformance results (5a)
 - `adversarial-revalidation.md` — Adversarial revalidation findings against the frozen catalog (5b)
+- `mutation-plan.md` — Whether the Phase 5c mutation pass runs, and its budget
+- `mutants.json` / `mutation-results.md` — Mutation pass inputs and findings (5c)
 - `decisions.md` — Running decision log: every point where 2+ viable options existed and one was chosen; read and reported by the summary node
 - `commit-plan.md` — Commit strategy, base SHA, and behavior→commit-subject map (see `nodes/commit-protocol.md`)
 
@@ -151,14 +153,20 @@ Read the node instructions from `nodes/node-behavior-risk.md` in this skill's di
 
 The core loop — batched BDD executions alternate with quality gates.
 
-### 4·0. Commit-Strategy Gate — before any code is written
+### 4·0. Run-Options Gate — before any code is written
 
-The behavior list is final now (Phase 3b may have added steps), so this is the last moment the answer is stable. Ask the user to choose:
+The behavior list is final now (Phase 3b may have added steps), so this is the last moment the answers are stable. Ask the user both questions in one message:
+
+**a. How to commit?**
 
 - **One commit per behavior** — each behavior is committed as soon as it goes green, and every later fix (quality gate, conformance, adversarial) is folded back into the commit owning that behavior. The branch ends with exactly one commit per behavior in the plan. Say plainly that folding **rewrites history**, so it is only free while the branch is unpushed.
 - **Defer all commits** — the run never touches git; everything accumulates in the working tree and the user commits at the end.
 
-Write the answer to `commit-plan.md` per `nodes/commit-protocol.md` and log it to `decisions.md`. **Gate:** do not dispatch the first BDD batch until the user has chosen. Pass the strategy into every execution from here on.
+**b. Run the Phase 5c mutation pass?** One budgeted pass that injects defects to prove the tests would catch them. Quote the real trade: on a past run it surfaced **8 false-green tests** the other phases missed, and the budgeted version costs roughly **10-20 minutes**. Default **on** for correctness-critical work (money, data integrity, scoring); **off** for UI/wiring work where a false green is cheap.
+
+Write the commit answer to `commit-plan.md` per `nodes/commit-protocol.md` and the mutation answer to `mutation-plan.md` (`Mutation: on|off`, plus the budget if it differs from the default ≤3 per behavior / ≤30 per run). Log both to `decisions.md`. **Gate:** do not dispatch the first BDD batch until the user has answered both. Pass the commit strategy into every execution from here on.
+
+**Mutation testing happens in Phase 5c or not at all.** No other phase mutates source to check a test — not the BDD loop, not the quality gate, not conformance; they judge sensitivity by reading.
 
 ### Initialize
 
@@ -206,7 +214,13 @@ Read the node instructions from `nodes/node-adversarial-revalidation.md` in this
 
 **On return — report + triage.** Present each `breaks` / `silent-misbehavior` finding with severity; the user decides per finding: **new step** (→ back to Phase 4) or **accepted / out-of-scope**. There is no auto-loop back into implementation. Log each decision to `decisions.md`. A fix to an existing behavior folds into that behavior's commit; a genuinely new behavior becomes a new step with its own commit — either way the one-commit-per-behavior count holds.
 
-**Then present combined 5a + 5b results.**
+### 5c. Mutation Pass — "would the tests catch a defect at all?"
+
+Only if `mutation-plan.md` says `Mutation: on`. Read the node instructions from `nodes/node-mutation.md` and execute them **alone, after 5a and 5b are both done** — this pass writes to the source tree, so it cannot overlap with passes that read and test it. It builds a budgeted mutant list, runs `nodes/mutation-harness.py` (every mutant scoped to the tests that execute its own file), and writes `mutation-results.md`. It reports survivors and never fixes.
+
+**On return — report + triage**, same shape as 5b: each **false green** is either a **new step** (→ back to Phase 4) or **accepted/out-of-scope**. Log each to `decisions.md`.
+
+**Then present combined 5a + 5b + 5c results.**
 
 ---
 
