@@ -28,11 +28,7 @@ describe("E2E: Claude Code Installation Tests", () => {
 	/**
 	 * Expected skill names that should be installed for Claude Code
 	 */
-	const EXPECTED_SKILLS = [
-		"feature-dev-lite",
-		"structured-brainstorming",
-		"test-quality-reviewer",
-	] as const;
+	const EXPECTED_SKILLS = ["feature-dev-lite", "structured-brainstorming", "test-quality-reviewer"] as const;
 
 	/**
 	 * Helper: Check if skill file exists and return its path
