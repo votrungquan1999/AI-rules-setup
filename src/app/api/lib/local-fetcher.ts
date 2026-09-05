@@ -6,6 +6,9 @@ import type { GitHubFile, HookFile, Manifest, RulesData, SkillFile, WorkflowFile
 /** Junk a working directory accumulates on its own — never publishable, so no opt-in is required. */
 const DEFAULT_IGNORE_PATTERNS = [".DS_Store", "Thumbs.db", "node_modules/", "__pycache__/", ".git/", "*.pyc"];
 
+/** Optional gitignore-syntax file at a skill root listing what that skill must not publish. */
+const SKILL_IGNORE_FILENAME = "skill.ignore";
+
 /**
  * Extracts the description from YAML frontmatter (between --- and ---)
  */
@@ -107,7 +110,8 @@ export async function fetchManifestLocal(agent: string, category: string, rootPa
 
 /**
  * Recursively collects a skill's publishable files — everything except the entry file and anything
- * matching the built-in junk rules, so a polluted working directory does not reach the catalog.
+ * matching the built-in junk rules or the skill's own `skill.ignore`, so a polluted working
+ * directory does not reach the catalog.
  * @param dirPath - Absolute path to the directory
  * @param basePath - Base path for computing relative paths (same as dirPath on first call)
  * @param entryFileName - Name of the entry file to exclude (defaults to SKILL.md)
@@ -119,6 +123,12 @@ export async function collectSupportingFiles(
 	entryFileName = "SKILL.md",
 ): Promise<Array<{ path: string; content: string }>> {
 	const matcher = ignore().add(DEFAULT_IGNORE_PATTERNS);
+
+	// Author rules are added after the defaults so a `!` line can re-include what they drop.
+	// Absent is the normal case — most skills need no exclusions beyond the defaults.
+	const authorRules = await readFile(join(basePath, SKILL_IGNORE_FILENAME), "utf-8").catch(() => null);
+	if (authorRules) matcher.add(authorRules);
+
 	return collectFilesExcluding(dirPath, basePath, entryFileName, matcher);
 }
 

@@ -46,4 +46,36 @@ describe("collectSupportingFiles", () => {
 		// Assert: only the author's own file survives, with no configuration
 		expect(files.map((file) => file.path).sort()).toEqual(["reference.md"]);
 	});
+
+	it("should exclude the files and directories named by the author's skill.ignore", async () => {
+		// Arrange: the author marks a draft file and a whole scratch directory as unpublishable
+		const skillDir = await createSkillDir({
+			"SKILL.md": "# Skill",
+			"keep.md": "# Keep",
+			"draft.md": "# Draft",
+			"scratch/notes.md": "# Notes",
+			"skill.ignore": "draft.md\nscratch/\n",
+		});
+
+		// Act
+		const files = await collectSupportingFiles(skillDir, skillDir);
+
+		// Assert: the excluded pair is gone; skill.ignore itself ships so installed copies keep the rules
+		expect(files.map((file) => file.path).sort()).toEqual(["keep.md", "skill.ignore"]);
+	});
+
+	it("should let a negation in skill.ignore re-include a file the built-in rules drop", async () => {
+		// Arrange: *.pyc is junk by default, but this skill ships one deliberately as a fixture
+		const skillDir = await createSkillDir({
+			"SKILL.md": "# Skill",
+			"fixtures/sample.pyc": "compiled fixture",
+			"skill.ignore": "!fixtures/sample.pyc\n",
+		});
+
+		// Act
+		const files = await collectSupportingFiles(skillDir, skillDir);
+
+		// Assert: the author's rules are applied after the defaults, so they can override them
+		expect(files.map((file) => file.path).sort()).toEqual(["fixtures/sample.pyc", "skill.ignore"]);
+	});
 });
