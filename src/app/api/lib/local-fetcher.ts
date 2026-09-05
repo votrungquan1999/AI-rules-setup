@@ -1,6 +1,10 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
+import ignore, { type Ignore } from "ignore";
 import type { GitHubFile, HookFile, Manifest, RulesData, SkillFile, WorkflowFile } from "../../../server/types";
+
+/** Junk a working directory accumulates on its own — never publishable, so no opt-in is required. */
+const DEFAULT_IGNORE_PATTERNS = [".DS_Store", "Thumbs.db", "node_modules/", "__pycache__/", ".git/", "*.pyc"];
 
 /**
  * Extracts the description from YAML frontmatter (between --- and ---)
@@ -102,7 +106,8 @@ export async function fetchManifestLocal(agent: string, category: string, rootPa
 }
 
 /**
- * Recursively collects all files in a directory except the entry file
+ * Recursively collects a skill's publishable files — everything except the entry file and anything
+ * matching the built-in junk rules, so a polluted working directory does not reach the catalog.
  * @param dirPath - Absolute path to the directory
  * @param basePath - Base path for computing relative paths (same as dirPath on first call)
  * @param entryFileName - Name of the entry file to exclude (defaults to SKILL.md)
@@ -113,16 +118,37 @@ export async function collectSupportingFiles(
 	basePath: string,
 	entryFileName = "SKILL.md",
 ): Promise<Array<{ path: string; content: string }>> {
+	const matcher = ignore().add(DEFAULT_IGNORE_PATTERNS);
+	return collectFilesExcluding(dirPath, basePath, entryFileName, matcher);
+}
+
+/**
+ * Recursive worker behind `collectSupportingFiles`, carrying the exclusion matcher built once at
+ * the skill root so every level is judged by the same rules.
+ * @param dirPath - Absolute path to the directory being walked
+ * @param basePath - Skill root, against which stored paths and exclusion rules are relative
+ * @param entryFileName - Name of the entry file to exclude (it ships as the skill's `content`)
+ * @param matcher - Exclusion rules to apply to each relative path
+ * @returns Array of surviving files with relative paths and content
+ */
+async function collectFilesExcluding(
+	dirPath: string,
+	basePath: string,
+	entryFileName: string,
+	matcher: Ignore,
+): Promise<Array<{ path: string; content: string }>> {
 	const supportingFiles: Array<{ path: string; content: string }> = [];
 	const entries = await readdir(dirPath, { withFileTypes: true });
 
 	for (const entry of entries) {
 		const fullPath = join(dirPath, entry.name);
+		const relativePath = fullPath.slice(basePath.length + 1); // +1 for trailing /
 		if (entry.isDirectory()) {
-			const nested = await collectSupportingFiles(fullPath, basePath, entryFileName);
+			// Trailing slash is what lets a `dir/` rule match; skipping here prunes the whole subtree.
+			if (matcher.ignores(`${relativePath}/`)) continue;
+			const nested = await collectFilesExcluding(fullPath, basePath, entryFileName, matcher);
 			supportingFiles.push(...nested);
-		} else if (entry.isFile() && entry.name !== entryFileName) {
-			const relativePath = fullPath.slice(basePath.length + 1); // +1 for trailing /
+		} else if (entry.isFile() && entry.name !== entryFileName && !matcher.ignores(relativePath)) {
 			const content = await readFile(fullPath, "utf-8");
 			supportingFiles.push({ path: relativePath, content });
 		}

@@ -55,6 +55,7 @@
     "commander": "^11.1.0",
     "execa": "^8.0.1",
     "fuse.js": "^7.1.0",
+    "ignore": "^7.0.8",
     "inquirer": "^9.2.12",
     "lucide-react": "^0.546.0",
     "mongodb": "^6.20.0",
