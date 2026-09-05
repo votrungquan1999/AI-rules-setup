@@ -1,5 +1,5 @@
 import { constants } from "node:fs";
-import { access, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { access, chmod, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, resolve, sep } from "node:path";
 import { AIAgent, type ConflictResult } from "./types";
 
@@ -42,14 +42,19 @@ export async function detectConflict(filePath: string): Promise<ConflictResult> 
  * Writes rule file content to the specified path, creating directories as needed
  * @param content - Content to write to the file
  * @param targetPath - Target file path
+ * @param executable - When true, make the file runnable; never chmods down, so a file made
+ * executable locally keeps that
  */
-export async function writeRuleFile(content: string, targetPath: string): Promise<void> {
+export async function writeRuleFile(content: string, targetPath: string, executable?: boolean): Promise<void> {
 	// Create directory structure if it doesn't exist
 	const dir = dirname(targetPath);
 	await mkdir(dir, { recursive: true });
 
 	// Write the file
 	await writeFile(targetPath, content, "utf-8");
+
+	// chmod after the write: writeFile's mode option applies on create only, not on overwrite.
+	if (executable) await chmod(targetPath, 0o755);
 }
 
 /**

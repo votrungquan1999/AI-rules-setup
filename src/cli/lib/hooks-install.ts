@@ -69,7 +69,7 @@ export async function installHooks(
 
 		for (const supportingFile of hook.supportingFiles ?? []) {
 			const targetPath = applyHookNamingConvention(agent as AIAgent, hook.name, supportingFile.path);
-			await writeRuleFile(supportingFile.content, resolveWithinDir(targetDir, targetPath));
+			await writeRuleFile(supportingFile.content, resolveWithinDir(targetDir, targetPath), supportingFile.executable);
 		}
 
 		const command = firstCommand(manifest.settingsFragment, manifest.event);

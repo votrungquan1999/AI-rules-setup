@@ -222,7 +222,11 @@ export async function syncOneProject(targetDir: string): Promise<SyncResult> {
 			await writeRuleFile(skill.content, resolveWithinDir(targetDir, targetPath));
 			for (const supportingFile of skill.supportingFiles ?? []) {
 				const supportingPath = applySkillFileNamingConvention(agent as AIAgent, skill.name, supportingFile.path);
-				await writeRuleFile(supportingFile.content, resolveWithinDir(targetDir, supportingPath));
+				await writeRuleFile(
+					supportingFile.content,
+					resolveWithinDir(targetDir, supportingPath),
+					supportingFile.executable,
+				);
 			}
 			installedSkills.push(skill.name);
 		}

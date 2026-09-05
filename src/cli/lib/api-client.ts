@@ -60,7 +60,7 @@ export interface RulesResponse {
 			skills?: Array<{
 				name: string;
 				content: string;
-				supportingFiles?: Array<{ path: string; content: string }>;
+				supportingFiles?: Array<{ path: string; content: string; executable?: boolean }>;
 			}>;
 			/** Optional workflows (currently only for Antigravity) */
 			workflows?: Array<{
@@ -71,7 +71,7 @@ export interface RulesResponse {
 			hooks?: Array<{
 				name: string;
 				content: string;
-				supportingFiles?: Array<{ path: string; content: string }>;
+				supportingFiles?: Array<{ path: string; content: string; executable?: boolean }>;
 			}>;
 		};
 	};
@@ -219,7 +219,13 @@ export async function fetchRuleFile(
 export async function fetchSkills(
 	agent: string,
 	scope?: string[],
-): Promise<Array<{ name: string; content: string; supportingFiles?: Array<{ path: string; content: string }> }>> {
+): Promise<
+	Array<{
+		name: string;
+		content: string;
+		supportingFiles?: Array<{ path: string; content: string; executable?: boolean }>;
+	}>
+> {
 	try {
 		const data = await fetchRulesData(scope);
 		const agentData = data.agents[agent];
@@ -613,7 +619,13 @@ export async function fetchWorkflows(
 export async function fetchHooks(
 	agent: string,
 	scope?: string[],
-): Promise<Array<{ name: string; content: string; supportingFiles?: Array<{ path: string; content: string }> }>> {
+): Promise<
+	Array<{
+		name: string;
+		content: string;
+		supportingFiles?: Array<{ path: string; content: string; executable?: boolean }>;
+	}>
+> {
 	try {
 		const data = await fetchRulesData(scope);
 		const agentData = data.agents[agent];

@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -100,5 +100,24 @@ describe("collectSupportingFiles", () => {
 		// Then re-uploading from that copy still honours the author's rules, because they travelled
 		const republished = await collectSupportingFiles(installedDir, installedDir);
 		expect(republished.map((file) => file.path).sort()).toEqual(["keep.md", "skill.ignore"]);
+	});
+
+	it("should record which files are executable so an install can restore the bit", async () => {
+		// Arrange: a runnable script next to an ordinary reference file
+		const skillDir = await createSkillDir({
+			"SKILL.md": "# Skill",
+			"scripts/run.sh": "#!/bin/sh\necho hello\n",
+			"reference.md": "# Reference",
+		});
+		await chmod(join(skillDir, "scripts/run.sh"), 0o755);
+
+		// Act
+		const files = await collectSupportingFiles(skillDir, skillDir);
+
+		// Assert: the script is marked; the ordinary file carries no marking at all
+		const script = files.find((file) => file.path === "scripts/run.sh");
+		const reference = files.find((file) => file.path === "reference.md");
+		expect(script?.executable).toBe(true);
+		expect(reference?.executable).toBeUndefined();
 	});
 });

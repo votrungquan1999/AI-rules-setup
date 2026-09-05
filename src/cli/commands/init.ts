@@ -31,7 +31,11 @@ import type { AIAgent, Config, InitOptions, OverwriteStrategy } from "../lib/typ
  * Installs selected skills for the given agent, including any supporting files
  */
 async function installSkills(
-	skills: Array<{ name: string; content: string; supportingFiles?: Array<{ path: string; content: string }> }>,
+	skills: Array<{
+		name: string;
+		content: string;
+		supportingFiles?: Array<{ path: string; content: string; executable?: boolean }>;
+	}>,
 	agent: string,
 	overwriteStrategy: OverwriteStrategy,
 	config: Config,
@@ -69,7 +73,7 @@ async function installSkills(
 			if (skill.supportingFiles && skill.supportingFiles.length > 0) {
 				for (const supportingFile of skill.supportingFiles) {
 					const supportingPath = applySkillFileNamingConvention(agent as AIAgent, skill.name, supportingFile.path);
-					await writeRuleFile(supportingFile.content, join(process.cwd(), supportingPath));
+					await writeRuleFile(supportingFile.content, join(process.cwd(), supportingPath), supportingFile.executable);
 				}
 			}
 

@@ -177,7 +177,7 @@ async function addSkillsToProject(
 		if (skill.supportingFiles && skill.supportingFiles.length > 0) {
 			for (const supportingFile of skill.supportingFiles) {
 				const supportingPath = applySkillFileNamingConvention(agent, skill.name, supportingFile.path);
-				await writeRuleFile(supportingFile.content, join(process.cwd(), supportingPath));
+				await writeRuleFile(supportingFile.content, join(process.cwd(), supportingPath), supportingFile.executable);
 			}
 		}
 

@@ -76,6 +76,16 @@ export enum SkillVisibility {
 }
 
 /**
+ * One file shipped alongside a skill's or hook's entry file (nodes, scripts, references).
+ */
+export interface SupportingFile {
+	path: string;
+	content: string;
+	/** Present only when the source file was executable; installs restore the bit. */
+	executable?: boolean;
+}
+
+/**
  * Represents a single skill file
  */
 export interface SkillFile {
@@ -83,7 +93,7 @@ export interface SkillFile {
 	description?: string;
 	content: string;
 	/** Optional supporting files (nodes, scripts, references, etc.) */
-	supportingFiles?: Array<{ path: string; content: string }>;
+	supportingFiles?: SupportingFile[];
 	/** Public skills get this injected at read time; private skills carry it from storage. */
 	visibility?: SkillVisibility;
 	/** Free-form scope tags. Required (non-empty) on private skills only. */
@@ -108,7 +118,7 @@ export interface HookFile {
 	description?: string;
 	content: string;
 	/** Optional supporting files (the executable script, docs, etc.) */
-	supportingFiles?: Array<{ path: string; content: string }>;
+	supportingFiles?: SupportingFile[];
 }
 
 /**
@@ -251,7 +261,7 @@ export interface StoredPrivateSkillDocument {
 	name: string;
 	description?: string;
 	content: string;
-	supportingFiles?: Array<{ path: string; content: string }>;
+	supportingFiles?: SupportingFile[];
 	scopes: string[];
 	createdAt: Date;
 	updatedAt: Date;

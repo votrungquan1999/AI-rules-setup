@@ -127,7 +127,11 @@ export async function pullCommand(_options: PullOptions = {}): Promise<void> {
 			// Supporting-file paths come from the catalog, so refuse any that escape the project.
 			for (const supportingFile of skill.supportingFiles ?? []) {
 				const supportingPath = applySkillFileNamingConvention(agent as AIAgent, skill.name, supportingFile.path);
-				await writeRuleFile(supportingFile.content, resolveWithinDir(process.cwd(), supportingPath));
+				await writeRuleFile(
+					supportingFile.content,
+					resolveWithinDir(process.cwd(), supportingPath),
+					supportingFile.executable,
+				);
 			}
 			console.log(chalk.green(`  ✓ ${targetPath}`));
 			totalInstalled++;

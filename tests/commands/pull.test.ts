@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -295,6 +295,45 @@ describe("Pull Command Integration", () => {
 		expect(await readFile(join(skillDir, "SKILL.md"), "utf-8")).toBe("# My Skill");
 		expect(await readFile(join(skillDir, "reference.md"), "utf-8")).toBe("# Reference");
 		expect(await readFile(join(skillDir, "steps/1-open.md"), "utf-8")).toBe("# Step 1: Open");
+	});
+
+	it("should install an executable supporting file so the developer can run it", async () => {
+		// Arrange: the catalog ships a runnable script next to an ordinary reference file
+		const config = {
+			version: "1.0.0",
+			agent: "antigravity",
+			categories: [],
+			skills: ["my-skill"],
+		};
+		await writeFile(join(testDir, ".ai-rules.json"), JSON.stringify(config, null, 2));
+
+		setCachedRules({
+			agents: {
+				antigravity: {
+					categories: {},
+					skills: [
+						{
+							name: "my-skill",
+							content: "# My Skill",
+							supportingFiles: [
+								{ path: "scripts/run.sh", content: "#!/bin/sh\necho hello\n", executable: true },
+								{ path: "reference.md", content: "# Reference" },
+							],
+						},
+					],
+				},
+			},
+		});
+
+		// Act
+		await pullCommand();
+
+		// Assert: the script is runnable on disk, and an ordinary file is not made executable
+		const skillDir = join(testDir, ".agents/skills/my-skill");
+		const script = await stat(join(skillDir, "scripts/run.sh"));
+		const reference = await stat(join(skillDir, "reference.md"));
+		expect(script.mode & 0o111).not.toBe(0);
+		expect(reference.mode & 0o111).toBe(0);
 	});
 
 	it("should refuse a supporting file whose path escapes the project directory", async () => {

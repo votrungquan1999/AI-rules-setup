@@ -1,7 +1,15 @@
-import { readdir, readFile } from "node:fs/promises";
+import { readdir, readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 import ignore, { type Ignore } from "ignore";
-import type { GitHubFile, HookFile, Manifest, RulesData, SkillFile, WorkflowFile } from "../../../server/types";
+import type {
+	GitHubFile,
+	HookFile,
+	Manifest,
+	RulesData,
+	SkillFile,
+	SupportingFile,
+	WorkflowFile,
+} from "../../../server/types";
 
 /** Junk a working directory accumulates on its own — never publishable, so no opt-in is required. */
 const DEFAULT_IGNORE_PATTERNS = [".DS_Store", "Thumbs.db", "node_modules/", "__pycache__/", ".git/", "*.pyc"];
@@ -121,7 +129,7 @@ export async function collectSupportingFiles(
 	dirPath: string,
 	basePath: string,
 	entryFileName = "SKILL.md",
-): Promise<Array<{ path: string; content: string }>> {
+): Promise<SupportingFile[]> {
 	const matcher = ignore().add(DEFAULT_IGNORE_PATTERNS);
 
 	// Author rules are added after the defaults so a `!` line can re-include what they drop.
@@ -146,8 +154,8 @@ async function collectFilesExcluding(
 	basePath: string,
 	entryFileName: string,
 	matcher: Ignore,
-): Promise<Array<{ path: string; content: string }>> {
-	const supportingFiles: Array<{ path: string; content: string }> = [];
+): Promise<SupportingFile[]> {
+	const supportingFiles: SupportingFile[] = [];
 	const entries = await readdir(dirPath, { withFileTypes: true });
 
 	for (const entry of entries) {
@@ -160,7 +168,11 @@ async function collectFilesExcluding(
 			supportingFiles.push(...nested);
 		} else if (entry.isFile() && entry.name !== entryFileName && !matcher.ignores(relativePath)) {
 			const content = await readFile(fullPath, "utf-8");
-			supportingFiles.push({ path: relativePath, content });
+			const supportingFile: SupportingFile = { path: relativePath, content };
+			// Recorded only when set, so catalog entries written before this field existed are unchanged.
+			const { mode } = await stat(fullPath);
+			if (mode & 0o111) supportingFile.executable = true;
+			supportingFiles.push(supportingFile);
 		}
 	}
 

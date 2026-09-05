@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -303,7 +303,10 @@ describe("E2E: Private Skills", () => {
 				{
 					name: "work-helper",
 					content: "---\nname: work-helper\n---\n# Work Helper",
-					supportingFiles: [{ path: "steps/1-open.md", content: "# Step 1: Open" }],
+					supportingFiles: [
+						{ path: "steps/1-open.md", content: "# Step 1: Open" },
+						{ path: "scripts/run.sh", content: "#!/bin/sh\necho hello\n", executable: true },
+					],
 				},
 				["work"],
 			);
@@ -344,6 +347,10 @@ describe("E2E: Private Skills", () => {
 					"utf-8",
 				);
 				expect(installedSupportingContent).toBe("# Step 1: Open");
+
+				// And an executable script survives storage and the wire, arriving runnable.
+				const installedScript = await stat(join(projectDir, ".claude/skills/work-helper/scripts/run.sh"));
+				expect(installedScript.mode & 0o111).not.toBe(0);
 			} finally {
 				await cleanupTestProject(projectDir);
 			}
