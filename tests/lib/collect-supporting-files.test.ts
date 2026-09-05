@@ -78,4 +78,27 @@ describe("collectSupportingFiles", () => {
 		// Assert: the author's rules are applied after the defaults, so they can override them
 		expect(files.map((file) => file.path).sort()).toEqual(["fixtures/sample.pyc", "skill.ignore"]);
 	});
+
+	it("should keep filtering the same way when re-collected from an installed copy", async () => {
+		// Given an author's skill that excludes a scratch directory
+		const authorDir = await createSkillDir({
+			"SKILL.md": "# Skill",
+			"keep.md": "# Keep",
+			"scratch/notes.md": "# Notes",
+			"skill.ignore": "scratch/\n",
+		});
+		const published = await collectSupportingFiles(authorDir, authorDir);
+
+		// When it is installed elsewhere and that working copy accumulates junk of its own
+		const installedDir = await createSkillDir({
+			"SKILL.md": "# Skill",
+			...Object.fromEntries(published.map((file) => [file.path, file.content])),
+			".DS_Store": "finder junk",
+			"scratch/notes.md": "# Notes written again by the local agent",
+		});
+
+		// Then re-uploading from that copy still honours the author's rules, because they travelled
+		const republished = await collectSupportingFiles(installedDir, installedDir);
+		expect(republished.map((file) => file.path).sort()).toEqual(["keep.md", "skill.ignore"]);
+	});
 });
