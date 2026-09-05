@@ -82,6 +82,8 @@ AI_RULES_SECRET=… npx @quanvo99/ai-rules@latest skill upload ./my-skill --agen
 
 The directory must contain a `SKILL.md`; any other files are uploaded as supporting files. The skill name is the directory's basename, and re-uploading the same `{agent, name}` replaces it.
 
+Junk is never published — `.DS_Store`, `Thumbs.db`, `node_modules/`, `__pycache__/`, `.git/` and `*.pyc` are always excluded. To exclude anything else, add a `skill.ignore` at the skill root (gitignore syntax); its rules apply after the built-in ones, so `!keep.pyc` can re-include a default-dropped file. `skill.ignore` ships with the skill, so an installed copy filters the same way when re-uploaded from. Executable files stay executable through install.
+
 ### `npx @quanvo99/ai-rules@latest skill list` / `update` / `delete`
 
 Manage private skills you've already uploaded. Requires `AI_RULES_SECRET`:

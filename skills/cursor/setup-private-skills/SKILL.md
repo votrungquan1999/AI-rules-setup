@@ -75,7 +75,16 @@ When the user wants to share a skill privately — either an existing local skil
 - Write `<skills-dir>/<skill-name>/SKILL.md` for the configured agent (`.claude/skills`, `.cursor/skills`, or `.agents/skills`). `<skill-name>` is short kebab-case. Frontmatter needs `name` and a one-line `description` that states what it does AND when to use it (the trigger phrases). Keep the body skimmable; add supporting files in the directory if the procedure needs references.
 - 🛑 **Stop and show the user the SKILL.md (and the exact upload command below) and wait for explicit approval before uploading.**
 
-**4b. Upload (`skill upload`).** The directory must contain a `SKILL.md`; any other files become supporting files.
+**4b. Upload (`skill upload`).** The directory must contain a `SKILL.md`; every other file in it becomes a supporting file and is published with the skill.
+
+**What gets published.** Everything in the folder except:
+
+- **Built-in junk** — `.DS_Store`, `Thumbs.db`, `node_modules/`, `__pycache__/`, `.git/`, `*.pyc`. Always excluded; no configuration needed.
+- **Anything matching an optional `skill.ignore`** at the skill root — gitignore syntax, one pattern per line. Applied after the built-in rules, so a `!keep.pyc` line can re-include a default-dropped file.
+
+`skill.ignore` is itself published, so an installed copy filters the same way when someone edits and re-uploads from it. To keep one local, list `skill.ignore` inside itself.
+
+Keep the `+x` bit on a script (`scripts/*.sh`) and it survives the round trip — the file installs executable.
 
 ```bash
 npx @quanvo99/ai-rules@latest skill upload ./path/to/skill-dir \
