@@ -70,7 +70,7 @@ Run the test. You **MUST** see the result before writing ANY behavior logic.
 
 - **If it fails on the behavior assertion** → real red, proceed to step 4
 - **If it fails structurally** (404 route not registered, missing field, import error) → that red validates nothing; fix the scaffolding (step 2c) and run again
-- **If it passes** → either the behavior is already covered, or this is the expected green-from-start case. Update `<ws>/PLAN_STEPS.md` accordingly. Skip to Output.
+- **If it passes** → either the behavior is already covered (nothing changed: update `<ws>/PLAN_STEPS.md`, skip to Output), or this is the expected green-from-start case (the scaffolding IS the implementation — skip to step 6 so it still gets reviewed and committed)
 
 ### 4. Implement
 
@@ -80,12 +80,37 @@ Write the **minimum code** to make the test pass. Nothing more.
 
 Confirm it passes. Also run any related previous tests to check for regressions.
 
-- **If all pass** → proceed to Output
+- **If all pass** → proceed to step 6
 - **If regression** → fix the regression, run tests again
 
-### 6. Quick Refactor (Optional)
+### 6. Review the Changes
+
+Read the **full diff of this behavior** — every file you touched, not just the last edit (`git diff` on those paths; under `defer` the working tree is the diff). Check:
+
+- **Every hunk is intentional and belongs to this behavior.** Drop debug leftovers, stray formatting churn, and edits to files this step should not own — under `per-behavior` they would land in the wrong commit. The `Files Changed` list in your Output must match this diff exactly; the commit step stages from it.
+- **Comments are concise and skimmable.** One line, one idea; say WHY, not WHAT. Delete any comment that restates the code or narrates an obvious step. Match the surrounding code's comment density.
+- **No narrating block at the top.** A file- or function-level comment that walks through the steps of the code below it (`// 1. fetch… 2. validate… 3. save…`) gets **broken up and distributed**: move each piece next to the line or clause it describes, so a dev reads it in place. Leave at most a one-line intro at the top.
+- **Ticket IDs stay out of the code** — they belong in the commit message.
+
+If anything changed, re-run the scoped test before moving on.
+
+**Do NOT mutate the implementation to check the test is sensitive.** Judge sensitivity by reading the assertion: would it still pass if the behavior were wrong? Injecting a real defect is Phase 5c's job — it is budgeted, runs alone, and uses a harness that restores safely. Mutating here with `Edit` (or `cp` + edit) has left mutants in the tree and corrupted later steps.
+
+### 7. Quick Refactor (Optional)
 
 Only if there's an obvious improvement. Keep it small. Run tests again.
+
+### 8. Commit the Behavior (only under the `per-behavior` strategy)
+
+Read `<ws>/COMMIT_PLAN.md`. If `Strategy: defer`, **skip this step entirely — run no git commands at all.**
+
+Under `Strategy: per-behavior`, this behavior is green, so commit it now, following `nodes/commit-protocol.md`:
+- Capture `Base:` first if you are the run's first behavior commit
+- Stage **explicit paths only** — the files listed under "Files Changed" for this step; never `git add -A`, `-a`, or `.`
+- One commit, subject naming the behavior in the repo's existing convention
+- Record the row in `<ws>/COMMIT_PLAN.md` as `committed`
+
+Commit **per behavior, not per batch** — your batch holds several behaviors and each gets its own commit as it goes green.
 
 ## Output
 
@@ -108,4 +133,4 @@ Update `<ws>/IMPLEMENTATION_PROGRESS.md` with the step result:
 **Notes:** [anything worth mentioning]
 ```
 
-**Log any decision.** If this step involved a choice between **2+ viable implementation approaches** and you committed to one — including an approved test-skip at the 2d gate (skip vs defer vs make-testable) — append an entry to `<ws>/DECISIONS.md` (create it if absent): the option chosen, the alternative(s), and a one-line why (note "user chose" when it came from an escalation). The summary phase reports these. **Also mirror each new entry to the AI-Kanban card (best-effort):** `append_decision(cardId, { decision, why? })`, resolving `cardId` from `~/.claude/kanban-session-state/$CLAUDE_CODE_SESSION_ID.json`; skip silently if absent. If it supersedes a specific earlier decision, `mark_decision_outdated(cardId, index)` on the older entry **first** (match it by text via `get_card_context`; skip the mark if you can't locate it unambiguously), then append. Mirror only new entries. **After a successful mirror, re-stamp `lastMirroredAt` in the session pointer** (skip the stamp if the call failed). Never blocks the work.
+**Log any decision.** If this step involved a choice between **2+ viable implementation approaches** and you committed to one — including an approved test-skip at the 2d gate (skip vs defer vs make-testable) — append an entry to `<ws>/DECISIONS.md` (create it if absent): the option chosen, the alternative(s), and a one-line why (note "user chose" when it came from an escalation). The summary phase reports these. **Also mirror each new entry to the AI-Kanban card (best-effort):** `append_decision(cardId, { decision, why? })`, resolving `cardId` from `~/.claude/kanban-session-state/$CLAUDE_CODE_SESSION_ID.json`; skip silently if absent. If it supersedes a specific earlier decision, `mark_decision_outdated(cardId, index)` on the older entry **first** (match it by text via `get_card_context`; skip the mark if you can't locate it unambiguously), then append. Mirror only new entries. **After a successful mirror, re-stamp `lastMirroredAt` in the session pointer** (skip the stamp if the call failed). Never blocks the work — **except** an `ERR_VALIDATION` refusal, which means the entry exceeded 200 characters (`decision`) or 400 (`why`); the message names the actual length. Rewrite it shorter and call again rather than skipping, or the decision never lands.

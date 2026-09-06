@@ -4,6 +4,8 @@ Post-implementation validation of assigned plan steps. A few instances run in pa
 
 > **Task workspace:** All state files live in the task working directory `<ws>` (`./tmp/<identifier>/`) given in your prompt. Every state-file path below is relative to `<ws>`.
 
+> **Report only — never touch git.** Several instances of you run in parallel, so staging, committing, or rebasing here would race the others and corrupt the branch. Record what needs fixing in your verdict; the single fix sub-agent that follows applies it and folds it into the owning commit.
+
 ## Input
 
 - Read `<ws>/implementation-plan.md` and `<ws>/PLAN_STEPS.md`, focusing on the sections relevant to your assigned steps — read them ONCE and reuse for all your steps
@@ -28,7 +30,7 @@ Find and read the test(s) written for this step:
 - **Tests are meaningful** (apply the 4 Pillars, especially Validity & Sensitivity): does each test have a valid, sensitive assertion that would FAIL if the behavior were wrong? Reject hollow/tautological tests, over-mocking that bypasses the code under test, and assertions too loose to catch a real defect.
 - Does the test actually assert the planned behavior?
 - Run the test in isolation — does it pass?
-- Could the test pass even if the implementation were wrong (false positive)?
+- Could the test pass even if the implementation were wrong (false positive)? Decide this by reading — **never mutate the source to find out.** You run in parallel with other validators; a mutated file breaks their test runs. Phase 5c proves it empirically.
 - **Skipped tests**: if the step is marked `done (test skipped — no meaningful test possible, user approved)`, confirm the skip was user-approved and record the behavior as implementation-only (untested) in the verdict. Do NOT flag it as a coverage gap to fix unless the original reason no longer holds (a fixture/seam now exists that makes a meaningful test possible).
 
 ### 3. Check for Regressions Against Other Steps

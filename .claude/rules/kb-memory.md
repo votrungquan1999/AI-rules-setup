@@ -100,3 +100,15 @@ Never write headline-style section titles (verdict + em-dash). Use plain descrip
 ## Explain assuming the user knows nothing about the project
 
 When explaining work or asking the user to decide, assume zero project knowledge — define the terms and give each option's concrete consequence. Jargon blocks a real decision.
+
+## Introspect columns before querying an unfamiliar table
+
+Before querying an unfamiliar table, run information_schema.columns first. Guessing names (user vs abstract_user, user_id vs "userId") burns round trips.
+
+## Slack read access via ~/.slack-bot-token
+
+Read Slack via Web API with the bot token in ~/.slack-bot-token (conversations.replies + users.info, Bearer). Never echo it. Permalink p<digits> -> ts: dot 6 digits from end.
+
+## DB check requested → must actually query the DB
+
+User asks to check the DB: if it's unreachable, STOP and report — never substitute code-reading for real data.

@@ -14,7 +14,7 @@ Work from inside the repo the orchestrator resolved in Step 0 (the repo the conv
 
 Decide whether the fan-out adds value, and report your verdict back to the orchestrator:
 - **No changes** → verdict `stop`. Report it back; write nothing else.
-- **Trivial diff** (a handful of lines, generated files, pure formatting, version bumps) → verdict `single-inline-pass`. Review it yourself in one pass and write the **final report** directly to `<ws>/review-changes.md` (format below), then report the verdict back. Skip the lens fan-out.
+- **Trivial diff** (a handful of lines, generated files, pure formatting, version bumps) → verdict `single-inline-pass`. Review it yourself in one pass and write the **final report** directly to `<ws>/review-changes.md` (format below), then report the verdict back. Skip the lens fan-out. Number the findings `### 1.`, `### 2.` … as the report format requires — the reader cites them by number.
 - **Non-trivial** (real logic, multiple files, or anything touching data/auth/security) → verdict `proceed`. Write `HOLISTIC.md` (below) and set the **review depth** (step 2b); the orchestrator takes it from there.
 
 ### 2b. Review depth (the main cost gate)

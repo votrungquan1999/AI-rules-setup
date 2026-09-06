@@ -38,6 +38,8 @@ A decision is a different signal from a progress note: progress is *what changed
 append_decision(<id>, <decision>, <why>)
 ```
 
+`decision` is capped at **200 characters** and `why` at **400**. Over that the call is refused with `ERR_VALIDATION` naming the actual length — rewrite it shorter and call again. Do not treat that refusal as a failed mirror to skip past: skipping it loses the decision entirely.
+
 If a later decision reverses an earlier one, mark the old one outdated so the log stays honest:
 
 ```

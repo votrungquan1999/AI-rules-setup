@@ -10,9 +10,10 @@ Tracking must be **idempotent** — one card per unit of work, even across a con
    - `Active AI-Kanban card #N (<summary>). …` → a card already exists. **Adopt it** — skip creation, keep its id/number, go straight to `steps/2-track-progress.md`.
    - `No AI-Kanban card is active for this session. …` → this session has none. That is NOT "no card exists" — keep going down this list.
 2. **The pointer file** — the durable record that survives a compact (see below). If `~/.claude/kanban-session-state/<sessionId>.json` exists and has `cardId`/`cardNumber`, that IS your active card. Adopt it.
-3. **The board itself** — see the next section. Both checks above are session-scoped, so both miss the common case: the work has a card, opened by a session that is no longer you.
+3. **The same task on the board** — see the next section. Both checks above are session-scoped, so both miss the common case: the work has a card, opened by a session that is no longer you.
+4. **The neighbours on this repo** — see *Before creating: what else is open on this repo?* below. The keyword search only recognises the work you are about to do; it cannot see the open card this work belongs **under**.
 
-Only when **all three** come up empty do you create one.
+Only when **all four** come up empty do you create one.
 
 > The dispatch server is also idempotent as a backstop, but only for the *same* session id: calling `create_card` again for a session that already has a live card returns THAT card. It cannot recognise a card opened by a different session — that is what the board search is for.
 
@@ -50,6 +51,45 @@ list_cards({ text: "<the distinctive words of this work>" })
 
 Never fall through from a search error to `create_card`. That is precisely how one unit of work becomes five cards.
 
+## Before creating: what else is open on this repo?
+
+The keyword search answers *"has someone already opened a card for this exact task?"*. It cannot answer *"is there open work here that this belongs to?"* — and that second miss is what turns one request into three cards.
+
+Derive the repo tag from **git**:
+
+```
+git rev-parse --show-toplevel     # its basename is the repo tag
+```
+
+Not from `.ai-rules.json`. That file is absent in many repos, and where it exists its `scope` is often just `personal`, which names no repo — use its entries as extra tags, never as the repo identity.
+
+Then list what is open there:
+
+```
+list_cards({ tags: [<repo tag>] })
+```
+
+Pass no `status`: the default already hides `done`/`archived`, and finished cards are exactly the ones you must not pile new work onto.
+
+### What to do with the neighbours
+
+- **Nothing open** — create, per the rest of this file.
+- **Something open and plausibly related** — surface it and ask, picking the best **one or two**, never the whole list:
+
+  > #145 is still open on quant-trading ("prune ML artifacts, fix picker sort order"). Why isn't it done — should this work go there instead?
+
+  The question does double duty: it stops the split, and it puts a parked card in front of the user at the one moment they would act on it.
+- **Open but clearly unrelated** — don't ask. A question with no plausible candidate is the interruption this skill exists to avoid.
+
+### Reuse or split
+
+Default to **reuse**:
+
+- **It piles on top of that card's subject** — another item in the same area, the next slice, a defect in what it built → reuse it. `update_card` to add the item, then `append_progress` with what you're starting.
+- **It is a genuinely different task** that happens to share a repo → new card.
+
+A repo is a coarse key, and several unrelated threads legitimately live on one. The tag finds candidates; it never decides for you.
+
 ## Adopting a card the board already has
 
 The card exists, but it belongs to the session that opened it. In this order:
@@ -71,7 +111,7 @@ The card exists, but it belongs to the session that opened it. In this order:
 
 ## Gather the inputs (only when creating)
 
-1. **Tags** — if you're in a repo with an `.ai-rules.json` at its root, its `scope` array is a good default. Otherwise (no such file/key, or not in a repo), **ask the user** which tags to use.
+1. **Tags** — the git-derived **repo tag** you already resolved in *Before creating: what else is open on this repo?*, plus the `scope` entries from `.ai-rules.json` when that file exists. The repo tag is what makes the next session's neighbour lookup work, so a card without one is a card the ladder cannot find. Outside a git repo and with no scope to read, **ask the user** which tags to use.
 2. **Session id** — optional. If you're a session with an id (e.g. `$CLAUDE_CODE_SESSION_ID`), include it — it's what makes tracking idempotent and compact-proof. No session id → omit the field; do not stop or ask for one.
 3. **Task name** — a short imperative title inferred from the work (e.g. "Add staled-card auto-park").
 
@@ -90,11 +130,14 @@ The card is created **directly in `in_progress`** — no separate claim step. Th
 
 ### When the work genuinely diverges
 
-If, later in the same session, the work splits into a **distinct task** that deserves its own card (not a continuation of the current one), call `create_card` again with `forceNew: true`. That — and only that — opens a second card for the session; then repoint the pointer file (below) at the new card.
+Divergence is **temporal**: work that surfaces *later* in the session and isn't what the card was opened for. If that happens, call `create_card` again with `forceNew: true` — that, and only that, opens a second card for the session; then repoint the pointer file (below) at the new card.
+
+**A request that listed several things is not divergence.** Three features named in one breath are one unit of work: one card, three items in its description, `nextAction` on the first. Item count says nothing about how many cards the work needs.
 
 `forceNew` is for genuine divergence, never for convenience. Do **not** reach for it because:
 
-- a compact made you lose track — that's what the three checks above are for;
+- the ask had several parts — see above; that is one card;
+- a compact made you lose track — that's what the four checks above are for;
 - the board search found a card you'd rather not reuse — adopt it, or ask the user;
 - the match is `done`, or parked in `need_review`/`staled`/`blocked` — a follow-up on finished or parked work is still that work; adopt and reopen it;
 - `adopt_card` or `set_status` returned `ERR_DUPLICATE` — that's a conflict to resolve with the user, not a reason to open a third card;
