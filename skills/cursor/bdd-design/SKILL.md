@@ -37,6 +37,7 @@ Define behavior first, then implement code that satisfies those behaviors.
 
 - **Client's Language First.** Name the client/stakeholder before listing any behavior (by default a business or end-user stakeholder), then frame every behavior as an outcome that stakeholder would recognize and care about, in their words. Tie it to value: "As a [stakeholder], I want [capability], So that [value]".
 - One scenario = one observable behavior.
+- **Test at the integration level by default** — drive the real flow through the client-facing entry point with real collaborators; mock only what you cannot run (third-party calls, payments, clocks). A scenario whose collaborators are mocked verifies the mock, and stays green while the wiring is broken. Survey the project's existing test patterns before choosing; `@feature-dev-lite` and `@orchestrated-feature-dev` carry the full survey + ask-the-user protocol for when no harness exists.
 - Cover happy path, edge cases, and failure paths.
 
 ## Write Behaviors in the Client's Language

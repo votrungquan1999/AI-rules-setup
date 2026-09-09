@@ -17,7 +17,8 @@ This Skill is the **lightweight tier** for implementing features and tasks incre
 6. **Test Each Step** - Prove each step works before building on top of it
 7. **One Test at a Time** - Write exactly one test, run it, see a meaningful result, make it pass, then move to the next test. This ensures incremental validation and prevents skipping test coverage.
 8. **Meaningful Red** - A red run only counts when a behavior assertion fails. Structural failures (404 route not registered, missing field/import) validate nothing — scaffold structure before running, or expect green from the start when no real red is possible.
-9. **Record Decisions** - When a step involves picking one of 2+ viable options, record it on the AI-Kanban card so the "why" outlives the session (best-effort — see Phase 2).
+9. **Integration Over Unit** - Default to a test that drives the real flow through the entry point a client actually uses, with real collaborators. An isolated unit test with mocked collaborators passes while the wiring is broken (see [Test Level](#test-level-integration-first)).
+10. **Record Decisions** - When a step involves picking one of 2+ viable options, record it on the AI-Kanban card so the "why" outlives the session (best-effort — see Phase 2).
 
 ---
 
@@ -47,10 +48,19 @@ Before creating your plan, read as many relevant files as possible to understand
 - Existing patterns and conventions in the codebase
 - Related features or components that might be affected
 - Architecture and structure of the area you'll be modifying
-- Testing patterns and utilities already in place
 - Types, interfaces, and data models
 
 This context-gathering phase helps you create a more accurate plan and avoid surprises during implementation.
+
+**Survey the project's test patterns — this is not optional.** You cannot choose a test level, and you certainly cannot ask the user to set one up, before you know what the project already has. Look for:
+
+- The **test command** — `package.json` scripts (or `Makefile`, `pyproject.toml`, `justfile`); note whether integration/e2e has its own script
+- **Test locations and naming** — `tests/`, `__tests__/`, `*.test.ts` vs `*.integration.test.ts` vs `tests/e2e/`
+- **Harness and setup files** — `vitest.config`, `jest.setup`, `conftest.py`, `playwright.config`, testcontainers, `supertest`, `msw`, an in-memory or throwaway test DB
+- **Fixtures, factories, and seeds** — how a test gets a user, a record, a logged-in client; how state is reset between tests
+- **One real example** — open an existing integration/e2e test in this repo and read it end to end. It is the template you will mirror, and it tells you more than the config does.
+
+Record the verdict in one line so the plan and the tests inherit it: **the harness that exists, the command that runs it, and the file you will mirror** — or `none found`. See [Test Level](#test-level-integration-first) for what to do with each outcome.
 
 **Critical: Requirement Clarification First.** If anything is unclear or ambiguous, ask the user clarifying questions. Do not assume implementation details, architectural decisions, or requirements. You must proactively ask requirement-focused questions instead of assuming details.
 
@@ -134,6 +144,10 @@ The plan is approved and the behavior list is final, so this is the last stable 
 
 Record the answer at the top of `<ws>/IMPLEMENTATION_PROGRESS.md` (`Commit strategy: per-behavior | defer`, plus the base SHA from `git rev-parse HEAD` if per-behavior) and record it as a decision on the AI-Kanban card. **Do not start Step 1 until the user has chosen.**
 
+**Step 0b: If the test-pattern survey found no integration harness, ask how to test — same message, before any code.**
+
+Skip this entirely when Phase 1 found a usable harness: you already know what to mirror, so just note `Test level: integration via <harness>` and move on. Otherwise put the three options from [Test Level](#test-level-integration-first) to the user now — this is the last moment the answer is free, since retrofitting a harness after ten mocked tests means rewriting them. Record `Test level: integration via <harness> | unit-level (user accepted: <reason>)` next to the commit strategy, and log it as a decision on the card.
+
 **Under `per-behavior`:**
 
 - **Commit when a behavior goes green**, after its tests, lint, and the diff review (step 10 below) pass. Stage **explicit paths only** — never `git add -A`, `-a`, or `.`. One behavior, one commit, subject naming the behavior in the repo's existing convention.
@@ -150,7 +164,7 @@ Record the answer at the top of `<ws>/IMPLEMENTATION_PROGRESS.md` (`Commit strat
 **For each step in your plan:**
 
 1. **Add step to progress file** - When starting a new step, add it with 🔄 In Progress status
-2. **Define test scenarios** - NOW figure out what tests are needed for THIS step (you can define empty test scenarios first)
+2. **Define test scenarios** - NOW figure out what tests are needed for THIS step (you can define empty test scenarios first). Default to **one flow-level test** for the behavior, at the level Step 0b settled and mirroring the example file from the survey; add unit tests only for interior cases the flow cannot reach.
 
 **Then, for EACH test scenario, follow this iterative process:**
 
@@ -177,6 +191,24 @@ Record the answer at the top of `<ws>/IMPLEMENTATION_PROGRESS.md` (`Commit strat
 **Record decisions as you go.** Whenever a step involved choosing one of 2+ viable options, record it on the AI-Kanban card (best-effort): `append_decision(cardId, { decision, why? })`, resolving `cardId` from `~/.claude/kanban-session-state/$CLAUDE_CODE_SESSION_ID.json`; skip silently if absent (no card tracked this session). If it supersedes an earlier decision, `mark_decision_outdated(cardId, index)` on the older entry **first** (match it by text via `get_card_context`; skip the mark if you can't locate it unambiguously), then append. **After a successful mirror, re-stamp `lastMirroredAt` in the session pointer** (skip the stamp if the call failed). Never block the work on a mirror failure.
 
 `decision` is capped at **200 characters** and `why` at **400**; over that the call is refused with `ERR_VALIDATION` naming the actual length. A refusal is **not** a mirror failure — rewrite it shorter and call again, or the decision is lost. Only transport failures (no card, server unreachable) are skipped silently.
+
+### Test Level: Integration First
+
+**Default to the integration level: drive the real flow through the entry point a client actually uses** — the HTTP route, the CLI command, the exported service function, the rendered component — **with its real collaborators** (real router, real serialization, real DB against the project's test database). Assert the outcome the client observes.
+
+**Why this is the default, not a preference.** A unit test that mocks its collaborators verifies the mock. It stays green while the route is unregistered, the transaction never commits, the serializer drops a field, the permission check is skipped, or the two modules disagree about a shape. Those are the defects that actually reach production, and only a test that crosses the seams can see them. It also pairs with the meaningful-red rule: a flow-level test fails on a behavior assertion, where a mocked test often fails on the mock's own setup.
+
+**Mock only what you cannot run**: third-party network calls, payment providers, email/SMS, clocks and randomness, and anything that costs money. Never mock the module under test's own neighbours just to isolate it.
+
+**A unit test is right when the case is unreachable from the flow** — a branch of a pure function, a parsing edge case, numeric or date arithmetic. Then it is a **supplement**, not a substitute: the behavior still earns one flow-level test, and the unit tests cover the fiddly interior. Use `@tdd-design` for that inner loop.
+
+**When the survey found no usable integration harness — STOP and ask; do not quietly write unit tests.** Report what you looked for and what you found, then let the user choose:
+
+- **Stand up the harness now** — name the concrete setup you would add (e.g. a test database + a `supertest` client, a Playwright runner) and what it costs. It becomes its own step in the plan.
+- **Point you at one you missed** — an existing harness, a docker-compose service, a dev command.
+- **Accept unit-level for this feature** — explicitly, with the note that the wiring goes unverified.
+
+Ask **once**, at the Phase 2 Step 0b gate, and apply the answer to every step. Never invent heavy infrastructure (containers, a browser runner, CI wiring) without that decision.
 
 ### When Writing Tests
 
@@ -245,6 +277,8 @@ Follow the guidelines in the 4 Pillars document when defining test scenarios and
 - ❌ Not updating progress file
 - ❌ Writing tests without consulting project testing guidelines
 - ❌ Pre-creating steps in progress file (only add when working on them)
+- ❌ Mocking the code's own collaborators to dodge the real flow — mock only what you cannot run
+- ❌ Falling back to unit tests because no harness exists, without asking (Step 0b)
 
 ### Quality Checkpoints
 

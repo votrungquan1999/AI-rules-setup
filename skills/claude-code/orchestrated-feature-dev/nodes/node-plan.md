@@ -61,11 +61,13 @@ Read the `<ws>/RESEARCH_OUTPUT.md` file for context about the codebase.
      - ❌ `Migrate listTasks onto findManyZ and assert parsed shape and order`
      - ❌ `Running the linter reports no violations on a clean repo`
 
-4. **Flag testability up front.** For each behavior, sanity-check that a *meaningful* test could plausibly be written and set up for it (a valid, sensitive assertion + reachable fixtures/environment). If a behavior looks like it has **no meaningful way to be tested** — non-deterministic output, an external system that can't be mocked/seeded, no available harness — do NOT silently plan around it. Mark the step `Testability: uncertain (reason)` so the BDD loop escalates to the user at implementation time instead of writing a hollow test. Do not invent test cases now (test scenarios are designed per-step during implementation) — only flag the risk.
+4. **Carry the settled test level into the plan.** Your prompt names it (the orchestrator resolved it at the Phase 1 gate): `integration via <harness>` or `unit-level (user accepted)`. If the user chose to **stand up a harness**, that setup is a real, ordered step — put it first in `PLAN_STEPS.md`, before the behaviors that depend on it, and say in Technical Design what it is and why. Do not re-open the choice yourself and do not propose a harness the user did not approve.
 
-5. **Check your own document before returning.** Re-read `<ws>/implementation-plan.md` and confirm it carries `## Technical Design` and `## Behaviors to Implement`, and that every step is an observable behavior with the four test-first checkboxes. Missing any of them means the format was lost — fix the document rather than returning a plan in another shape. **Report in your return whether the skill was loaded and the check passed**, so the orchestrator can reject a drifted plan.
+5. **Flag testability up front.** For each behavior, sanity-check that a *meaningful* test could plausibly be written and set up for it (a valid, sensitive assertion + reachable fixtures/environment). If a behavior looks like it has **no meaningful way to be tested** — non-deterministic output, an external system that can't be mocked/seeded, no available harness — do NOT silently plan around it. Mark the step `Testability: uncertain (reason)` so the BDD loop escalates to the user at implementation time instead of writing a hollow test. Do not invent test cases now (test scenarios are designed per-step during implementation) — only flag the risk.
 
-6. **Write the step list** to the workflow state file for the BDD scenario loop to consume.
+6. **Check your own document before returning.** Re-read `<ws>/implementation-plan.md` and confirm it carries `## Technical Design` and `## Behaviors to Implement`, and that every step is an observable behavior with the four test-first checkboxes. Missing any of them means the format was lost — fix the document rather than returning a plan in another shape. **Report in your return whether the skill was loaded and the check passed**, so the orchestrator can reject a drifted plan.
+
+7. **Write the step list** to the workflow state file for the BDD scenario loop to consume.
 
 ## Output
 

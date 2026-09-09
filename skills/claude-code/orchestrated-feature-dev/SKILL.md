@@ -66,7 +66,14 @@ The identifier doubles as the `<slug>` for the feature's living spec (`docs/feat
 
 Spawn `node-research.md` as the INITIAL agent → writes `RESEARCH_OUTPUT.md`. While its "Follow-up Investigations Needed" is non-empty, spawn one follow-up agent per item (parallel), fold each `RESEARCH_FOLLOWUP_[id].md` back into `RESEARCH_OUTPUT.md`, and rebuild the list from new threads. Stop when empty or after **3 rounds**. Then present findings + only the genuine Open Questions.
 
-**Gate:** ask "continue to planning, or investigate more?" and wait for explicit continue.
+**Settle the test level here.** Read the `Testing Patterns` block of `RESEARCH_OUTPUT.md`. The BDD loop defaults to the **integration level** — real flow, real collaborators, asserted at the client-facing entry point — because a mocked unit test stays green while the wiring, transaction, serialization, or permission check is broken.
+
+- **A harness exists** → note `Test level: integration via <harness>` in `DECISIONS.md`, and pass the harness, its command, and the example file to mirror into every BDD sub-agent prompt. No question needed.
+- **`none found`** → **ask the user now, in the same message as the gate.** This is the cheapest moment: the plan isn't written, so a harness-setup step can still be planned in rather than retrofitted after ten mocked tests. Offer: **stand one up** (name the concrete setup and its cost — it becomes a step in the plan), **point you at one you missed**, or **accept unit-level for this feature** (wiring goes unverified). Never let a run fall back to mocked unit tests without that answer, and never invent containers or a browser runner unasked.
+
+Record the resolution in `DECISIONS.md`, mirror it to the card, and pass it to `node-plan.md`.
+
+**Gate:** ask "continue to planning, or investigate more?" — plus the test-level question when the verdict was `none found` — and wait for explicit continue.
 
 ## Phase 2: Plan
 

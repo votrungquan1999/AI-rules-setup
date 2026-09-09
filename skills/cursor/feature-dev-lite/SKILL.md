@@ -18,7 +18,8 @@ Build features incrementally with explicit planning and verification.
 1. Context first.
 2. Plan before implementation.
 3. Test behavior, not internals.
-4. Ship in small, verifiable steps.
+4. Test the real flow, not mocks — integration level by default.
+5. Ship in small, verifiable steps.
 
 ## Workflow
 
@@ -34,8 +35,9 @@ Build features incrementally with explicit planning and verification.
 ### Phase 1: Context and Clarification
 
 1. Read relevant code paths and existing patterns.
-2. Clarify ambiguous requirements before coding.
-3. Confirm scope and acceptance criteria.
+2. **Survey the project's test patterns** — the test command, test dirs/naming, harness and setup files (vitest/jest config, `conftest.py`, playwright, testcontainers, supertest, a test DB), fixtures/factories/state reset, and **one existing integration test read end to end** as the file to mirror. Commit to a verdict: the harness + its command + the example file, or `none found`. A pile of mock-heavy unit tests is not an integration harness.
+3. Clarify ambiguous requirements before coding.
+4. Confirm scope and acceptance criteria.
 
 ### Phase 2: Plan
 
@@ -52,6 +54,8 @@ Ask the user **before writing any code** — the plan is approved and the behavi
 
 Record the answer (and the base SHA from `git rev-parse HEAD` if per-behavior) at the top of `<ws>/IMPLEMENTATION_PROGRESS.md`. Don't start Phase 3 until the user has chosen.
 
+**In the same message, if the Phase 1 survey found no integration harness, ask how to test.** Skip this when a harness exists — just record `Test level: integration via <harness>`. Otherwise offer: **stand one up** (name the concrete setup and its cost — it becomes a step), **point you at one you missed**, or **accept unit-level for this feature** (wiring goes unverified). Never fall back to mocked unit tests unasked, and never invent containers or a browser runner without that answer. Retrofitting a harness after ten mocked tests means rewriting them, which is why the question lands here.
+
 **Under one-commit-per-behavior:**
 
 - Commit when a behavior is green and its tests, lint, and diff review (Phase 3 step 7) pass. Stage **explicit paths only** — never `git add -A`, `-a`, or `.`. One behavior, one commit, subject naming the behavior in the repo's convention.
@@ -64,8 +68,8 @@ Record the answer (and the base SHA from `git rev-parse HEAD` if per-behavior) a
 
 For each step:
 
-1. Define behavior scenario(s).
-2. Write ONE test at a time.
+1. Define behavior scenario(s) — default to **one flow-level test** per behavior, mirroring the example file from the survey.
+2. Write ONE test at a time, at the **integration level**: drive the real flow through the entry point a client uses (HTTP route, CLI command, exported service function, rendered component) with real collaborators, and assert what the client observes. Mock only what you cannot run (third-party calls, payments, email/SMS, clocks, randomness) — never the code's own neighbours. A mocked test verifies the mock and stays green while the route is unregistered, the transaction never commits, or the serializer drops a field. Unit tests supplement it for interior cases the flow cannot reach; they never replace it.
 3. Scaffold the structure the test touches (route, field, empty handler returning a default) — no behavior logic.
 4. Run the test before writing behavior logic — expect a failure on the behavior assertion. A structural error (404, missing field, import error) is NOT a valid red; fix the scaffolding and re-run. If no meaningful red is possible (the scaffolding IS the implementation), write just enough code to pass first and expect green from the first run — note this explicitly.
 5. Implement minimal code to satisfy behavior.
@@ -101,4 +105,6 @@ Write progress to `<ws>/IMPLEMENTATION_PROGRESS.md`:
 
 - No large speculative refactors mid-feature.
 - No skipping tests for behavior-changing code.
+- No mocking the code's own collaborators to dodge the real flow.
+- No silent fallback to unit tests when no harness exists — ask (Phase 2b).
 - Keep scope aligned with user-approved plan.

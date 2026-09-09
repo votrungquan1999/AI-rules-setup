@@ -35,21 +35,31 @@ describe('[Feature/Scenario name]', () => {
 })
 ```
 
-### 2b. One Test Per Step
+### 2b. Test Level: Integration First
+
+**Write the test at the integration level: drive the real flow through the entry point a client actually uses** — the HTTP route, the CLI command, the exported service function, the rendered component — **with its real collaborators** (real router, real serialization, real DB against the project's test database). Assert what the client observes. Your instructions name the harness, its command, and an example file from research: **mirror that example** rather than inventing a shape.
+
+A unit test that mocks its collaborators verifies the mock. It stays green while the route is unregistered, the transaction never commits, the serializer drops a field, or two modules disagree about a shape — exactly the defects that reach production, and exactly what a behavior-level red is supposed to catch.
+
+- **Mock only what you cannot run**: third-party network calls, payment providers, email/SMS, clocks, randomness. Never mock the module's own neighbours just to isolate it.
+- **A unit test is a supplement, never the substitute.** When an interior case is unreachable from the flow (a pure-function branch, a parsing edge, date arithmetic), the behavior still gets its flow-level test and the unit test covers the interior.
+- **The level is already settled** — the orchestrator resolved it at the research gate. If you were given `unit-level (user accepted)`, write unit tests and say so. If the named harness turns out not to work, that is a **bubble-up** (2e), not a licence to fall back to mocks.
+
+### 2c. One Test Per Step
 
 **IMPORTANT:** Write exactly **one test** (one `it()` block) per BDD scenario step. Do NOT batch multiple behaviors into the same step. Each step = one observable behavior = one test = one implementation cycle.
 
-### 2c. Scaffold Structure
+### 2d. Scaffold Structure
 
 Put in place whatever structure the test touches — register the route, add the field, create the empty handler returning a default — so the test run can only fail on the behavior assertion. Scaffolding contains **no behavior logic**.
 
 **If no meaningful red is possible** (the minimal scaffolding to avoid a structural failure already IS the implementation — e.g., a trivial pass-through or a field that just renders), write just enough code to pass first and expect **green from the first run**. Record `green from start (no meaningful red possible)` in the Output.
 
-### 2d. 🚫 GATE: Meaningful Test Possible? (escalate if not)
+### 2e. 🚫 GATE: Meaningful Test Possible? (escalate if not)
 
 Before running, confirm a **meaningful** test can actually be written AND set up for this behavior. A meaningful test (per the 4 Pillars) has a **valid, sensitive assertion** — it would fail if the behavior were wrong — and its preconditions/fixtures/environment can be set up reliably.
 
-This is NOT the same as "no meaningful red" (2c): there, a real, asserting test exists and simply passes from the first run. Here, you **cannot construct a meaningful test at all** — e.g., no way to assert the real outcome, output is non-deterministic and can't be made stable, or the behavior depends on an external system/environment you can't mock, seed, or stand up.
+This is NOT the same as "no meaningful red" (2d): there, a real, asserting test exists and simply passes from the first run. Here, you **cannot construct a meaningful test at all** — e.g., no way to assert the real outcome, output is non-deterministic and can't be made stable, or the behavior depends on an external system/environment you can't mock, seed, or stand up.
 
 When you hit this, do NOT write a hollow test (one that asserts nothing real or passes regardless) just to satisfy the ritual, and do NOT silently skip it. Instead **BUBBLE UP** (stop and return control to the orchestrator, which escalates to the user):
 
@@ -68,7 +78,7 @@ When re-dispatched: if the decision is skip, implement the behavior (step 4) the
 Run the test. You **MUST** see the result before writing ANY behavior logic.
 
 - **If it fails on the behavior assertion** → real red, proceed to step 4
-- **If it fails structurally** (404 route not registered, missing field, import error) → that red validates nothing; fix the scaffolding (step 2c) and run again
+- **If it fails structurally** (404 route not registered, missing field, import error) → that red validates nothing; fix the scaffolding (step 2d) and run again
 - **If it passes** → either the behavior is already covered (nothing changed: update `plan-steps.md`, skip to Output), or this is the expected green-from-start case (the scaffolding IS the implementation — skip to step 6 so it still gets reviewed and committed)
 
 ### 4. Implement

@@ -94,7 +94,14 @@ Research runs as a loop that **keeps re-running until no code-answerable threads
 
 **Then present to the user.** Read the consolidated `research-output.md` and present findings, including only the **Open Questions for the User** (genuine product/requirement decisions).
 
-**Gate:** Ask the user: "Research complete. Continue to planning, or investigate more?"
+**Settle the test level here.** Read the `Testing Patterns` block of `research-output.md`. The BDD loop defaults to the **integration level** — real flow, real collaborators, asserted at the client-facing entry point — because a mocked unit test stays green while the wiring, transaction, serialization, or permission check is broken.
+
+- **A harness exists** → note `Test level: integration via <harness>` in the decisions log, and pass the harness, its command, and the example file to mirror into every BDD sub-agent prompt. No question needed.
+- **`none found`** → **ask the user now, in the same message as the gate.** This is the cheapest moment: the plan isn't written, so a harness-setup step can still be planned in rather than retrofitted after ten mocked tests. Offer: **stand one up** (name the concrete setup and its cost — it becomes a step in the plan), **point you at one you missed**, or **accept unit-level for this feature** (wiring goes unverified). Never let a run fall back to mocked unit tests without that answer, and never invent containers or a browser runner unasked.
+
+Record the resolution in the decisions log and pass it to `nodes/node-plan.md`.
+
+**Gate:** Ask the user: "Research complete. Continue to planning, or investigate more?" — plus the test-level question when the verdict was `none found`.
 - If "more" → start a new follow-up round with the user's expanded scope as a follow-up item
 - **CRITICAL:** You MUST stop and wait for the user's explicit "continue" before proceeding.
 
