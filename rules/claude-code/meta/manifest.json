@@ -27,15 +27,20 @@
     "plan.md",
     "test-driven",
     "tdd",
-    "claude-code"
+    "claude-code",
+    "testing",
+    "integration-tests",
+    "e2e",
+    "dev-server",
+    "test-harness"
   ],
-  "description": "Meta rules for applying Claude Code rules covering file size limits and line count restrictions, scope management and complexity control, error handling patterns, rule application guidelines, code quality standards, validation requirements, change management strategies for maintainable codebases, planning mode behavior for plan file generation, and mode-aware test-first enforcement",
+  "description": "Meta rules for applying Claude Code rules covering file size limits and line count restrictions, scope management and complexity control, error handling patterns, rule application guidelines, code quality standards, validation requirements, change management strategies for maintainable codebases, planning mode behavior for plan file generation, mode-aware test-first enforcement, and when an automated test may start a server (the no-dev-server rules cover the user's dev loop, not the test harness)",
   "version": "1.0.0",
-  "lastUpdated": "2026-06-22T00:00:00Z",
+  "lastUpdated": "2026-09-09T00:00:00Z",
   "files": [
     {
       "path": "meta-rules.md",
-      "description": "Meta rules for rule application and code quality, including mode-aware test-first enforcement (the test-run GATE and one-at-a-time discipline apply to both BDD scenarios and TDD unit tests)",
+      "description": "Meta rules for rule application and code quality, including mode-aware test-first enforcement (the test-run GATE and one-at-a-time discipline apply to both BDD scenarios and TDD unit tests), and the carve-out letting integration/e2e tests start their own server",
       "required": true
     }
   ],

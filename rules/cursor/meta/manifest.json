@@ -28,15 +28,20 @@
     "test-driven",
     "tdd",
     "bdd",
-    "test-first"
+    "test-first",
+    "testing",
+    "integration-tests",
+    "e2e",
+    "dev-server",
+    "test-harness"
   ],
-  "description": "Meta rules for applying AI agent rules covering file size limits and line count restrictions, scope management and complexity control, error handling patterns, rule application guidelines, code quality standards, validation requirements, change management strategies for maintainable codebases, planning mode behavior for plan file generation, and mode-aware test-first enforcement spanning BDD (outer loop) and TDD (inner loop) under a shared test-run gate",
+  "description": "Meta rules for applying AI agent rules covering file size limits and line count restrictions, scope management and complexity control, error handling patterns, rule application guidelines, code quality standards, validation requirements, change management strategies for maintainable codebases, planning mode behavior for plan file generation, mode-aware test-first enforcement spanning BDD (outer loop) and TDD (inner loop) under a shared test-run gate, and when an automated test may start a server (the no-dev-server rules cover the user's dev loop, not the test harness)",
   "version": "1.0.0",
-  "lastUpdated": "2026-06-22T00:00:00Z",
+  "lastUpdated": "2026-09-09T00:00:00Z",
   "files": [
     {
       "path": "meta-rules.mdc",
-      "description": "Meta rules for rule application and code quality",
+      "description": "Meta rules for rule application and code quality, and the carve-out letting integration/e2e tests start their own server",
       "required": true
     }
   ],

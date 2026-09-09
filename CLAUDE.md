@@ -130,7 +130,7 @@ This is a monorepo with both CLI and rules in the same repository:
 
 ### Meta Rules (ALWAYS APPLY)
 - Keep file size small and reasonable for AI context management
-- NEVER run `npm run build` or `npm run dev` after completing tasks
+- NEVER leave `npm run build` or `npm run dev` running after completing tasks — but tests MAY start servers (see [Testing](#testing-1))
 - ALWAYS use `npm install` to install packages (never edit package.json directly)
 - NEVER implement unused/future features not explicitly requested
 - Ask 1-2 clarifying questions before implementing (more if explanation >100 chars)
@@ -145,8 +145,9 @@ This is a monorepo with both CLI and rules in the same repository:
 
 ### Testing
 - Run tests automatically to verify changes when appropriate
-- Tests run against real Next.js API server
+- Tests run against a real Next.js API server — starting one for a test run is expected, and is not the "don't leave the dev server running" rule
 - Start API server before running tests: `npm run dev:api` then `npm test`
+- E2E starts and stops its own server on port 4000 via `npm run test:e2e`; if startup fails, capture the child's stderr rather than trusting "server failed to start"
 - **ALWAYS run tests without watch mode in agent terminals** (watch mode hangs in non-interactive shells)
 
 ### Planning Mode
