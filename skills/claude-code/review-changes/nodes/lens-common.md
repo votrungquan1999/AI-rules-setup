@@ -44,7 +44,9 @@ For each finding, give the **failure mode**: the concrete sequence that turns th
 - Be **concrete and specific to THIS code**: name the trigger (a user action, an input value, a timing/concurrency window, a second tab or request), trace what the code actually does step by step, and end at the observable harm (wrong data, a race, a crash, a leak, a user locked out). Reference bar for the level of detail: *"user updates a field → mutation returns task IDs → FE polls → user refreshes → FE returns empty pending IDs while the BE task is still IN_PROGRESS → user edits assignees and races the worker."*
 - A vague restatement — "this could cause bugs", "may break", "is risky" — is **NOT** a failure mode; it just repeats the description. **Never write a hollow one to fill the field.**
 - If you cannot construct a concrete runtime failure (the finding is a pure maintainability / readability / style concern), **omit it and say so**: `No distinct failure mode — <maintainability/readability> concern`.
-- The **architecture** lens has a third accepted form — the *design consequence* (what the change forces later, when nothing fails at runtime). It is defined in that lens's node file and is held to the same specificity bar; no other lens may use it.
+- Two lenses have an additional accepted form, each defined in its own node file and held to the same specificity bar. **No other lens may use either.**
+  - **architecture** — the *design consequence*: what the change forces later, when nothing fails at runtime.
+  - **tests** — the *missed defect*: the concrete bug that ships green because the test cannot fail. A test that guarantees nothing has no runtime failure of its own, so name the defect it was believed to be covering and trace that to the harm. Do **not** downgrade such a finding to a maintainability concern — the harm is a real bug reaching production behind a passing suite.
 
 ## Flag findings that need a code-level check
 
@@ -67,7 +69,7 @@ Write findings to the `./tmp/review-changes/LENS_<name>.md` path named in your p
 - **Failure mode**: [Concrete trigger → behavior → harm, OR "No distinct failure mode — <maintainability/readability> concern". Never a vague restatement — see the rules above.]
 - **Why it matters**: [Impact/risk — the magnitude, given the failure mode above]
 - **Needs verification**: yes — [what to check, and where] / no
-- **Suggested fix**: [Concrete suggestion; code snippet only if helpful]
+- **Suggested fix**: [Concrete suggestion; code snippet only if helpful. **Deleting code that earns nothing — a test that cannot fail, a branch nothing reaches — is a valid fix, not a cop-out.** Say "delete it" when that is the answer, instead of proposing a way to improve it.]
 
 ## Notes
 [Anything good worth calling out, or "no issues found in this lens"]

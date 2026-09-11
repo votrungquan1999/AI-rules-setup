@@ -27,8 +27,10 @@ Read the files changed for this step (listed in the step result):
 #### 2. Verify Test Coverage & Meaningfulness
 
 Find and read the test(s) written for this step:
+- **Each test earns its place** — ask this FIRST, before coverage: what defect would this test catch that no other test catches? If the answer is "none", the verdict is **delete it**, not improve it. A test that guarantees nothing still costs maintenance on every refactor and reports coverage it never earned.
+- **No entailed assertions** — reject the signature where the asserted value is already fixed by the test's own arrange block: stub a collaborator to return `X`, call through, assert the result is `X`. The implementation is not in the causal path; the test passes just as well if you replace it with a pass-through.
 - **Coverage is good**: are all aspects of the planned behavior exercised — happy path plus the relevant edge/error cases and boundaries? Note any part of the behavior left untested.
-- **Tests are meaningful** (apply the 4 Pillars, especially Validity & Sensitivity): does each test have a valid, sensitive assertion that would FAIL if the behavior were wrong? Reject hollow/tautological tests, over-mocking that bypasses the code under test, and assertions too loose to catch a real defect.
+- **Tests are meaningful** (apply the 4 Pillars, especially Validity & Sensitivity): does each test assert the **observable outcome** — returned value, persisted state, response body, rendered output — in a way that would FAIL if the behavior were wrong? An assertion that a collaborator *was called*, with or without its arguments, is not an outcome: it re-states the wiring the test set up and survives every defect that leaves the call site intact. Reject hollow/tautological tests, over-mocking that bypasses the code under test, and assertions too loose to catch a real defect.
 - Does the test actually assert the planned behavior?
 - Run the test in isolation — does it pass?
 - Could the test pass even if the implementation were wrong (false positive)? Decide this by reading — **never mutate the source to find out.** Phase 5c proves it empirically.

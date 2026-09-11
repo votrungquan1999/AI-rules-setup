@@ -44,6 +44,7 @@ A unit test that mocks its collaborators verifies the mock. It stays green while
 
 - **Mock only what you cannot run**: third-party network calls, payment providers, email/SMS, clocks, randomness. Never mock the module's own neighbours just to isolate it.
 - **A unit test is a supplement, never the substitute.** When an interior case is unreachable from the flow (a pure-function branch, a parsing edge, date arithmetic), the behavior still gets its flow-level test and the unit test covers the interior.
+- **Never assert a value your own mock setup already fixed.** Stub returns `X` → assert the result is `X` puts the implementation outside the causal path: the test passes if you replace the code under test with a pass-through, so it can never go red for a real defect. Assert the observable outcome instead; asserting a collaborator *was called* is wiring, not behavior.
 - **The level is already settled** — the orchestrator resolved it at the Phase 1 gate. If your prompt says `unit-level (user accepted)`, write unit tests and say so. If it names a harness that turns out not to work, that is a **bubble-up** (2e), not a licence to fall back to mocks.
 
 ### 2c. One Test Per Step

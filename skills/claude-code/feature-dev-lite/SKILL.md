@@ -18,7 +18,8 @@ This Skill is the **lightweight tier** for implementing features and tasks incre
 7. **One Test at a Time** - Write exactly one test, run it, see a meaningful result, make it pass, then move to the next test. This ensures incremental validation and prevents skipping test coverage.
 8. **Meaningful Red** - A red run only counts when a behavior assertion fails. Structural failures (404 route not registered, missing field/import) validate nothing — scaffold structure before running, or expect green from the start when no real red is possible.
 9. **Integration Over Unit** - Default to a test that drives the real flow through the entry point a client actually uses, with real collaborators. An isolated unit test with mocked collaborators passes while the wiring is broken (see [Test Level](#test-level-integration-first)).
-10. **Record Decisions** - When a step involves picking one of 2+ viable options, record it on the AI-Kanban card so the "why" outlives the session (best-effort — see Phase 2).
+10. **Every Test Must Be Able To Fail** - Before writing a test, answer what defect it would catch. If the asserted value is already fixed by the test's own mock setup (stub returns `X` → assert `X`), the implementation isn't in the causal path and the test proves nothing — don't write it.
+11. **Record Decisions** - When a step involves picking one of 2+ viable options, record it on the AI-Kanban card so the "why" outlives the session (best-effort — see Phase 2).
 
 ---
 
@@ -279,11 +280,14 @@ Follow the guidelines in the 4 Pillars document when defining test scenarios and
 - ❌ Pre-creating steps in progress file (only add when working on them)
 - ❌ Mocking the code's own collaborators to dodge the real flow — mock only what you cannot run
 - ❌ Falling back to unit tests because no harness exists, without asking (Step 0b)
+- ❌ Asserting a value your own mock setup already fixed (stub returns `X` → assert `X`) — it passes if you delete the implementation
+- ❌ Asserting a collaborator *was called* instead of asserting the outcome the client observes — a call log is wiring, not behavior
+- ❌ Adding a test to lift a coverage number rather than to pin a behavior
 
 ### Quality Checkpoints
 
 **Every 2-3 completed steps**, pause to review quality:
-- Use `@test-quality-reviewer` to check recent test quality against the 4 Pillars
+- Use `@test-quality-reviewer` on the recent tests — it runs the necessity gate before the 4 Pillars. **Deleting a test it reports as unable to fail is a valid outcome of the checkpoint**, not a regression to argue with.
 - Use `@code-refactoring` to identify cleanup opportunities in recent implementation
 - Fix any issues before continuing to the next step
 

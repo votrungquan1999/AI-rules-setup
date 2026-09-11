@@ -19,6 +19,7 @@ Build features incrementally with explicit planning and verification.
 2. Plan before implementation.
 3. Test behavior, not internals.
 4. Test the real flow, not mocks — integration level by default.
+5. Every test must be able to fail — if the asserted value is already fixed by the test's own mock setup, it proves nothing; don't write it.
 5. Ship in small, verifiable steps.
 
 ## Workflow
@@ -69,7 +70,7 @@ Record the answer (and the base SHA from `git rev-parse HEAD` if per-behavior) a
 For each step:
 
 1. Define behavior scenario(s) — default to **one flow-level test** per behavior, mirroring the example file from the survey.
-2. Write ONE test at a time, at the **integration level**: drive the real flow through the entry point a client uses (HTTP route, CLI command, exported service function, rendered component) with real collaborators, and assert what the client observes. Mock only what you cannot run (third-party calls, payments, email/SMS, clocks, randomness) — never the code's own neighbours. A mocked test verifies the mock and stays green while the route is unregistered, the transaction never commits, or the serializer drops a field. Unit tests supplement it for interior cases the flow cannot reach; they never replace it.
+2. Write ONE test at a time, at the **integration level**: drive the real flow through the entry point a client uses (HTTP route, CLI command, exported service function, rendered component) with real collaborators, and assert what the client observes. Mock only what you cannot run (third-party calls, payments, email/SMS, clocks, randomness) — never the code's own neighbours. A mocked test verifies the mock and stays green while the route is unregistered, the transaction never commits, or the serializer drops a field. Unit tests supplement it for interior cases the flow cannot reach; they never replace it. **Never assert a value your own mock setup already fixed** (stub returns `X` → assert `X`) — the implementation sits outside the causal path, so it passes against a pass-through.
 3. Scaffold the structure the test touches (route, field, empty handler returning a default) — no behavior logic.
 4. Run the test before writing behavior logic — expect a failure on the behavior assertion. A structural error (404, missing field, import error) is NOT a valid red; fix the scaffolding and re-run. If no meaningful red is possible (the scaffolding IS the implementation), write just enough code to pass first and expect green from the first run — note this explicitly.
 5. Implement minimal code to satisfy behavior.
@@ -81,7 +82,7 @@ For each step:
 
 After every 2-3 steps:
 
-- Review test quality and coverage gaps.
+- Review test quality and coverage gaps. Run the necessity gate first: a test that cannot fail is **deleted**, not improved.
 - Refactor only where it improves clarity/safety.
 - Re-verify before continuing.
 - Under one-commit-per-behavior, **fold each fix into the commit owning that behavior** (Phase 2b) rather than adding a new commit.
@@ -106,5 +107,7 @@ Write progress to `<ws>/IMPLEMENTATION_PROGRESS.md`:
 - No large speculative refactors mid-feature.
 - No skipping tests for behavior-changing code.
 - No mocking the code's own collaborators to dodge the real flow.
+- No asserting a value your own mock setup already fixed, and no asserting a collaborator *was called* in place of the outcome the client observes.
+- No adding a test to lift a coverage number rather than to pin a behavior.
 - No silent fallback to unit tests when no harness exists — ask (Phase 2b).
 - Keep scope aligned with user-approved plan.

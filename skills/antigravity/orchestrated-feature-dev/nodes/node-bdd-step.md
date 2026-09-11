@@ -43,6 +43,7 @@ A unit test that mocks its collaborators verifies the mock. It stays green while
 
 - **Mock only what you cannot run**: third-party network calls, payment providers, email/SMS, clocks, randomness. Never mock the module's own neighbours just to isolate it.
 - **A unit test is a supplement, never the substitute.** When an interior case is unreachable from the flow (a pure-function branch, a parsing edge, date arithmetic), the behavior still gets its flow-level test and the unit test covers the interior.
+- **Never assert a value your own mock setup already fixed.** Stub returns `X` → assert the result is `X` puts the implementation outside the causal path: the test passes if you replace the code under test with a pass-through, so it can never go red for a real defect. Assert the observable outcome instead; asserting a collaborator *was called* is wiring, not behavior.
 - **The level is already settled** — the orchestrator resolved it at the research gate. If you were given `unit-level (user accepted)`, write unit tests and say so. If the named harness turns out not to work, that is a **bubble-up** (2e), not a licence to fall back to mocks.
 
 ### 2c. One Test Per Step
@@ -103,7 +104,7 @@ Read the **full diff of this behavior** — every file you touched, not just the
 
 If anything changed, re-run the scoped test before moving on.
 
-**Do NOT mutate the implementation to check the test is sensitive.** Judge sensitivity by reading the assertion: would it still pass if the behavior were wrong? Injecting a real defect is Phase 5c's job — budgeted, alone, via a restoring harness. Mutating here has left mutants in the tree and corrupted later steps.
+**Do NOT mutate the implementation to check the test is sensitive.** Judge sensitivity by reading the assertion, against the observable outcome only — a collaborator's call log is wiring, not behavior. Would the assertion still pass if the behavior were wrong? Injecting a real defect is Phase 5c's job — budgeted, alone, via a restoring harness. Mutating here has left mutants in the tree and corrupted later steps.
 
 ### 7. Quick Refactor (Optional)
 
