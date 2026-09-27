@@ -29,7 +29,8 @@
     "------------ PUBLISH COMMANDS ------------": "",
     "build:cli": "tsc -p tsconfig.cli.json",
     "publish:cli": "cd cli-package && npm publish --access public",
-    "prepublish:cli": "npm run build:cli"
+    "prepublish:cli": "npm run build:cli",
+    "test:visual-qa": "playwright test --config tests/visual-qa/playwright.config.ts"
   },
   "author": "Vo Trung Quan",
   "license": "MIT",

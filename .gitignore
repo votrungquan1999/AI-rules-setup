@@ -112,3 +112,6 @@ test-dir/
 /playwright-report/
 /blob-report/
 /tests/pw/.auth/
+
+# Visual-QA working archive (screenshots written by snap() runs)
+.visual-qa/

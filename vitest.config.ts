@@ -18,7 +18,15 @@ export default defineConfig({
 			},
 		},
 		setupFiles: ["./tests/setup.ts"],
-		// tests/pw holds Playwright specs (.spec.ts) — they must run under Playwright, not Vitest.
-		exclude: ["**/node_modules/**", "**/dist/**", "**/.history/**", "**/.next/**", "**/tests/e2e/**", "**/tests/pw/**"],
+		// tests/pw and tests/visual-qa hold Playwright specs — they must run under Playwright, not Vitest.
+		exclude: [
+			"**/node_modules/**",
+			"**/dist/**",
+			"**/.history/**",
+			"**/.next/**",
+			"**/tests/e2e/**",
+			"**/tests/pw/**",
+			"**/tests/visual-qa/**",
+		],
 	},
 });
