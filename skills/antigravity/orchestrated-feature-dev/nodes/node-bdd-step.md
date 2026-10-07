@@ -1,19 +1,24 @@
-# Node: BDD Scenario Step
+# Node: BDD Behavior
 
-Execute BDD scenarios (test-first), one observable behavior at a time.
+Deliver one observable behavior test-first: all of its steps, under the acceptance mode the plan names.
 
-> **You run as a batch execution.** Your assignment is a batch of related steps (as many as possible, capped at 4). Work them one at a time — this node describes one step. You **cannot talk to the user**: wherever this node says "escalate," it means **BUBBLE UP** — stop, write your progress to `step-result.md` + `plan-steps.md`, and return control to the orchestrator with the gate details. The orchestrator escalates to the user and re-dispatches you to resume. Never guess past a gate.
+> **You run as a batch execution.** Your assignment is a batch of related behaviors (as many as possible, capped at 4). Work them one at a time — this node describes one behavior, with all its steps. You **cannot talk to the user**: wherever this node says "escalate," it means **BUBBLE UP** — stop, write your progress to `step-result.md` + `plan-steps.md`, and return control to the orchestrator with the gate details. The orchestrator escalates to the user and re-dispatches you to resume. Never guess past a gate.
 
 ## Input
 
-Work through the steps assigned in your batch, one at a time, in `plan-steps.md` order. For each, treat the first `pending` assigned step as your current target.
-Read the `loop-state.json` artifact for the current step counter.
+Work through the behaviors assigned in your batch, one at a time, in `plan-steps.md` order. For each, treat the first `pending` assigned behavior as your current target.
+Read the `loop-state.json` artifact for the current behavior counter.
 
 ## Execution
 
 ### 1. Identify the Behavior
 
-Find the first step with `Status: pending` in `plan-steps.md`. This is your target behavior.
+Find the first behavior with `Status: pending` in `plan-steps.md`. This is your target. Its `Acceptance` line names the mode, and its `### Step N.M` entries (if any) are the ordered technical work you will do in step 4, each with its own files and notes. Skip any step already `done` — you are resuming after a bubble-up.
+
+**Unchanged outcome** (refactor, performance, migration, upgrade) runs differently — no red is expected, so do not manufacture one:
+- **Pin first.** Run the pin — the named suites, or a new pin test written as in sections 2-2b below — **green on today's code, before any change**. A red pin means the pin is wrong or today's behavior is not what the plan assumes: bubble up.
+- **Measure before.** If the entry names a metric, take the before number now.
+- Then do the steps in order (step 4), re-running the pin after each step that could break it.
 
 ### 2. Write the Test
 
@@ -46,9 +51,9 @@ A unit test that mocks its collaborators verifies the mock. It stays green while
 - **Never assert a value your own mock setup already fixed.** Stub returns `X` → assert the result is `X` puts the implementation outside the causal path: the test passes if you replace the code under test with a pass-through, so it can never go red for a real defect. Assert the observable outcome instead; asserting a collaborator *was called* is wiring, not behavior.
 - **The level is already settled** — the orchestrator resolved it at the research gate. If you were given `unit-level (user accepted)`, write unit tests and say so. If the named harness turns out not to work, that is a **bubble-up** (2e), not a licence to fall back to mocks.
 
-### 2c. One Test Per Step
+### 2c. One Test at a Time
 
-**IMPORTANT:** Write exactly **one test** (one `it()` block) per BDD scenario step. Do NOT batch multiple behaviors into the same step. Each step = one observable behavior = one test = one implementation cycle.
+**IMPORTANT:** Write exactly **one test** (one `it()` block) at a time, and run it before writing more. A behavior gets one flow-level test by default; add another only for a case the first cannot reach. Do NOT batch multiple behaviors into one entry. The behavior is the unit of acceptance and commit — its steps are the implementation work under that test, not tests of their own.
 
 ### 2d. Scaffold Structure
 
@@ -66,11 +71,11 @@ When you hit this, do NOT write a hollow test (one that asserts nothing real or 
 
 - Report the behavior, what you tried, and exactly what blocks a meaningful assertion or test setup.
 - The options the orchestrator will offer the user: **skip the test** for this behavior (still implement it), **defer** the behavior, or **provide a way to make it testable** (a fixture, seam, or mock).
-- Do not proceed on this step until the orchestrator re-dispatches you with the decision.
+- Do not proceed on this behavior until the orchestrator re-dispatches you with the decision.
 
 When re-dispatched: if the decision is skip, implement the behavior (step 4) then record it as `test skipped (no meaningful test possible — user approved: [reason])` in the Output; if it was made testable, return to step 2 and write the test.
 
-**Other bubble-up triggers (same protocol):** 2+ defensible implementation behaviors for the step, or an unexpected failure you cannot resolve with minimum code. Stop, write progress, return control.
+**Other bubble-up triggers (same protocol):** 2+ defensible implementation behaviors while building it, or an unexpected failure you cannot resolve with minimum code. Stop, write progress, return control.
 
 ### 3. 🚫 GATE: Run the Test
 
@@ -80,15 +85,15 @@ Run the test. You **MUST** see the result before writing ANY behavior logic.
 
 - **If it fails on the behavior assertion** → real red, proceed to step 4
 - **If it fails structurally** (404 route not registered, missing field, import error) → that red validates nothing; fix the scaffolding (step 2d) and run again
-- **If it passes** → either the behavior is already covered (nothing changed: update `plan-steps.md`, skip to Output), or this is the expected green-from-start case (the scaffolding IS the implementation — skip to step 6 so it still gets reviewed and committed)
+- **If it passes** → either the behavior is already covered (nothing changed: update `plan-steps.md`, skip to Output), or this is the expected green-from-start case (the scaffolding IS the implementation — skip to step 6 so it still gets reviewed and committed), or it is the pin of an unchanged-outcome behavior (expected — proceed to step 4)
 
 ### 4. Implement
 
-Write the **minimum code** to make the test pass. Nothing more.
+Write the **minimum code** to make the test pass. Nothing more. If the behavior has `### Step N.M` entries, do them in order — they are this implementation — run the test after any step the next one depends on, and set each step's `Status: done` in `plan-steps.md` as it lands.
 
 ### 5. Run the Test Again
 
-Confirm it passes. Also run any related previous tests to check for regressions.
+Confirm it passes. Also run any related previous tests to check for regressions. For an unchanged-outcome behavior, the pin must still be green, and you take the after measurement now.
 
 - **If all pass** → proceed to step 6
 - **If regression** → fix the regression, run tests again
@@ -97,7 +102,7 @@ Confirm it passes. Also run any related previous tests to check for regressions.
 
 Read the **full diff of this behavior** — every file you touched, not just the last edit (`git diff` on those paths; under `defer` the working tree is the diff). Check:
 
-- **Every hunk is intentional and belongs to this behavior.** Drop debug leftovers, stray formatting churn, and edits to files this step should not own — under `per-behavior` they would land in the wrong commit. The `Files Changed` list in your Output must match this diff exactly; the commit step stages from it.
+- **Every hunk is intentional and belongs to this behavior.** Drop debug leftovers, stray formatting churn, and edits to files this behavior should not own — under `per-behavior` they would land in the wrong commit. The `Files Changed` list in your Output must match this diff exactly; the commit step stages from it.
 - **Comments are concise and skimmable.** One line, one idea; say WHY, not WHAT. Delete any comment that restates the code or narrates an obvious step. Match the surrounding code's comment density.
 - **No narrating block at the top.** A file- or function-level comment that walks through the steps of the code below it (`// 1. fetch… 2. validate… 3. save…`) gets **broken up and distributed**: move each piece next to the line or clause it describes, so a dev reads it in place. Leave at most a one-line intro at the top.
 - **Ticket IDs stay out of the code** — they belong in the commit message.
@@ -116,28 +121,32 @@ Read `commit-plan.md`. If `Strategy: defer`, **skip this step entirely — run n
 
 Under `Strategy: per-behavior`, this behavior is green, so commit it now per `nodes/commit-protocol.md`:
 - Capture `Base:` first if you are the run's first behavior commit
-- Stage **explicit paths only** — the files listed under "Files Changed" in `step-result.md`; never `git add -A`, `-a`, or `.`
+- Stage **explicit paths only** — the files listed under "Files Changed" for this behavior in `step-result.md`; never `git add -A`, `-a`, or `.`
 - One commit, subject naming the behavior in the repo's existing convention
 - Record the row in `commit-plan.md` as `committed`
 
-Commit **per behavior, not per batch** — your batch holds several behaviors and each gets its own commit as it goes green.
+Commit **per behavior, not per batch and not per step** — your batch holds several behaviors and each gets its own commit as it goes green; a behavior with several steps is still one commit, made after its last step passes.
+
+## Final Check Assignment
+
+If your assignment is the `## Final check`, run what it lists after every behavior is done, record the results in `step-result.md` under `## Final check`, and set its status to `done` in `plan-steps.md`. It changes no code and makes no commit; a failure is a bubble-up.
 
 ## Output
 
 Update the `plan-steps.md` artifact:
 
-- Change the completed step's status to `done` (or `done (already covered)`, or `done (test skipped — no meaningful test possible, user approved)`)
+- Change the completed behavior's status to `done` (or `done (already covered)`, or `done (test skipped — no meaningful test possible, user approved)`)
 
 Write to the `step-result.md` artifact:
 
 ```markdown
-# Step Result
+# Behavior Result
 
-## Step: [step number]
+## Behavior [number]: [what was implemented]
 
-## Behavior: [what was implemented]
+## Acceptance: [new behavior: red → green | trivial: green from start (no meaningful red possible) | unchanged outcome: pinned green before and after by [test or suites][; metric before → after] | test skipped (no meaningful test possible — user approved: reason) | already covered]
 
-## Test Result: [red → green | green from start (no meaningful red possible) | test skipped (no meaningful test possible — user approved: reason) | already covered]
+## Steps: [only when the behavior has several — each `Step N.M` ✅, with the test run that gated it]
 
 ## Files Changed:
 
@@ -149,6 +158,6 @@ Write to the `step-result.md` artifact:
 ## Notes: [anything worth mentioning]
 ```
 
-**Log any decision.** If this step involved a choice between **2+ viable implementation approaches** and you committed to one — including an approved test-skip at the meaningful-test gate (skip vs defer vs make-testable) — append an entry to the `decisions.md` artifact (create it if absent): option chosen, alternative(s), one-line why (note "user chose" when escalated). The summary phase reports these.
+**Log any decision.** If this behavior involved a choice between **2+ viable implementation approaches** and you committed to one — including an approved test-skip at the meaningful-test gate (skip vs defer vs make-testable) — append an entry to the `decisions.md` artifact (create it if absent): option chosen, alternative(s), one-line why (note "user chose" when escalated). The summary phase reports these.
 
-Update `loop-state.json` artifact: increment `current_step`.
+Update `loop-state.json` artifact: increment `current_behavior`.

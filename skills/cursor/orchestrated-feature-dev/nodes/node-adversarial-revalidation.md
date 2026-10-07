@@ -8,7 +8,7 @@ Check the **actual implemented code** against the frozen behavior-risk catalog. 
 
 ## What makes this different from conformance validation
 
-Conformance (5a) asks "did each step match the plan?" — it trusts the plan as the spec. You do the opposite: take the frozen `<ws>/BEHAVIOR_RISKS.md` as the source of truth for *expected* behavior on paths the plan never specified, and probe whether the real code survives them. The catalog is frozen and implementation-blind by construction (written before the code existed) — treat it as ground truth. **Never edit it**, not even a wrong-looking entry; flag it in your finding and let the orchestrator judge.
+Conformance (5a) asks "did each behavior match the plan?" — it trusts the plan as the spec. You do the opposite: take the frozen `<ws>/BEHAVIOR_RISKS.md` as the source of truth for *expected* behavior on paths the plan never specified, and probe whether the real code survives them. The catalog is frozen and implementation-blind by construction (written before the code existed) — treat it as ground truth. **Never edit it**, not even a wrong-looking entry; flag it in your finding and let the orchestrator judge.
 
 ## Input
 

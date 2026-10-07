@@ -4,14 +4,14 @@ Periodic quality check that reviews recent tests and implementation for issues.
 
 ## Input
 
-Read the `loop-state.json` artifact for the current step counter.
-Read the `plan-steps.md` artifact to identify which steps were completed since the last quality check.
+Read the `loop-state.json` artifact for the current behavior counter.
+Read the `plan-steps.md` artifact to identify which behaviors were completed since the last quality check.
 
 ## Execution
 
 ### 1. Test Quality Review
 
-Use `@test-quality-reviewer` to review the tests written in the most recent 2-3 steps.
+Use `@test-quality-reviewer` to review the tests written in the most recent 2-3 behaviors.
 
 Focus on:
 - Are tests reliable (no flakiness)?
@@ -22,14 +22,14 @@ Focus on:
 
 ### 2. Code Refactoring Review
 
-Use `@code-refactoring` to review the implementation from recent steps.
+Use `@code-refactoring` to review the implementation from recent behaviors.
 
 Focus on:
-- Any duplication introduced across recent steps?
+- Any duplication introduced across recent behaviors?
 - Naming clarity?
 - Unnecessary complexity?
 
-**If `@code-refactoring` reports missing test coverage → skip the refactoring review** rather than blocking. The tests exist from the BDD scenario steps.
+**If `@code-refactoring` reports missing test coverage → skip the refactoring review** rather than blocking. The tests exist from the BDD loop.
 
 ### 3. Apply Fixes
 
@@ -46,7 +46,7 @@ Write to the `quality-result.md` artifact:
 ```markdown
 # Quality Gate Result
 
-## Checkpoint: After steps [X-Y]
+## Checkpoint: After behaviors [X-Y]
 
 ## Test Quality
 - **Score**: [Excellent / Good / Needs Improvement]

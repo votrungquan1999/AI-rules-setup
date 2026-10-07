@@ -17,7 +17,7 @@ Produce final delivery summary after validation.
 
 ## Workflow
 
-1. Count completed versus planned steps.
+1. Count completed versus planned behaviors, and read the `Final check` result if the plan has one.
 2. Summarize quality gate and validation outcomes.
 3. Aggregate changed files and test outcomes.
 3b. **Check the commit invariant.** Under `Strategy: per-behavior`, `git rev-list --count <base>..HEAD` must equal the number of behaviors with status `done`. Report the count either way; if they differ, say so plainly and name the likely cause (a fix committed separately instead of folded, or a behavior never committed) rather than quietly reporting success. Under `Strategy: defer`, skip it and note the changes are uncommitted by design.
@@ -30,7 +30,8 @@ Create `<ws>/FINAL_SUMMARY.md`:
 
 ```markdown
 ## Feature Outcome
-## Steps Completed
+## Behaviors Completed
+[X/Y, plus one line with the Final check and its result if the plan has one]
 ## Commits
 [per-behavior: each commit subject against its behavior, and whether the counts match. defer: "no commits made — changes are in the working tree."]
 ## Quality and Validation Results

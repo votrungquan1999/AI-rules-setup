@@ -67,7 +67,7 @@ Reframing examples (client in parentheses):
 ## Guardrails
 
 - Does every scenario read in the client's language (no code/internals)? If not, rewrite before implementing.
-- Do not batch multiple behaviors into one step.
+- Do not batch behaviors or write multiple tests at once — write one test, then the implementation that makes it pass, before the next test.
 - Do not write behavior logic before executing the scenario test (structural scaffolding is allowed and encouraged).
 - Do not treat a structural failure (404, missing route/field) as a valid red.
 - If requirements are unclear, ask first instead of assuming.

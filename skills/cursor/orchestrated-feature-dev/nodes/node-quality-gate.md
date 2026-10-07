@@ -1,6 +1,6 @@
 # Node: Quality Gate
 
-Run periodic quality checks across recent implementation steps.
+Run periodic quality checks across recently implemented behaviors.
 
 > **Task workspace:** State files live in the task working directory `<ws>` (`./tmp/<identifier>/`) given in your prompt.
 
@@ -11,7 +11,7 @@ Run periodic quality checks across recent implementation steps.
 
 ## Workflow
 
-1. Review tests from recent 2-3 steps with `test-quality-reviewer`. Judge the Sensitivity pillar by **reading** the assertion. **No mutation testing in this gate** — do not edit source to see a test go red, and do not build a mutation harness. That pass runs once, in Phase 5c; doing it per gate re-mutates the same files 3-5 times a run, and one gate that did it spent 62 of its 68 minutes on 96 mutants. Suspect a hollow test? Report it and let 5c settle it.
+1. Review tests from the recent 2-3 behaviors with `test-quality-reviewer`. Judge the Sensitivity pillar by **reading** the assertion. **No mutation testing in this gate** — do not edit source to see a test go red, and do not build a mutation harness. That pass runs once, in Phase 5c; doing it per gate re-mutates the same files 3-5 times a run, and one gate that did it spent 62 of its 68 minutes on 96 mutants. Suspect a hollow test? Report it and let 5c settle it.
 2. Review code quality/refactor opportunities with `code-refactoring`.
 3. Apply fixes if issues are found.
 4. Re-run related tests.
