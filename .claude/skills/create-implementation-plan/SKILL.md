@@ -80,10 +80,10 @@ For complex designs, consider using the `@structured-brainstorming` workflow to 
 
 **Identify the client first.** Before listing any behavior, name the client/stakeholder of the feature. By DEFAULT this is a business or end-user stakeholder. Frame every behavior as an outcome that stakeholder would recognize and care about, in their words — business/end-user language is the default. ONLY when the user explicitly states the client is a developer or an internal/consuming system (e.g. a library/API contract) may you phrase behaviors in developer terms.
 
-List the behaviors the system should exhibit, ordered by implementation priority. Each behavior becomes one BDD scenario step — a strictly isolated test-first cycle.
+List the behaviors the system should exhibit, ordered by implementation priority. **A behavior is the unit of planning, acceptance and commit:** one heading in the client's language, with its own acceptance check. **Steps** are the ordered technical work inside one behavior, numbered under it (Step 2.1, Step 2.2), with a test run wherever it gates the next step. Most behaviors need no steps beyond the default test-first cycle — add steps only when a behavior genuinely needs several changes (a query rewrite plus an index, a migration plus a backfill plus wiring).
 
 **CRITICAL: ONE TEST AT A TIME**
-Never batch behaviors or write multiple tests at once. Each step must be exactly one behavior, which translates to exactly one test, followed immediately by its implementation.
+Never batch behaviors or write multiple tests at once. Write one test, then the implementation that makes it pass, before the next test.
 
 Each behavior must be:
 - **Observable** — something a user or system can verify externally
@@ -104,21 +104,20 @@ Each behavior must be:
 > ❌ `Migrate listTasks onto findManyZ and assert parsed shape and order`
 > ❌ `Running the linter reports no violations on a clean repo`
 
-For each behavior, plan the test-first cycle:
-```markdown
-### [Observable behavior]
-- [ ] Write test
-- [ ] Run test
-- [ ] Implement (if needed)
-- [ ] Run test (if implemented)
-```
+**Behavior check — run it on every heading before the plan is presented.** A heading that fails is a step, or belongs somewhere else:
+- **No acceptance check of its own, or only makes sense after the heading before it** → a step; move it inside the behavior it serves.
+- **Setup or groundwork** (a test harness, config or flag removal, a migration, a refactor that only enables new work) → steps of the first behavior that needs it; cleanup goes in the behavior that makes the old code dead.
+- **"Still works as before" inside a feature** → not a behavior; name the existing suites that pin it in the step that risks it, and add a pin test only where nothing covers the path.
+- **Comes from the code, not the request** (a path the change happens to touch) → a note in the behavior that covers it, or a question for the user.
+- **Two outcomes the client would check separately** → split them. **One outcome split across headings by technical step** → merge them.
+- **Only verifies other behaviors** (an end-to-end run, a speed check across several) → `### Final check`, which holds checks only, never code changes.
 
-Group quality checkpoints after every 2-3 behaviors:
-```markdown
-### Quality Checkpoint
-- [ ] Review test quality
-- [ ] Review code for refactoring
-```
+**Acceptance check — exactly one mode per behavior:**
+1. **New behavior** (default) — a new test runs red, then green after the implementation.
+2. **Trivial implementation** — green from the first run, because no meaningful red is possible.
+3. **Unchanged outcome under a risky change** (refactor, performance, migration, upgrade) — only when the request is to change *how* something works without changing *what* the client sees. Pin today's behavior with a test that runs green before the change and stays green after; when existing suites already pin it, name them and write no new test. Measure a non-functional goal (speed, memory) inside the behavior, before and after.
+
+Only mode 3 gets an `**Acceptance:**` line in the plan, so a plain plan stays as light as today. The shapes are in the Step 5 template; group a quality checkpoint after every 2-3 behaviors.
 
 ### Step 5: Write the Plan Document
 
@@ -142,16 +141,34 @@ Brief description of the problem and what the change accomplishes.
 
 ## Behaviors to Implement
 
-### Step 1: [Observable behavior]
+### Behavior 1: [Observable behavior]
 - [ ] Write test
 - [ ] Run test
 - [ ] Implement (if needed)
 - [ ] Run test (if implemented)
 
-### Quality Checkpoint (after every 2-3 steps)
+### Behavior 2: [Observable behavior that needs several changes]
+- [ ] Write test
+- [ ] Run test
+- [ ] Step 2.1: [first technical change]
+- [ ] Step 2.2: [next technical change]
+- [ ] Run test
+
+### Behavior 3: [Outcome that must not change, plus the goal — e.g. "… the same results, faster"]
+**Acceptance:** unchanged outcome — pinned by [named suites | a new pin test]; [metric] before → after
+- [ ] Pin: run it green on today's code; measure [metric]
+- [ ] Step 3.1: [technical change] — run the pin, still green
+- [ ] Measure [metric] again
+
+### Quality Checkpoint (after every 2-3 behaviors)
 - [ ] Review test quality
 - [ ] Review code for refactoring
+
+### Final check
+- [ ] [A check that spans several behaviors — an end-to-end run, a speed check]
 ```
+
+Behaviors 2 and 3 show the other shapes — use them only for behaviors that need them; a plain feature uses the first shape throughout. Omit `### Final check` when no check spans several behaviors.
 
 ### Step 6: Request Review
 

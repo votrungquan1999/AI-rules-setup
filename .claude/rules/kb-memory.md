@@ -105,10 +105,14 @@ When explaining work or asking the user to decide, assume zero project knowledge
 
 Before querying an unfamiliar table, run information_schema.columns first. Guessing names (user vs abstract_user, user_id vs "userId") burns round trips.
 
-## Slack read access via ~/.slack-bot-token
+## Slack read access via the user token file in ~/
 
-Read Slack via Web API with the bot token in ~/.slack-bot-token (conversations.replies + users.info, Bearer). Never echo it. Permalink p<digits> -> ts: dot 6 digits from end.
+Read Slack via Web API with the user token, not a bot token; find its file under ~/ (ls -a ~ | grep -i slack). Bearer; conversations.replies. Never echo it. Permalink p<digits>: ts = dot 6 from end.
 
 ## DB check requested → must actually query the DB
 
 User asks to check the DB: if it's unreachable, STOP and report — never substitute code-reading for real data.
+
+## No assert for type validation in TS
+
+Never use assert() for type or shape validation in TS. Validate external input (config, payloads) with a named Zod schema; assert is only for genuine runtime invariants.

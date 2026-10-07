@@ -84,7 +84,7 @@ Write scenarios describing behavior using three stages:
 **For EACH scenario, follow this loop. Do NOT batch scenarios or skip steps.**
 
 **CRITICAL: ONE TEST AT A TIME**
-Never batch behaviors or write multiple tests at once. Each step must be exactly one behavior, which translates to exactly one test, followed immediately by its implementation.
+Never batch behaviors or write multiple tests at once. Write one test, then the implementation that makes it pass, before the next test.
 
 ### Step 1: Write ONE Scenario Test
 
@@ -181,6 +181,7 @@ After all scenarios pass:
 ## Best Practices
 
 - ✅ Write scenarios in domain language, not code language
+- ✅ **Test at the integration level by default** — drive the real flow through the client-facing entry point with real collaborators; mock only what you cannot run (third-party calls, payments, clocks). A scenario whose collaborators are mocked verifies the mock, and stays green while the wiring is broken. Survey the project's existing test patterns before choosing; `@feature-dev-lite` and `@orchestrated-feature-dev` carry the full survey + ask-the-user protocol for when no harness exists.
 - ✅ One scenario = one behavior = one `it()` block
 - ✅ Use `describe` to group related tests, not to label a single test
 - ✅ Run the test after writing it, BEFORE writing implementation
