@@ -64,7 +64,7 @@ A finding may only describe what is visible. Anything about what happens *next* 
 ## Write the results
 
 - **`findings.json`** — the machine-readable findings, root causes and the commit ([format](../references/manifest-format.md#findingsjson)). Later runs and the fix check read this, not the report.
-- **`manifest.json`** — for each reviewed state: `sources` and `capturedAt` from its sidecar, `reviewedAt`, `reviewedAgainst` (the `catalogueVersion` in `_selection.json`), `verdict`, `openFindings`. Carried states keep their entries. For states that came back clean or known-only, **copy their images into `_reference/`** so the next review has a before picture.
+- **`manifest.json`** — for each reviewed state: `sources` and `capturedAt` from its sidecar, `reviewedAt`, `reviewedAgainst` (the `catalogueVersion` in `_selection.json`), `verdict`, `openFindings`. Carried states keep their entries. Reference images need no step here: the next run's `select-states.py` saves the clean and known-only ones before its tours overwrite them.
 - **`baseline`** — copy it from `_selection.json` into the manifest. **If it is missing there, a capture failed: keep the old one**, so the next run still re-captures those states.
 - **`_metrics.jsonl`** — one line: states reviewed and skipped, candidates, refuted, reported.
 

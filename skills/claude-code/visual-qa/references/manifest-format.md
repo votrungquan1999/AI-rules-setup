@@ -32,8 +32,7 @@ Only `snap()` writes the captures and their sidecars; everything else is written
       "reviewedAgainst": "sha256:9f2a…",   // catalogue version used for THIS state
       "verdict": "clean",                   // clean | findings | known-only
       "openFindings": [],                   // finding ids still unresolved here
-      "sources": ["src/components/setup/setup.ui.tsx"],
-      "reference": "_reference/375x812/setup/empty.png"
+      "sources": ["src/components/setup/setup.ui.tsx"]
     }
   }
 }
@@ -59,7 +58,9 @@ Everything else is **carried**: not captured, not reviewed, verdict and open fin
 
 ### Reference images
 
-A reference is the last accepted capture of the same state, handed to the reviewer as "what this screen looked like when it was judged". It roughly doubles review precision, so it has to actually exist as a file: **copy the images into `_reference/`**, don't just store a hash — the working capture gets overwritten next run.
+A reference is the last accepted capture of the same state, handed to the reviewer as "what this screen looked like when it was judged". It roughly doubles review precision, so it has to actually exist as a file, not a hash: the working capture gets overwritten next run.
+
+[select-states.py](./select-states.py) saves them at the start of every run, before the tours overwrite anything: every tile of each accepted state whose current capture is the one that was reviewed. It was a manual step, and in the LMS run it was skipped for all 39 clean states. Nothing records the path; [review-state.sh](./review-state.sh) finds `_reference/<viewport>/<feature>/<state>.png` by convention.
 
 Promote to reference when the verdict is `clean` **or** `known-only`. That second case matters: without it, a single site-wide defect (a wrong font on every screen) leaves every state permanently on `findings`, and no state ever gets a reference. When a reference carries a known issue, say so in the review brief so the model does not learn the defect as normal.
 

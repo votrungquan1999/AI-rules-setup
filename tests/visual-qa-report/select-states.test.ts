@@ -82,7 +82,13 @@ function project(): string {
 
 	const states: Record<string, unknown> = {};
 	for (const [state, sources] of Object.entries(STATES)) {
-		writeJson(root, `.visual-qa/1280x720/${state}.meta.json`, { state, sources, capturedAt: CAPTURED });
+		write(root, `.visual-qa/1280x720/${state}.png`, `picture of ${state}, as reviewed`);
+		writeJson(root, `.visual-qa/1280x720/${state}.meta.json`, {
+			state,
+			sources,
+			images: [`${state}.png`],
+			capturedAt: CAPTURED,
+		});
 		states[`1280x720/${state}`] = {
 			sources,
 			capturedAt: CAPTURED,
@@ -106,6 +112,7 @@ function recapture(root: string, tours: string[]): void {
 		if (!tours.includes(`e2e/visual/${state.split("/")[0]}.tour.ts`)) continue;
 		const path = join(root, `.visual-qa/1280x720/${state}.meta.json`);
 		const meta = existsSync(path) ? JSON.parse(readFileSync(path, "utf8")) : { state, sources };
+		write(root, `.visual-qa/1280x720/${state}.png`, `picture of ${state}, re-captured`);
 		write(
 			root,
 			`.visual-qa/1280x720/${state}.meta.json`,
@@ -434,5 +441,46 @@ describe("select-states.py", () => {
 		const { tours } = select(root);
 
 		expect(tours).toEqual(["e2e/visual/day.tour.ts", "e2e/visual/setup.tour.ts"]);
+	});
+
+	it("saves each clean state's reviewed picture as its reference before a tour overwrites it, and never a picture with findings", () => {
+		const root = project();
+		patchManifest(root, (manifest) => {
+			stateEntry(manifest, "setup/empty").verdict = "findings";
+		});
+		write(root, "src/day.tsx", "changed\n");
+
+		select(root);
+
+		const reference = (state: string) => join(root, `.visual-qa/_reference/1280x720/${state}.png`);
+		expect(readFileSync(reference("day/vote"), "utf8")).toBe("picture of day/vote, as reviewed");
+		expect(existsSync(reference("setup/empty"))).toBe(false);
+	});
+
+	it("saves a known-only state's picture too, but never a capture that was not reviewed", () => {
+		const root = project();
+		patchManifest(root, (manifest) => {
+			stateEntry(manifest, "setup/empty").verdict = "known-only";
+		});
+		// day/vote is clean, but its current picture came after its last review.
+		patchSidecar(root, "day/vote", { capturedAt: "2026-09-22T12:00:00Z" });
+
+		const { out } = select(root);
+
+		const reference = (state: string) => join(root, `.visual-qa/_reference/1280x720/${state}.png`);
+		expect(existsSync(reference("setup/empty"))).toBe(true);
+		expect(existsSync(reference("day/vote"))).toBe(false);
+		expect(out).toContain("1 reference saved");
+	});
+
+	it("drops a stale extra tile when a page got shorter, and leaves a similarly named state's reference alone", () => {
+		const root = project();
+		write(root, ".visual-qa/_reference/1280x720/day/vote.2.png", "second tile of an older, taller page");
+		write(root, ".visual-qa/_reference/1280x720/day/voter.png", "another state's reference");
+
+		select(root);
+
+		expect(existsSync(join(root, ".visual-qa/_reference/1280x720/day/vote.2.png"))).toBe(false);
+		expect(existsSync(join(root, ".visual-qa/_reference/1280x720/day/voter.png"))).toBe(true);
 	});
 });

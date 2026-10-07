@@ -10,6 +10,7 @@ import fnmatch
 import hashlib
 import json
 import re
+import shutil
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -100,6 +101,33 @@ def load_manifest(archive: Path) -> dict:
     return json.loads(path.read_text()) if path.is_file() else {"states": {}}
 
 
+def save_references(archive: Path, states: dict) -> int:
+    """Copy each accepted state's reviewed picture to _reference/ before a tour overwrites it.
+
+    Accepted is clean or known-only: a picture with open findings would teach the next reviewer
+    the defect is normal. A capture newer than its review was never judged, so it is not accepted.
+    """
+    saved = 0
+    for key, entry in states.items():
+        sidecar = archive / f"{key}.meta.json"
+        if entry.get("verdict") not in ("clean", "known-only") or not sidecar.is_file():
+            continue
+        if captured_at(archive, key) > moment(entry["reviewedAt"]):
+            continue
+        viewport, state = key.split("/", 1)
+        images = json.loads(sidecar.read_text()).get("images") or [f"{state}.png"]
+        target = archive / "_reference" / viewport / state
+        # A page that got shorter must not keep its old extra tiles.
+        for old in target.parent.glob(f"{target.name}*.png"):
+            if re.fullmatch(rf"{re.escape(target.name)}(\.\d+)?\.png", old.name):
+                old.unlink()
+        target.parent.mkdir(parents=True, exist_ok=True)
+        for image in images:
+            shutil.copyfile(archive / viewport / image, archive / "_reference" / viewport / image)
+        saved += 1
+    return saved
+
+
 def before_capture(archive: Path, shared: list[str]) -> tuple[list[str], int]:
     manifest = load_manifest(archive)
     states = manifest["states"]
@@ -135,6 +163,9 @@ def before_capture(archive: Path, shared: list[str]) -> tuple[list[str], int]:
         touring = {path.split("/")[-1].removesuffix(".tour.ts") for path in changed if TOUR.fullmatch(path)}
         features = sorted({feature_of(key) for key in capture} | {f for f in touring if Path(tour(f)).is_file()})
 
+    # The last reviewed pictures are still on disk only until the tours run.
+    saved = save_references(archive, states)
+
     if reason:
         print(f"full run: {reason}", file=sys.stderr)
     for key in sorted(key for key, entry in states.items() if not entry["sources"]):
@@ -143,7 +174,7 @@ def before_capture(archive: Path, shared: list[str]) -> tuple[list[str], int]:
     carried = {state_of(key) for key in states} - set(review)
     print(
         f"capture {count(len(recaptured), 'state')} ({count(len(features), 'tour')}), "
-        f"review {len(review) - len(recaptured)} more, carry {len(carried)}",
+        f"review {len(review) - len(recaptured)} more, carry {len(carried)}, {count(saved, 'reference')} saved",
         file=sys.stderr,
     )
 

@@ -61,7 +61,7 @@ Then review the re-captured states normally for anything new. A defect that appe
 ## 7. Write the results
 
 - **`findings.json`**: update each finding's `status`; add regressions as new findings; record `verifiedAt` and the commit verified.
-- **`manifest.json`**: update the re-captured states, adopt the new `baseline` as in [node-review.md](./node-review.md#write-the-results), and promote the now-clean ones to `_reference/`.
+- **`manifest.json`**: update the re-captured states, adopt the new `baseline` as in [node-review.md](./node-review.md#write-the-results). The now-clean ones become references at the next run's selection.
 - **`_metrics.jsonl`**: one line for the check — states re-captured, fixed, not fixed, regressions.
 - **The report**: add a dated "Fix check" section rather than rewriting history. Per finding: one line of verdict, and for the fixed ones a before-and-after pair, copied into the report's `images/` as `<nn>-before.png` and `<nn>-after.png`.
 
