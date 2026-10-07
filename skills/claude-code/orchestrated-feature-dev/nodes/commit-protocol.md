@@ -20,8 +20,8 @@ Strategy: per-behavior | defer
 Base: <sha captured before the first behavior commit>
 Branch: <branch name>
 
-| Step | Commit subject | Status |
-|------|----------------|--------|
+| Behavior | Commit subject | Status |
+|----------|----------------|--------|
 | 1 | feat(market): a trader sees trending markets at the top | committed |
 | 2 | feat(market): markets below the score threshold are excluded | pending |
 ```
@@ -30,9 +30,9 @@ Branch: <branch name>
 
 ## Committing a behavior
 
-After the behavior is green and its tests pass:
+After the behavior is green and its tests pass — after its last step, never once per step:
 
-1. **Stage explicit paths only** — the files listed under "Files Changed" for this step. Never `git add -A`, `-a`, or `.`; the working tree may hold unrelated work.
+1. **Stage explicit paths only** — the files listed under "Files Changed" for this behavior. Never `git add -A`, `-a`, or `.`; the working tree may hold unrelated work.
 2. Commit with a subject naming the behavior, in the repo's existing convention (e.g. `feat(scope): <behavior>`). One behavior, one commit.
 3. Record the row in `<ws>/COMMIT_PLAN.md` with `Status: committed`.
 
@@ -53,7 +53,7 @@ Any fix to already-committed behavior code — quality-gate refactor, conformanc
    `GIT_SEQUENCE_EDITOR=true` is what makes the rebase non-interactive — without it the rebase hangs waiting for an editor.
 4. Re-run the affected tests after the rebase. A clean autosquash still reorders work; confirm green before moving on.
 
-**A fix that introduces genuinely new behavior is not a fold.** It is a new plan step, and it gets its own commit — the invariant is one commit per behavior, so adding a behavior adds a commit.
+**A fix that introduces genuinely new behavior is not a fold.** It is a new plan behavior, and it gets its own commit — the invariant is one commit per behavior, so adding a behavior adds a commit.
 
 ## Safety rails
 

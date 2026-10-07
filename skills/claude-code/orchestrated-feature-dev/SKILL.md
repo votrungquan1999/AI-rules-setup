@@ -12,8 +12,9 @@ Pipeline: research → plan → (investigation ∥ behavior-risk catalog) → BD
 ## Orchestrator Rules
 
 - **Delegate everything.** Never research, plan, investigate, catalog, implement, or verify in the main session — spawn the node sub-agent. Delegation (not model choice) is what keeps the orchestrator a lean router.
-- **Batch to the cap.** For investigation, BDD, and verification, put **as many related steps as possible into one sub-agent, capped at 4** (group by shared files/module) — one agent amortizes the shared-context read across its steps, but beyond ~4 its context congests and quality drops. Spawn a phase's batches in a single message so they run in parallel.
+- **Batch to the cap.** For investigation, BDD, and verification, put **as many related behaviors as possible into one sub-agent, capped at 4** (group by shared files/module) — one agent amortizes the shared-context read across its behaviors, but beyond ~4 its context congests and quality drops. Spawn a phase's batches in a single message so they run in parallel.
 - **Route on returns.** Read state files to make decisions and relay sub-agent outputs to the user. Do not re-analyze findings in your own words.
+- **The plan owns the behavior → step tree.** `PLAN_STEPS.md` mirrors `implementation-plan.md` title-for-title (`Behavior N`, `Step N.M`) and only adds build detail. Change a behavior or step in the plan first, then mirror it; after any edit to either file, list both files' `Behavior N` / `Step N.M` titles and fix any mismatch before routing on — a silent mismatch builds something you never reviewed.
 - **Freeze `BEHAVIOR_RISKS.md`** once Phase 3b writes it — the adversarial phase checks against it; never edit it to match what was built.
 - **Serialize git.** Under the `per-behavior` commit strategy, never spawn BDD batches in parallel — concurrent sub-agents committing to one branch corrupt each other's history, and batches are grouped by *shared files*, so one file's diff cannot be split across behaviors after the fact. Run batches one at a time. Verification (Phase 5) stays parallel because those sub-agents only report; the single fix sub-agent does the git work.
 - **Mutation testing happens in Phase 5c or not at all.** No phase mutates source to check a test — not the BDD loop, not the quality gate, not conformance. Judging sensitivity by reading is every other phase's job; the one pass that injects real defects is budgeted, runs alone, and uses `nodes/mutation-harness.py`. Never write mutation instructions into a sub-agent prompt yourself.
@@ -27,7 +28,7 @@ Agent(
   description: "[phase] [assignment]",
   model: [see lever],
   prompt: "Read [skill dir]/nodes/node-X.md and execute it. Workspace <ws> (./tmp/<identifier>/).
-    [Assignment: which steps/risks, which state files to focus on.]
+    [Assignment: which behaviors/risks, which state files to focus on.]
     Report back: [what the orchestrator needs to route]."
 )
 ```
@@ -43,10 +44,10 @@ Every run is scoped to a **task identifier** (a ticket id, or a confirmed kebab-
 
 - `RESEARCH_OUTPUT.md` — research findings (+ `RESEARCH_FOLLOWUP_[id].md`, folded back in)
 - `implementation-plan.md` — the plan the user reviews (Technical Design + Behaviors)
-- `PLAN_STEPS.md` — step list with files/deps; workflow state, **not** for user review
-- `INVESTIGATION_STEP_[N].md` — per-step investigation context
+- `PLAN_STEPS.md` — the plan's behavior → step tree with build detail (acceptance mode, files, notes, status per behavior and step); workflow state, **not** for user review. `N` in every `_STEP_[N]` file name is the behavior number
+- `INVESTIGATION_STEP_[N].md` — per-behavior investigation context
 - `BEHAVIOR_RISKS.md` — implementation-blind behavior-risk catalog (Phase 3b); **frozen** after
-- `IMPLEMENTATION_PROGRESS.md` — per-step results + red/green audit trail
+- `IMPLEMENTATION_PROGRESS.md` — per-behavior results + red/green (or pinned-green) audit trail
 - `VALIDATION_STEP_[N].md` — conformance results (5a); `ADVERSARIAL_REVALIDATION.md` — adversarial findings (5b)
 - `MUTATION_PLAN.md` — whether Phase 5c runs, and its budget; `MUTANTS.json` + `MUTATION_RESULTS.md/.json` — the pass's inputs and findings
 - `DECISIONS.md` — running decision log (each new entry is also mirrored to the AI-Kanban card — see **Mirror decisions to the card**)
@@ -69,7 +70,7 @@ Spawn `node-research.md` as the INITIAL agent → writes `RESEARCH_OUTPUT.md`. W
 **Settle the test level here.** Read the `Testing Patterns` block of `RESEARCH_OUTPUT.md`. The BDD loop defaults to the **integration level** — real flow, real collaborators, asserted at the client-facing entry point — because a mocked unit test stays green while the wiring, transaction, serialization, or permission check is broken.
 
 - **A harness exists** → note `Test level: integration via <harness>` in `DECISIONS.md`, and pass the harness, its command, and the example file to mirror into every BDD sub-agent prompt. No question needed.
-- **`none found`** → **ask the user now, in the same message as the gate.** This is the cheapest moment: the plan isn't written, so a harness-setup step can still be planned in rather than retrofitted after ten mocked tests. Offer: **stand one up** (name the concrete setup and its cost — it becomes a step in the plan), **point you at one you missed**, or **accept unit-level for this feature** (wiring goes unverified). Never let a run fall back to mocked unit tests without that answer, and never invent containers or a browser runner unasked.
+- **`none found`** → **ask the user now, in the same message as the gate.** This is the cheapest moment: the plan isn't written, so harness setup can still be planned in rather than retrofitted after ten mocked tests. Offer: **stand one up** (name the concrete setup and its cost — it becomes the first steps of the first behavior that needs it, never a heading of its own), **point you at one you missed**, or **accept unit-level for this feature** (wiring goes unverified). Never let a run fall back to mocked unit tests without that answer, and never invent containers or a browser runner unasked.
 
 Record the resolution in `DECISIONS.md`, mirror it to the card, and pass it to `node-plan.md`.
 
@@ -79,13 +80,13 @@ Record the resolution in `DECISIONS.md`, mirror it to the card, and pass it to `
 
 Spawn `node-plan.md` (reads `RESEARCH_OUTPUT.md`, loads the `create-implementation-plan` skill) → writes `implementation-plan.md` + `PLAN_STEPS.md`.
 
-**Check the format before presenting.** `implementation-plan.md` must carry `## Technical Design` and `## Behaviors to Implement` with test-first checkboxes per step. A plan shaped as an `AC:` / `Test Type:` step list means the sub-agent never loaded the skill — send it back to a fresh sub-agent rather than presenting it. Then present `implementation-plan.md` (never `PLAN_STEPS.md`) for review.
+**Check the format before presenting.** `implementation-plan.md` must carry `## Technical Design` and `## Behaviors to Implement`, one `### Behavior N` heading per behavior with its checklist (test-first checkboxes, or its steps). A plan shaped as an `AC:` / `Test Type:` step list means the sub-agent never loaded the skill — send it back to a fresh sub-agent rather than presenting it. So does a heading that fails the behavior check in `nodes/node-plan.md` — setup, cleanup or a verification run as its own heading, or a heading with no acceptance check of its own ("no new test", "existing tests stay green") outside the unchanged-outcome mode. Then present `implementation-plan.md` (never `PLAN_STEPS.md`) for review, as behaviors with their steps nested under them.
 
 **Gate:** do not proceed until the user approves the plan.
 
 ## Phase 3: Investigation (batched parallel)
 
-Spawn `node-investigation.md`, one sub-agent per batch (batch to the cap), each assigned its steps → writes `INVESTIGATION_STEP_[N].md` per step. On return, **fix the plan yourself** (`PLAN_STEPS.md` + `implementation-plan.md`): drop already-done steps, fix wrong paths/types, reorder for deps, add gaps, resolve conflicts. Present problems (grouped) + fixes + updated plan.
+Spawn `node-investigation.md`, one sub-agent per batch (batch to the cap), each assigned its behaviors → writes `INVESTIGATION_STEP_[N].md` per behavior. On return, **fix the plan yourself**: drop already-done behaviors, reorder for deps, add gaps (a missing change is a step inside the behavior it serves, not a new heading), resolve conflicts — tree changes in `implementation-plan.md` first, then mirrored. Fold each finding (files, wrong paths/types, notes) under its matching behavior or step in `PLAN_STEPS.md` — the BDD loop reads only that file, so a finding left in `INVESTIGATION_STEP_[N].md` never reaches the build. Present problems (grouped) + fixes + updated plan.
 
 **Gate:** wait for approval of the updated plan.
 
@@ -93,14 +94,14 @@ Spawn `node-investigation.md`, one sub-agent per batch (batch to the cap), each 
 
 Spawn `node-behavior-risk.md` (may go in the same message as the investigation batches). It catalogs edge-case **behaviors** from the requirement + existing system only — **never** the new implementation — into `BEHAVIOR_RISKS.md`. On return:
 
-1. **Escalate requirement-silent entries now** — each is a 2+ defensible-behaviors product decision, cheaper to resolve before implementation. Fold each resolution into `implementation-plan.md` (+ a `PLAN_STEPS.md` step if it adds behavior); log to `DECISIONS.md` (and mirror it to the card).
+1. **Escalate requirement-silent entries now** — each is a 2+ defensible-behaviors product decision, cheaper to resolve before implementation. Fold each resolution into `implementation-plan.md` (then mirror it into `PLAN_STEPS.md` if it adds a behavior or step); log to `DECISIONS.md` (and mirror it to the card).
 2. **Freeze the catalog** — requirement-implied entries become the Phase 5b checks; `BEHAVIOR_RISKS.md` is now immutable.
 
 **Gate:** if there were silent entries, wait for the user's decisions.
 
 ## Phase 4: Implementation Loop
 
-**4·0. Run-options gate — ask both questions before any code is written.** The behavior list is final now (Phase 3b may have added steps), so this is the last moment the answers are stable. Ask the operator both, in one message:
+**4·0. Run-options gate — ask both questions before any code is written.** The behavior list is final now (Phase 3b may have added behaviors), so this is the last moment the answers are stable. Ask the operator both, in one message:
 
 **a. How to commit?**
 - **One commit per behavior** — each behavior is committed as soon as it goes green, and every later fix (quality gate, conformance, adversarial) is folded back into the commit that owns that behavior. The branch ends with exactly one commit per behavior in the plan. Say plainly that folding **rewrites history**, so it is only free while the branch is unpushed.
@@ -112,21 +113,23 @@ Write the commit answer to `<ws>/COMMIT_PLAN.md` per `nodes/commit-protocol.md` 
 
 Batched BDD sub-agents alternate with quality gates.
 
-**4a. BDD batch** — spawn `node-bdd-step.md` per batch (batch to the cap; same grouping as investigation). It runs its steps one-test-at-a-time with meaningful-red discipline and **bubbles up** on any gate. Route on its return:
+**4a. BDD batch** — spawn `node-bdd-step.md` per batch (batch to the cap; same grouping as investigation). **The execution unit is the behavior:** one node run delivers one behavior and all its steps under its acceptance mode, one test at a time with meaningful-red discipline, and **bubbles up** on any gate. Route on its return:
 - **Done, no gate** → quality gate (4b), then next batch.
 - **Stopped at a gate** (untestable behavior / 2+ defensible behaviors / unresolved failure) → escalate to the user, log to `DECISIONS.md` (and mirror it to the card), then spawn a **new** sub-agent to resume that batch with the decision baked in.
 
 Verify discipline via the red/green trail in `IMPLEMENTATION_PROGRESS.md`, not the prose summary.
 
-**4b. Quality gate** — every **2-3 completed steps**, spawn `node-quality-gate.md`. `pass` → next batch; `needs-fixes` → spawn a fix sub-agent, re-check (**max 2** re-checks per checkpoint).
+**4b. Quality gate** — every **2-3 completed behaviors**, spawn `node-quality-gate.md`. `pass` → next batch; `needs-fixes` → spawn a fix sub-agent, re-check (**max 2** re-checks per checkpoint).
 
-**Terminate** when all planned behaviors are done, the user says stop, or step count exceeds 20.
+**4c. Final check** — if `PLAN_STEPS.md` has a `## Final check`, spawn one `node-bdd-step.md` sub-agent for it once every behavior is done. It runs the check and records the result; it changes no code. A failure routes like a stopped gate.
+
+**Terminate** when all planned behaviors are done, the user says stop, or the behavior count exceeds 20.
 
 ## Phase 5: Verification (batched parallel)
 
 Two independent axes, spawned together so all run in parallel:
 
-**5a. Conformance Validation** — "did each step match the plan?" Spawn `node-validation.md` per step-batch (to the cap) → `VALIDATION_STEP_[N].md`.
+**5a. Conformance Validation** — "did each behavior match the plan?" Spawn `node-validation.md` per behavior-batch (to the cap) → `VALIDATION_STEP_[N].md`.
 
 **5b. Adversarial Revalidation** — "does the code survive the frozen catalog?" Spawn `node-adversarial-revalidation.md` per risk-group (related risks together) → `ADVERSARIAL_REVALIDATION.md`.
 
@@ -135,14 +138,14 @@ Both verification passes **report only — they never stage, commit, or rebase**
 **5c. Mutation pass (only if `MUTATION_PLAN.md` says `on`)** — "would the tests catch a defect at all?" Spawn `node-mutation.md` as a **single sub-agent, alone, after 5a and 5b have both returned** — it writes to the source tree, so it cannot overlap with passes that read and test it. It reports survivors; it never fixes. Triage each false green with the operator like a 5b finding.
 
 On return:
-- **Conformance (5a):** invalid steps → one fix sub-agent for all of them, then re-validate only those. Under `per-behavior`, that fix sub-agent **folds each fix into the commit owning that behavior** per `nodes/commit-protocol.md` — never a new commit.
-- **Adversarial (5b): report + triage.** Present each break/silent-misbehavior with severity; the user decides **new step** (→ Phase 4) or **accepted/out-of-scope**. No auto-loop; log each to `DECISIONS.md` (and mirror each to the card). A fix to an existing behavior folds into that behavior's commit; a genuinely new behavior becomes a new step and earns its own commit — either way the one-commit-per-behavior count holds.
+- **Conformance (5a):** invalid behaviors → one fix sub-agent for all of them, then re-validate only those. Under `per-behavior`, that fix sub-agent **folds each fix into the commit owning that behavior** per `nodes/commit-protocol.md` — never a new commit.
+- **Adversarial (5b): report + triage.** Present each break/silent-misbehavior with severity; the user decides **new behavior** (→ Phase 4) or **accepted/out-of-scope**. No auto-loop; log each to `DECISIONS.md` (and mirror each to the card). A fix to an existing behavior folds into that behavior's commit; a genuinely new behavior goes into the plan first, is mirrored into `PLAN_STEPS.md`, and earns its own commit — either way the one-commit-per-behavior count holds.
 
 Present combined results.
 
 ## Phase 6: Summary
 
-Spawn `node-summary.md` (reads the state files, aggregates the test/lint status already recorded — no full-project re-run) → complete summary with steps, quality gates, conformance + adversarial results, tests, files changed, key decisions. Present it.
+Spawn `node-summary.md` (reads the state files, aggregates the test/lint status already recorded — no full-project re-run) → complete summary with behaviors, quality gates, conformance + adversarial results, tests, files changed, key decisions. Present it.
 
 ## Error Handling
 

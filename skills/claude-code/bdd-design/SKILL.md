@@ -84,7 +84,7 @@ Write scenarios describing behavior using three stages:
 **For EACH scenario, follow this loop. Do NOT batch scenarios or skip steps.**
 
 **CRITICAL: ONE TEST AT A TIME**
-Never batch behaviors or write multiple tests at once. Each step must be exactly one behavior, which translates to exactly one test, followed immediately by its implementation.
+Never batch behaviors or write multiple tests at once. Write one test, then the implementation that makes it pass, before the next test.
 
 ### Step 1: Write ONE Scenario Test
 
