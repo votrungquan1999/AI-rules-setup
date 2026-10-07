@@ -221,6 +221,7 @@ Skip this entirely when Phase 1 found a usable harness: you already know what to
 9. **Run linting** - Check for code quality issues and fix any problems
 10. **Review the changes** - Read the **full diff of this behavior** (every file you touched, not just the last edit) before it gets committed:
     - Every hunk is intentional and belongs to this behavior — drop debug leftovers, stray formatting, and edits to files another behavior owns (under `per-behavior` they land in the wrong commit).
+    - Comments follow the project's comment rules — read them in the project's instructions (`CLAUDE.md`, `.claude/rules/`), check every comment you added or changed against each one, and rewrite or delete any that break one. They apply on top of the defaults below and win where the two conflict.
     - Comments are concise and skimmable — one line, one idea, WHY not WHAT; delete any that restate the code.
     - A top-of-file/function block that narrates the steps below it is **broken up and distributed** next to the line each piece describes; at most a one-line intro stays at the top.
     - No ticket IDs in code — they belong in the commit message.

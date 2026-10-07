@@ -32,7 +32,11 @@ Focus on:
 
 **If `@code-refactoring` reports missing test coverage → skip the refactoring review** rather than blocking. The tests exist from the BDD loop.
 
-### 3. Apply Fixes
+### 3. Comment Review
+
+Read the comment rules in the project's instructions (`CLAUDE.md`, `.claude/rules/`) and the comment defaults in `nodes/node-bdd-step.md` step 6. Check every comment the recent steps added or changed — tests included — against each one, and flag any that break one. Never skip this when step 2 is skipped; the author's own check is the only other one these comments get.
+
+### 4. Apply Fixes
 
 If issues are found:
 1. Fix them immediately
@@ -56,6 +60,7 @@ Report the quality gate result:
 ### Code Quality
 - **Refactoring Applied**: [yes/no]
 - **Changes Made**: [brief list, or "none needed"]
+- **Comments Fixed**: [count + brief list, or "none"]
 
 ### Overall
 - **Quality**: pass | needs-fixes

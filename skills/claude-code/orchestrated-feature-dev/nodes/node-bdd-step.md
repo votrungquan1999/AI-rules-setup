@@ -104,6 +104,7 @@ Confirm it passes. Also run any related previous tests to check for regressions.
 Read the **full diff of this behavior** — every file you touched, not just the last edit (`git diff` on those paths; under `defer` the working tree is the diff). Check:
 
 - **Every hunk is intentional and belongs to this behavior.** Drop debug leftovers, stray formatting churn, and edits to files this behavior should not own — under `per-behavior` they would land in the wrong commit. The `Files Changed` list in your Output must match this diff exactly; the commit step stages from it.
+- **Comments follow the project's comment rules.** Read the comment rules in the project's instructions (`CLAUDE.md`, `.claude/rules/`) and check every comment you added or changed against each one; rewrite or delete any that break one. They apply on top of the defaults below and win where the two conflict.
 - **Comments are concise and skimmable.** One line, one idea; say WHY, not WHAT. Delete any comment that restates the code or narrates an obvious step. Match the surrounding code's comment density.
 - **No narrating block at the top.** A file- or function-level comment that walks through the steps of the code below it (`// 1. fetch… 2. validate… 3. save…`) gets **broken up and distributed**: move each piece next to the line or clause it describes, so a dev reads it in place. Leave at most a one-line intro at the top.
 - **Ticket IDs stay out of the code** — they belong in the commit message.
