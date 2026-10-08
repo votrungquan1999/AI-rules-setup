@@ -31,7 +31,17 @@ Focus on:
 
 **If `@code-refactoring` reports missing test coverage → skip the refactoring review** rather than blocking. The tests exist from the BDD loop.
 
-### 3. Apply Fixes
+### 3. Comment Review
+
+Review the comments the recent behaviors added or changed, tests included. Read each touched file's diff with wide context (e.g. `-U20`) so every comment is judged next to the code it describes; a pre-existing comment in that window is in scope only if the change made it wrong.
+
+1. Read the comment rules in the project's rules (`.agents/rules/`) and the comment defaults in `nodes/node-bdd-step.md` step 6.
+2. For each comment, ask: **would a dev who never saw the old code, the diff, the plan or this session understand it?** Then check it against each rule.
+3. For every comment that fails, write the fix — the replacement text, or "delete". When a reason is buried in history wording, restate it as a fact about the code as it is rather than dropping it: "the old per-user subqueries re-scanned the table ~5k times" becomes "one join, not a subquery per user — those re-scan the table per row".
+
+Never skip this when step 2 is skipped; the author's own check is the only other one these comments get.
+
+### 4. Apply Fixes
 
 If issues are found:
 1. Fix them immediately
@@ -57,6 +67,7 @@ Write to the `quality-result.md` artifact:
 ## Code Quality
 - **Refactoring Applied**: [yes/no]
 - **Changes Made**: [brief list, or "none needed"]
+- **Comments Fixed**: [count + brief list, or "none"]
 
 ## Overall
 - **Quality**: pass | needs-fixes
